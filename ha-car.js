@@ -230,12 +230,19 @@ function ranked(groups) {
 function keyOf(rec) {
   return rec.key.replace(/^(dev|pfx):/, "");
 }
+function nicknameOf(rec, hass) {
+  const hit = rec.slots.get("nickname") || rec.slots.get("plate");
+  const st = hit && hass && hass.states && hass.states[hit.id];
+  return st && st.state ? String(st.state) : "";
+}
 function chooseGroup(groups, hass, config) {
   const list = ranked(groups);
   if (!list.length) return null;
   const want = config && config.hash != null && config.hash !== "" ? String(config.hash) : "";
   if (want) {
-    const hit = list.find((r) => keyOf(r) === want || r.label === want || r.prefixes.has(want) || r.key === want);
+    const hit = list.find(
+      (r) => keyOf(r) === want || r.label === want || r.prefixes.has(want) || r.key === want || nicknameOf(r, hass) === want
+    );
     if (hit) return hit;
   }
   if (config && config.device && hass && hass.entities && hass.states) {
@@ -243,7 +250,9 @@ function chooseGroup(groups, hass, config) {
     const sub = ranked(scanGroups(hass, ids));
     if (sub.length) return sub[0];
   }
-  return list[0];
+  const veh = list.filter(isVehicle);
+  if (veh.length) return veh[0];
+  return list[0].slots.size >= 6 ? list[0] : null;
 }
 function detectVehicles(hass) {
   return ranked(scanGroups(hass)).filter((r) => isVehicle(r) || r.slots.size >= 8).map((rec) => ({
@@ -544,33 +553,32 @@ h1 { margin: 0; font-size: 25px; line-height: 1.12; font-weight: 650; letter-spa
 
 /* 俯视图状态层：贴在车图上，位置由 JS 量出车图矩形 */
 .covl { position: absolute; pointer-events: none; }
-.cst { position: absolute; transform: translate(-50%, -50%); border-radius: 999px; background: rgba(233,239,247,.22);
-  border: 1px solid rgba(233,239,247,.16); transition: background .25s ease, box-shadow .25s ease; }
-.cst.bar-h { width: 30%; height: 5px; border-radius: 3px; }
-.cst.bar-v { width: 5px; height: 14%; border-radius: 3px; }
-.cst.thin { width: 4px; height: 9%; border-radius: 2px; opacity: .8; }
-.cst.open { background: var(--hc-warn); border-color: rgba(255,196,107,.9);
-  box-shadow: 0 0 12px rgba(255,196,107,.85), 0 0 2px rgba(255,196,107,.9); }
-.cst.bad { background: var(--hc-bad); border-color: rgba(255,145,130,.9); box-shadow: 0 0 12px rgba(255,145,130,.7); }
-.cst.hood { left: 50%; top: 6%; }
-.cst.trunk { left: 50%; top: 87%; }
-.cst.dfl { left: 24%; top: 38%; }
-.cst.dfr { left: 76%; top: 38%; }
-.cst.drl { left: 24%; top: 63%; }
-.cst.drr { left: 76%; top: 63%; }
-.cst.wfl { left: 30%; top: 40%; }
-.cst.wfr { left: 70%; top: 40%; }
-.cst.wrl { left: 30%; top: 60%; }
-.cst.wrr { left: 70%; top: 60%; }
+.cst { position: absolute; transform: translate(-50%, -50%); white-space: nowrap; line-height: 1;
+  font-size: 9px; font-weight: 600; letter-spacing: .02em; padding: 2.5px 5px; border-radius: 999px;
+  color: #a8b8ca; background: rgba(8,13,20,.78); border: 1px solid rgba(255,255,255,.13);
+  box-shadow: 0 1px 6px rgba(0,0,0,.4); transition: background .25s ease, color .25s ease, box-shadow .25s ease; }
+.cst.open { color: #ffcf90; background: rgba(52,34,10,.86); border-color: rgba(255,196,107,.55);
+  box-shadow: 0 1px 8px rgba(0,0,0,.45), 0 0 10px rgba(255,196,107,.28); }
+.cst.bad { color: #ffc8c2; background: rgba(56,16,16,.86); border-color: rgba(255,145,130,.5); }
+.cst.hood { left: 50%; top: 5%; }
+.cst.trunk { left: 50%; top: 92%; }
+.cst.dfl { left: 12%; top: 30%; }
+.cst.wfl { left: 12%; top: 42%; }
+.cst.drl { left: 12%; top: 54%; }
+.cst.wrl { left: 12%; top: 66%; }
+.cst.dfr { left: 88%; top: 30%; }
+.cst.wfr { left: 88%; top: 42%; }
+.cst.drr { left: 88%; top: 54%; }
+.cst.wrr { left: 88%; top: 66%; }
 .ctire { position: absolute; transform: translate(-50%, -50%); font-size: 11px; font-weight: 650;
   color: #b9c9dc; font-variant-numeric: tabular-nums; letter-spacing: .02em;
   padding: 2px 7px; border-radius: 999px; background: rgba(10,17,26,.8); border: 1px solid rgba(255,255,255,.16);
   box-shadow: 0 1px 6px rgba(0,0,0,.45); text-shadow: 0 1px 2px rgba(0,0,0,.6); }
 .ctire.warn { color: var(--hc-warn); border-color: rgba(255,196,107,.5); }
-.ctire.tlf { left: 6%; top: 21%; }
-.ctire.trf { left: 94%; top: 21%; }
-.ctire.tlr { left: 6%; top: 68%; }
-.ctire.trr { left: 94%; top: 68%; }
+.ctire.tlf { left: 7%; top: 18%; }
+.ctire.trf { left: 93%; top: 18%; }
+.ctire.tlr { left: 7%; top: 72%; }
+.ctire.trr { left: 93%; top: 72%; }
 
 /* ---- 面板模式：1440×900 设计稿等比缩放，整页装下不滚动 ---- */
 
@@ -582,6 +590,30 @@ ha-card.panel:not(.fit) .sub { font-size: 10px; }
 ha-card.panel:not(.fit) .hero { height: 178px; min-height: 0; --r: 88px; }
 ha-card.panel:not(.fit) .carimg { max-height: 92%; max-width: 58%; }
 ha-card.panel:not(.fit) .gauge { max-width: 86px; }
+/* 窄面板：车图变小，门窗文字改挂到车图左右外侧（相对车图中心固定像素偏移，避免压车） */
+ha-card.panel:not(.fit) .cst { font-size: 8.5px; padding: 2px 4px; }
+ha-card.panel:not(.fit) .cst.dfl,
+ha-card.panel:not(.fit) .cst.wfl,
+ha-card.panel:not(.fit) .cst.drl,
+ha-card.panel:not(.fit) .cst.wrl { left: calc(50% - 84px); }
+ha-card.panel:not(.fit) .cst.dfr,
+ha-card.panel:not(.fit) .cst.wfr,
+ha-card.panel:not(.fit) .cst.drr,
+ha-card.panel:not(.fit) .cst.wrr { left: calc(50% + 84px); }
+ha-card.panel:not(.fit) .cst.dfl { top: 24%; }
+ha-card.panel:not(.fit) .cst.wfl { top: 40%; }
+ha-card.panel:not(.fit) .cst.drl { top: 58%; }
+ha-card.panel:not(.fit) .cst.wrl { top: 74%; }
+ha-card.panel:not(.fit) .cst.dfr { top: 24%; }
+ha-card.panel:not(.fit) .cst.wfr { top: 40%; }
+ha-card.panel:not(.fit) .cst.drr { top: 58%; }
+ha-card.panel:not(.fit) .cst.wrr { top: 74%; }
+ha-card.panel:not(.fit) .cst.hood { top: 2%; }
+ha-card.panel:not(.fit) .cst.trunk { top: 98%; }
+ha-card.panel:not(.fit) .ctire.tlf { left: 30%; top: 14%; }
+ha-card.panel:not(.fit) .ctire.trf { left: 70%; top: 14%; }
+ha-card.panel:not(.fit) .ctire.tlr { left: 30%; top: 80%; }
+ha-card.panel:not(.fit) .ctire.trr { left: 70%; top: 80%; }
 ha-card.panel:not(.fit) .energy { column-gap: 6px; }
 ha-card.panel:not(.fit) .orb { width: 44px; height: 44px; }
 ha-card.panel:not(.fit) .tile .ic { width: 17px; height: 17px; }
@@ -1312,27 +1344,29 @@ var HaCarCard = class extends HTMLElement {
   _carOverlay(data, t, mods) {
     const zh = !isEn(this._hass);
     const out = [];
-    const mark = (slot, cls, label) => {
+    const mark = (slot, cls, label, short) => {
       const st = data.get(slot);
       if (!st) return;
       const bad = isBad(st);
       const open = !bad && normOpen(st) === "open";
+      const txt = bad ? zh ? "不可用" : "N/A" : open ? zh ? "打开" : "Open" : zh ? "关闭" : "Shut";
+      const body = short ? `${short} ${txt}` : txt;
       out.push(
-        `<i class="cst ${cls}${bad ? " bad" : open ? " open" : ""}" data-more="${esc(data.id(slot))}"
-          title="${esc(label)} · ${esc(bad ? t.never : open ? t.open : t.closed)}"></i>`
+        `<span class="cst ${cls}${bad ? " bad" : open ? " open" : ""}" data-more="${esc(data.id(slot))}"
+          title="${esc(label)} · ${esc(txt)}" aria-label="${esc(label)} ${esc(txt)}">${esc(body)}</span>`
       );
     };
     if (mods.includes("doors")) {
-      mark("hood", "bar-h hood", zh ? "引擎盖" : "Hood");
-      mark("tailgate", "bar-h trunk", zh ? "尾门" : "Tailgate");
-      mark("door_fl", "bar-v dfl", zh ? "主驾门" : "Driver door");
-      mark("door_fr", "bar-v dfr", zh ? "副驾门" : "Passenger door");
-      mark("door_rl", "bar-v drl", zh ? "左后门" : "Rear left door");
-      mark("door_rr", "bar-v drr", zh ? "右后门" : "Rear right door");
-      mark("win_fl", "thin wfl", zh ? "主驾车窗" : "Driver window");
-      mark("win_fr", "thin wfr", zh ? "副驾车窗" : "Passenger window");
-      mark("win_rl", "thin wrl", zh ? "左后车窗" : "Rear left window");
-      mark("win_rr", "thin wrr", zh ? "右后车窗" : "Rear right window");
+      mark("hood", "txt hood", zh ? "引擎盖" : "Hood", zh ? "引擎盖" : "Hood");
+      mark("tailgate", "txt trunk", zh ? "尾门" : "Tailgate", zh ? "尾门" : "Trunk");
+      mark("door_fl", "txt dfl", zh ? "主驾门" : "Driver door", zh ? "主驾门" : "FL door");
+      mark("door_fr", "txt dfr", zh ? "副驾门" : "Passenger door", zh ? "副驾门" : "FR door");
+      mark("door_rl", "txt drl", zh ? "左后门" : "Rear left door", zh ? "左后门" : "RL door");
+      mark("door_rr", "txt drr", zh ? "右后门" : "Rear right door", zh ? "右后门" : "RR door");
+      mark("win_fl", "txt wfl", zh ? "主驾车窗" : "Driver window", zh ? "主驾窗" : "FL win");
+      mark("win_fr", "txt wfr", zh ? "副驾车窗" : "Passenger window", zh ? "副驾窗" : "FR win");
+      mark("win_rl", "txt wrl", zh ? "左后车窗" : "Rear left window", zh ? "左后窗" : "RL win");
+      mark("win_rr", "txt wrr", zh ? "右后车窗" : "Rear right window", zh ? "右后窗" : "RR win");
     }
     {
       const tp = [
@@ -2208,7 +2242,7 @@ var HaCarEditor = class extends HTMLElement {
 customElements.define("ha-car-editor", HaCarEditor);
 
 // src/main.js
-var VERSION = "1.1.5";
+var VERSION = "1.1.6";
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "ha-car",

@@ -238,12 +238,20 @@ function keyOf(rec) {
 }
 
 // 车辆选择：显式 hash（编辑器里存的设备名/前缀/device_id）> device > 槽位最全的一辆
+function nicknameOf(rec, hass) {
+  const hit = rec.slots.get("nickname") || rec.slots.get("plate");
+  const st = hit && hass && hass.states && hass.states[hit.id];
+  return st && st.state ? String(st.state) : "";
+}
+
 function chooseGroup(groups, hass, config) {
   const list = ranked(groups);
   if (!list.length) return null;
   const want = config && config.hash != null && config.hash !== "" ? String(config.hash) : "";
   if (want) {
-    const hit = list.find((r) => keyOf(r) === want || r.label === want || r.prefixes.has(want) || r.key === want);
+    const hit = list.find(
+      (r) => keyOf(r) === want || r.label === want || r.prefixes.has(want) || r.key === want || nicknameOf(r, hass) === want,
+    );
     if (hit) return hit;
   }
   if (config && config.device && hass && hass.entities && hass.states) {
@@ -251,7 +259,10 @@ function chooseGroup(groups, hass, config) {
     const sub = ranked(scanGroups(hass, ids));
     if (sub.length) return sub[0];
   }
-  return list[0];
+  // 有车辆锚点的组优先；都没有时才退回槽位最多的组（兼容缺锚点的新集成）
+  const veh = list.filter(isVehicle);
+  if (veh.length) return veh[0];
+  return list[0].slots.size >= 6 ? list[0] : null;
 }
 
 export function detectVehicles(hass) {

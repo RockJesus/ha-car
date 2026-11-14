@@ -255,33 +255,32 @@ h1 { margin: 0; font-size: 25px; line-height: 1.12; font-weight: 650; letter-spa
 
 /* 俯视图状态层：贴在车图上，位置由 JS 量出车图矩形 */
 .covl { position: absolute; pointer-events: none; }
-.cst { position: absolute; transform: translate(-50%, -50%); border-radius: 999px; background: rgba(233,239,247,.22);
-  border: 1px solid rgba(233,239,247,.16); transition: background .25s ease, box-shadow .25s ease; }
-.cst.bar-h { width: 30%; height: 5px; border-radius: 3px; }
-.cst.bar-v { width: 5px; height: 14%; border-radius: 3px; }
-.cst.thin { width: 4px; height: 9%; border-radius: 2px; opacity: .8; }
-.cst.open { background: var(--hc-warn); border-color: rgba(255,196,107,.9);
-  box-shadow: 0 0 12px rgba(255,196,107,.85), 0 0 2px rgba(255,196,107,.9); }
-.cst.bad { background: var(--hc-bad); border-color: rgba(255,145,130,.9); box-shadow: 0 0 12px rgba(255,145,130,.7); }
-.cst.hood { left: 50%; top: 6%; }
-.cst.trunk { left: 50%; top: 87%; }
-.cst.dfl { left: 24%; top: 38%; }
-.cst.dfr { left: 76%; top: 38%; }
-.cst.drl { left: 24%; top: 63%; }
-.cst.drr { left: 76%; top: 63%; }
-.cst.wfl { left: 30%; top: 40%; }
-.cst.wfr { left: 70%; top: 40%; }
-.cst.wrl { left: 30%; top: 60%; }
-.cst.wrr { left: 70%; top: 60%; }
+.cst { position: absolute; transform: translate(-50%, -50%); white-space: nowrap; line-height: 1;
+  font-size: 9px; font-weight: 600; letter-spacing: .02em; padding: 2.5px 5px; border-radius: 999px;
+  color: #a8b8ca; background: rgba(8,13,20,.78); border: 1px solid rgba(255,255,255,.13);
+  box-shadow: 0 1px 6px rgba(0,0,0,.4); transition: background .25s ease, color .25s ease, box-shadow .25s ease; }
+.cst.open { color: #ffcf90; background: rgba(52,34,10,.86); border-color: rgba(255,196,107,.55);
+  box-shadow: 0 1px 8px rgba(0,0,0,.45), 0 0 10px rgba(255,196,107,.28); }
+.cst.bad { color: #ffc8c2; background: rgba(56,16,16,.86); border-color: rgba(255,145,130,.5); }
+.cst.hood { left: 50%; top: 5%; }
+.cst.trunk { left: 50%; top: 92%; }
+.cst.dfl { left: 12%; top: 30%; }
+.cst.wfl { left: 12%; top: 42%; }
+.cst.drl { left: 12%; top: 54%; }
+.cst.wrl { left: 12%; top: 66%; }
+.cst.dfr { left: 88%; top: 30%; }
+.cst.wfr { left: 88%; top: 42%; }
+.cst.drr { left: 88%; top: 54%; }
+.cst.wrr { left: 88%; top: 66%; }
 .ctire { position: absolute; transform: translate(-50%, -50%); font-size: 11px; font-weight: 650;
   color: #b9c9dc; font-variant-numeric: tabular-nums; letter-spacing: .02em;
   padding: 2px 7px; border-radius: 999px; background: rgba(10,17,26,.8); border: 1px solid rgba(255,255,255,.16);
   box-shadow: 0 1px 6px rgba(0,0,0,.45); text-shadow: 0 1px 2px rgba(0,0,0,.6); }
 .ctire.warn { color: var(--hc-warn); border-color: rgba(255,196,107,.5); }
-.ctire.tlf { left: 6%; top: 21%; }
-.ctire.trf { left: 94%; top: 21%; }
-.ctire.tlr { left: 6%; top: 68%; }
-.ctire.trr { left: 94%; top: 68%; }
+.ctire.tlf { left: 7%; top: 18%; }
+.ctire.trf { left: 93%; top: 18%; }
+.ctire.tlr { left: 7%; top: 72%; }
+.ctire.trr { left: 93%; top: 72%; }
 
 /* ---- 面板模式：1440×900 设计稿等比缩放，整页装下不滚动 ---- */
 
@@ -293,6 +292,30 @@ ha-card.panel:not(.fit) .sub { font-size: 10px; }
 ha-card.panel:not(.fit) .hero { height: 178px; min-height: 0; --r: 88px; }
 ha-card.panel:not(.fit) .carimg { max-height: 92%; max-width: 58%; }
 ha-card.panel:not(.fit) .gauge { max-width: 86px; }
+/* 窄面板：车图变小，门窗文字改挂到车图左右外侧（相对车图中心固定像素偏移，避免压车） */
+ha-card.panel:not(.fit) .cst { font-size: 8.5px; padding: 2px 4px; }
+ha-card.panel:not(.fit) .cst.dfl,
+ha-card.panel:not(.fit) .cst.wfl,
+ha-card.panel:not(.fit) .cst.drl,
+ha-card.panel:not(.fit) .cst.wrl { left: calc(50% - 84px); }
+ha-card.panel:not(.fit) .cst.dfr,
+ha-card.panel:not(.fit) .cst.wfr,
+ha-card.panel:not(.fit) .cst.drr,
+ha-card.panel:not(.fit) .cst.wrr { left: calc(50% + 84px); }
+ha-card.panel:not(.fit) .cst.dfl { top: 24%; }
+ha-card.panel:not(.fit) .cst.wfl { top: 40%; }
+ha-card.panel:not(.fit) .cst.drl { top: 58%; }
+ha-card.panel:not(.fit) .cst.wrl { top: 74%; }
+ha-card.panel:not(.fit) .cst.dfr { top: 24%; }
+ha-card.panel:not(.fit) .cst.wfr { top: 40%; }
+ha-card.panel:not(.fit) .cst.drr { top: 58%; }
+ha-card.panel:not(.fit) .cst.wrr { top: 74%; }
+ha-card.panel:not(.fit) .cst.hood { top: 2%; }
+ha-card.panel:not(.fit) .cst.trunk { top: 98%; }
+ha-card.panel:not(.fit) .ctire.tlf { left: 30%; top: 14%; }
+ha-card.panel:not(.fit) .ctire.trf { left: 70%; top: 14%; }
+ha-card.panel:not(.fit) .ctire.tlr { left: 30%; top: 80%; }
+ha-card.panel:not(.fit) .ctire.trr { left: 70%; top: 80%; }
 ha-card.panel:not(.fit) .energy { column-gap: 6px; }
 ha-card.panel:not(.fit) .orb { width: 44px; height: 44px; }
 ha-card.panel:not(.fit) .tile .ic { width: 17px; height: 17px; }

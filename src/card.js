@@ -402,27 +402,29 @@ class HaCarCard extends HTMLElement {
   _carOverlay(data, t, mods) {
     const zh = !isEn(this._hass);
     const out = [];
-    const mark = (slot, cls, label) => {
+    const mark = (slot, cls, label, short) => {
       const st = data.get(slot);
       if (!st) return;
       const bad = isBad(st);
       const open = !bad && normOpen(st) === "open";
+      const txt = bad ? (zh ? "不可用" : "N/A") : open ? (zh ? "打开" : "Open") : zh ? "关闭" : "Shut";
+      const body = short ? `${short} ${txt}` : txt;
       out.push(
-        `<i class="cst ${cls}${bad ? " bad" : open ? " open" : ""}" data-more="${esc(data.id(slot))}"
-          title="${esc(label)} · ${esc(bad ? t.never : open ? t.open : t.closed)}"></i>`,
+        `<span class="cst ${cls}${bad ? " bad" : open ? " open" : ""}" data-more="${esc(data.id(slot))}"
+          title="${esc(label)} · ${esc(txt)}" aria-label="${esc(label)} ${esc(txt)}">${esc(body)}</span>`,
       );
     };
     if (mods.includes("doors")) {
-      mark("hood", "bar-h hood", zh ? "引擎盖" : "Hood");
-      mark("tailgate", "bar-h trunk", zh ? "尾门" : "Tailgate");
-      mark("door_fl", "bar-v dfl", zh ? "主驾门" : "Driver door");
-      mark("door_fr", "bar-v dfr", zh ? "副驾门" : "Passenger door");
-      mark("door_rl", "bar-v drl", zh ? "左后门" : "Rear left door");
-      mark("door_rr", "bar-v drr", zh ? "右后门" : "Rear right door");
-      mark("win_fl", "thin wfl", zh ? "主驾车窗" : "Driver window");
-      mark("win_fr", "thin wfr", zh ? "副驾车窗" : "Passenger window");
-      mark("win_rl", "thin wrl", zh ? "左后车窗" : "Rear left window");
-      mark("win_rr", "thin wrr", zh ? "右后车窗" : "Rear right window");
+      mark("hood", "txt hood", zh ? "引擎盖" : "Hood", zh ? "引擎盖" : "Hood");
+      mark("tailgate", "txt trunk", zh ? "尾门" : "Tailgate", zh ? "尾门" : "Trunk");
+      mark("door_fl", "txt dfl", zh ? "主驾门" : "Driver door", zh ? "主驾门" : "FL door");
+      mark("door_fr", "txt dfr", zh ? "副驾门" : "Passenger door", zh ? "副驾门" : "FR door");
+      mark("door_rl", "txt drl", zh ? "左后门" : "Rear left door", zh ? "左后门" : "RL door");
+      mark("door_rr", "txt drr", zh ? "右后门" : "Rear right door", zh ? "右后门" : "RR door");
+      mark("win_fl", "txt wfl", zh ? "主驾车窗" : "Driver window", zh ? "主驾窗" : "FL win");
+      mark("win_fr", "txt wfr", zh ? "副驾车窗" : "Passenger window", zh ? "副驾窗" : "FR win");
+      mark("win_rl", "txt wrl", zh ? "左后车窗" : "Rear left window", zh ? "左后窗" : "RL win");
+      mark("win_rr", "txt wrr", zh ? "右后车窗" : "Rear right window", zh ? "右后窗" : "RR win");
     }
     // 胎压属于车上信息，不受 modules 开关限制（旧配置里常没有 tires）
     {
