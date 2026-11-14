@@ -572,19 +572,19 @@ h1 { margin: 0; font-size: 25px; line-height: 1.12; font-weight: 650; letter-spa
 /* ---- 面板模式：1440×900 设计稿等比缩放，整页装下不滚动 ---- */
 
 /* 窄面板（手机 / 小屏全屏视图）：缩纵向节奏，目标一屏放下全部信息 */
-ha-card.panel:not(.fit) .wrap { padding: 10px 12px 8px; gap: 7px; }
+ha-card.panel:not(.fit) .wrap { padding: 10px 12px 8px; gap: 6px; }
 ha-card.panel:not(.fit) .head { gap: 2px; }
 ha-card.panel:not(.fit) .title { font-size: 21px; }
 ha-card.panel:not(.fit) .sub { font-size: 10px; }
-ha-card.panel:not(.fit) .hero { height: 132px; min-height: 0; --r: 74px; }
-ha-card.panel:not(.fit) .carimg { max-height: 88%; max-width: 52%; }
-ha-card.panel:not(.fit) .gauge { max-width: 92px; }
+ha-card.panel:not(.fit) .hero { height: 178px; min-height: 0; --r: 88px; }
+ha-card.panel:not(.fit) .carimg { max-height: 92%; max-width: 58%; }
+ha-card.panel:not(.fit) .gauge { max-width: 86px; }
 ha-card.panel:not(.fit) .energy { column-gap: 6px; }
 ha-card.panel:not(.fit) .orb { width: 44px; height: 44px; }
 ha-card.panel:not(.fit) .tile .ic { width: 17px; height: 17px; }
 ha-card.panel:not(.fit) .tile { gap: 6px; }
 ha-card.panel:not(.fit) .tile .lbl { font-size: 10px; }
-ha-card.panel:not(.fit) .pills { margin-top: 4px; gap: 6px; }
+ha-card.panel:not(.fit) .pills { margin-top: 2px; gap: 6px; }
 ha-card.panel:not(.fit) .pill { height: 26px; font-size: 10.5px; }
 ha-card.panel:not(.fit) .substats { margin-top: 4px; gap: 6px; }
 ha-card.panel:not(.fit) .substats .sstat { padding: 4px 4px 3px; }
@@ -2183,7 +2183,7 @@ var HaCarEditor = class extends HTMLElement {
 customElements.define("ha-car-editor", HaCarEditor);
 
 // src/main.js
-var VERSION = "1.1.3";
+var VERSION = "1.1.4";
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "ha-car",
