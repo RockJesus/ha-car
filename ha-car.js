@@ -560,9 +560,9 @@ h1 { margin: 0; font-size: 25px; line-height: 1.12; font-weight: 650; letter-spa
 .cst.wrl { left: 30%; top: 60%; }
 .cst.wrr { left: 70%; top: 60%; }
 .ctire { position: absolute; transform: translate(-50%, -50%); font-size: 11px; font-weight: 650;
-  color: var(--hc-dim); font-variant-numeric: tabular-nums; letter-spacing: .02em;
-  padding: 2px 6px; border-radius: 8px; background: rgba(8,13,20,.62); border: 1px solid rgba(255,255,255,.07);
-  text-shadow: 0 1px 2px rgba(0,0,0,.6); }
+  color: #b9c9dc; font-variant-numeric: tabular-nums; letter-spacing: .02em;
+  padding: 2px 7px; border-radius: 999px; background: rgba(10,17,26,.8); border: 1px solid rgba(255,255,255,.16);
+  box-shadow: 0 1px 6px rgba(0,0,0,.45); text-shadow: 0 1px 2px rgba(0,0,0,.6); }
 .ctire.warn { color: var(--hc-warn); border-color: rgba(255,196,107,.5); }
 .ctire.tlf { left: 6%; top: 21%; }
 .ctire.trf { left: 94%; top: 21%; }
@@ -570,6 +570,30 @@ h1 { margin: 0; font-size: 25px; line-height: 1.12; font-weight: 650; letter-spa
 .ctire.trr { left: 94%; top: 68%; }
 
 /* ---- 面板模式：1440×900 设计稿等比缩放，整页装下不滚动 ---- */
+
+/* 窄面板（手机 / 小屏全屏视图）：缩纵向节奏，目标一屏放下全部信息 */
+ha-card.panel:not(.fit) .wrap { padding: 10px 12px 8px; gap: 7px; }
+ha-card.panel:not(.fit) .head { gap: 2px; }
+ha-card.panel:not(.fit) .title { font-size: 21px; }
+ha-card.panel:not(.fit) .sub { font-size: 10px; }
+ha-card.panel:not(.fit) .hero { height: 132px; min-height: 0; --r: 74px; }
+ha-card.panel:not(.fit) .carimg { max-height: 88%; max-width: 52%; }
+ha-card.panel:not(.fit) .gauge { max-width: 92px; }
+ha-card.panel:not(.fit) .energy { column-gap: 6px; }
+ha-card.panel:not(.fit) .orb { width: 44px; height: 44px; }
+ha-card.panel:not(.fit) .tile .ic { width: 17px; height: 17px; }
+ha-card.panel:not(.fit) .tile { gap: 6px; }
+ha-card.panel:not(.fit) .tile .lbl { font-size: 10px; }
+ha-card.panel:not(.fit) .pills { margin-top: 4px; gap: 6px; }
+ha-card.panel:not(.fit) .pill { height: 26px; font-size: 10.5px; }
+ha-card.panel:not(.fit) .substats { margin-top: 4px; gap: 6px; }
+ha-card.panel:not(.fit) .substats .sstat { padding: 4px 4px 3px; }
+ha-card.panel:not(.fit) .substats .sstat b { font-size: 12px; }
+ha-card.panel:not(.fit) .alert { padding: 7px 9px; font-size: 11px; }
+ha-card.panel:not(.fit) .svc, ha-card.panel:not(.fit) .loc { font-size: 11px; }
+ha-card.panel:not(.fit) .svc summary { padding: 7px 9px; }
+ha-card.panel:not(.fit) .baseline.solo { padding: 3px 8px; font-size: 10px; }
+
 :host(.panel) { position: relative; overflow: hidden;
   background: radial-gradient(90% 60% at 50% 0%, rgba(55,214,232,.10), transparent 62%),
     linear-gradient(170deg, #101b29 0%, #0a1119 60%, #070c13 100%); }
@@ -1318,7 +1342,9 @@ var HaCarCard = class extends HTMLElement {
         const st = data.get(slot);
         if (isBad(st)) continue;
         const v = num(st);
-        const warn = normTire(data.get(sslot)) === "warn";
+        const flag = normTire(data.get(sslot)) === "warn";
+        const outOfRange = v != null && (v < 190 || v > 300);
+        const warn = outOfRange || flag && v == null;
         const unit = attrs(st, "unit_of_measurement") || "kPa";
         out.push(
           `<b class="ctire ${cls}${warn ? " warn" : ""}" data-more="${esc(data.id(slot))}"
@@ -2157,7 +2183,7 @@ var HaCarEditor = class extends HTMLElement {
 customElements.define("ha-car-editor", HaCarEditor);
 
 // src/main.js
-var VERSION = "1.1.2";
+var VERSION = "1.1.3";
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "ha-car",

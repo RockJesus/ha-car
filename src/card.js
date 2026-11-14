@@ -436,7 +436,10 @@ class HaCarCard extends HTMLElement {
         const st = data.get(slot);
         if (isBad(st)) continue;
         const v = num(st);
-        const warn = normTire(data.get(sslot)) === "warn";
+        // 只按压力区间判定：集成把四路轮状态都报「故障」时，压力正常就不逐轮泛黄
+        const flag = normTire(data.get(sslot)) === "warn";
+        const outOfRange = v != null && (v < 190 || v > 300);
+        const warn = outOfRange || (flag && v == null);
         const unit = attrs(st, "unit_of_measurement") || "kPa";
         out.push(
           `<b class="ctire ${cls}${warn ? " warn" : ""}" data-more="${esc(data.id(slot))}"
