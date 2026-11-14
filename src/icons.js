@@ -38,6 +38,8 @@ const PATHS = {
     "M181.66,133.66l-80,80A8,8,0,0,1,88,208V48a8,8,0,0,1,13.66-5.66l80,80A8,8,0,0,1,181.66,133.66Z",
 };
 
+export const ICON_NAMES = Object.keys(PATHS);
+
 export function icon(name, cls) {
   const d = PATHS[name] || PATHS.car;
   return `<svg class="ic${cls ? " " + cls : ""}" viewBox="0 0 256 256" aria-hidden="true" focusable="false"><path d="${d}"/></svg>`;

@@ -1,18 +1,13 @@
 import { EDITOR_STYLES } from "./styles.js";
 import { detectVehicles, resolve } from "./resolve.js";
-import { MODULES, CONFIRMABLE, DEFAULTS } from "./card.js";
+import { CONFIRMABLE, DEFAULTS, normBlocks } from "./card.js";
+
+const BLOCK_LABELS = {
+  meta: "定位/同步", hero: "车图", energy: "能耗仪表", alerts: "车辆告警",
+  doors: "门窗", charging: "充电", service: "服务信息", actions: "控制按钮", custom: "自定义实体",
+};
 import { esc } from "./util.js";
 
-const MODULE_LABELS = {
-  status: "状态徽章",
-  actions: "快捷操作",
-  energy: "里程与能耗",
-  tires: "四轮胎压",
-  doors: "门窗状态",
-  charging: "充电与能源",
-  alerts: "异常告警",
-  service: "服务信息",
-};
 const ACTION_LABELS = {
   btn_unlock: "开锁",
   btn_lock: "上锁",
@@ -60,8 +55,7 @@ const L = {
   layout: "布局",
   layoutFull: DEFAULTS.layout === "full" ? "完整" : "完整",
   layoutCompact: "紧凑",
-  modules: "显示模块",
-  modulesHint: "取消的模块不渲染，也不占高度。",
+
   guard: "防误触",
   guardHint: "开启后，下列动作需要按住不放才执行；松手太早只提示、不动作。适合后备箱、远程启动这类有实际后果的指令。",
   guardOn: "启用长按确认",
@@ -96,6 +90,7 @@ class HaCarEditor extends HTMLElement {
     this._config.entities = Object.assign({}, this._config.entities || {});
     if (!Array.isArray(this._config.modules)) this._config.modules = DEFAULTS.modules.slice();
     if (!Array.isArray(this._config.confirm)) this._config.confirm = DEFAULTS.confirm.slice();
+    this._config.blocks = normBlocks(this._config);
     if (!this._built) this._build();
     this._sync();
   }
@@ -129,9 +124,24 @@ class HaCarEditor extends HTMLElement {
       </div>
 
       <div class="sec">
-        <h3>${L.modules}</h3>
-        <p class="hint">${L.modulesHint}</p>
-        <div class="chips2" id="mods"></div>
+        <h3>模块布局</h3>
+        <p class="hint">上下箭头调整顺序，开关控制显示，✕ 删除。车图是固定锚点（首个模块 / 宽屏左栏），其余模块严格按此顺序排列：手机从上到下，宽屏排右栏。</p>
+        <div id="blk" class="blklist"></div>
+        <label class="f">添加模块</label>
+        <div style="display:flex;gap:6px">
+          <select class="tf" id="blkadd">
+            <option value="custom">自定义实体</option>
+            <option value="meta">定位/同步</option>
+            <option value="hero">车图</option>
+            <option value="energy">能耗仪表</option>
+            <option value="alerts">车辆告警</option>
+            <option value="doors">门窗</option>
+            <option value="charging">充电</option>
+            <option value="service">服务信息</option>
+            <option value="actions">控制按钮</option>
+          </select>
+          <button class="btn" id="blkaddbtn" type="button" style="min-width:64px">添加</button>
+        </div>
       </div>
 
       <div class="sec">
@@ -231,16 +241,6 @@ class HaCarEditor extends HTMLElement {
       this._emit();
     });
 
-    this.shadowRoot.getElementById("mods").addEventListener("click", (e) => {
-      const b = e.target.closest("[data-mod]");
-      if (!b) return;
-      const mod = b.dataset.mod;
-      const list = this._config.modules || [];
-      this._config.modules = list.includes(mod) ? list.filter((m) => m !== mod) : [...MODULES].filter((m) => m === mod || list.includes(m));
-      this._sync();
-      this._emit();
-    });
-
     q("guard").addEventListener("click", () => {
       this._config.confirm = this._config.confirm.length ? [] : DEFAULTS.confirm.slice();
       this._sync();
@@ -298,18 +298,88 @@ class HaCarEditor extends HTMLElement {
         this._emit();
       });
     });
+
+    q("blkaddbtn").addEventListener("click", () => {
+      const type = this.shadowRoot.getElementById("blkadd").value;
+      const blocks = (this._config.blocks || []).slice();
+      blocks.push({ type, on: true, entity: "", label: type === "custom" ? "自定义" : "", unit: "", icon: "" });
+      this._config.blocks = blocks;
+      this._renderBlocks();
+      this._emit();
+    });
+
+    this.shadowRoot.getElementById("blk").addEventListener("click", (e) => {
+      const btn = e.target.closest("[data-bk]");
+      if (!btn) return;
+      const i = Number(btn.dataset.i);
+      const act = btn.dataset.bk;
+      const blocks = (this._config.blocks || []).slice();
+      if (!blocks[i]) return;
+      if (act === "up" && i > 0) [blocks[i - 1], blocks[i]] = [blocks[i], blocks[i - 1]];
+      else if (act === "dn" && i < blocks.length - 1) [blocks[i + 1], blocks[i]] = [blocks[i], blocks[i + 1]];
+      else if (act === "on") blocks[i] = Object.assign({}, blocks[i], { on: blocks[i].on === false });
+      else if (act === "del") blocks.splice(i, 1);
+      this._config.blocks = blocks;
+      this._renderBlocks();
+      this._emit();
+    });
+
+    this.shadowRoot.getElementById("blk").addEventListener("input", (e) => {
+      const tEl = e.target.closest("[data-bf]");
+      if (!tEl) return;
+      const i = Number(tEl.dataset.i);
+      const blocks = (this._config.blocks || []).slice();
+      if (!blocks[i]) return;
+      const f = tEl.dataset.bf;
+      blocks[i] = Object.assign({}, blocks[i], { [f]: tEl.value.trim() });
+      this._config.blocks = blocks;
+      this._emit();
+    });
   }
 
   _renderChips() {
-    const mods = this.shadowRoot.getElementById("mods");
-    mods.innerHTML = MODULES.map(
-      (m) => `<button class="tg" type="button" data-mod="${m}">${MODULE_LABELS[m] || m}</button>`,
-    ).join("");
 
     const confirms = this.shadowRoot.getElementById("confirms");
     confirms.innerHTML = CONFIRMABLE.map(
       (k) => `<button class="tg" type="button" data-confirm="${k}">${ACTION_LABELS[k] || k}</button>`,
     ).join("");
+  }
+
+  _renderBlocks() {
+    const host = this.shadowRoot.getElementById("blk");
+    if (!host) return;
+    const blocks = this._config.blocks || [];
+    const ents = [];
+    if (this._hass && this._hass.states) {
+      for (const id of Object.keys(this._hass.states)) {
+        if (/^(sensor|binary_sensor|switch|number|input_|device_tracker|image|light|update)\./.test(id)) ents.push(id);
+      }
+      ents.sort();
+    }
+    const rows = blocks.map((b, i) => {
+      const nm = `${BLOCK_LABELS[b.type] || b.type}${b.entity ? " · " + b.entity : ""}`;
+      const off = b.on === false ? " off" : "";
+      const pinned = b.type === "hero";
+      const entSel = b.type === "custom"
+        ? `<select class="tf ent" data-bf="entity" data-i="${i}">
+            <option value="">选择实体…</option>
+            ${ents.map((id) => `<option value="${esc(id)}"${id === b.entity ? " selected" : ""}>${esc(id)}</option>`).join("")}
+          </select>
+          <input class="tf" data-bf="label" data-i="${i}" value="${esc(b.label || "")}" placeholder="显示名称" style="flex:1 1 90px">
+          <input class="tf" data-bf="unit" data-i="${i}" value="${esc(b.unit || "")}" placeholder="单位" style="flex:0 0 62px">`
+        : "";
+      return `<div class="blkrow${off}">
+        <div class="bk-top">
+          <button class="btn sq" data-bk="up" data-i="${i}" type="button"${pinned ? " disabled" : ""}>↑</button>
+          <button class="btn sq" data-bk="dn" data-i="${i}" type="button"${pinned ? " disabled" : ""}>↓</button>
+          <span class="nm">${esc(nm)}</span>
+          <button class="sw" data-bk="on" data-i="${i}" role="switch" aria-checked="${b.on !== false}"></button>
+          <button class="btn sq del" data-bk="del" data-i="${i}" type="button">✕</button>
+        </div>
+        ${entSel ? `<div class="bk-sub">${entSel}</div>` : ""}
+      </div>`;
+    });
+    host.innerHTML = rows.join("") || `<p class="hint">还没有模块，从下面添加。</p>`;
   }
 
   _syncVehicles() {
@@ -339,9 +409,7 @@ class HaCarEditor extends HTMLElement {
     this.shadowRoot.querySelectorAll("[data-layout]").forEach((b) => {
       b.setAttribute("aria-pressed", String(b.dataset.layout === (this._config.layout || "full")));
     });
-    this.shadowRoot.querySelectorAll("[data-mod]").forEach((b) => {
-      b.setAttribute("aria-pressed", String((this._config.modules || []).includes(b.dataset.mod)));
-    });
+    this._renderBlocks();
     q("guard").setAttribute("aria-checked", String((this._config.confirm || []).length > 0));
     const hold = Number(this._config.hold_ms) || 2000;
     q("hold").value = String(hold);

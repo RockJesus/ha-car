@@ -1,4 +1,4 @@
-import { icon } from "./icons.js";
+import { icon, ICON_NAMES } from "./icons.js";
 import { resolve, detectVehicles, SLOTS } from "./resolve.js";
 import { STYLES } from "./styles.js";
 import { dict, isEn } from "./strings.js";
@@ -11,6 +11,8 @@ const FORD_LOGO = `<span class="brand" aria-hidden="true"><svg viewBox="0 0 44 2
  font-weight="700" font-size="9.4" fill="#f4f8ff" letter-spacing=".4">Ford</text></svg></span>`;
 
 const MODULES = ["status", "actions", "energy", "tires", "doors", "charging", "alerts", "service"];
+// 可自由排序/增删的模块类型（blocks）
+const BLOCK_TYPES = ["meta", "hero", "energy", "alerts", "doors", "charging", "service", "actions", "custom"];
 const CONFIRMABLE = [
   "btn_unlock",
   "btn_lock",
@@ -35,6 +37,8 @@ const DEFAULTS = {
   layout: "full",
   // 默认不渲染「服务信息」，可在编辑器里手动勾选
   modules: MODULES.filter((m) => m !== "service"),
+  // 模块顺序：null 时按 modules 兼容推导（老配置无需迁移）
+  blocks: null,
   confirm: ["btn_unlock", "btn_lock", "btn_trunk", "sw_engine", "sw_honk"],
   hold_ms: 2000,
   accent: "#37d6e8",
@@ -44,6 +48,33 @@ const DEFAULTS = {
   image_url: "",
   entities: {},
 };
+
+// blocks 归一化：老配置没有 blocks 时按 modules 推导等价顺序
+export function normBlocks(cfg) {
+  const raw = Array.isArray(cfg.blocks) ? cfg.blocks : null;
+  if (raw) {
+    const list = raw
+      .filter((b) => b && typeof b === "object" && BLOCK_TYPES.includes(b.type))
+      .map((b) => ({
+        type: b.type,
+        on: b.on !== false,
+        entity: typeof b.entity === "string" ? b.entity : "",
+        label: typeof b.label === "string" ? b.label : "",
+        unit: typeof b.unit === "string" ? b.unit : "",
+        icon: typeof b.icon === "string" ? b.icon : "",
+      }));
+    if (list.length) return list;
+  }
+  const mods = Array.isArray(cfg.modules) ? cfg.modules : MODULES;
+  const list = [{ type: "meta", on: true }, { type: "hero", on: true }];
+  if (mods.includes("energy")) list.push({ type: "energy", on: true });
+  if (mods.includes("doors")) list.push({ type: "doors", on: true });
+  if (mods.includes("charging")) list.push({ type: "charging", on: true });
+  if (mods.includes("alerts")) list.push({ type: "alerts", on: true });
+  if (mods.includes("service")) list.push({ type: "service", on: true });
+  if (mods.includes("actions")) list.push({ type: "actions", on: true });
+  return list;
+}
 
 const SLOT_KEYS = Object.keys(SLOTS);
 
@@ -84,6 +115,7 @@ class HaCarCard extends HTMLElement {
       : DEFAULTS.confirm.slice();
     cfg.entities = cfg.entities && typeof cfg.entities === "object" ? cfg.entities : {};
     cfg.hold_ms = clamp(Number(cfg.hold_ms) || DEFAULTS.hold_ms, 300, 3000);
+    cfg.blocks = normBlocks(cfg);
     this._config = cfg;
     this._sig = "";
     this._toast = null;
@@ -158,7 +190,13 @@ class HaCarCard extends HTMLElement {
     const h = this.clientHeight;
     if (!w || !h) return;
     const fit = w >= 900 && h >= 620;
+    const wasFit = this._fitState;
+    this._fitState = fit;
     this._card.classList.toggle("fit", fit);
+    // 双栏 / 单列是两套 DOM 结构：面板尺寸跨过阈值时重排一次
+    if (wasFit !== undefined && wasFit !== fit && this._wrap && this._wrap.firstChild) {
+      this._render(true);
+    }
     // 小屏（手机面板）按 390×840 的版式等比缩放，保证一屏铺满、绝不出滚动条
     const pfit = !fit && w > 0 && h > 0;
     this._card.classList.toggle("pfit", pfit);
@@ -255,7 +293,7 @@ class HaCarCard extends HTMLElement {
     this._wrap.className = "wrap";
     if (cfg.accent) this._card.style.setProperty("--hc-accent", cfg.accent);
     this._prunePending(data);
-    this._wrap.innerHTML = this._body(data);
+    this._wrap.innerHTML = this._body(data, this._card.classList.contains("fit"));
     this._placeOverlay();
     const img = this._wrap.querySelector("img.carimg");
     if (img) img.addEventListener("load", () => this._placeOverlay(), { once: true });
@@ -297,7 +335,7 @@ class HaCarCard extends HTMLElement {
 
   // ---------- 卡片主体 ----------
 
-  _body(data) {
+  _body(data, twoCol) {
     const cfg = this._config;
     const t = dict(this._hass);
     if (!data.group && !Object.keys(cfg.entities || {}).length) {
@@ -339,69 +377,84 @@ class HaCarCard extends HTMLElement {
     if (chgNow) chips.push({ cls: "info", label: t.charging });
     if (running) chips.push({ cls: "warn", label: t.running });
 
-    const parts = [];
-
-    // 顶部：车型名 + 锁态胶囊
-    parts.push(`<div class="head"><div class="ttl"><h1>${FORD_LOGO}${esc(title)}</h1>
+    const blocks = [];
+    const head = `<div class="head"><div class="ttl"><h1>${FORD_LOGO}${esc(title)}</h1>
       ${cfg.show_plate && plate ? `<p class="plate">${esc(cfg.privacy ? maskPlate(plate) : plate)}</p>` : ""}
-      </div><span class="status ${status.cls}"><span class="dot"></span>${esc(status.label)}</span></div>`);
+      </div><span class="status ${status.cls}"><span class="dot"></span>${esc(status.label)}</span></div>`;
 
-    // 锁态胶囊下面：定位 + 同步时间（一条紧凑元信息行）
-    const locHtml = compact ? "" : this._location(data, t);
-    const syncHtml = this._baseline(data, t);
-    if (locHtml || syncHtml) {
-      parts.push(`<div class="hmeta">${locHtml}${syncHtml}</div>`);
-    }
-
-    // 主视觉 + 右侧数据区：窄屏上下叠放，宽屏（桌面/面板视图）左右分栏
-    const side = [];
-    if (mods.includes("status") && chips.length) {
-      side.push(`<div class="chips">${chips
-        .slice(0, 3)
-        .map((c) => `<span class="chip ${c.cls}">${esc(c.label)}</span>`)
-        .join("")}</div>`);
-    }
-    if (mods.includes("energy")) {
-      const energy = this._energy(data, t);
-      if (energy) side.push(energy);
-    }
     const hero = this._imagePair(data);
-    const heroHtml = this._hero(hero.src, hero.fb, this._carOverlay(data, t, mods));
-    parts.push(
-      side.length
-        ? `<div class="duo"><div class="dleft">${heroHtml}</div><div class="dright">${side.join("")}</div></div>`
-        : heroHtml,
-    );
-
-    if (mods.includes("alerts")) {
-      const alert = this._alert(data, t);
-      if (alert) parts.push(alert);
+    const list = cfg.blocks || normBlocks(cfg);
+    for (const b of list) {
+      if (b.on === false) continue;
+      let html = "";
+      switch (b.type) {
+        case "meta": {
+          const locH = compact ? "" : this._location(data, t, b.entity);
+          const syncH = this._baseline(data, t);
+          if (locH || syncH) html = `<div class="b-meta"><div class="hmeta">${locH}${syncH}</div></div>`;
+          break;
+        }
+        case "hero":
+          html = `<div class="blk b-hero">${this._hero(
+            this._imgFrom(b.entity, hero.src),
+            hero.fb,
+            this._carOverlay(data, t, mods),
+          )}</div>`;
+          break;
+        case "energy": {
+          const en = this._energy(data, t);
+          if (en) html = `<div class="blk b-energy">${en}</div>`;
+          break;
+        }
+        case "alerts": {
+          const al = this._alert(data, t);
+          if (al) html = `<div class="blk b-alerts">${al}</div>`;
+          break;
+        }
+        case "doors": {
+          if (!compact) {
+            const dr = this._doors(data, t);
+            if (dr) html = `<div class="blk b-doors">${dr}</div>`;
+          }
+          break;
+        }
+        case "charging": {
+          if (!compact) {
+            const ch = this._charging(data, t, chgNow);
+            if (ch) html = `<div class="blk b-charging">${ch}</div>`;
+          }
+          break;
+        }
+        case "service": {
+          if (!compact) {
+            const sv = this._service(data, t);
+            if (sv) html = `<div class="blk b-service">${sv}</div>`;
+          }
+          break;
+        }
+        case "actions": {
+          const ac = this._actions(data, t, running, offline, compact);
+          if (ac) html = `<div class="blk b-actions">${ac}</div>`;
+          break;
+        }
+        case "custom":
+          html = this._customBlock(b, t);
+          break;
+        default:
+          break;
+      }
+      if (html) blocks.push({ html, hero: b.type === "hero" });
     }
 
-    if (!compact && mods.includes("doors")) {
-      const doors = this._doors(data, t);
-      if (doors) parts.push(doors);
+    let inner;
+    if (twoCol) {
+      const left = blocks.filter((b) => b.hero).map((b) => b.html).join("");
+      const right = blocks.filter((b) => !b.hero).map((b) => b.html).join("");
+      inner = `<div class="b-hero-col">${left}</div><div class="b-side">${right}</div>`;
+    } else {
+      inner = blocks.map((b) => b.html).join("");
     }
-
-    if (!compact && mods.includes("charging")) {
-      const chg = this._charging(data, t, chgNow);
-      if (chg) parts.push(chg);
-    }
-
-    if (!compact && mods.includes("service")) {
-      const svc = this._service(data, t);
-      if (svc) parts.push(svc);
-    }
-
-
-    // 控制按钮固定放最下面
-    if (mods.includes("actions")) {
-      parts.push(this._actions(data, t, running, offline, compact));
-    }
-
-    if (this._toast) parts.push(this._toastHtml());
-
-    return parts.join("");
+    return `${head}<div class="blocks">${inner}</div>${this._toast ? this._toastHtml() : ""}`;
   }
 
   // 车图 + 同心轨道 + 四枚发光节点（无图时落回圆形占位）
@@ -693,6 +746,31 @@ class HaCarCard extends HTMLElement {
       ${icon(o.ic)}<span>${esc(o.label)}</span></button>`;
   }
 
+  _imgFrom(ent, fallback) {
+    if (!ent || !this._hass || !this._hass.states[ent]) return fallback;
+    const st = String(this._hass.states[ent].state || "");
+    return /^https?:/i.test(st) ? st : fallback;
+  }
+
+  // 自定义实体模块：任意实体按顺序排进版式
+  _customBlock(b, t) {
+    const ent = b.entity;
+    if (!ent) return "";
+    const label = b.label || (ent ? ent.split(".").slice(-1)[0].replace(/_/g, " ") : t.custom || "自定义");
+    const st = ent && this._hass && this._hass.states[ent] ? this._hass.states[ent] : null;
+    let value = "—";
+    let unit = b.unit || "";
+    if (st) {
+      const raw = String(st.state);
+      value = isBad(st) ? "—" : raw;
+      if (!unit && st.attributes && st.attributes.unit_of_measurement) unit = st.attributes.unit_of_measurement;
+      if (/^on|off$/i.test(raw)) value = raw.toLowerCase() === "on" ? (isEn(this._hass) ? "On" : "开") : (isEn(this._hass) ? "Off" : "关");
+    }
+    const ic = ICON_NAMES.includes(b.icon) ? b.icon : "bolt";
+    return `<div class="blk b-custom"><div class="cblock">${icon(ic)}<span class="cl">${esc(label)}</span>
+      <b>${esc(value)}</b>${unit ? `<i>${esc(unit)}</i>` : ""}</div></div>`;
+  }
+
   _tires(data, _t) {
     const defs = [
       { slot: "tp_lf", sslot: "tps_lf", label: isEn(this._hass) ? "LF" : "左前" },
@@ -807,10 +885,11 @@ class HaCarCard extends HTMLElement {
         .join("")}</details>`;
   }
 
-  _location(data, _t) {
-    const addr = text(data.get("addr"));
+  _location(data, _t, override) {
+    const ovr = override && this._hass && this._hass.states[override] ? this._hass.states[override] : null;
+    const addr = ovr ? String(ovr.state) : text(data.get("addr"));
     const shown = addr && this._config.privacy ? maskAddr(addr) : addr;
-    const tracker = data.id("tracker");
+    const tracker = ovr ? override : data.id("tracker");
     if (!addr && !tracker) return "";
     const label = shown || (isEn(this._hass) ? "Open map" : "查看地图");
     return `<div class="doors"><span class="door" data-more="${esc(tracker || data.id("addr"))}">

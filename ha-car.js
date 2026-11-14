@@ -24,6 +24,7 @@ var PATHS = {
   chevron: "M213.66,101.66l-80,80a8,8,0,0,1-11.32,0l-80-80a8,8,0,0,1,11.32-11.32L128,164.69l74.34-74.35a8,8,0,0,1,11.32,11.32Z",
   caretRight: "M181.66,133.66l-80,80A8,8,0,0,1,88,208V48a8,8,0,0,1,13.66-5.66l80,80A8,8,0,0,1,181.66,133.66Z"
 };
+var ICON_NAMES = Object.keys(PATHS);
 function icon(name, cls) {
   const d = PATHS[name] || PATHS.car;
   return `<svg class="ic${cls ? " " + cls : ""}" viewBox="0 0 256 256" aria-hidden="true" focusable="false"><path d="${d}"/></svg>`;
@@ -336,6 +337,22 @@ ha-card::after { content: ""; position: absolute; left: 8%; right: 8%; top: 0; h
 .wrap { padding: 18px 16px 14px; display: flex; flex-direction: column; gap: 14px; }
 .duo { display: flex; flex-direction: column; gap: 14px; }
 .dleft, .dright { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+/* 模块栈：顺序由配置决定，手机单列、宽屏双栏（车图固定左栏） */
+.blocks { display: flex; flex-direction: column; gap: 14px; flex: 1 1 auto; min-height: 0; }
+.b-hero-col, .b-side { display: contents; }
+.blk + .blk { margin-top: 0; }
+.blk { min-width: 0; }
+.b-hero { display: flex; flex-direction: column; flex: 1 1 auto; min-height: 0; }
+.b-hero .hero { flex: 1 1 auto; }
+.b-actions { display: flex; flex-direction: column; gap: 10px; }
+.cblock { display: flex; align-items: center; gap: 8px; padding: 9px 12px; border-radius: 15px;
+  border: 1px solid rgba(255,255,255,.07); background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.016));
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.06); font-size: 12px; color: var(--hc-dim); }
+.cblock .ic { width: 15px; height: 15px; opacity: .8; color: var(--hc-accent); }
+.cblock .cl { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  font-size: 11.5px; letter-spacing: .02em; }
+.cblock b { font-size: 14px; font-weight: 680; color: #eef5fd; font-variant-numeric: tabular-nums; }
+.cblock i { font-style: normal; font-size: 10px; color: rgba(150,172,196,.8); margin-left: 1px; }
 .ic { width: 20px; height: 20px; fill: currentColor; display: block; flex: none; }
 
 /* 头部：大标题 + 右上状态胶囊（参考图同构） */
@@ -706,9 +723,9 @@ ha-card.panel { box-sizing: border-box; width: 100%; height: 100%; margin: 0; }
 ha-card.panel.fit { box-sizing: border-box; position: absolute; left: 50%; top: 50%; width: 1440px; height: 900px;
   transform: translate(-50%, -50%) scale(var(--fit, 1)); transform-origin: center center; }
 ha-card.panel .wrap { height: 100%; box-sizing: border-box; padding: 26px 30px 20px; overflow: hidden; }
-ha-card.panel .duo { flex: 1 1 auto; min-height: 0; }
-ha-card.panel .dleft { justify-content: center; min-height: 0; }
-ha-card.panel .dright { justify-content: center; }
+ha-card.panel .blocks { flex: 1 1 auto; min-height: 0; }
+ha-card.panel .b-hero { justify-content: center; min-height: 0; }
+
 ha-card.panel .hero { flex: 1 1 auto; height: auto; min-height: 300px; }
 ha-card.panel .carimg { max-height: min(62%, 460px); max-width: min(60%, 330px); }
 
@@ -718,22 +735,19 @@ ha-card.panel .carimg { max-height: min(62%, 460px); max-width: min(60%, 330px);
 ha-card.panel.pfit { position: absolute; left: 0; top: 0;
   transform: scale(var(--pscale, 1)); transform-origin: 0 0; }
 ha-card.panel.pfit .wrap { height: 100%; }
-ha-card.panel.fit .wrap { display: grid; grid-template-columns: minmax(0,1.04fr) minmax(0,.96fr);
-  column-gap: 52px; row-gap: 20px; align-content: center; }
+ha-card.panel.fit .wrap { display: flex; flex-direction: column; gap: 14px; justify-content: center; }
 ha-card.panel.fit .head { grid-column: 1 / -1; }
-ha-card.panel.fit .duo { display: contents; }
-ha-card.panel.fit .dleft { grid-column: 1; grid-row: 2 / span 12; align-self: stretch; justify-content: center; }
-ha-card.panel.fit .dleft .hero { height: 100%; min-height: 600px; }
+ha-card.panel.fit .blocks { grid-column: 1 / -1; display: flex; flex-direction: row; align-items: stretch;
+  gap: 52px; min-height: 0; }
+ha-card.panel:not(.fit) .blocks { flex-direction: column; }
+ha-card.panel.fit .b-hero-col { display: flex; flex: 1.02 1 0; min-width: 0; }
+ha-card.panel.fit .b-hero-col .b-hero { flex: 1 1 auto; justify-content: center; }
+ha-card.panel.fit .b-side { display: flex; flex-direction: column; flex: .98 1 0; min-width: 0;
+  justify-content: center; gap: 16px; }
+ha-card.panel.fit .b-hero .hero { height: 100%; min-height: 600px; }
 ha-card.panel.fit .orbit { height: 78%; }
 ha-card.panel.fit .orbit.o2 { height: 86%; }
-ha-card.panel.fit .dright { grid-column: 2; align-self: start; gap: 18px; }
-ha-card.panel.fit .acts,
-ha-card.panel.fit .pills,
-ha-card.panel.fit .alert,
-ha-card.panel.fit .svc,
-ha-card.panel.fit .loc,
-ha-card.panel.fit .toast { grid-column: 2; }
-ha-card.panel.fit .hmeta { grid-column: 2; }
+ha-card.panel.fit .hmeta { grid-column: 1 / -1; }
 ha-card.panel.fit .acts { width: 100%; max-width: none; }
 ha-card.panel.fit .pills { width: 100%; max-width: none; }
 
@@ -743,8 +757,7 @@ ha-card.panel.fit .pills { width: 100%; max-width: none; }
   .hero { height: 268px; --r: 104px; }
   .head { align-items: center; }
   /* 桌面/面板视图：车图在左，仪表与副指标在右 */
-  .duo { display: grid; grid-template-columns: minmax(0, 1.06fr) minmax(0, 1fr); column-gap: 26px;
-    align-items: center; }
+
   .dright { gap: 14px; }
   .gauge { max-width: 152px; }
   .acts { max-width: 540px; margin: 2px auto 0; width: 100%; }
@@ -752,8 +765,7 @@ ha-card.panel.fit .pills { width: 100%; max-width: none; }
   /* 面板模式：容器多宽就排多宽，车图列跟着面板高度走 */
   :host(.panel) { max-width: none; margin: 0; }
   ha-card.panel .wrap { padding: 22px 26px 16px; gap: 12px; }
-  ha-card.panel .duo { grid-template-columns: minmax(0, 1.02fr) minmax(0, 1fr); column-gap: 34px; align-items: stretch; }
-  ha-card.panel .dleft .hero { height: 100%; min-height: 250px; --r: 106px; }
+  ha-card.panel .b-hero .hero { height: 100%; min-height: 250px; --r: 106px; }
   ha-card.panel .carimg { max-height: min(74%, 520px); max-width: min(60%, 330px); }
   ha-card.panel .gauge { max-width: 196px; }
   ha-card.panel .acts { max-width: 600px; }
@@ -808,6 +820,20 @@ input[type="range"] { flex: 1; accent-color: var(--primary-color, #03a9f4); }
 select.tf { font-size: 13px; padding: 8px 10px; }
 .ed .hint, .ed label.f { color: var(--secondary-text-color, #98a0a8); }
 .ed h3, .ed .row .rl, .ed summary { color: var(--primary-text-color, #e6e6e6); }
+/* 编辑器：模块布局行 */
+.blklist { display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px; }
+.blkrow { display: flex; flex-direction: column; gap: 6px; padding: 7px 8px 8px; border-radius: 11px;
+  background: rgba(255,255,255,.045); border: 1px solid rgba(255,255,255,.06); font-size: 12px; }
+.bk-top { display: flex; align-items: center; gap: 6px; }
+.bk-sub { display: flex; align-items: center; gap: 6px; }
+.bk-sub .ent { flex: 1 1 auto; min-width: 0; }
+.blkrow.off { opacity: .55; }
+.blkrow .nm { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.blkrow .btn.sq { min-width: 26px; padding: 4px 6px; font-size: 12px; line-height: 1; }
+.blkrow .btn.sq.del { color: #ff8a8a; border-color: rgba(255,110,110,.28); }
+.blkrow select.tf, .blkrow input.tf { padding: 5px 7px; font-size: 11.5px; }
+.blkrow .sw { flex: none; }
+
 `;
 
 // src/strings.js
@@ -1119,6 +1145,7 @@ var FORD_LOGO = `<span class="brand" aria-hidden="true"><svg viewBox="0 0 44 20"
 <text x="22" y="13.4" text-anchor="middle" font-family="Georgia,'Times New Roman',serif" font-style="italic"
  font-weight="700" font-size="9.4" fill="#f4f8ff" letter-spacing=".4">Ford</text></svg></span>`;
 var MODULES = ["status", "actions", "energy", "tires", "doors", "charging", "alerts", "service"];
+var BLOCK_TYPES = ["meta", "hero", "energy", "alerts", "doors", "charging", "service", "actions", "custom"];
 var CONFIRMABLE = [
   "btn_unlock",
   "btn_lock",
@@ -1141,6 +1168,8 @@ var DEFAULTS = {
   layout: "full",
   // 默认不渲染「服务信息」，可在编辑器里手动勾选
   modules: MODULES.filter((m) => m !== "service"),
+  // 模块顺序：null 时按 modules 兼容推导（老配置无需迁移）
+  blocks: null,
   confirm: ["btn_unlock", "btn_lock", "btn_trunk", "sw_engine", "sw_honk"],
   hold_ms: 2e3,
   accent: "#37d6e8",
@@ -1150,6 +1179,29 @@ var DEFAULTS = {
   image_url: "",
   entities: {}
 };
+function normBlocks(cfg) {
+  const raw = Array.isArray(cfg.blocks) ? cfg.blocks : null;
+  if (raw) {
+    const list2 = raw.filter((b) => b && typeof b === "object" && BLOCK_TYPES.includes(b.type)).map((b) => ({
+      type: b.type,
+      on: b.on !== false,
+      entity: typeof b.entity === "string" ? b.entity : "",
+      label: typeof b.label === "string" ? b.label : "",
+      unit: typeof b.unit === "string" ? b.unit : "",
+      icon: typeof b.icon === "string" ? b.icon : ""
+    }));
+    if (list2.length) return list2;
+  }
+  const mods = Array.isArray(cfg.modules) ? cfg.modules : MODULES;
+  const list = [{ type: "meta", on: true }, { type: "hero", on: true }];
+  if (mods.includes("energy")) list.push({ type: "energy", on: true });
+  if (mods.includes("doors")) list.push({ type: "doors", on: true });
+  if (mods.includes("charging")) list.push({ type: "charging", on: true });
+  if (mods.includes("alerts")) list.push({ type: "alerts", on: true });
+  if (mods.includes("service")) list.push({ type: "service", on: true });
+  if (mods.includes("actions")) list.push({ type: "actions", on: true });
+  return list;
+}
 var SLOT_KEYS = Object.keys(SLOTS);
 var HaCarCard = class extends HTMLElement {
   constructor() {
@@ -1181,6 +1233,7 @@ var HaCarCard = class extends HTMLElement {
     cfg.confirm = Array.isArray(cfg.confirm) ? cfg.confirm.filter((k) => CONFIRMABLE.includes(k)) : DEFAULTS.confirm.slice();
     cfg.entities = cfg.entities && typeof cfg.entities === "object" ? cfg.entities : {};
     cfg.hold_ms = clamp(Number(cfg.hold_ms) || DEFAULTS.hold_ms, 300, 3e3);
+    cfg.blocks = normBlocks(cfg);
     this._config = cfg;
     this._sig = "";
     this._toast = null;
@@ -1246,7 +1299,12 @@ var HaCarCard = class extends HTMLElement {
     const h = this.clientHeight;
     if (!w || !h) return;
     const fit = w >= 900 && h >= 620;
+    const wasFit = this._fitState;
+    this._fitState = fit;
     this._card.classList.toggle("fit", fit);
+    if (wasFit !== void 0 && wasFit !== fit && this._wrap && this._wrap.firstChild) {
+      this._render(true);
+    }
     const pfit = !fit && w > 0 && h > 0;
     this._card.classList.toggle("pfit", pfit);
     if (pfit) {
@@ -1332,7 +1390,7 @@ var HaCarCard = class extends HTMLElement {
     this._wrap.className = "wrap";
     if (cfg.accent) this._card.style.setProperty("--hc-accent", cfg.accent);
     this._prunePending(data);
-    this._wrap.innerHTML = this._body(data);
+    this._wrap.innerHTML = this._body(data, this._card.classList.contains("fit"));
     this._placeOverlay();
     const img = this._wrap.querySelector("img.carimg");
     if (img) img.addEventListener("load", () => this._placeOverlay(), { once: true });
@@ -1369,7 +1427,7 @@ var HaCarCard = class extends HTMLElement {
       </div>`;
   }
   // ---------- 卡片主体 ----------
-  _body(data) {
+  _body(data, twoCol) {
     const cfg = this._config;
     const t = dict(this._hass);
     if (!data.group && !Object.keys(cfg.entities || {}).length) {
@@ -1398,49 +1456,82 @@ var HaCarCard = class extends HTMLElement {
     const chips = [];
     if (chgNow) chips.push({ cls: "info", label: t.charging });
     if (running) chips.push({ cls: "warn", label: t.running });
-    const parts = [];
-    parts.push(`<div class="head"><div class="ttl"><h1>${FORD_LOGO}${esc(title)}</h1>
+    const blocks = [];
+    const head = `<div class="head"><div class="ttl"><h1>${FORD_LOGO}${esc(title)}</h1>
       ${cfg.show_plate && plate ? `<p class="plate">${esc(cfg.privacy ? maskPlate(plate) : plate)}</p>` : ""}
-      </div><span class="status ${status.cls}"><span class="dot"></span>${esc(status.label)}</span></div>`);
-    const locHtml = compact ? "" : this._location(data, t);
-    const syncHtml = this._baseline(data, t);
-    if (locHtml || syncHtml) {
-      parts.push(`<div class="hmeta">${locHtml}${syncHtml}</div>`);
-    }
-    const side = [];
-    if (mods.includes("status") && chips.length) {
-      side.push(`<div class="chips">${chips.slice(0, 3).map((c) => `<span class="chip ${c.cls}">${esc(c.label)}</span>`).join("")}</div>`);
-    }
-    if (mods.includes("energy")) {
-      const energy = this._energy(data, t);
-      if (energy) side.push(energy);
-    }
+      </div><span class="status ${status.cls}"><span class="dot"></span>${esc(status.label)}</span></div>`;
     const hero = this._imagePair(data);
-    const heroHtml = this._hero(hero.src, hero.fb, this._carOverlay(data, t, mods));
-    parts.push(
-      side.length ? `<div class="duo"><div class="dleft">${heroHtml}</div><div class="dright">${side.join("")}</div></div>` : heroHtml
-    );
-    if (mods.includes("alerts")) {
-      const alert = this._alert(data, t);
-      if (alert) parts.push(alert);
+    const list = cfg.blocks || normBlocks(cfg);
+    for (const b of list) {
+      if (b.on === false) continue;
+      let html = "";
+      switch (b.type) {
+        case "meta": {
+          const locH = compact ? "" : this._location(data, t, b.entity);
+          const syncH = this._baseline(data, t);
+          if (locH || syncH) html = `<div class="b-meta"><div class="hmeta">${locH}${syncH}</div></div>`;
+          break;
+        }
+        case "hero":
+          html = `<div class="blk b-hero">${this._hero(
+            this._imgFrom(b.entity, hero.src),
+            hero.fb,
+            this._carOverlay(data, t, mods)
+          )}</div>`;
+          break;
+        case "energy": {
+          const en = this._energy(data, t);
+          if (en) html = `<div class="blk b-energy">${en}</div>`;
+          break;
+        }
+        case "alerts": {
+          const al = this._alert(data, t);
+          if (al) html = `<div class="blk b-alerts">${al}</div>`;
+          break;
+        }
+        case "doors": {
+          if (!compact) {
+            const dr = this._doors(data, t);
+            if (dr) html = `<div class="blk b-doors">${dr}</div>`;
+          }
+          break;
+        }
+        case "charging": {
+          if (!compact) {
+            const ch = this._charging(data, t, chgNow);
+            if (ch) html = `<div class="blk b-charging">${ch}</div>`;
+          }
+          break;
+        }
+        case "service": {
+          if (!compact) {
+            const sv = this._service(data, t);
+            if (sv) html = `<div class="blk b-service">${sv}</div>`;
+          }
+          break;
+        }
+        case "actions": {
+          const ac = this._actions(data, t, running, offline, compact);
+          if (ac) html = `<div class="blk b-actions">${ac}</div>`;
+          break;
+        }
+        case "custom":
+          html = this._customBlock(b, t);
+          break;
+        default:
+          break;
+      }
+      if (html) blocks.push({ html, hero: b.type === "hero" });
     }
-    if (!compact && mods.includes("doors")) {
-      const doors = this._doors(data, t);
-      if (doors) parts.push(doors);
+    let inner;
+    if (twoCol) {
+      const left = blocks.filter((b) => b.hero).map((b) => b.html).join("");
+      const right = blocks.filter((b) => !b.hero).map((b) => b.html).join("");
+      inner = `<div class="b-hero-col">${left}</div><div class="b-side">${right}</div>`;
+    } else {
+      inner = blocks.map((b) => b.html).join("");
     }
-    if (!compact && mods.includes("charging")) {
-      const chg = this._charging(data, t, chgNow);
-      if (chg) parts.push(chg);
-    }
-    if (!compact && mods.includes("service")) {
-      const svc = this._service(data, t);
-      if (svc) parts.push(svc);
-    }
-    if (mods.includes("actions")) {
-      parts.push(this._actions(data, t, running, offline, compact));
-    }
-    if (this._toast) parts.push(this._toastHtml());
-    return parts.join("");
+    return `${head}<div class="blocks">${inner}</div>${this._toast ? this._toastHtml() : ""}`;
   }
   // 车图 + 同心轨道 + 四枚发光节点（无图时落回圆形占位）
   _hero(imgUrl, fbUrl, overlay) {
@@ -1711,6 +1802,29 @@ var HaCarCard = class extends HTMLElement {
       data-label="${esc(o.label)}"${o.hold(o.key)} role="button" tabindex="0">
       ${icon(o.ic)}<span>${esc(o.label)}</span></button>`;
   }
+  _imgFrom(ent, fallback) {
+    if (!ent || !this._hass || !this._hass.states[ent]) return fallback;
+    const st = String(this._hass.states[ent].state || "");
+    return /^https?:/i.test(st) ? st : fallback;
+  }
+  // 自定义实体模块：任意实体按顺序排进版式
+  _customBlock(b, t) {
+    const ent = b.entity;
+    if (!ent) return "";
+    const label = b.label || (ent ? ent.split(".").slice(-1)[0].replace(/_/g, " ") : t.custom || "自定义");
+    const st = ent && this._hass && this._hass.states[ent] ? this._hass.states[ent] : null;
+    let value = "—";
+    let unit = b.unit || "";
+    if (st) {
+      const raw = String(st.state);
+      value = isBad(st) ? "—" : raw;
+      if (!unit && st.attributes && st.attributes.unit_of_measurement) unit = st.attributes.unit_of_measurement;
+      if (/^on|off$/i.test(raw)) value = raw.toLowerCase() === "on" ? isEn(this._hass) ? "On" : "开" : isEn(this._hass) ? "Off" : "关";
+    }
+    const ic = ICON_NAMES.includes(b.icon) ? b.icon : "bolt";
+    return `<div class="blk b-custom"><div class="cblock">${icon(ic)}<span class="cl">${esc(label)}</span>
+      <b>${esc(value)}</b>${unit ? `<i>${esc(unit)}</i>` : ""}</div></div>`;
+  }
   _tires(data, _t) {
     const defs = [
       { slot: "tp_lf", sslot: "tps_lf", label: isEn(this._hass) ? "LF" : "左前" },
@@ -1813,10 +1927,11 @@ var HaCarCard = class extends HTMLElement {
     return `<details class="svc"><summary><span class="sum">${icon("wrench")}${esc(t.service)}</span>${icon("chevron")}</summary>
       ${rows.map((r) => `<div class="row" data-more="${esc(r.ent)}"><span class="k">${esc(r.label)}</span><span class="val">${esc(r.value)}</span></div>`).join("")}</details>`;
   }
-  _location(data, _t) {
-    const addr = text(data.get("addr"));
+  _location(data, _t, override) {
+    const ovr = override && this._hass && this._hass.states[override] ? this._hass.states[override] : null;
+    const addr = ovr ? String(ovr.state) : text(data.get("addr"));
     const shown = addr && this._config.privacy ? maskAddr(addr) : addr;
-    const tracker = data.id("tracker");
+    const tracker = ovr ? override : data.id("tracker");
     if (!addr && !tracker) return "";
     const label = shown || (isEn(this._hass) ? "Open map" : "查看地图");
     return `<div class="doors"><span class="door" data-more="${esc(tracker || data.id("addr"))}">
@@ -1997,15 +2112,16 @@ var HaCarCard = class extends HTMLElement {
 customElements.define("ha-car", HaCarCard);
 
 // src/editor.js
-var MODULE_LABELS = {
-  status: "状态徽章",
-  actions: "快捷操作",
-  energy: "里程与能耗",
-  tires: "四轮胎压",
-  doors: "门窗状态",
-  charging: "充电与能源",
-  alerts: "异常告警",
-  service: "服务信息"
+var BLOCK_LABELS = {
+  meta: "定位/同步",
+  hero: "车图",
+  energy: "能耗仪表",
+  alerts: "车辆告警",
+  doors: "门窗",
+  charging: "充电",
+  service: "服务信息",
+  actions: "控制按钮",
+  custom: "自定义实体"
 };
 var ACTION_LABELS = {
   btn_unlock: "开锁",
@@ -2053,8 +2169,6 @@ var L = {
   layout: "布局",
   layoutFull: DEFAULTS.layout === "full" ? "完整" : "完整",
   layoutCompact: "紧凑",
-  modules: "显示模块",
-  modulesHint: "取消的模块不渲染，也不占高度。",
   guard: "防误触",
   guardHint: "开启后，下列动作需要按住不放才执行；松手太早只提示、不动作。适合后备箱、远程启动这类有实际后果的指令。",
   guardOn: "启用长按确认",
@@ -2087,6 +2201,7 @@ var HaCarEditor = class extends HTMLElement {
     this._config.entities = Object.assign({}, this._config.entities || {});
     if (!Array.isArray(this._config.modules)) this._config.modules = DEFAULTS.modules.slice();
     if (!Array.isArray(this._config.confirm)) this._config.confirm = DEFAULTS.confirm.slice();
+    this._config.blocks = normBlocks(this._config);
     if (!this._built) this._build();
     this._sync();
   }
@@ -2118,9 +2233,24 @@ var HaCarEditor = class extends HTMLElement {
       </div>
 
       <div class="sec">
-        <h3>${L.modules}</h3>
-        <p class="hint">${L.modulesHint}</p>
-        <div class="chips2" id="mods"></div>
+        <h3>模块布局</h3>
+        <p class="hint">上下箭头调整顺序，开关控制显示，✕ 删除。车图是固定锚点（首个模块 / 宽屏左栏），其余模块严格按此顺序排列：手机从上到下，宽屏排右栏。</p>
+        <div id="blk" class="blklist"></div>
+        <label class="f">添加模块</label>
+        <div style="display:flex;gap:6px">
+          <select class="tf" id="blkadd">
+            <option value="custom">自定义实体</option>
+            <option value="meta">定位/同步</option>
+            <option value="hero">车图</option>
+            <option value="energy">能耗仪表</option>
+            <option value="alerts">车辆告警</option>
+            <option value="doors">门窗</option>
+            <option value="charging">充电</option>
+            <option value="service">服务信息</option>
+            <option value="actions">控制按钮</option>
+          </select>
+          <button class="btn" id="blkaddbtn" type="button" style="min-width:64px">添加</button>
+        </div>
       </div>
 
       <div class="sec">
@@ -2214,15 +2344,6 @@ var HaCarEditor = class extends HTMLElement {
       this._sync();
       this._emit();
     });
-    this.shadowRoot.getElementById("mods").addEventListener("click", (e) => {
-      const b = e.target.closest("[data-mod]");
-      if (!b) return;
-      const mod = b.dataset.mod;
-      const list = this._config.modules || [];
-      this._config.modules = list.includes(mod) ? list.filter((m) => m !== mod) : [...MODULES].filter((m) => m === mod || list.includes(m));
-      this._sync();
-      this._emit();
-    });
     q("guard").addEventListener("click", () => {
       this._config.confirm = this._config.confirm.length ? [] : DEFAULTS.confirm.slice();
       this._sync();
@@ -2273,16 +2394,80 @@ var HaCarEditor = class extends HTMLElement {
         this._emit();
       });
     });
+    q("blkaddbtn").addEventListener("click", () => {
+      const type = this.shadowRoot.getElementById("blkadd").value;
+      const blocks = (this._config.blocks || []).slice();
+      blocks.push({ type, on: true, entity: "", label: type === "custom" ? "自定义" : "", unit: "", icon: "" });
+      this._config.blocks = blocks;
+      this._renderBlocks();
+      this._emit();
+    });
+    this.shadowRoot.getElementById("blk").addEventListener("click", (e) => {
+      const btn = e.target.closest("[data-bk]");
+      if (!btn) return;
+      const i = Number(btn.dataset.i);
+      const act = btn.dataset.bk;
+      const blocks = (this._config.blocks || []).slice();
+      if (!blocks[i]) return;
+      if (act === "up" && i > 0) [blocks[i - 1], blocks[i]] = [blocks[i], blocks[i - 1]];
+      else if (act === "dn" && i < blocks.length - 1) [blocks[i + 1], blocks[i]] = [blocks[i], blocks[i + 1]];
+      else if (act === "on") blocks[i] = Object.assign({}, blocks[i], { on: blocks[i].on === false });
+      else if (act === "del") blocks.splice(i, 1);
+      this._config.blocks = blocks;
+      this._renderBlocks();
+      this._emit();
+    });
+    this.shadowRoot.getElementById("blk").addEventListener("input", (e) => {
+      const tEl = e.target.closest("[data-bf]");
+      if (!tEl) return;
+      const i = Number(tEl.dataset.i);
+      const blocks = (this._config.blocks || []).slice();
+      if (!blocks[i]) return;
+      const f = tEl.dataset.bf;
+      blocks[i] = Object.assign({}, blocks[i], { [f]: tEl.value.trim() });
+      this._config.blocks = blocks;
+      this._emit();
+    });
   }
   _renderChips() {
-    const mods = this.shadowRoot.getElementById("mods");
-    mods.innerHTML = MODULES.map(
-      (m) => `<button class="tg" type="button" data-mod="${m}">${MODULE_LABELS[m] || m}</button>`
-    ).join("");
     const confirms = this.shadowRoot.getElementById("confirms");
     confirms.innerHTML = CONFIRMABLE.map(
       (k) => `<button class="tg" type="button" data-confirm="${k}">${ACTION_LABELS[k] || k}</button>`
     ).join("");
+  }
+  _renderBlocks() {
+    const host = this.shadowRoot.getElementById("blk");
+    if (!host) return;
+    const blocks = this._config.blocks || [];
+    const ents = [];
+    if (this._hass && this._hass.states) {
+      for (const id of Object.keys(this._hass.states)) {
+        if (/^(sensor|binary_sensor|switch|number|input_|device_tracker|image|light|update)\./.test(id)) ents.push(id);
+      }
+      ents.sort();
+    }
+    const rows = blocks.map((b, i) => {
+      const nm = `${BLOCK_LABELS[b.type] || b.type}${b.entity ? " · " + b.entity : ""}`;
+      const off = b.on === false ? " off" : "";
+      const pinned = b.type === "hero";
+      const entSel = b.type === "custom" ? `<select class="tf ent" data-bf="entity" data-i="${i}">
+            <option value="">选择实体…</option>
+            ${ents.map((id) => `<option value="${esc(id)}"${id === b.entity ? " selected" : ""}>${esc(id)}</option>`).join("")}
+          </select>
+          <input class="tf" data-bf="label" data-i="${i}" value="${esc(b.label || "")}" placeholder="显示名称" style="flex:1 1 90px">
+          <input class="tf" data-bf="unit" data-i="${i}" value="${esc(b.unit || "")}" placeholder="单位" style="flex:0 0 62px">` : "";
+      return `<div class="blkrow${off}">
+        <div class="bk-top">
+          <button class="btn sq" data-bk="up" data-i="${i}" type="button"${pinned ? " disabled" : ""}>↑</button>
+          <button class="btn sq" data-bk="dn" data-i="${i}" type="button"${pinned ? " disabled" : ""}>↓</button>
+          <span class="nm">${esc(nm)}</span>
+          <button class="sw" data-bk="on" data-i="${i}" role="switch" aria-checked="${b.on !== false}"></button>
+          <button class="btn sq del" data-bk="del" data-i="${i}" type="button">✕</button>
+        </div>
+        ${entSel ? `<div class="bk-sub">${entSel}</div>` : ""}
+      </div>`;
+    });
+    host.innerHTML = rows.join("") || `<p class="hint">还没有模块，从下面添加。</p>`;
   }
   _syncVehicles() {
     const sel = this.shadowRoot.getElementById("veh");
@@ -2310,9 +2495,7 @@ var HaCarEditor = class extends HTMLElement {
     this.shadowRoot.querySelectorAll("[data-layout]").forEach((b) => {
       b.setAttribute("aria-pressed", String(b.dataset.layout === (this._config.layout || "full")));
     });
-    this.shadowRoot.querySelectorAll("[data-mod]").forEach((b) => {
-      b.setAttribute("aria-pressed", String((this._config.modules || []).includes(b.dataset.mod)));
-    });
+    this._renderBlocks();
     q("guard").setAttribute("aria-checked", String((this._config.confirm || []).length > 0));
     const hold = Number(this._config.hold_ms) || 2e3;
     q("hold").value = String(hold);
@@ -2356,7 +2539,7 @@ var HaCarEditor = class extends HTMLElement {
 customElements.define("ha-car-editor", HaCarEditor);
 
 // src/main.js
-var VERSION = "1.3.2";
+var VERSION = "1.4.0";
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "ha-car",

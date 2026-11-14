@@ -36,6 +36,22 @@ ha-card::after { content: ""; position: absolute; left: 8%; right: 8%; top: 0; h
 .wrap { padding: 18px 16px 14px; display: flex; flex-direction: column; gap: 14px; }
 .duo { display: flex; flex-direction: column; gap: 14px; }
 .dleft, .dright { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+/* 模块栈：顺序由配置决定，手机单列、宽屏双栏（车图固定左栏） */
+.blocks { display: flex; flex-direction: column; gap: 14px; flex: 1 1 auto; min-height: 0; }
+.b-hero-col, .b-side { display: contents; }
+.blk + .blk { margin-top: 0; }
+.blk { min-width: 0; }
+.b-hero { display: flex; flex-direction: column; flex: 1 1 auto; min-height: 0; }
+.b-hero .hero { flex: 1 1 auto; }
+.b-actions { display: flex; flex-direction: column; gap: 10px; }
+.cblock { display: flex; align-items: center; gap: 8px; padding: 9px 12px; border-radius: 15px;
+  border: 1px solid rgba(255,255,255,.07); background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.016));
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.06); font-size: 12px; color: var(--hc-dim); }
+.cblock .ic { width: 15px; height: 15px; opacity: .8; color: var(--hc-accent); }
+.cblock .cl { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  font-size: 11.5px; letter-spacing: .02em; }
+.cblock b { font-size: 14px; font-weight: 680; color: #eef5fd; font-variant-numeric: tabular-nums; }
+.cblock i { font-style: normal; font-size: 10px; color: rgba(150,172,196,.8); margin-left: 1px; }
 .ic { width: 20px; height: 20px; fill: currentColor; display: block; flex: none; }
 
 /* 头部：大标题 + 右上状态胶囊（参考图同构） */
@@ -406,9 +422,9 @@ ha-card.panel { box-sizing: border-box; width: 100%; height: 100%; margin: 0; }
 ha-card.panel.fit { box-sizing: border-box; position: absolute; left: 50%; top: 50%; width: 1440px; height: 900px;
   transform: translate(-50%, -50%) scale(var(--fit, 1)); transform-origin: center center; }
 ha-card.panel .wrap { height: 100%; box-sizing: border-box; padding: 26px 30px 20px; overflow: hidden; }
-ha-card.panel .duo { flex: 1 1 auto; min-height: 0; }
-ha-card.panel .dleft { justify-content: center; min-height: 0; }
-ha-card.panel .dright { justify-content: center; }
+ha-card.panel .blocks { flex: 1 1 auto; min-height: 0; }
+ha-card.panel .b-hero { justify-content: center; min-height: 0; }
+
 ha-card.panel .hero { flex: 1 1 auto; height: auto; min-height: 300px; }
 ha-card.panel .carimg { max-height: min(62%, 460px); max-width: min(60%, 330px); }
 
@@ -418,22 +434,19 @@ ha-card.panel .carimg { max-height: min(62%, 460px); max-width: min(60%, 330px);
 ha-card.panel.pfit { position: absolute; left: 0; top: 0;
   transform: scale(var(--pscale, 1)); transform-origin: 0 0; }
 ha-card.panel.pfit .wrap { height: 100%; }
-ha-card.panel.fit .wrap { display: grid; grid-template-columns: minmax(0,1.04fr) minmax(0,.96fr);
-  column-gap: 52px; row-gap: 20px; align-content: center; }
+ha-card.panel.fit .wrap { display: flex; flex-direction: column; gap: 14px; justify-content: center; }
 ha-card.panel.fit .head { grid-column: 1 / -1; }
-ha-card.panel.fit .duo { display: contents; }
-ha-card.panel.fit .dleft { grid-column: 1; grid-row: 2 / span 12; align-self: stretch; justify-content: center; }
-ha-card.panel.fit .dleft .hero { height: 100%; min-height: 600px; }
+ha-card.panel.fit .blocks { grid-column: 1 / -1; display: flex; flex-direction: row; align-items: stretch;
+  gap: 52px; min-height: 0; }
+ha-card.panel:not(.fit) .blocks { flex-direction: column; }
+ha-card.panel.fit .b-hero-col { display: flex; flex: 1.02 1 0; min-width: 0; }
+ha-card.panel.fit .b-hero-col .b-hero { flex: 1 1 auto; justify-content: center; }
+ha-card.panel.fit .b-side { display: flex; flex-direction: column; flex: .98 1 0; min-width: 0;
+  justify-content: center; gap: 16px; }
+ha-card.panel.fit .b-hero .hero { height: 100%; min-height: 600px; }
 ha-card.panel.fit .orbit { height: 78%; }
 ha-card.panel.fit .orbit.o2 { height: 86%; }
-ha-card.panel.fit .dright { grid-column: 2; align-self: start; gap: 18px; }
-ha-card.panel.fit .acts,
-ha-card.panel.fit .pills,
-ha-card.panel.fit .alert,
-ha-card.panel.fit .svc,
-ha-card.panel.fit .loc,
-ha-card.panel.fit .toast { grid-column: 2; }
-ha-card.panel.fit .hmeta { grid-column: 2; }
+ha-card.panel.fit .hmeta { grid-column: 1 / -1; }
 ha-card.panel.fit .acts { width: 100%; max-width: none; }
 ha-card.panel.fit .pills { width: 100%; max-width: none; }
 
@@ -443,8 +456,7 @@ ha-card.panel.fit .pills { width: 100%; max-width: none; }
   .hero { height: 268px; --r: 104px; }
   .head { align-items: center; }
   /* 桌面/面板视图：车图在左，仪表与副指标在右 */
-  .duo { display: grid; grid-template-columns: minmax(0, 1.06fr) minmax(0, 1fr); column-gap: 26px;
-    align-items: center; }
+
   .dright { gap: 14px; }
   .gauge { max-width: 152px; }
   .acts { max-width: 540px; margin: 2px auto 0; width: 100%; }
@@ -452,8 +464,7 @@ ha-card.panel.fit .pills { width: 100%; max-width: none; }
   /* 面板模式：容器多宽就排多宽，车图列跟着面板高度走 */
   :host(.panel) { max-width: none; margin: 0; }
   ha-card.panel .wrap { padding: 22px 26px 16px; gap: 12px; }
-  ha-card.panel .duo { grid-template-columns: minmax(0, 1.02fr) minmax(0, 1fr); column-gap: 34px; align-items: stretch; }
-  ha-card.panel .dleft .hero { height: 100%; min-height: 250px; --r: 106px; }
+  ha-card.panel .b-hero .hero { height: 100%; min-height: 250px; --r: 106px; }
   ha-card.panel .carimg { max-height: min(74%, 520px); max-width: min(60%, 330px); }
   ha-card.panel .gauge { max-width: 196px; }
   ha-card.panel .acts { max-width: 600px; }
@@ -509,4 +520,18 @@ input[type="range"] { flex: 1; accent-color: var(--primary-color, #03a9f4); }
 select.tf { font-size: 13px; padding: 8px 10px; }
 .ed .hint, .ed label.f { color: var(--secondary-text-color, #98a0a8); }
 .ed h3, .ed .row .rl, .ed summary { color: var(--primary-text-color, #e6e6e6); }
+/* 编辑器：模块布局行 */
+.blklist { display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px; }
+.blkrow { display: flex; flex-direction: column; gap: 6px; padding: 7px 8px 8px; border-radius: 11px;
+  background: rgba(255,255,255,.045); border: 1px solid rgba(255,255,255,.06); font-size: 12px; }
+.bk-top { display: flex; align-items: center; gap: 6px; }
+.bk-sub { display: flex; align-items: center; gap: 6px; }
+.bk-sub .ent { flex: 1 1 auto; min-width: 0; }
+.blkrow.off { opacity: .55; }
+.blkrow .nm { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.blkrow .btn.sq { min-width: 26px; padding: 4px 6px; font-size: 12px; line-height: 1; }
+.blkrow .btn.sq.del { color: #ff8a8a; border-color: rgba(255,110,110,.28); }
+.blkrow select.tf, .blkrow input.tf { padding: 5px 7px; font-size: 11.5px; }
+.blkrow .sw { flex: none; }
+
 `;
