@@ -509,22 +509,23 @@ class HaCarCard extends HTMLElement {
       const open = !bad && normOpen(st) === "open";
       const txt = bad ? (zh ? "不可用" : "N/A") : open ? (zh ? "打开" : "Open") : zh ? "关闭" : "Shut";
       (isEdge ? edge : out).push(
-        `<span class="cst ico ${cls}${bad ? " bad" : open ? " open" : ""}" data-more="${esc(data.id(slot))}"
+        `<span class="cst ${cls}${bad ? " bad" : open ? " open" : ""}" data-more="${esc(data.id(slot))}"
           title="${esc(label)} · ${esc(txt)}" aria-label="${esc(label)} ${esc(txt)}">
-          <span class="glyph">${icon(ic)}</span><b class="tx">${esc(txt)}</b><i class="tag">${esc(short)}</i></span>`,
+          <span class="ci">${icon(ic)}</span>
+          <span class="ct"><b>${esc(txt)}</b><i>${esc(short)}</i></span></span>`,
       );
     };
     if (mods.includes("doors")) {
-      mark("hood", "hood", zh ? "引擎盖" : "Hood", zh ? "引擎盖" : "Hood", "engine", true);
-      mark("tailgate", "trunk", zh ? "尾门" : "Tailgate", zh ? "尾门" : "Trunk", "trunk", true);
+      mark("hood", "hood", zh ? "引擎盖" : "Hood", zh ? "引擎盖" : "Hood", "engine");
+      mark("tailgate", "trunk", zh ? "尾门" : "Tailgate", zh ? "尾门" : "Trunk", "trunk");
       mark("door_fl", "dfl", zh ? "主驾门" : "Driver door", zh ? "主驾门" : "FL door", "door");
       mark("door_fr", "dfr", zh ? "副驾门" : "Passenger door", zh ? "副驾门" : "FR door", "door");
       mark("door_rl", "drl", zh ? "左后门" : "Rear left door", zh ? "左后门" : "RL door", "door");
       mark("door_rr", "drr", zh ? "右后门" : "Rear right door", zh ? "右后门" : "RR door", "door");
-      mark("win_fl", "wfl", zh ? "主驾车窗" : "Driver window", zh ? "主驾窗" : "FL win", "door");
-      mark("win_fr", "wfr", zh ? "副驾车窗" : "Passenger window", zh ? "副驾窗" : "FR win", "door");
-      mark("win_rl", "wrl", zh ? "左后车窗" : "Rear left window", zh ? "左后窗" : "RL win", "door");
-      mark("win_rr", "wrr", zh ? "右后车窗" : "Rear right window", zh ? "右后窗" : "RR win", "door");
+      mark("win_fl", "wfl", zh ? "主驾车窗" : "Driver window", zh ? "主驾窗" : "FL win", "window");
+      mark("win_fr", "wfr", zh ? "副驾车窗" : "Passenger window", zh ? "副驾窗" : "FR win", "window");
+      mark("win_rl", "wrl", zh ? "左后车窗" : "Rear left window", zh ? "左后窗" : "RL win", "window");
+      mark("win_rr", "wrr", zh ? "右后车窗" : "Rear right window", zh ? "右后窗" : "RR win", "window");
     }
     // 胎压属于车上信息，不受 modules 开关限制（旧配置里常没有 tires）
     {
@@ -544,9 +545,10 @@ class HaCarCard extends HTMLElement {
         const warn = outOfRange || (flag && v == null);
         const unit = attrs(st, "unit_of_measurement") || "kPa";
         out.push(
-          `<b class="ctire ico ${cls}${warn ? " warn" : ""}" data-more="${esc(data.id(slot))}"
+          `<span class="ctire ${cls}${warn ? " warn" : ""}" data-more="${esc(data.id(slot))}"
             title="${esc(t.tireLabel + " · " + label)} ${v == null ? "—" : fmtNum(v)} ${esc(unit)}">
-            <span class="glyph">${icon("tire")}</span><span class="tv">${v == null ? "—" : fmtNum(v)}</span><span class="tu">${esc(unit)}</span></b>`,
+            <span class="ci">${icon("wheel")}</span>
+            <span class="ct"><b>${v == null ? "—" : fmtNum(v)}<s>${esc(unit)}</s></b><i>${esc(label)}</i></span></span>`,
         );
       }
     }
