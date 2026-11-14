@@ -334,7 +334,7 @@ ha-card::after { content: ""; position: absolute; left: 8%; right: 8%; top: 0; h
   opacity: .55; }
 .plate, .gn b, .tc b, .stat b { font-variant-numeric: tabular-nums; }
 .plate { font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace; }
-.wrap { padding: 18px 16px 14px; display: flex; flex-direction: column; gap: 14px; }
+.wrap { position: relative; padding: 18px 16px 14px; display: flex; flex-direction: column; gap: 14px; }
 .duo { display: flex; flex-direction: column; gap: 14px; }
 .dleft, .dright { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
 /* 模块栈：顺序由配置决定，手机单列、宽屏双栏（车图固定左栏） */
@@ -591,11 +591,19 @@ h1 { margin: 0; font-size: 26px; line-height: 1.1; font-weight: 700; letter-spac
 .svc .row .k { color: var(--hc-dim); flex: none; font-size: 11px; }
 .svc .row .val { text-align: right; color: var(--hc-ink); word-break: break-word; max-width: 66%; }
 
-.toast { display: flex; align-items: flex-start; gap: 8px; padding: 9px 11px; border-radius: 12px;
-  font-size: 11.5px; line-height: 1.4; background: rgba(55,214,232,.1);
-  border: 1px solid rgba(55,214,232,.26); color: #d5f8ff; }
-.toast.err { background: rgba(255,145,130,.1); border-color: rgba(255,145,130,.3); color: #ffd3c9; }
-.toast .ic { width: 14px; height: 14px; flex: none; margin-top: 1px; }
+.b-actions { position: relative; }
+.toast.free { bottom: 64px; }
+.toast { position: absolute; right: 0; left: auto; bottom: calc(100% + 6px); z-index: 6;
+  pointer-events: none; max-width: 100%;
+  box-shadow: 0 14px 30px -16px rgba(0,0,0,.95);
+  display: flex; align-items: center; gap: 7px; padding: 7px 13px; border-radius: 999px; white-space: nowrap;
+  font-size: 11.5px; line-height: 1.4; color: #d5f8ff;
+  background: linear-gradient(180deg, rgba(16,32,48,.97), rgba(9,20,32,.97));
+  border: 1px solid rgba(55,214,232,.28);
+  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
+.toast.err { border-color: rgba(255,145,130,.34); color: #ffd3c9;
+  background: linear-gradient(180deg, rgba(40,18,20,.97), rgba(24,12,14,.97)); }
+.toast .ic { width: 13px; height: 13px; flex: none; }
 
 .empty { padding: 26px 16px 30px; text-align: center; color: var(--hc-dim); font-size: 12px; line-height: 1.6; }
 .empty .ic { width: 34px; height: 34px; margin: 0 auto 10px; opacity: .45; }
@@ -1472,6 +1480,7 @@ var HaCarCard = class extends HTMLElement {
     if (chgNow) chips.push({ cls: "info", label: t.charging });
     if (running) chips.push({ cls: "warn", label: t.running });
     const blocks = [];
+    let toastPlaced = false;
     const head = `<div class="head"><div class="ttl"><h1>${FORD_LOGO}${esc(title)}</h1>
       ${cfg.show_plate && plate ? `<p class="plate">${esc(cfg.privacy ? maskPlate(plate) : plate)}</p>` : ""}
       </div><span class="status ${status.cls}"><span class="dot"></span>${esc(status.label)}</span></div>`;
@@ -1527,7 +1536,11 @@ var HaCarCard = class extends HTMLElement {
         }
         case "actions": {
           const ac = this._actions(data, t, running, offline, compact);
-          if (ac) html = `<div class="blk b-actions">${ac}</div>`;
+          if (ac) {
+            const toast = this._toast ? this._toastHtml() : "";
+            html = `<div class="blk b-actions">${toast}${ac}</div>`;
+            toastPlaced = Boolean(toast);
+          }
           break;
         }
         case "custom":
@@ -1538,6 +1551,7 @@ var HaCarCard = class extends HTMLElement {
       }
       if (html) blocks.push({ html, hero: b.type === "hero" });
     }
+    if (!toastPlaced && this._toast) blocks.push({ html: this._toastHtml("free"), hero: false });
     let inner;
     if (twoCol) {
       const left = blocks.filter((b) => b.hero).map((b) => b.html).join("");
@@ -1962,9 +1976,10 @@ var HaCarCard = class extends HTMLElement {
     return `<div class="doors"><span class="door" data-more="${esc(tracker || data.id("addr"))}">
       ${icon("pin")}<span class="addr">${esc(label)}</span></span></div>`;
   }
-  _toastHtml() {
+  _toastHtml(variant) {
     const kind = this._toast.kind === "err" ? " err" : "";
-    return `<div class="toast${kind}" role="status">${icon(this._toast.kind === "err" ? "warning" : "bolt")}<span>${esc(this._toast.msg)}</span></div>`;
+    const free = variant === "free" ? " free" : "";
+    return `<div class="toast${kind}${free}" role="status">${icon(this._toast.kind === "err" ? "warning" : "bolt")}<span>${esc(this._toast.msg)}</span></div>`;
   }
   // ---------- 交互 ----------
   _bind() {
@@ -2569,7 +2584,7 @@ var HaCarEditor = class extends HTMLElement {
 customElements.define("ha-car-editor", HaCarEditor);
 
 // src/main.js
-var VERSION = "1.4.2";
+var VERSION = "1.4.3";
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "ha-car",

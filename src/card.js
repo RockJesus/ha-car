@@ -377,6 +377,7 @@ class HaCarCard extends HTMLElement {
     if (running) chips.push({ cls: "warn", label: t.running });
 
     const blocks = [];
+    let toastPlaced = false;
     const head = `<div class="head"><div class="ttl"><h1>${FORD_LOGO}${esc(title)}</h1>
       ${cfg.show_plate && plate ? `<p class="plate">${esc(cfg.privacy ? maskPlate(plate) : plate)}</p>` : ""}
       </div><span class="status ${status.cls}"><span class="dot"></span>${esc(status.label)}</span></div>`;
@@ -433,7 +434,11 @@ class HaCarCard extends HTMLElement {
         }
         case "actions": {
           const ac = this._actions(data, t, running, offline, compact);
-          if (ac) html = `<div class="blk b-actions">${ac}</div>`;
+          if (ac) {
+            const toast = this._toast ? this._toastHtml() : "";
+            html = `<div class="blk b-actions">${toast}${ac}</div>`;
+            toastPlaced = Boolean(toast);
+          }
           break;
         }
         case "custom":
@@ -444,6 +449,8 @@ class HaCarCard extends HTMLElement {
       }
       if (html) blocks.push({ html, hero: b.type === "hero" });
     }
+
+    if (!toastPlaced && this._toast) blocks.push({ html: this._toastHtml("free"), hero: false });
 
     let inner;
     if (twoCol) {
@@ -902,9 +909,10 @@ class HaCarCard extends HTMLElement {
       ${icon("pin")}<span class="addr">${esc(label)}</span></span></div>`;
   }
 
-  _toastHtml() {
+  _toastHtml(variant) {
     const kind = this._toast.kind === "err" ? " err" : "";
-    return `<div class="toast${kind}" role="status">${icon(this._toast.kind === "err" ? "warning" : "bolt")}<span>${esc(this._toast.msg)}</span></div>`;
+    const free = variant === "free" ? " free" : "";
+    return `<div class="toast${kind}${free}" role="status">${icon(this._toast.kind === "err" ? "warning" : "bolt")}<span>${esc(this._toast.msg)}</span></div>`;
   }
 
   // ---------- 交互 ----------
