@@ -1046,6 +1046,14 @@ var HaCarCard = class extends HTMLElement {
     if (cfg.accent) this._card.style.setProperty("--hc-accent", cfg.accent);
     this._prunePending(data);
     this._wrap.innerHTML = this._body(data);
+    const img = this._wrap.querySelector("img.carimg");
+    if (img && img.dataset.fb) {
+      img.addEventListener("error", () => {
+        const fb = img.dataset.fb;
+        delete img.dataset.fb;
+        img.src = fb;
+      }, { once: true });
+    }
   }
   _prunePending(data) {
     const now = Date.now();
@@ -1113,7 +1121,8 @@ var HaCarCard = class extends HTMLElement {
       const energy = this._energy(data, t);
       if (energy) side.push(energy);
     }
-    const heroHtml = this._hero(this._imageUrl(data));
+    const hero = this._imagePair(data);
+    const heroHtml = this._hero(hero.src, hero.fb);
     parts.push(
       side.length ? `<div class="duo"><div class="dleft">${heroHtml}</div><div class="dright">${side.join("")}</div></div>` : heroHtml
     );
@@ -1148,11 +1157,11 @@ var HaCarCard = class extends HTMLElement {
     return parts.join("");
   }
   // 车图 + 同心轨道 + 四枚发光节点（无图时落回圆形占位）
-  _hero(imgUrl) {
+  _hero(imgUrl, fbUrl) {
     return `<div class="hero"><div class="halo"></div>
       <span class="orbit"></span><span class="orbit o2"></span>
       <i class="node n1"></i><i class="node n2"></i><i class="node n3"></i><i class="node n4"></i>
-      ${imgUrl ? `<img class="carimg" src="${esc(imgUrl)}" alt="">` : `<div class="carph">${icon("car")}</div>`}
+      ${imgUrl ? `<img class="carimg" src="${esc(imgUrl)}"${fbUrl ? ` data-fb="${esc(fbUrl)}"` : ""} alt="">` : `<div class="carph">${icon("car")}</div>`}
       <div class="ground"></div></div>`;
   }
   // 底座条：四轮胎压 + 同步（同步入口就是刷新按钮）
@@ -1180,6 +1189,9 @@ var HaCarCard = class extends HTMLElement {
       title="${esc(t.syncTime + label)}">${inner}</button>`;
   }
   _imageUrl(data) {
+    return this._imagePair(data).src;
+  }
+  _imagePair(data) {
     const cfg = this._config;
     const pic = (slot) => {
       const st = data.get(slot);
@@ -1187,22 +1199,27 @@ var HaCarCard = class extends HTMLElement {
       const direct = attrs(st, "image_url");
       const proxy = attrs(st, "entity_picture") || null;
       const okDirect = direct && /^https?:\/\//.test(String(direct));
-      if (cfg.privacy) return proxy || (okDirect ? direct : null);
-      return okDirect ? direct : proxy;
+      if (cfg.privacy) {
+        return { src: proxy || (okDirect ? direct : null), fb: proxy && okDirect ? direct : null };
+      }
+      return { src: okDirect ? direct : proxy, fb: okDirect && proxy ? proxy : null };
     };
-    if (cfg.image === "custom" && cfg.image_url) return cfg.image_url;
+    if (cfg.image === "custom" && cfg.image_url) return { src: cfg.image_url, fb: null };
     if (cfg.image && cfg.image !== "auto") {
-      if (/^https?:\/\//.test(cfg.image)) return cfg.image;
+      if (/^https?:\/\//.test(cfg.image)) return { src: cfg.image, fb: null };
       if (data.states[cfg.image]) {
         const st = data.states[cfg.image];
         const direct = attrs(st, "image_url");
-        return direct && /^https?:\/\//.test(String(direct)) ? direct : attrs(st, "entity_picture");
+        const proxy = attrs(st, "entity_picture") || null;
+        const okDirect = direct && /^https?:\/\//.test(String(direct));
+        if (cfg.privacy) return { src: proxy || (okDirect ? direct : null), fb: proxy && okDirect ? direct : null };
+        return { src: okDirect ? direct : proxy, fb: okDirect && proxy ? proxy : null };
       }
-      if (cfg.image === "overlook") return pic("image_overlook");
-      if (cfg.image === "3d") return pic("image_3d");
-      if (cfg.image === "side") return pic("image_side");
+      if (cfg.image === "overlook") return pic("image_overlook") || { src: null, fb: null };
+      if (cfg.image === "3d") return pic("image_3d") || { src: null, fb: null };
+      if (cfg.image === "side") return pic("image_side") || { src: null, fb: null };
     }
-    return pic("image_overlook") || pic("image_3d") || pic("image_side");
+    return pic("image_overlook") || pic("image_3d") || pic("image_side") || { src: null, fb: null };
   }
   _energy(data, t) {
     const fuel = num(data.get("fuel"));
@@ -1959,7 +1976,7 @@ var HaCarEditor = class extends HTMLElement {
 customElements.define("ha-car-editor", HaCarEditor);
 
 // src/main.js
-var VERSION = "1.0.6";
+var VERSION = "1.0.7";
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "ha-car",
