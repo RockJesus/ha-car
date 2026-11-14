@@ -445,6 +445,17 @@ ha-card.panel:not(.fit) .baseline.solo { padding: 3px 8px; font-size: 10px; }
   background: radial-gradient(90% 60% at 50% 0%, rgba(55,214,232,.10), transparent 62%),
     linear-gradient(170deg, #101b29 0%, #0a1119 60%, #070c13 100%); }
 ha-card.panel { box-sizing: border-box; width: 100%; height: 100%; margin: 0; }
+/* 卡片选择器缩略图：固定高度，绝不把整张面板卡塞进小格子 */
+ha-card.preview { height: 186px; overflow: hidden; }
+ha-card.preview .wrap { padding: 10px 12px 8px; gap: 6px; height: 100%; justify-content: center; box-sizing: border-box; }
+ha-card.preview .hero { height: 62px; --r: 40px; margin: 0; }
+ha-card.preview h1 { font-size: 16px; }
+ha-card.preview .energy { margin-top: 0; }
+ha-card.preview .gauge { max-width: 74px; }
+ha-card.preview .gn b { font-size: 19px; }
+ha-card.preview .gl { font-size: 8.5px; }
+ha-card.preview .egmid { transform: scale(.8); }
+
 ha-card.panel.fit { box-sizing: border-box; position: absolute; left: 50%; top: 50%; width: 1440px; height: 900px;
   transform: translate(-50%, -50%) scale(var(--fit, 1)); transform-origin: center center; }
 ha-card.panel .wrap { height: 100%; box-sizing: border-box; padding: 26px 30px 20px; overflow: hidden; }

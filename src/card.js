@@ -23,9 +23,11 @@ const CONFIRMABLE = [
 ];
 const PREVIEW_TAGS = new Set([
   "hui-card-picker",
+  "ha-card-picker",
   "hui-dialog-add-card",
   "hui-dialog-edit-card",
   "hui-card-editor",
+  "hui-edit-card-dialog",
   "ha-editor",
 ]);
 
@@ -126,6 +128,18 @@ class HaCarCard extends HTMLElement {
     this._render();
   }
 
+  // 挂载后再判定一次上下文：选择器缩略卡/面板都依赖祖先链或 HA 的 preview 标记，
+  // 而 setConfig/set hass 往往发生在元素挂进 DOM 之前。
+  connectedCallback() {
+    if (this._mountSync) return;
+    this._mountSync = true;
+    requestAnimationFrame(() => {
+      if (!this._config) return;
+      this._syncPanel();
+      this._render(true);
+    });
+  }
+
   getCardSize() {
     return this._config && this._config.layout === "compact" ? 4 : 7;
   }
@@ -219,6 +233,8 @@ class HaCarCard extends HTMLElement {
 
   _isPreview() {
     if (this._preview) return true;
+    // HA 的卡选择器给预览卡设的是公开属性 preview（不是私有字段）
+    if (this.preview === true || this.preview === "true" || this.hasAttribute("preview")) return true;
     let node = this.parentElement;
     let depth = 0;
     while (node && depth < 10) {
@@ -247,8 +263,9 @@ class HaCarCard extends HTMLElement {
     if (!this._built) this._build();
     this._syncPanel();
     if (this._isPreview()) {
+      const card = this.shadowRoot.querySelector("ha-card");
       this._wrap.className = "wrap";
-      this.shadowRoot.querySelector("ha-card").classList.add("compact");
+      card.classList.add("compact", "preview");
       this._wrap.innerHTML = this._previewBody();
       return;
     }

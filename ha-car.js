@@ -746,6 +746,17 @@ ha-card.panel:not(.fit) .baseline.solo { padding: 3px 8px; font-size: 10px; }
   background: radial-gradient(90% 60% at 50% 0%, rgba(55,214,232,.10), transparent 62%),
     linear-gradient(170deg, #101b29 0%, #0a1119 60%, #070c13 100%); }
 ha-card.panel { box-sizing: border-box; width: 100%; height: 100%; margin: 0; }
+/* 卡片选择器缩略图：固定高度，绝不把整张面板卡塞进小格子 */
+ha-card.preview { height: 186px; overflow: hidden; }
+ha-card.preview .wrap { padding: 10px 12px 8px; gap: 6px; height: 100%; justify-content: center; box-sizing: border-box; }
+ha-card.preview .hero { height: 62px; --r: 40px; margin: 0; }
+ha-card.preview h1 { font-size: 16px; }
+ha-card.preview .energy { margin-top: 0; }
+ha-card.preview .gauge { max-width: 74px; }
+ha-card.preview .gn b { font-size: 19px; }
+ha-card.preview .gl { font-size: 8.5px; }
+ha-card.preview .egmid { transform: scale(.8); }
+
 ha-card.panel.fit { box-sizing: border-box; position: absolute; left: 50%; top: 50%; width: 1440px; height: 900px;
   transform: translate(-50%, -50%) scale(var(--fit, 1)); transform-origin: center center; }
 ha-card.panel .wrap { height: 100%; box-sizing: border-box; padding: 26px 30px 20px; overflow: hidden; }
@@ -1192,9 +1203,11 @@ var CONFIRMABLE = [
 ];
 var PREVIEW_TAGS = /* @__PURE__ */ new Set([
   "hui-card-picker",
+  "ha-card-picker",
   "hui-dialog-add-card",
   "hui-dialog-edit-card",
   "hui-card-editor",
+  "hui-edit-card-dialog",
   "ha-editor"
 ]);
 var PANEL_TAGS = /* @__PURE__ */ new Set(["hui-panel-view", "hui-grid-view"]);
@@ -1278,6 +1291,17 @@ var HaCarCard = class extends HTMLElement {
     this._hass = hass;
     this._render();
   }
+  // 挂载后再判定一次上下文：选择器缩略卡/面板都依赖祖先链或 HA 的 preview 标记，
+  // 而 setConfig/set hass 往往发生在元素挂进 DOM 之前。
+  connectedCallback() {
+    if (this._mountSync) return;
+    this._mountSync = true;
+    requestAnimationFrame(() => {
+      if (!this._config) return;
+      this._syncPanel();
+      this._render(true);
+    });
+  }
   getCardSize() {
     return this._config && this._config.layout === "compact" ? 4 : 7;
   }
@@ -1358,6 +1382,7 @@ var HaCarCard = class extends HTMLElement {
   }
   _isPreview() {
     if (this._preview) return true;
+    if (this.preview === true || this.preview === "true" || this.hasAttribute("preview")) return true;
     let node = this.parentElement;
     let depth = 0;
     while (node && depth < 10) {
@@ -1384,8 +1409,9 @@ var HaCarCard = class extends HTMLElement {
     if (!this._built) this._build();
     this._syncPanel();
     if (this._isPreview()) {
+      const card = this.shadowRoot.querySelector("ha-card");
       this._wrap.className = "wrap";
-      this.shadowRoot.querySelector("ha-card").classList.add("compact");
+      card.classList.add("compact", "preview");
       this._wrap.innerHTML = this._previewBody();
       return;
     }
@@ -2649,7 +2675,7 @@ var HaCarEditor = class extends HTMLElement {
 customElements.define("ha-car-editor", HaCarEditor);
 
 // src/main.js
-var VERSION = "1.4.5";
+var VERSION = "1.4.6";
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "ha-car",
