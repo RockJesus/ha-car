@@ -1,0 +1,7 @@
+{
+  "name": "爱车卡片",
+  "filename": "ha-car.js",
+  "render_readme": true,
+  "hide_default_branch": true,
+  "homeassistant": "2025.1"
+}

@@ -1,0 +1,1709 @@
+// src/icons.js
+var PATHS = {
+  lock: "M208,80H176V56a48,48,0,0,0-96,0V80H48A16,16,0,0,0,32,96V208a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V96A16,16,0,0,0,208,80ZM96,56a32,32,0,0,1,64,0V80H96ZM208,208H48V96H208V208Zm-68-56a12,12,0,1,1-12-12A12,12,0,0,1,140,152Z",
+  unlock: "M208,80H96V56a32,32,0,0,1,32-32c15.37,0,29.2,11,32.16,25.59a8,8,0,0,0,15.68-3.18C171.32,24.15,151.2,8,128,8A48.05,48.05,0,0,0,80,56V80H48A16,16,0,0,0,32,96V208a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V96A16,16,0,0,0,208,80Zm0,128H48V96H208V208Z",
+  car: "M240,104H229.2L201.42,41.5A16,16,0,0,0,186.8,32H69.2a16,16,0,0,0-14.62,9.5L26.8,104H16a8,8,0,0,0,0,16h8v80a16,16,0,0,0,16,16H64a16,16,0,0,0,16-16V184h96v16a16,16,0,0,0,16,16h24a16,16,0,0,0,16-16V120h8a8,8,0,0,0,0-16ZM69.2,48H186.8l24.89,56H44.31ZM64,200H40V184H64Zm128,0V184h24v16Zm24-32H40V120H216ZM56,144a8,8,0,0,1,8-8H80a8,8,0,0,1,0,16H64A8,8,0,0,1,56,144Zm112,0a8,8,0,0,1,8-8h16a8,8,0,0,1,0,16H176A8,8,0,0,1,168,144Z",
+  carProfile: "M240,112H211.31L168,68.69A15.86,15.86,0,0,0,156.69,64H44.28A16,16,0,0,0,31,71.12L1.34,115.56A8.07,8.07,0,0,0,0,120v48a16,16,0,0,0,16,16H33a32,32,0,0,0,62,0h66a32,32,0,0,0,62,0h17a16,16,0,0,0,16-16V128A16,16,0,0,0,240,112ZM44.28,80H156.69l32,32H23ZM64,192a16,16,0,1,1,16-16A16,16,0,0,1,64,192Zm128,0a16,16,0,1,1,16-16A16,16,0,0,1,192,192Zm48-24H223a32,32,0,0,0-62,0H95a32,32,0,0,0-62,0H16V128H240Z",
+  power: "M120,128V48a8,8,0,0,1,16,0v80a8,8,0,0,1-16,0Zm60.37-78.7a8,8,0,0,0-8.74,13.4C194.74,77.77,208,101.57,208,128a80,80,0,0,1-160,0c0-26.43,13.26-50.23,36.37-65.3a8,8,0,0,0-8.74-13.4C47.9,67.38,32,96.06,32,128a96,96,0,0,0,192,0C224,96.06,208.1,67.38,180.37,49.3Z",
+  trunk: "M216,56H176V48a24,24,0,0,0-24-24H104A24,24,0,0,0,80,48v8H40A16,16,0,0,0,24,72V200a16,16,0,0,0,16,16H216a16,16,0,0,0,16-16V72A16,16,0,0,0,216,56ZM96,48a8,8,0,0,1,8-8h48a8,8,0,0,1,8,8v8H96Zm64,24V200H96V72ZM40,72H80V200H40ZM216,200H176V72h40V200Z",
+  megaphone: "M248,120a48.05,48.05,0,0,0-48-48H160.2c-2.91-.17-53.62-3.74-101.91-44.24A16,16,0,0,0,32,40V200a16,16,0,0,0,26.29,12.25c37.77-31.68,77-40.76,93.71-43.3v31.72A16,16,0,0,0,159.12,214l11,7.33A16,16,0,0,0,194.5,212l11.77-44.36A48.07,48.07,0,0,0,248,120ZM48,199.93V40h0c42.81,35.91,86.63,45,104,47.24v65.48C134.65,155,90.84,164.07,48,199.93Zm131,8,0,.11-11-7.33V168h21.6ZM200,152H168V88h32a32,32,0,1,1,0,64Z",
+  speaker: "M155.51,24.81a8,8,0,0,0-8.42.88L77.25,80H32A16,16,0,0,0,16,96v64a16,16,0,0,0,16,16H77.25l69.84,54.31A8,8,0,0,0,160,224V32A8,8,0,0,0,155.51,24.81ZM32,96H72v64H32ZM144,207.64,88,164.09V91.91l56-43.55Zm54-106.08a40,40,0,0,1,0,52.88,8,8,0,0,1-12-10.58,24,24,0,0,0,0-31.72,8,8,0,0,1,12-10.58ZM248,128a79.9,79.9,0,0,1-20.37,53.34,8,8,0,0,1-11.92-10.67,64,64,0,0,0,0-85.33,8,8,0,1,1,11.92-10.67A79.83,79.83,0,0,1,248,128Z",
+  bulb: "M176,232a8,8,0,0,1-8,8H88a8,8,0,0,1,0-16h80A8,8,0,0,1,176,232Zm40-128a87.55,87.55,0,0,1-33.64,69.21A16.24,16.24,0,0,0,176,186v6a16,16,0,0,1-16,16H96a16,16,0,0,1-16-16v-6a16,16,0,0,0-6.23-12.66A87.59,87.59,0,0,1,40,104.49C39.74,56.83,78.26,17.14,125.88,16A88,88,0,0,1,216,104Zm-16,0a72,72,0,0,0-73.74-72c-39,.92-70.47,33.39-70.26,72.39a71.65,71.65,0,0,0,27.64,56.3A32,32,0,0,1,96,186v6h64v-6a32.15,32.15,0,0,1,12.47-25.35A71.65,71.65,0,0,0,200,104Zm-16.11-9.34a57.6,57.6,0,0,0-46.56-46.55,8,8,0,0,0-2.66,15.78c16.57,2.79,30.63,16.85,33.44,33.45A8,8,0,0,0,176,104a9,9,0,0,0,1.35-.11A8,8,0,0,0,183.89,94.66Z",
+  refresh: "M224,48V96a8,8,0,0,1-8,8H168a8,8,0,0,1,0-16h28.69L182.06,73.37a79.56,79.56,0,0,0-56.13-23.43h-.45A79.52,79.52,0,0,0,69.59,72.71,8,8,0,0,1,58.41,61.27a96,96,0,0,1,135,.79L208,76.69V48a8,8,0,0,1,16,0ZM186.41,183.29a80,80,0,0,1-112.47-.66L59.31,168H88a8,8,0,0,0,0-16H40a8,8,0,0,0-8,8v48a8,8,0,0,0,16,0V179.31l14.63,14.63A95.43,95.43,0,0,0,130,222.06h.53a95.36,95.36,0,0,0,67.07-27.33,8,8,0,0,0-11.18-11.44Z",
+  pin: "M128,64a40,40,0,1,0,40,40A40,40,0,0,0,128,64Zm0,64a24,24,0,1,1,24-24A24,24,0,0,1,128,128Zm0-112a88.1,88.1,0,0,0-88,88c0,31.4,14.51,64.68,42,96.25a254.19,254.19,0,0,0,41.45,38.3,8,8,0,0,0,9.18,0A254.19,254.19,0,0,0,174,200.25c27.45-31.57,42-64.85,42-96.25A88.1,88.1,0,0,0,128,16Zm0,206c-16.53-13-72-60.75-72-118a72,72,0,0,1,144,0C200,161.23,144.53,209,128,222Z",
+  warning: "M236.8,188.09,149.35,36.22h0a24.76,24.76,0,0,0-42.7,0L19.2,188.09a23.51,23.51,0,0,0,0,23.72A24.35,24.35,0,0,0,40.55,224h174.9a24.35,24.35,0,0,0,21.33-12.19A23.51,23.51,0,0,0,236.8,188.09ZM222.93,203.8a8.5,8.5,0,0,1-7.48,4.2H40.55a8.5,8.5,0,0,1-7.48-4.2,7.59,7.59,0,0,1,0-7.72L120.52,44.21a8.75,8.75,0,0,1,15,0l87.45,151.87A7.59,7.59,0,0,1,222.93,203.8ZM120,144V104a8,8,0,0,1,16,0v40a8,8,0,0,1-16,0Zm20,36a12,12,0,1,1-12-12A12,12,0,0,1,140,180Z",
+  wrench: "M226.76,69a8,8,0,0,0-12.84-2.88l-40.3,37.19-17.23-3.7-3.7-17.23,37.19-40.3A8,8,0,0,0,187,29.24,72,72,0,0,0,88,96,72.34,72.34,0,0,0,94,124.94L33.79,177c-.15.12-.29.26-.43.39a32,32,0,0,0,45.26,45.26c.13-.13.27-.28.39-.42L131.06,162A72,72,0,0,0,232,96,71.56,71.56,0,0,0,226.76,69ZM160,152a56.14,56.14,0,0,1-27.07-7,8,8,0,0,0-9.92,1.77L67.11,211.51a16,16,0,0,1-22.62-22.62L109.18,133a8,8,0,0,0,1.77-9.93,56,56,0,0,1,58.36-82.31l-31.2,33.81a8,8,0,0,0-1.94,7.1L141.83,108a8,8,0,0,0,6.14,6.14l26.35,5.66a8,8,0,0,0,7.1-1.94l33.81-31.2A56.06,56.06,0,0,1,160,152Z",
+  bell: "M221.8,175.94C216.25,166.38,208,139.33,208,104a80,80,0,1,0-160,0c0,35.34-8.26,62.38-13.81,71.94A16,16,0,0,0,48,200H88.81a40,40,0,0,0,78.38,0H208a16,16,0,0,0,13.8-24.06ZM128,216a24,24,0,0,1-22.62-16h45.24A24,24,0,0,1,128,216ZM48,184c7.7-13.24,16-43.92,16-80a64,64,0,1,1,128,0c0,36.05,8.28,66.73,16,80Z",
+  door: "M232,216H208V40a16,16,0,0,0-16-16H64A16,16,0,0,0,48,40V216H24a8,8,0,0,0,0,16H232a8,8,0,0,0,0-16ZM64,40H192V216H64Zm104,92a12,12,0,1,1-12-12A12,12,0,0,1,168,132Z",
+  tire: "M149.26,159.26C155.09,173.82,163.5,176,168,176s12.91-2.18,18.74-16.74c3.39-8.48,5.26-19.58,5.26-31.26s-1.87-22.78-5.26-31.26C180.91,82.18,172.5,80,168,80s-12.91,2.18-18.74,16.74C145.87,105.22,144,116.32,144,128S145.87,150.78,149.26,159.26ZM168,96.2c2.62,2.06,8,13,8,31.8s-5.38,29.74-8,31.8c-2.62-2.06-8-13-8-31.8S165.38,98.26,168,96.2ZM232,216H196.41C213.12,197.73,224,165.47,224,128c0-58.32-26.35-104-60-104H92C58.35,24,32,69.68,32,128S58.35,232,92,232H232a8,8,0,0,0,0-16ZM48,128c0-2.5.07-5,.17-7.44L80,97.83l24.43,17.45c-.28,4.16-.43,8.41-.43,12.72a179.89,179.89,0,0,0,3.07,33.5l-22.42-16a8,8,0,0,0-9.3,0l-23.74,17A161,161,0,0,1,48,128Z",
+  bolt: "M215.79,118.17a8,8,0,0,0-5-5.66L153.18,90.9l14.66-73.33a8,8,0,0,0-13.69-7l-112,120a8,8,0,0,0,3,13l57.63,21.61L88.16,238.43a8,8,0,0,0,13.69,7l112-120A8,8,0,0,0,215.79,118.17ZM109.37,214l10.47-52.38a8,8,0,0,0-5-9.06L62,132.71l84.62-90.66L136.16,94.43a8,8,0,0,0,5,9.06l52.8,19.8Z",
+  fuel: "M241,69.66,221.66,50.34a8,8,0,0,0-11.32,11.32L229.66,81A8,8,0,0,1,232,86.63V168a8,8,0,0,1-16,0V128a24,24,0,0,0-24-24H176V56a24,24,0,0,0-24-24H72A24,24,0,0,0,48,56V208H32a8,8,0,0,0,0,16H192a8,8,0,0,0,0-16H176V120h16a8,8,0,0,1,8,8v40a24,24,0,0,0,48,0V86.63A23.85,23.85,0,0,0,241,69.66ZM64,208V56a8,8,0,0,1,8-8h80a8,8,0,0,1,8,8V208Zm80-96a8,8,0,0,1-8,8H88a8,8,0,0,1,0-16h48A8,8,0,0,1,144,112Z",
+  gauge: "M207.06,72.67A111.24,111.24,0,0,0,128,40h-.4C66.07,40.21,16,91,16,153.13V176a16,16,0,0,0,16,16H224a16,16,0,0,0,16-16V152A111.25,111.25,0,0,0,207.06,72.67ZM224,176H119.71l54.76-75.3a8,8,0,0,0-12.94-9.42L99.92,176H32V153.13c0-3.08.15-6.12.43-9.13H56a8,8,0,0,0,0-16H35.27c10.32-38.86,44-68.24,84.73-71.66V80a8,8,0,0,0,16,0V56.33A96.14,96.14,0,0,1,221,128H200a8,8,0,0,0,0,16h23.67c.21,2.65.33,5.31.33,8Z",
+  chevron: "M213.66,101.66l-80,80a8,8,0,0,1-11.32,0l-80-80a8,8,0,0,1,11.32-11.32L128,164.69l74.34-74.35a8,8,0,0,1,11.32,11.32Z",
+  caretRight: "M181.66,133.66l-80,80A8,8,0,0,1,88,208V48a8,8,0,0,1,13.66-5.66l80,80A8,8,0,0,1,181.66,133.66Z"
+};
+function icon(name, cls) {
+  const d = PATHS[name] || PATHS.car;
+  return `<svg class="ic${cls ? " " + cls : ""}" viewBox="0 0 256 256" aria-hidden="true" focusable="false"><path d="${d}"/></svg>`;
+}
+
+// src/resolve.js
+var HASH_RE = /^[0-9a-f]{16}$/;
+function parseEntityId(id) {
+  const dot = id.indexOf(".");
+  if (dot < 0) return null;
+  const name = id.slice(dot + 1);
+  if (name.length <= 17 || name[16] !== "_") return null;
+  const head = name.slice(0, 16);
+  if (!HASH_RE.test(head)) return null;
+  return { hash: head, key: name.slice(17) };
+}
+var SLOTS = {
+  nickname: ["vehicle_nickname"],
+  plate: ["license_plate"],
+  image_overlook: ["vehicle_overlook_image"],
+  image_3d: ["vehicle_3d_image"],
+  image_side: ["vehicle_image"],
+  lock: ["lock_status"],
+  online: ["onlinernr"],
+  ignition: ["ignition"],
+  fuel: ["fuel_level"],
+  battery: ["battery_fill_level"],
+  range: ["distance_to_empty", "prognostic_range"],
+  ev_range: ["ev_dte"],
+  odo: ["odometer"],
+  volt: ["battery_voltage"],
+  oil: ["prognostic", "oil_health"],
+  tp_lf: ["lf_tire"],
+  tp_rf: ["rf_tire"],
+  tp_lr: ["lr_tire"],
+  tp_rr: ["rr_tire"],
+  tps_lf: ["lf_tire_status"],
+  tps_rf: ["rf_tire_status"],
+  tps_lr: ["lr_tire_status"],
+  tps_rr: ["rr_tire_status"],
+  tp_rec_f: ["recommended_front_pressure"],
+  tp_rec_r: ["recommended_rear_pressure"],
+  door_fl: ["driver_door"],
+  door_fr: ["passenger_door"],
+  door_rl: ["left_rear_door"],
+  door_rr: ["right_rear_door"],
+  tailgate: ["tailgate"],
+  hood: ["hood"],
+  win_fl: ["driver_window"],
+  win_fr: ["passenger_window"],
+  win_rl: ["left_rear_window"],
+  win_rr: ["right_rear_window"],
+  btn_lock: ["lock_door"],
+  btn_unlock: ["unlock_door"],
+  btn_trunk: ["trunk_unlock"],
+  btn_refresh: ["manual_refresh"],
+  sw_engine: ["engine"],
+  sw_honk: ["honk"],
+  sw_va: ["va_switch"],
+  sw_light: ["light_find"],
+  chg_status: ["charging_status"],
+  chg_start: ["start_charge", "charge_start", "wallbox_charge"],
+  chg_stop: ["stop_charge", "charge_stop"],
+  wallbox: ["wallbox_charge"],
+  gun_lock: ["evss_lock"],
+  gun_unlock: ["evss_unlock"],
+  departure: ["departure_toggle"],
+  departure_plan: ["cevs_departure"],
+  last_soc: ["last_charge_soc"],
+  alerts: ["vehicle_alerts", "active_alert_list"],
+  maint: ["maintenance_plan"],
+  recall: ["recall"],
+  messages: ["messages"],
+  sync: ["sync_health"],
+  data_time: ["vehicle_data_time"],
+  fw: ["firmware_update"],
+  support: ["contact_number", "after_sales_number", "rsa_number"],
+  tracker: ["tracker"],
+  addr: ["location"],
+  temp: ["remote_temp"],
+  auto_off: ["auto_off_remaining"],
+  alert_event: ["vehicle_alert_event"],
+  door_event: ["door_event"]
+};
+function detectVehicles(hass) {
+  const st = hass && hass.states || {};
+  const seen = /* @__PURE__ */ new Map();
+  for (const id of Object.keys(st)) {
+    const p = parseEntityId(id);
+    if (!p) continue;
+    if (p.key !== "lock_status" && p.key !== "vehicle_nickname" && p.key !== "odometer") continue;
+    const rec = seen.get(p.hash) || { hash: p.hash, ids: {} };
+    rec.ids[p.key] = id;
+    seen.set(p.hash, rec);
+  }
+  return [...seen.values()];
+}
+function hashFromDevice(hass, deviceId) {
+  if (!deviceId || !hass) return null;
+  const entities = hass.entities || {};
+  for (const id of Object.keys(entities)) {
+    const entry = entities[id];
+    if (!entry || entry.device_id !== deviceId) continue;
+    const p = parseEntityId(id);
+    if (p) return p.hash;
+  }
+  return null;
+}
+function resolve(hass, config) {
+  const st = hass && hass.states || {};
+  let hash = null;
+  if (config && config.hash && HASH_RE.test(String(config.hash))) hash = String(config.hash);
+  if (!hash && config && config.prefix) {
+    const raw = String(config.prefix).replace(/^[a-z_]+\./, "");
+    if (HASH_RE.test(raw)) hash = raw;
+    else if (HASH_RE.test(raw.slice(0, 16))) hash = raw.slice(0, 16);
+  }
+  if (!hash && config) hash = hashFromDevice(hass, config.device);
+  if (!hash) {
+    const found = detectVehicles(hass);
+    if (found.length === 1) hash = found[0].hash;
+  }
+  const index = /* @__PURE__ */ new Map();
+  if (hash) {
+    for (const id of Object.keys(st)) {
+      const p = parseEntityId(id);
+      if (p && p.hash === hash) index.set(p.key, id);
+    }
+  }
+  const overrides = config && config.entities || {};
+  const idOf = (slot) => {
+    const forced = overrides[slot];
+    if (forced) return forced;
+    const keys = SLOTS[slot] || [];
+    for (const key of keys) {
+      if (index.has(key)) return index.get(key);
+    }
+    return null;
+  };
+  const get = (slot) => {
+    const id = idOf(slot);
+    return id && st[id] ? st[id] : null;
+  };
+  return {
+    hash,
+    id: idOf,
+    get,
+    has: (slot) => Boolean(idOf(slot)),
+    states: st
+  };
+}
+
+// src/styles.js
+var STYLES = `
+:host { display: block; --hc-accent: #37d6e8; --hc-ink: #e9eff7; --hc-dim: #8496ad;
+  --hc-ok: #6fe0a8; --hc-warn: #ffc46b; --hc-bad: #ff9182; --hc-holdms: 700ms; }
+ha-card { display: block; overflow: hidden; border: none;
+  border-radius: var(--ha-card-border-radius, 22px);
+  color: var(--hc-ink);
+  background:
+    radial-gradient(120% 72% at 50% -8%, rgba(55,214,232,.10), transparent 62%),
+    linear-gradient(168deg, #141d2b 0%, #0b1220 58%, #080d16 100%);
+  box-shadow: 0 1px 2px rgba(3,7,14,.5), 0 18px 44px -20px rgba(3,7,14,.9),
+    inset 0 1px 0 rgba(255,255,255,.06);
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "PingFang SC", "Microsoft YaHei", "Segoe UI", Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+.num, .big, .tire .v, .plate { font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+  font-variant-numeric: tabular-nums; }
+.wrap { padding: 16px 16px 12px; display: flex; flex-direction: column; gap: 14px; }
+.head { display: flex; align-items: flex-start; gap: 10px; }
+.ttl { flex: 1; min-width: 0; }
+.kicker { margin: 0 0 5px; font-size: 10px; font-weight: 700; letter-spacing: .14em;
+  text-transform: uppercase; color: var(--hc-dim); }
+h1 { margin: 0; font-size: 21px; line-height: 1.15; font-weight: 650; letter-spacing: .01em;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.plate { margin-top: 6px; font-size: 11px; font-weight: 600; letter-spacing: .1em; color: var(--hc-dim); }
+.iconbtn { flex: none; width: 34px; height: 34px; display: grid; place-items: center; cursor: pointer;
+  border-radius: 999px; border: 1px solid rgba(255,255,255,.09); background: rgba(255,255,255,.045);
+  color: var(--hc-ink); transition: background .18s, border-color .18s, transform .18s; }
+.iconbtn:hover { background: rgba(255,255,255,.09); border-color: rgba(255,255,255,.16); }
+.iconbtn:active { transform: scale(.94); }
+.iconbtn.spin .ic { animation: hc-spin .9s linear infinite; }
+.ic { width: 20px; height: 20px; fill: currentColor; display: block; }
+
+.stage { position: relative; height: 156px; display: flex; align-items: center; justify-content: center;
+  margin: -2px 0 0; }
+.stage .glow { position: absolute; inset: -10% -6% 0; pointer-events: none;
+  background: radial-gradient(46% 58% at 50% 50%, rgba(55,214,232,.17), transparent 70%); }
+.stage .ground { position: absolute; left: 50%; bottom: 8px; width: 46%; height: 12px; transform: translateX(-50%);
+  border-radius: 50%; background: radial-gradient(50% 50% at 50% 50%, rgba(0,0,0,.6), transparent 72%); filter: blur(3px); }
+.carimg { position: relative; max-width: 100%; max-height: 100%; object-fit: contain; border-radius: 16px;
+  background: transparent; }
+.carph { position: relative; width: 88px; height: 88px; display: grid; place-items: center; border-radius: 999px;
+  border: 1px solid rgba(255,255,255,.1); color: var(--hc-dim); background: rgba(255,255,255,.03); }
+.carph .ic { width: 40px; height: 40px; opacity: .55; }
+
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { display: inline-flex; align-items: center; gap: 5px; height: 24px; padding: 0 9px; border-radius: 999px;
+  font-size: 11px; font-weight: 600; letter-spacing: .02em; color: var(--hc-dim);
+  background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.08); }
+.chip .dot { width: 5px; height: 5px; border-radius: 50%; background: currentColor; flex: none; }
+.chip.ok { color: var(--hc-ok); background: rgba(111,224,168,.1); border-color: rgba(111,224,168,.26); }
+.chip.warn { color: var(--hc-warn); background: rgba(255,196,107,.1); border-color: rgba(255,196,107,.26); }
+.chip.bad { color: var(--hc-bad); background: rgba(255,145,130,.1); border-color: rgba(255,145,130,.26); }
+.chip.info { color: var(--hc-accent); background: rgba(55,214,232,.09); border-color: rgba(55,214,232,.24); }
+
+.acts { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+.tile { position: relative; height: 72px; display: flex; flex-direction: column; align-items: center;
+  justify-content: center; gap: 7px; padding: 0; border-radius: 16px; cursor: pointer; overflow: hidden;
+  border: 1px solid rgba(255,255,255,.07);
+  background: linear-gradient(180deg, rgba(255,255,255,.055), rgba(255,255,255,.018));
+  color: var(--hc-ink); font-size: 11px; font-weight: 600; letter-spacing: .01em; text-align: center;
+  -webkit-tap-highlight-color: transparent; -webkit-touch-callout: none; user-select: none;
+  touch-action: manipulation; transition: transform .16s, background .18s, border-color .18s; }
+.tile:hover { border-color: rgba(255,255,255,.14); }
+.tile:active, .tile.pressing { transform: scale(.972); }
+.tile .ic { width: 22px; height: 22px; opacity: .92; }
+.tile .lbl { max-width: 100%; padding: 0 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tile.on { border-color: rgba(111,224,168,.3); background: linear-gradient(180deg, rgba(111,224,168,.12), rgba(111,224,168,.03)); }
+.tile.hot { border-color: rgba(55,214,232,.34); background: linear-gradient(180deg, rgba(55,214,232,.14), rgba(55,214,232,.04)); color: #d9fbff; }
+.tile.off { opacity: .45; }
+.tile .holdbar { position: absolute; left: 0; right: 0; bottom: 0; height: 2px; background: var(--hc-accent);
+  transform: scaleX(0); transform-origin: left; opacity: 0; transition: opacity .12s; }
+.tile.pressing .holdbar { opacity: 1; transform: scaleX(1);
+  transition: opacity .12s, transform var(--hc-holdms) linear; }
+.tile.armed { border-color: rgba(55,214,232,.55); background: rgba(55,214,232,.16); }
+.tile.pending::after { content: ""; position: absolute; top: 8px; right: 8px; width: 5px; height: 5px;
+  border-radius: 50%; background: var(--hc-accent); animation: hc-pulse 1.4s ease-in-out infinite; }
+.pills { display: flex; gap: 6px; }
+.pill { flex: 1; height: 31px; display: inline-flex; align-items: center; justify-content: center; gap: 5px;
+  border-radius: 10px; cursor: pointer; border: 1px solid rgba(255,255,255,.07);
+  background: rgba(255,255,255,.028); color: var(--hc-dim); font-size: 11px; font-weight: 600;
+  -webkit-tap-highlight-color: transparent; user-select: none; transition: color .18s, background .18s; }
+.pill .ic { width: 14px; height: 14px; }
+.pill:hover { color: var(--hc-ink); background: rgba(255,255,255,.06); }
+.pill.on { color: var(--hc-ok); border-color: rgba(111,224,168,.26); }
+
+.energy { display: flex; align-items: center; gap: 16px; }
+.ring { position: relative; flex: none; width: 66px; height: 66px; border-radius: 50%;
+  background: conic-gradient(var(--hc-accent) calc(var(--v, 0) * 1%), rgba(255,255,255,.075) 0); }
+.ring::after { content: ""; position: absolute; inset: 5px; border-radius: 50%; background: #0c1421;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.05); }
+.ring .rv { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center;
+  justify-content: center; z-index: 1; }
+.ring .rv b { font: 600 17px/1 ui-monospace, "SF Mono", Menlo, monospace; font-variant-numeric: tabular-nums; }
+.ring .rv i { font-size: 9px; font-style: normal; letter-spacing: .1em; text-transform: uppercase;
+  color: var(--hc-dim); margin-top: 3px; }
+.energy .main { flex: 1; min-width: 0; }
+.big { display: flex; align-items: baseline; gap: 4px; font-size: 38px; font-weight: 600; line-height: 1; }
+.big small { font-size: 12px; font-weight: 600; color: var(--hc-dim); letter-spacing: .06em; }
+.subrow { display: flex; gap: 14px; margin-top: 8px; flex-wrap: wrap; }
+.stat { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.stat .k { font-size: 9px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--hc-dim); }
+.stat .v { font-size: 12px; font-weight: 600; }
+.stat .v b { font: 600 12px/1 ui-monospace, "SF Mono", Menlo, monospace; }
+
+/* 四轮胎压：单行四格，读作仪表横条，不占两行高度 */
+.tires { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
+.tire { display: flex; flex-direction: column; align-items: flex-start; gap: 3px; padding: 8px 9px;
+  border-radius: 12px; border: 1px solid rgba(255,255,255,.06); background: rgba(255,255,255,.032); }
+.tire .p { font-size: 9px; font-weight: 700; letter-spacing: .1em; color: var(--hc-dim); }
+.tire .v { font-size: 13px; font-weight: 600; line-height: 1.1; white-space: nowrap; }
+.tire .v small { font-size: 9px; color: var(--hc-dim); margin-left: 2px; font-weight: 500; }
+.tire.warn { border-color: rgba(255,196,107,.34); background: rgba(255,196,107,.08); }
+.tire.warn .v { color: var(--hc-warn); }
+
+.doors { display: flex; flex-wrap: wrap; gap: 6px; }
+.door { display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 10px; border-radius: 10px;
+  border: 1px solid rgba(255,255,255,.06); background: rgba(255,255,255,.03);
+  font-size: 11px; font-weight: 600; color: var(--hc-dim); }
+.door .ic { width: 15px; height: 15px; opacity: .8; }
+.door.open { color: var(--hc-warn); border-color: rgba(255,196,107,.3); background: rgba(255,196,107,.08); }
+.door .addr { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  font-weight: 500; letter-spacing: 0; }
+
+.panel { border-radius: 14px; border: 1px solid rgba(255,255,255,.06); background: rgba(255,255,255,.022);
+  padding: 10px 12px; }
+.panel .ph { display: flex; align-items: center; gap: 7px; font-size: 10px; font-weight: 700;
+  letter-spacing: .12em; text-transform: uppercase; color: var(--hc-dim); margin-bottom: 8px; }
+.panel .ph .ic { width: 13px; height: 13px; }
+.chgrow { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.chgrow .st { font-size: 13px; font-weight: 650; }
+.chgrow .meta { font-size: 10px; color: var(--hc-dim); letter-spacing: .06em; margin-top: 3px; }
+.mini { display: inline-flex; align-items: center; gap: 5px; height: 28px; padding: 0 10px; border-radius: 999px;
+  font-size: 11px; font-weight: 650; cursor: pointer; border: 1px solid rgba(55,214,232,.3);
+  background: rgba(55,214,232,.1); color: var(--hc-accent); }
+.mini.dim { border-color: rgba(255,255,255,.1); background: rgba(255,255,255,.04); color: var(--hc-dim); }
+.mini:active { transform: scale(.97); }
+
+.alert { display: flex; gap: 9px; padding: 10px 12px; border-radius: 14px; font-size: 12px; line-height: 1.45;
+  color: #ffd3c9; background: rgba(255,145,130,.1); border: 1px solid rgba(255,145,130,.28); }
+.alert .ic { width: 16px; height: 16px; flex: none; color: var(--hc-bad); margin-top: 1px; }
+.alert b { display: block; font-size: 10px; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--hc-bad); margin-bottom: 3px; font-weight: 700; }
+
+.svc { border-radius: 14px; border: 1px solid rgba(255,255,255,.06); background: rgba(255,255,255,.022);
+  overflow: hidden; }
+.svc summary { list-style: none; display: flex; align-items: center; gap: 8px;
+  padding: 10px 12px; cursor: pointer; font-size: 10px; font-weight: 700; letter-spacing: .12em;
+  text-transform: uppercase; color: var(--hc-dim); }
+.svc summary::-webkit-details-marker { display: none; }
+.svc summary .sum { display: inline-flex; align-items: center; gap: 7px; flex: 1; }
+.svc summary .ic { width: 13px; height: 13px; transition: transform .2s; }
+.svc[open] summary .sum .ic:first-child { opacity: .7; }
+.svc[open] summary > .ic { transform: rotate(180deg); }
+.svc .row { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px;
+  padding: 8px 12px; font-size: 12px; border-top: 1px solid rgba(255,255,255,.05); }
+.svc .row .k { color: var(--hc-dim); flex: none; font-size: 11px; }
+.svc .row .val { text-align: right; color: var(--hc-ink); word-break: break-word; max-width: 66%; }
+
+.foot { display: flex; align-items: center; justify-content: space-between; gap: 10px; font-size: 10px;
+  letter-spacing: .06em; color: var(--hc-dim); }
+.foot .left { display: inline-flex; align-items: center; gap: 12px; }
+.foot .syncwrap { display: inline-flex; align-items: center; gap: 6px; }
+.foot .sdot { width: 5px; height: 5px; border-radius: 50%; background: var(--hc-ok); }
+.foot .sdot.bad { background: var(--hc-bad); }
+
+.toast { display: flex; align-items: flex-start; gap: 8px; padding: 9px 11px; border-radius: 12px;
+  font-size: 11.5px; line-height: 1.4; background: rgba(55,214,232,.1);
+  border: 1px solid rgba(55,214,232,.26); color: #d5f8ff; }
+.toast.err { background: rgba(255,145,130,.1); border-color: rgba(255,145,130,.3); color: #ffd3c9; }
+.toast .ic { width: 14px; height: 14px; flex: none; margin-top: 1px; }
+
+.empty { padding: 26px 16px 30px; text-align: center; color: var(--hc-dim); font-size: 12px; line-height: 1.6; }
+.empty .ic { width: 34px; height: 34px; margin: 0 auto 10px; opacity: .45; }
+
+.compact .wrap { padding: 13px 14px 11px; gap: 10px; }
+.compact .stage { height: 104px; }
+.compact h1 { font-size: 18px; }
+.compact .tile { height: 62px; border-radius: 14px; }
+.compact .big { font-size: 30px; }
+.compact .ring { width: 54px; height: 54px; }
+.compact .ring .rv b { font-size: 15px; }
+
+@keyframes hc-spin { to { transform: rotate(360deg); } }
+@keyframes hc-pulse { 0%, 100% { opacity: .35; } 50% { opacity: 1; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .tile, .pill, .iconbtn { transition: none; }
+  .tile.pressing .holdbar { transition: none; }
+  .iconbtn.spin .ic, .tile.pending::after { animation: none; }
+}
+`;
+var EDITOR_STYLES = `
+:host { display: block; }
+.ed { padding: 4px 0 8px; font-family: var(--ha-font-family-body, inherit); }
+.sec { margin: 4px 0 14px; }
+.sec h3 { margin: 0 0 8px; font-size: 13px; font-weight: 600; color: var(--primary-text-color); }
+.hint { font-size: 11.5px; color: var(--secondary-text-color); line-height: 1.5; margin: 0 0 8px; }
+label.f { display: block; font-size: 11px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase;
+  color: var(--secondary-text-color); margin: 10px 0 4px; }
+.tf { width: 100%; box-sizing: border-box; padding: 9px 11px; border-radius: 8px; font-size: 13px;
+  color: var(--primary-text-color); background: var(--secondary-background-color, rgba(255,255,255,.06));
+  border: 1px solid var(--divider-color, rgba(255,255,255,.14)); outline: none; }
+.tf:focus { border-color: var(--primary-color); }
+.row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 7px 0; }
+.row .rl { font-size: 13px; color: var(--primary-text-color); }
+.sw { position: relative; width: 40px; height: 22px; flex: none; border-radius: 999px; cursor: pointer;
+  background: var(--divider-color, #bbb); transition: background .18s; border: none; }
+.sw[aria-checked="true"] { background: var(--primary-color, #03a9f4); }
+.sw::after { content: ""; position: absolute; top: 2px; left: 2px; width: 18px; height: 18px; border-radius: 50%;
+  background: #fff; transition: transform .18s; }
+.sw[aria-checked="true"]::after { transform: translateX(18px); }
+.chips2 { display: flex; flex-wrap: wrap; gap: 6px; }
+.tg { padding: 6px 11px; border-radius: 999px; font-size: 12px; cursor: pointer;
+  border: 1px solid var(--divider-color, rgba(255,255,255,.2)); background: transparent;
+  color: var(--secondary-text-color); }
+.tg[aria-pressed="true"] { border-color: var(--primary-color, #03a9f4); color: var(--primary-color, #03a9f4);
+  background: rgba(3,169,244,.12); }
+.swatches { display: flex; gap: 6px; align-items: center; }
+.swatch { width: 26px; height: 26px; border-radius: 999px; cursor: pointer; border: 2px solid transparent;
+  box-shadow: 0 0 0 1px rgba(255,255,255,.16) inset; }
+.swatch.sel { border-color: var(--primary-text-color); }
+.adv { border-top: 1px solid var(--divider-color, rgba(255,255,255,.14)); margin-top: 6px; padding-top: 4px; }
+.adv .grid2 { display: grid; grid-template-columns: 1fr; gap: 2px; }
+.ranged { display: flex; align-items: center; gap: 10px; }
+input[type="range"] { flex: 1; accent-color: var(--primary-color, #03a9f4); }
+
+/* 兜底：编辑器可能在任何主题下打开，HA 变量缺失时不能退化成不可见的控件 */
+.sec { border-top: 1px solid var(--divider-color, rgba(140,160,185,.22)); padding-top: 12px; margin: 14px 0; }
+.sec:first-child { border-top: none; padding-top: 0; margin-top: 4px; }
+.sw { background: var(--divider-color, #4b5563); }
+select.tf { font-size: 13px; padding: 8px 10px; }
+.ed .hint, .ed label.f { color: var(--secondary-text-color, #98a0a8); }
+.ed h3, .ed .row .rl, .ed summary { color: var(--primary-text-color, #e6e6e6); }
+`;
+
+// src/strings.js
+var ZH = {
+  locked: "已锁定",
+  unlocked: "已解锁",
+  locking: "车锁状态未知",
+  online: "车辆在线",
+  offline: "车辆离线",
+  running: "已启动",
+  charging: "充电中",
+  chargingDone: "已充满",
+  notCharging: "未充电",
+  lock: "车锁",
+  lockUp: "上锁",
+  unlock: "开锁",
+  unlockShort: "解锁",
+  trunk: "后备箱",
+  engine: "远程启动",
+  engineStop: "远程熄火",
+  honk: "鸣笛寻车",
+  soundLight: "声光寻车",
+  light: "灯光寻车",
+  refresh: "刷新",
+  refreshOk: "已请求云端刷新，约 30–60 秒回传",
+  holdHint: "长按 0.7 秒执行，防误触",
+  armed: "松手执行",
+  sent: "已发送指令，等待车辆响应",
+  failed: "指令发送失败",
+  offlineBlocked: "车辆离线，指令可能无法到达",
+  fuel: "燃油",
+  battery: "电量",
+  range: "续航",
+  odo: "总里程",
+  volt: "蓄电池",
+  oil: "机油寿命",
+  evRange: "纯电续航",
+  tireLabel: "胎压",
+  tireRec: "推荐",
+  doorsClosed: "车门车窗已关闭",
+  doorsTitle: "车门与车窗",
+  open: "开启",
+  closed: "关闭",
+  chargingTitle: "充电",
+  chargeNow: "立即充电",
+  stopCharge: "停止充电",
+  gunLock: "锁枪",
+  gunUnlock: "解锁枪",
+  departure: "预约充电",
+  lastSoc: "上次充电",
+  service: "服务信息",
+  maintenance: "保养计划",
+  recallInfo: "召回信息",
+  messages: "未读消息",
+  firmware: "车机固件",
+  support: "客服电话",
+  syncOk: "云端同步正常",
+  syncBad: "云端同步异常",
+  syncTime: "同步",
+  never: "尚无数据",
+  pickVehicle: "未识别到车辆，请在卡片设置里选择",
+  location: "位置",
+  noAlert: "无异常告警",
+  alert: "车辆告警",
+  tapHint: "点击查看详情",
+  holdMs: "长按时长",
+  modules: "显示模块",
+  accent: "强调色",
+  vehicle: "车辆",
+  titleLabel: "卡片标题",
+  showPlate: "显示车牌",
+  layoutLabel: "布局",
+  layoutFull: "完整",
+  layoutCompact: "紧凑",
+  imageLabel: "车辆图片",
+  imageAuto: "自动",
+  imageOverlook: "俯视车型图",
+  image3d: "3D 车型图",
+  imageSide: "侧视车型图",
+  imageCustom: "自定义地址",
+  guardTitle: "防误触",
+  guardHint: "下列动作需要长按才会执行",
+  guardActions: "需长按的动作",
+  advanced: "高级：实体绑定",
+  advancedHint: "留空即按设备自动识别；也可为每个位置指定实体。",
+  reset: "恢复默认",
+  none: "不显示",
+  detect: "自动识别",
+  noVehicleFound: "没有检测到福特派互联的车辆实体",
+  editVehicle: "更改",
+  every: "全部"
+};
+var EN = {
+  locked: "Locked",
+  unlocked: "Unlocked",
+  locking: "Lock unknown",
+  online: "Online",
+  offline: "Offline",
+  running: "Running",
+  charging: "Charging",
+  chargingDone: "Charged",
+  notCharging: "Idle",
+  lock: "Lock",
+  lockUp: "Lock",
+  unlock: "Unlock",
+  unlockShort: "Unlock",
+  trunk: "Trunk",
+  engine: "Remote start",
+  engineStop: "Stop engine",
+  honk: "Find by horn",
+  soundLight: "Horn & lights",
+  light: "Find by lights",
+  refresh: "Refresh",
+  refreshOk: "Cloud refresh requested, 30–60 s",
+  holdHint: "Hold 0.7 s to prevent mis-touch",
+  armed: "Release to run",
+  sent: "Command sent, waiting for the car",
+  failed: "Command failed",
+  offlineBlocked: "Car is offline; command may not arrive",
+  fuel: "Fuel",
+  battery: "Battery",
+  range: "Range",
+  odo: "Odometer",
+  volt: "12 V",
+  oil: "Oil life",
+  evRange: "EV range",
+  tireLabel: "Tyre",
+  tireRec: "Rec",
+  doorsClosed: "Doors and windows closed",
+  doorsTitle: "Doors & windows",
+  open: "Open",
+  closed: "Closed",
+  chargingTitle: "Charging",
+  chargeNow: "Start charge",
+  stopCharge: "Stop charge",
+  gunLock: "Lock gun",
+  gunUnlock: "Unlock gun",
+  departure: "Scheduled",
+  lastSoc: "Last charge",
+  service: "Service",
+  maintenance: "Maintenance",
+  recallInfo: "Recall",
+  messages: "Unread",
+  firmware: "Firmware",
+  support: "Hotline",
+  syncOk: "Cloud sync OK",
+  syncBad: "Cloud sync error",
+  syncTime: "Sync",
+  never: "No data",
+  pickVehicle: "No vehicle found, pick one in the card editor",
+  location: "Location",
+  noAlert: "No active alert",
+  alert: "Vehicle alert",
+  tapHint: "Tap for details",
+  holdMs: "Hold duration",
+  modules: "Modules",
+  accent: "Accent",
+  vehicle: "Vehicle",
+  titleLabel: "Title",
+  showPlate: "Show plate",
+  layoutLabel: "Layout",
+  layoutFull: "Full",
+  layoutCompact: "Compact",
+  imageLabel: "Vehicle image",
+  imageAuto: "Auto",
+  imageOverlook: "Top view",
+  image3d: "3D image",
+  imageSide: "Side view",
+  imageCustom: "Custom URL",
+  guardTitle: "Mis-touch guard",
+  guardHint: "These actions only run after a long press",
+  guardActions: "Actions requiring hold",
+  advanced: "Advanced: entity binding",
+  advancedHint: "Leave empty to auto-detect from the device.",
+  reset: "Reset",
+  none: "Hidden",
+  detect: "Auto",
+  noVehicleFound: "No FordPass vehicle entities detected",
+  editVehicle: "Change",
+  every: "All"
+};
+function dict(hass) {
+  const lang = String(hass && hass.locale && hass.locale.language || "zh").toLowerCase();
+  return lang.startsWith("en") ? EN : ZH;
+}
+function isEn(hass) {
+  const lang = String(hass && hass.locale && hass.locale.language || "zh").toLowerCase();
+  return lang.startsWith("en");
+}
+
+// src/util.js
+function esc(value) {
+  return String(value == null ? "" : value).replace(/[&<>"']/g, (ch) => {
+    switch (ch) {
+      case "&":
+        return "&amp;";
+      case "<":
+        return "&lt;";
+      case ">":
+        return "&gt;";
+      case '"':
+        return "&quot;";
+      default:
+        return "&#39;";
+    }
+  });
+}
+function isBad(state) {
+  return !state || state.state === "unavailable" || state.state === "unknown";
+}
+function num(state) {
+  if (isBad(state)) return null;
+  const v = parseFloat(String(state.state).replace(",", "."));
+  return Number.isFinite(v) ? v : null;
+}
+function text(state) {
+  return isBad(state) ? "" : String(state.state);
+}
+function attrs(state, key) {
+  return state && state.attributes ? state.attributes[key] : void 0;
+}
+function clamp(v, lo, hi) {
+  return Math.min(hi, Math.max(lo, v));
+}
+function fmtNum(v, digits = 0) {
+  if (v == null || !Number.isFinite(v)) return "—";
+  const opts = { maximumFractionDigits: digits, minimumFractionDigits: 0 };
+  try {
+    return new Intl.NumberFormat("zh-Hans-CN", opts).format(v);
+  } catch {
+    return String(Math.round(v * 10 ** digits) / 10 ** digits);
+  }
+}
+function relTime(iso, lang) {
+  if (!iso) return "";
+  const then = new Date(iso).getTime();
+  if (!Number.isFinite(then)) return "";
+  const diff = Math.max(0, Date.now() - then) / 1e3;
+  const zh = !lang || !String(lang).startsWith("en");
+  if (diff < 60) return zh ? "刚刚" : "just now";
+  if (diff < 3600) {
+    const m = Math.floor(diff / 60);
+    return zh ? `${m} 分钟前` : `${m} min ago`;
+  }
+  if (diff < 86400) {
+    const h = Math.floor(diff / 3600);
+    return zh ? `${h} 小时前` : `${h} h ago`;
+  }
+  const d = Math.floor(diff / 86400);
+  return zh ? `${d} 天前` : `${d} d ago`;
+}
+function normLock(state) {
+  const s = String(text(state)).toLowerCase();
+  if (!s) return "unknown";
+  if (s.includes("解锁") || s.includes("unlock")) return "unlocked";
+  if (s.includes("锁定") || s.includes("lock") || s.includes("secured")) return "locked";
+  return "unknown";
+}
+function normOpen(state) {
+  const s = String(text(state)).toLowerCase();
+  if (!s) return "unknown";
+  if (s.includes("开启") || s.includes("打开") || s.includes("open")) return "open";
+  if (s.includes("关闭") || s.includes("关好") || s.includes("closed")) return "closed";
+  return "unknown";
+}
+function normTire(state) {
+  const s = String(text(state)).toLowerCase();
+  if (!s) return "ok";
+  if (s.includes("fault") || s.includes("warn") || s.includes("低") || s.includes("异常")) return "warn";
+  return "ok";
+}
+function chargingNow(state) {
+  if (isBad(state)) return false;
+  const attr = state.attributes && state.attributes.evcc_charge_state;
+  if (attr === 2 || attr === "2") return true;
+  const s = String(state.state).toLowerCase();
+  return s.includes("充电中") || s.includes("charging");
+}
+
+// src/card.js
+var MODULES = ["status", "actions", "energy", "tires", "doors", "charging", "alerts", "service"];
+var CONFIRMABLE = [
+  "btn_unlock",
+  "btn_lock",
+  "btn_trunk",
+  "sw_engine",
+  "sw_honk",
+  "sw_va",
+  "sw_light"
+];
+var PREVIEW_TAGS = /* @__PURE__ */ new Set([
+  "hui-card-picker",
+  "hui-dialog-add-card",
+  "hui-dialog-edit-card",
+  "hui-card-editor",
+  "ha-editor"
+]);
+var DEFAULTS = {
+  title: "",
+  layout: "full",
+  modules: MODULES,
+  confirm: ["btn_unlock", "btn_lock", "btn_trunk", "sw_engine", "sw_honk"],
+  hold_ms: 700,
+  accent: "#37d6e8",
+  show_plate: true,
+  image: "auto",
+  image_url: "",
+  entities: {}
+};
+var SLOT_KEYS = Object.keys(SLOTS);
+var HaCarCard = class extends HTMLElement {
+  constructor() {
+    super();
+    this.attachShadow({ mode: "open" });
+    this._built = false;
+    this._sig = "";
+    this._pending = /* @__PURE__ */ new Map();
+    this._toast = null;
+    this._hold = null;
+    this._holdTimer = 0;
+    this._pendingRender = false;
+    this._justArmed = false;
+    this._preview = false;
+  }
+  static getStubConfig(hass) {
+    const cars = hass ? detectVehicles(hass) : [];
+    return cars.length ? { hash: cars[0].hash } : {};
+  }
+  static async getConfigElement() {
+    return document.createElement("ha-car-editor");
+  }
+  setConfig(config) {
+    if (config != null && typeof config !== "object") {
+      throw new Error("ha-car：配置必须是一个对象");
+    }
+    const cfg = Object.assign({}, DEFAULTS, config || {});
+    cfg.modules = Array.isArray(cfg.modules) ? cfg.modules.filter((m) => MODULES.includes(m)) : MODULES.slice();
+    cfg.confirm = Array.isArray(cfg.confirm) ? cfg.confirm.filter((k) => CONFIRMABLE.includes(k)) : DEFAULTS.confirm.slice();
+    cfg.entities = cfg.entities && typeof cfg.entities === "object" ? cfg.entities : {};
+    cfg.hold_ms = clamp(Number(cfg.hold_ms) || 700, 300, 3e3);
+    this._config = cfg;
+    this._sig = "";
+    this._toast = null;
+    this._render(true);
+  }
+  set hass(hass) {
+    this._hass = hass;
+    this._render();
+  }
+  getCardSize() {
+    return this._config && this._config.layout === "compact" ? 4 : 7;
+  }
+  getGridOptions() {
+    const rows = this.getCardSize();
+    return { columns: 12, rows, min_columns: 6, min_rows: 3, max_rows: 12 };
+  }
+  getLayoutOptions() {
+    const g = this.getGridOptions();
+    return {
+      grid_columns: g.columns,
+      grid_rows: g.rows,
+      grid_min_columns: g.min_columns,
+      grid_min_rows: g.min_rows
+    };
+  }
+  // ---------- 上下文 ----------
+  _isPreview() {
+    if (this._preview) return true;
+    let node = this.parentElement;
+    let depth = 0;
+    while (node && depth < 10) {
+      const n = (node.localName || "").toLowerCase();
+      if (PREVIEW_TAGS.has(n)) return true;
+      node = node.parentElement || node.parentNode && node.parentNode.host || null;
+      depth += 1;
+    }
+    return false;
+  }
+  // ---------- 渲染 ----------
+  _render(force) {
+    if (!this._hass && !force) return;
+    if (!this._config) this._config = Object.assign({}, DEFAULTS, { entities: {} });
+    if (this._hold) {
+      this._pendingRender = true;
+      return;
+    }
+    if (!this._built) this._build();
+    if (!this._hass) {
+      if (force) this._wrap.innerHTML = this._empty(dict(null));
+      return;
+    }
+    if (this._isPreview()) {
+      this._wrap.className = "wrap";
+      this.shadowRoot.querySelector("ha-card").classList.add("compact");
+      this._wrap.innerHTML = this._previewBody();
+      return;
+    }
+    const data = resolve(this._hass, this._config);
+    const sig = this._signature(data);
+    if (!force && sig === this._sig) return;
+    this._sig = sig;
+    this._paint(data);
+  }
+  _build() {
+    const root = this.shadowRoot;
+    root.innerHTML = `<style>${STYLES}</style><ha-card><div class="wrap"></div></ha-card>`;
+    this._wrap = root.querySelector(".wrap");
+    this._card = root.querySelector("ha-card");
+    this._built = true;
+    this._bind();
+  }
+  _signature(data) {
+    const parts = [];
+    for (const slot of SLOT_KEYS) {
+      const s = data.get(slot);
+      parts.push(slot + "=" + (s ? s.state + "@" + (s.last_changed || "") : "-"));
+    }
+    parts.push(String(this._pending.size));
+    parts.push(this._toast ? this._toast.ts + this._toast.msg : "");
+    parts.push(JSON.stringify([this._config.modules, this._config.confirm, this._config.layout, this._config.title]));
+    return parts.join("|");
+  }
+  _paint(data) {
+    const cfg = this._config;
+    this._card.classList.toggle("compact", cfg.layout === "compact");
+    this._wrap.className = "wrap";
+    if (cfg.accent) this._card.style.setProperty("--hc-accent", cfg.accent);
+    this._prunePending(data);
+    this._wrap.innerHTML = this._body(data);
+  }
+  _prunePending(data) {
+    const now = Date.now();
+    for (const [ent, ts] of this._pending) {
+      const st = data.states[ent];
+      const changed = st && new Date(st.last_changed).getTime() >= ts;
+      if (changed || now - ts > 18e4) this._pending.delete(ent);
+    }
+  }
+  _empty(msg) {
+    return `<div class="empty">${icon("car")}<div>${esc(msg)}</div></div>`;
+  }
+  _previewBody() {
+    return `<div class="head"><div class="ttl">
+      <p class="kicker">HA CAR</p><h1>${isEn(this._hass) ? "My car" : "我的座驾"}</h1>
+      </div><div class="iconbtn">${icon("refresh")}</div></div>
+      <div class="stage"><div class="glow"></div><div class="carph">${icon("car")}</div><div class="ground"></div></div>
+      <div class="chips"><span class="chip ok"><span class="dot"></span>已锁定</span>
+      <span class="chip">${isEn(this._hass) ? "Range" : "续航"} · 486 km</span></div>`;
+  }
+  // ---------- 卡片主体 ----------
+  _body(data) {
+    const cfg = this._config;
+    const t = dict(this._hass);
+    const compact = cfg.layout === "compact";
+    const mods = cfg.modules || MODULES;
+    const s = (slot) => data.get(slot);
+    const lockNorm = normLock(s("lock"));
+    const chgNow = chargingNow(s("chg_status"));
+    const onlineRaw = text(s("online")).toLowerCase();
+    const offline = onlineRaw ? /offline|离线|not[ _-]?online|不可用/.test(onlineRaw) : false;
+    const running = (() => {
+      const st = s("sw_engine") || s("ignition");
+      if (isBad(st)) return false;
+      const v = String(st.state).toLowerCase();
+      return v === "on" || v.includes("已启动") || v.includes("running") || v.includes("启动中");
+    })();
+    const title = cfg.title || text(s("nickname")) || (isEn(this._hass) ? "My car" : "我的座驾");
+    const plate = text(s("plate"));
+    const chips = [];
+    if (offline) chips.push({ cls: "bad", label: t.offline, dot: true });
+    if (lockNorm === "locked") chips.push({ cls: "ok", label: t.locked, dot: true });
+    else if (lockNorm === "unlocked") chips.push({ cls: "bad", label: t.unlocked, dot: true });
+    if (chgNow) chips.push({ cls: "info", label: t.charging, dot: true });
+    if (running) chips.push({ cls: "warn", label: t.running, dot: true });
+    if (!chips.length) chips.push({ cls: "", label: t.locking });
+    const parts = [];
+    parts.push(`<div class="head"><div class="ttl">
+      <p class="kicker">${esc(cfg.show_plate && plate ? plate : "HA CAR")}</p>
+      <h1>${esc(title)}</h1>
+      ${cfg.show_plate && plate ? "" : ""}
+    </div>
+    ${this._syncButton(data)}
+    </div>`);
+    const imgUrl = this._imageUrl(data);
+    parts.push(`<div class="stage"><div class="glow"></div>
+      ${imgUrl ? `<img class="carimg" src="${esc(imgUrl)}" alt="">` : `<div class="carph">${icon("car")}</div>`}
+      <div class="ground"></div></div>`);
+    if (mods.includes("status")) {
+      parts.push(
+        `<div class="chips">${chips.slice(0, 3).map((c) => `<span class="chip ${c.cls}">${c.dot ? '<span class="dot"></span>' : ""}${esc(c.label)}</span>`).join("")}</div>`
+      );
+    }
+    if (mods.includes("energy")) {
+      parts.push(this._energy(data, t));
+    }
+    if (mods.includes("actions")) {
+      parts.push(this._actions(data, t, running, offline, compact));
+    }
+    if (mods.includes("alerts")) {
+      const alert = this._alert(data, t);
+      if (alert) parts.push(alert);
+    }
+    if (!compact && mods.includes("tires")) {
+      const tires = this._tires(data, t);
+      if (tires) parts.push(tires);
+    }
+    if (!compact && mods.includes("doors")) {
+      const doors = this._doors(data, t);
+      if (doors) parts.push(doors);
+    }
+    if (!compact && mods.includes("charging")) {
+      const chg = this._charging(data, t, chgNow);
+      if (chg) parts.push(chg);
+    }
+    if (!compact && mods.includes("service")) {
+      const svc = this._service(data, t);
+      if (svc) parts.push(svc);
+    }
+    if (!compact) {
+      const loc = this._location(data, t);
+      if (loc) parts.push(loc);
+    }
+    parts.push(this._footer(data, t));
+    if (this._toast) parts.push(this._toastHtml());
+    return parts.join("");
+  }
+  _syncButton(data) {
+    const ent = data.id("btn_refresh");
+    const pending = ent && this._pending.has(ent);
+    if (!ent) {
+      return `<div class="iconbtn spin">${icon("refresh")}</div>`;
+    }
+    return `<button class="iconbtn${pending ? " spin" : ""}" data-act="btn_refresh" data-ent="${esc(ent)}"
+      data-dom="button" data-svc="press" data-label="${esc(dict(this._hass).refresh)}"
+      title="${esc(dict(this._hass).refresh)}">${icon("refresh")}</button>`;
+  }
+  _imageUrl(data) {
+    const cfg = this._config;
+    const pic = (slot) => {
+      const st = data.get(slot);
+      return st ? attrs(st, "entity_picture") : null;
+    };
+    if (cfg.image === "custom" && cfg.image_url) return cfg.image_url;
+    if (cfg.image && cfg.image !== "auto") {
+      if (/^https?:\/\//.test(cfg.image)) return cfg.image;
+      if (data.states[cfg.image]) return attrs(data.states[cfg.image], "entity_picture");
+      if (cfg.image === "overlook") return pic("image_overlook");
+      if (cfg.image === "3d") return pic("image_3d");
+      if (cfg.image === "side") return pic("image_side");
+    }
+    return pic("image_overlook") || pic("image_3d") || pic("image_side");
+  }
+  _energy(data, t) {
+    const fuel = num(data.get("fuel"));
+    const batt = num(data.get("battery"));
+    const ringVal = batt != null ? batt : fuel;
+    const ringLabel = batt != null ? t.battery : t.fuel;
+    const range = num(data.get("range")) != null ? num(data.get("range")) : num(data.get("ev_range"));
+    const rangeUnit = attrs(data.get("range"), "unit_of_measurement") || "km";
+    const odo = num(data.get("odo"));
+    const odoUnit = attrs(data.get("odo"), "unit_of_measurement") || "km";
+    const volt = num(data.get("volt"));
+    const oil = num(data.get("oil"));
+    if (ringVal == null && range == null && odo == null) return "";
+    const ring = ringVal == null ? "" : `<div class="ring" style="--v:${clamp(ringVal, 0, 100)}">
+            <div class="rv"><b>${Math.round(ringVal)}%</b><i>${esc(ringLabel)}</i></div></div>`;
+    const stats = [];
+    if (odo != null) {
+      stats.push(`<div class="stat"><span class="k">${esc(t.odo)}</span><span class="v"><b>${fmtNum(odo)}</b> ${esc(odoUnit)}</span></div>`);
+    }
+    if (volt != null) {
+      stats.push(`<div class="stat"><span class="k">${esc(t.volt)}</span><span class="v"><b>${fmtNum(volt, 1)}</b> V</span></div>`);
+    }
+    if (oil != null) {
+      stats.push(`<div class="stat"><span class="k">${esc(t.oil)}</span><span class="v"><b>${Math.round(oil)}</b> %</span></div>`);
+    }
+    const main = range == null ? `<div class="big">${odo != null ? fmtNum(odo) : ""}<small>${odo != null ? esc(odoUnit) : ""}</small></div>` : `<div class="big">${fmtNum(range)}<small>${esc(rangeUnit)}</small></div>`;
+    return `<div class="energy">${ring}<div class="main">${range == null ? "" : `<span class="k" style="font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--hc-dim)">${esc(t.range)}</span>`}${main}
+      ${stats.length ? `<div class="subrow">${stats.join("")}</div>` : ""}</div></div>`;
+  }
+  _actions(data, t, running, offline, compact) {
+    const cfg = this._config;
+    const tiles = [];
+    const hold = (key) => cfg.confirm.includes(key) ? ' data-hold="1"' : "";
+    const lockNorm = normLock(data.get("lock"));
+    if (data.id("btn_unlock") || data.id("btn_lock")) {
+      const key = lockNorm === "unlocked" ? "btn_lock" : "btn_unlock";
+      const ent = data.id(key);
+      if (ent) {
+        const label = lockNorm === "unlocked" ? t.lockUp : t.unlock;
+        const ic = lockNorm === "unlocked" ? "lock" : "unlock";
+        tiles.push(this._tile({
+          key,
+          ent,
+          cls: lockNorm === "locked" ? "on" : "hot",
+          ic,
+          label,
+          dom: "button",
+          svc: "press",
+          hold,
+          offline
+        }));
+      }
+    }
+    if (data.id("btn_trunk")) {
+      tiles.push(this._tile({
+        key: "btn_trunk",
+        ent: data.id("btn_trunk"),
+        ic: "trunk",
+        label: t.trunk,
+        dom: "button",
+        svc: "press",
+        hold,
+        offline
+      }));
+    }
+    if (data.id("sw_engine")) {
+      tiles.push(this._tile({
+        key: "sw_engine",
+        ent: data.id("sw_engine"),
+        ic: "power",
+        cls: running ? "on" : "",
+        label: running ? t.engineStop : t.engine,
+        dom: "homeassistant",
+        svc: "toggle",
+        hold,
+        offline
+      }));
+    }
+    if (data.id("sw_honk")) {
+      tiles.push(this._tile({
+        key: "sw_honk",
+        ent: data.id("sw_honk"),
+        ic: "megaphone",
+        label: t.honk,
+        dom: "homeassistant",
+        svc: "toggle",
+        hold,
+        offline
+      }));
+    }
+    const pills = [];
+    if (!compact) {
+      if (data.id("sw_va")) {
+        pills.push(this._pill({ key: "sw_va", ent: data.id("sw_va"), ic: "speaker", label: t.soundLight, dom: "homeassistant", svc: "toggle", hold, offline }));
+      }
+      if (data.id("sw_light")) {
+        pills.push(this._pill({ key: "sw_light", ent: data.id("sw_light"), ic: "bulb", label: t.light, dom: "homeassistant", svc: "toggle", hold, offline }));
+      }
+    }
+    if (!tiles.length && !pills.length) return "";
+    return `${tiles.length ? `<div class="acts">${tiles.join("")}</div>` : ""}
+      ${pills.length ? `<div class="pills">${pills.join("")}</div>` : ""}`;
+  }
+  _tile(o) {
+    const t = dict(this._hass);
+    const pending = this._pending.has(o.ent);
+    const disabled = o.offline ? " off" : "";
+    return `<button class="tile${o.cls ? " " + o.cls : ""}${disabled}${pending ? " pending" : ""}"
+      data-act="${esc(o.key)}" data-ent="${esc(o.ent)}" data-dom="${esc(o.dom)}" data-svc="${esc(o.svc)}"
+      data-label="${esc(o.label)}"${o.hold(o.key)} role="button" tabindex="0"
+      aria-label="${esc(o.label + "，" + t.holdHint)}">
+      ${icon(o.ic)}<span class="lbl">${esc(o.label)}</span><span class="holdbar"></span></button>`;
+  }
+  _pill(o) {
+    const pending = this._pending.has(o.ent);
+    return `<button class="pill${o.offline ? " off" : ""}${pending ? " pending" : ""}"
+      data-act="${esc(o.key)}" data-ent="${esc(o.ent)}" data-dom="${esc(o.dom)}" data-svc="${esc(o.svc)}"
+      data-label="${esc(o.label)}"${o.hold(o.key)} role="button" tabindex="0">
+      ${icon(o.ic)}<span>${esc(o.label)}</span></button>`;
+  }
+  _tires(data, _t) {
+    const defs = [
+      { slot: "tp_lf", sslot: "tps_lf", label: isEn(this._hass) ? "LF" : "左前" },
+      { slot: "tp_rf", sslot: "tps_rf", label: isEn(this._hass) ? "RF" : "右前" },
+      { slot: "tp_lr", sslot: "tps_lr", label: isEn(this._hass) ? "LR" : "左后" },
+      { slot: "tp_rr", sslot: "tps_rr", label: isEn(this._hass) ? "RR" : "右后" }
+    ];
+    const cells = [];
+    for (const d of defs) {
+      const st = data.get(d.slot);
+      if (isBad(st)) continue;
+      const v = num(st);
+      const unit = attrs(st, "unit_of_measurement") || "kPa";
+      const warn = normTire(data.get(d.sslot)) === "warn";
+      cells.push(`<div class="tire${warn ? " warn" : ""}" data-more="${esc(data.id(d.slot))}">
+        <span class="p">${esc(d.label)}</span>
+        <span class="v">${v == null ? "—" : fmtNum(v)}<small>${esc(unit)}</small></span></div>`);
+    }
+    if (!cells.length) return "";
+    return `<div class="tires">${cells.join("")}</div>`;
+  }
+  _doors(data, t) {
+    const defs = [
+      { slot: "door_fl", label: isEn(this._hass) ? "Front L" : "主驾门" },
+      { slot: "door_fr", label: isEn(this._hass) ? "Front R" : "副驾门" },
+      { slot: "door_rl", label: isEn(this._hass) ? "Rear L" : "左后门" },
+      { slot: "door_rr", label: isEn(this._hass) ? "Rear R" : "右后门" },
+      { slot: "tailgate", label: isEn(this._hass) ? "Trunk" : "尾门" },
+      { slot: "hood", label: isEn(this._hass) ? "Hood" : "引擎盖" },
+      { slot: "win_fl", label: isEn(this._hass) ? "Win L" : "主驾车窗" },
+      { slot: "win_fr", label: isEn(this._hass) ? "Win R" : "副驾车窗" }
+    ];
+    const open = [];
+    let known = 0;
+    for (const d of defs) {
+      const st = data.get(d.slot);
+      if (!st) continue;
+      known += 1;
+      if (normOpen(st) === "open") open.push(d);
+    }
+    if (!known) return "";
+    if (!open.length) {
+      return `<div class="doors"><span class="door">${icon("carProfile")}${esc(t.doorsClosed)}</span></div>`;
+    }
+    return `<div class="doors">${open.map((d) => `<span class="door open" data-more="${esc(data.id(d.slot))}">${icon("carProfile")}${esc(d.label)} · ${esc(t.open)}</span>`).join("")}</div>`;
+  }
+  _alert(data, t) {
+    const st = data.get("alerts");
+    const raw = text(st);
+    if (!raw) return "";
+    if (String(raw).trim() === "0") return "";
+    const low = raw.toLowerCase();
+    if (low === "none" || low === "no" || low === "无" || low === "正常" || low === "no alerts") return "";
+    return `<div class="alert" data-more="${esc(data.id("alerts"))}">${icon("warning")}
+      <div><b>${esc(t.alert)}</b>${esc(raw)}</div></div>`;
+  }
+  _charging(data, t, chgNow) {
+    const st = data.get("chg_status");
+    const wallbox = data.get("wallbox");
+    if (!st && !data.id("chg_start")) return "";
+    const statusText = text(st) || (chgNow ? t.charging : t.notCharging);
+    const soc = num(data.get("battery"));
+    const last = num(data.get("last_soc"));
+    const meta = [];
+    if (soc != null) meta.push(`${t.battery} ${Math.round(soc)}%`);
+    if (last != null) meta.push(`${t.lastSoc} ${Math.round(last)}%`);
+    const btns = [];
+    if (data.id("chg_start")) {
+      btns.push(`<button class="mini" data-act="chg_start" data-ent="${esc(data.id("chg_start"))}"
+        data-dom="homeassistant" data-svc="turn_on" data-label="${esc(t.chargeNow)}">${esc(t.chargeNow)}</button>`);
+    }
+    if (data.id("chg_stop")) {
+      btns.push(`<button class="mini dim" data-act="chg_stop" data-ent="${esc(data.id("chg_stop"))}"
+        data-dom="homeassistant" data-svc="turn_off" data-label="${esc(t.stopCharge)}">${esc(t.stopCharge)}</button>`);
+    }
+    if (data.id("wallbox")) {
+      const on = String(wallbox.state).toLowerCase() === "on";
+      btns.push(`<button class="mini${on ? "" : " dim"}" data-act="wallbox"
+        data-ent="${esc(data.id("wallbox"))}" data-dom="homeassistant" data-svc="toggle"
+        data-label="${esc(t.chargeNow)}">${esc(on ? t.stopCharge : t.chargeNow)}</button>`);
+    }
+    return `<div class="panel"><div class="ph">${icon("bolt")}${esc(t.chargingTitle)}</div>
+      <div class="chgrow"><div><div class="st">${esc(statusText)}</div>
+      ${meta.length ? `<div class="meta">${esc(meta.join(" · "))}</div>` : ""}</div>
+      ${btns.length ? `<div style="display:flex;gap:6px">${btns.join("")}</div>` : ""}</div></div>`;
+  }
+  _service(data, t) {
+    const rows = [];
+    const push = (label, slot, suffix) => {
+      const st = data.get(slot);
+      const raw = text(st);
+      if (!raw) return;
+      rows.push({ label, value: suffix ? raw + suffix : raw, ent: data.id(slot) });
+    };
+    push(t.maintenance, "maint");
+    push(t.recallInfo, "recall");
+    push(t.messages, "messages", "");
+    push(t.firmware, "fw");
+    push(t.support, "support");
+    if (!rows.length) return "";
+    return `<details class="svc"><summary><span class="sum">${icon("wrench")}${esc(t.service)}</span>${icon("chevron")}</summary>
+      ${rows.map((r) => `<div class="row" data-more="${esc(r.ent)}"><span class="k">${esc(r.label)}</span><span class="val">${esc(r.value)}</span></div>`).join("")}</details>`;
+  }
+  _location(data, _t) {
+    const addr = text(data.get("addr"));
+    const tracker = data.id("tracker");
+    if (!addr && !tracker) return "";
+    const label = addr || (isEn(this._hass) ? "Open map" : "查看地图");
+    return `<div class="doors"><span class="door" data-more="${esc(tracker || data.id("addr"))}">
+      ${icon("pin")}<span class="addr">${esc(label)}</span></span></div>`;
+  }
+  _footer(data, t) {
+    const sync = data.get("sync");
+    const syncText = text(sync);
+    const bad = syncText ? /异常|error|失败/.test(syncText.toLowerCase()) : false;
+    const when = relTime(attrs(data.get("data_time"), "when") || (data.get("data_time") ? data.get("data_time").state : ""), (this._hass.locale || {}).language);
+    const left = [];
+    if (syncText) {
+      left.push(`<span class="syncwrap"><span class="sdot${bad ? " bad" : ""}"></span>${esc(bad ? t.syncBad : t.syncOk)}</span>`);
+    }
+    if (when) left.push(`<span>${esc(t.syncTime)} ${esc(when)}</span>`);
+    if (!left.length) left.push(`<span>${esc(t.never)}</span>`);
+    return `<div class="foot"><span class="left">${left.join("")}</span></div>`;
+  }
+  _toastHtml() {
+    const kind = this._toast.kind === "err" ? " err" : "";
+    return `<div class="toast${kind}" role="status">${icon(this._toast.kind === "err" ? "warning" : "bolt")}<span>${esc(this._toast.msg)}</span></div>`;
+  }
+  // ---------- 交互 ----------
+  _bind() {
+    const w = this._wrap;
+    w.addEventListener("pointerdown", (ev) => this._onDown(ev));
+    w.addEventListener("pointerup", (ev) => this._onUp(ev));
+    w.addEventListener("pointercancel", () => this._cancelHold());
+    w.addEventListener("pointerleave", (ev) => {
+      const el = ev.target.closest && ev.target.closest("[data-act]");
+      if (el && this._hold && this._hold.el === el) this._cancelHold();
+    });
+    w.addEventListener("click", (ev) => this._onClick(ev));
+    w.addEventListener("keydown", (ev) => this._onKeyDown(ev));
+    w.addEventListener("keyup", (ev) => this._onKeyUp(ev));
+    w.addEventListener("contextmenu", (ev) => {
+      if (ev.target.closest && ev.target.closest("[data-act]")) ev.preventDefault();
+    });
+  }
+  _holdMs() {
+    return clamp(Number(this._config && this._config.hold_ms) || 700, 300, 3e3);
+  }
+  _onDown(ev) {
+    const el = ev.target.closest && ev.target.closest("[data-act]");
+    if (!el || !el.dataset.hold) return;
+    if (ev.pointerType === "mouse" && ev.button !== 0) return;
+    ev.preventDefault();
+    this._beginHold(el, ev.pointerId);
+  }
+  _beginHold(el, pointerId) {
+    this._cancelHold();
+    const ms = this._holdMs();
+    el.style.setProperty("--hc-holdms", ms + "ms");
+    el.classList.add("pressing");
+    this._hold = { el, armed: false };
+    try {
+      if (pointerId != null) el.setPointerCapture(pointerId);
+    } catch {
+    }
+    this._holdTimer = setTimeout(() => {
+      if (!this._hold) return;
+      this._hold.armed = true;
+      el.classList.add("armed");
+      const lbl = el.querySelector(".lbl");
+      if (lbl) lbl.textContent = dict(this._hass).armed;
+      if (navigator.vibrate) navigator.vibrate(14);
+    }, ms);
+  }
+  _onUp(ev) {
+    const el = ev.target.closest && ev.target.closest("[data-act]");
+    if (!this._hold) return;
+    if (!el || el !== this._hold.el) {
+      this._cancelHold();
+      return;
+    }
+    this._finishHold();
+  }
+  _finishHold() {
+    const h = this._hold;
+    if (!h) return;
+    const armed = h.armed;
+    this._hold = null;
+    clearTimeout(this._holdTimer);
+    h.el.classList.remove("pressing", "armed");
+    const lbl = h.el.querySelector(".lbl");
+    if (lbl && armed) lbl.textContent = h.el.dataset.label || "";
+    if (armed) {
+      this._justArmed = true;
+      this._exec(h.el);
+      setTimeout(() => {
+        this._justArmed = false;
+      }, 400);
+    } else {
+      this._hint();
+    }
+  }
+  _cancelHold() {
+    if (!this._hold) return;
+    clearTimeout(this._holdTimer);
+    this._hold.el.classList.remove("pressing", "armed");
+    const lbl = this._hold.el.querySelector(".lbl");
+    if (lbl) lbl.textContent = this._hold.el.dataset.label || "";
+    this._hold = null;
+    if (this._pendingRender) {
+      this._pendingRender = false;
+      this._render(true);
+    }
+  }
+  _onKeyDown(ev) {
+    if (ev.key !== "Enter" && ev.key !== " ") return;
+    const el = ev.target.closest && ev.target.closest("[data-act]");
+    if (!el || !el.dataset.hold) return;
+    ev.preventDefault();
+    if (this._hold) return;
+    this._beginHold(el, null);
+  }
+  _onKeyUp(ev) {
+    if (ev.key !== "Enter" && ev.key !== " ") return;
+    if (!this._hold) return;
+    this._finishHold();
+  }
+  _onClick(ev) {
+    const act = ev.target.closest && ev.target.closest("[data-act]");
+    if (act) {
+      if (act.dataset.hold) {
+        if (!this._justArmed) this._hint();
+        return;
+      }
+      this._exec(act);
+      return;
+    }
+    const more = ev.target.closest && ev.target.closest("[data-more]");
+    if (more && more.dataset.more) this._moreInfo(more.dataset.more);
+  }
+  _hint() {
+    const t = dict(this._hass);
+    this._showToast(t.holdHint, "ok");
+  }
+  _moreInfo(entityId) {
+    if (!entityId) return;
+    if (this._hass && typeof this._hass.moreInfo === "function") {
+      this._hass.moreInfo(entityId);
+      return;
+    }
+    this.dispatchEvent(
+      new CustomEvent("hass-more-info", {
+        detail: { entityId },
+        bubbles: true,
+        composed: true
+      })
+    );
+  }
+  _exec(el) {
+    if (!this._hass) return;
+    const ent = el.dataset.ent;
+    const dom = el.dataset.dom || "button";
+    const svc = el.dataset.svc || "press";
+    const label = el.dataset.label || "";
+    const key = el.dataset.act || "";
+    if (!ent) return;
+    this._pending.set(ent, Date.now());
+    let call;
+    try {
+      call = this._hass.callService(dom, svc, { entity_id: ent });
+    } catch (err) {
+      this._pending.delete(ent);
+      this._showToast(dict(this._hass).failed + "：" + (err && err.message ? err.message : err), "err");
+      return;
+    }
+    Promise.resolve(call).then(() => {
+      const t = dict(this._hass);
+      this._showToast(key === "btn_refresh" ? t.refreshOk : t.sent + (label ? "：" + label : ""), "ok");
+    }).catch((err) => {
+      this._pending.delete(ent);
+      const t = dict(this._hass);
+      this._showToast(t.failed + "：" + (err && err.message ? err.message : err), "err");
+    });
+  }
+  _showToast(msg, kind) {
+    this._toast = { msg, kind, ts: Date.now() };
+    this._sig = "";
+    if (this._toastTimer) clearTimeout(this._toastTimer);
+    this._toastTimer = setTimeout(() => {
+      this._toast = null;
+      this._sig = "";
+      this._render(true);
+    }, 4e3);
+    this._render(true);
+  }
+};
+customElements.define("ha-car", HaCarCard);
+
+// src/editor.js
+var MODULE_LABELS = {
+  status: "状态徽章",
+  actions: "快捷操作",
+  energy: "里程与能耗",
+  tires: "四轮胎压",
+  doors: "门窗状态",
+  charging: "充电与能源",
+  alerts: "异常告警",
+  service: "服务信息"
+};
+var ACTION_LABELS = {
+  btn_unlock: "开锁",
+  btn_lock: "上锁",
+  btn_trunk: "后备箱",
+  sw_engine: "远程启动/熄火",
+  sw_honk: "鸣笛寻车",
+  sw_va: "声光寻车",
+  sw_light: "灯光寻车"
+};
+var OVERRIDES = [
+  ["lock", "门锁状态"],
+  ["fuel", "燃油量"],
+  ["battery", "动力电池电量"],
+  ["range", "续航里程"],
+  ["odo", "总里程"],
+  ["tp_lf", "左前轮胎压"],
+  ["tp_rf", "右前轮胎压"],
+  ["tracker", "车辆定位"],
+  ["chg_status", "充电状态"],
+  ["alerts", "异常警示"],
+  ["btn_refresh", "手动刷新按钮"]
+];
+var ACCENTS = ["#37d6e8", "#6ea8ff", "#7ee2a8", "#ffb347", "#ff7ab0"];
+var L = {
+  vehicle: "车辆",
+  vehicleHint: "选择要显示的车辆；卡片按实体前缀自动绑定，不需要手填实体。",
+  autoDetect: "自动识别",
+  noVehicle: "没有检测到福特派互联的车辆实体，请先在集成里完成登录。",
+  title: "卡片标题",
+  showPlate: "显示车牌",
+  layout: "布局",
+  layoutFull: DEFAULTS.layout === "full" ? "完整" : "完整",
+  layoutCompact: "紧凑",
+  modules: "显示模块",
+  modulesHint: "取消的模块不渲染，也不占高度。",
+  guard: "防误触",
+  guardHint: "开启后，下列动作需要按住不放才执行；松手太早只提示、不动作。适合后备箱、远程启动这类有实际后果的指令。",
+  guardOn: "启用长按确认",
+  holdMs: "长按时长",
+  confirmWhich: "需要长按的动作",
+  look: "外观",
+  imageMode: "车辆图片",
+  imageUrl: "图片地址",
+  accent: "强调色",
+  advanced: "高级：实体绑定",
+  advancedHint: "留空即自动识别。只有实体被改名或一台车挂多个集成时才需要填。"
+};
+var IMG_MODES = [
+  ["auto", "自动（俯视 → 3D → 侧视）"],
+  ["overlook", "俯视车型图"],
+  ["3d", "3D 车型图"],
+  ["side", "侧视车型图"],
+  ["custom", "自定义图片地址"]
+];
+var HaCarEditor = class extends HTMLElement {
+  constructor() {
+    super();
+    this.attachShadow({ mode: "open" });
+    this._built = false;
+  }
+  setConfig(config) {
+    this._config = Object.assign({}, DEFAULTS, config || {});
+    this._config.entities = Object.assign({}, this._config.entities || {});
+    if (!Array.isArray(this._config.modules)) this._config.modules = MODULES.slice();
+    if (!Array.isArray(this._config.confirm)) this._config.confirm = DEFAULTS.confirm.slice();
+    if (!this._built) this._build();
+    this._sync();
+  }
+  set hass(hass) {
+    this._hass = hass;
+    if (this._built) this._syncVehicles();
+  }
+  _build() {
+    const root = this.shadowRoot;
+    root.innerHTML = `<style>${EDITOR_STYLES}</style>
+    <div class="ed">
+      <div class="sec">
+        <h3>${L.vehicle}</h3>
+        <p class="hint">${L.vehicleHint}</p>
+        <select class="tf" id="veh"></select>
+        <p class="hint" id="vehhint" style="margin-top:6px"></p>
+        <label class="f" for="title">${L.title}</label>
+        <input class="tf" id="title" type="text" placeholder="我的座驾">
+        <div class="row"><span class="rl">${L.showPlate}</span>
+          <button class="sw" id="plate" role="switch" aria-checked="true"></button></div>
+        <label class="f">${L.layout}</label>
+        <div class="chips2" id="layouts">
+          <button class="tg" type="button" data-layout="full">完整（含胎压/门窗/服务）</button>
+          <button class="tg" type="button" data-layout="compact">紧凑</button>
+        </div>
+      </div>
+
+      <div class="sec">
+        <h3>${L.modules}</h3>
+        <p class="hint">${L.modulesHint}</p>
+        <div class="chips2" id="mods"></div>
+      </div>
+
+      <div class="sec">
+        <h3>${L.guard}</h3>
+        <p class="hint">${L.guardHint}</p>
+        <div class="row"><span class="rl">${L.guardOn}</span>
+          <button class="sw" id="guard" role="switch" aria-checked="true"></button></div>
+        <label class="f">${L.holdMs}</label>
+        <div class="ranged"><input type="range" id="hold" min="300" max="2000" step="100">
+          <span id="holdv" style="font-size:12px;min-width:64px">700 ms</span></div>
+        <label class="f">${L.confirmWhich}</label>
+        <div class="chips2" id="confirms"></div>
+      </div>
+
+      <div class="sec">
+        <h3>${L.look}</h3>
+        <label class="f" for="imgmode">${L.imageMode}</label>
+        <select class="tf" id="imgmode">
+          ${IMG_MODES.map(([v, n]) => `<option value="${v}">${n}</option>`).join("")}
+        </select>
+        <input class="tf" id="imgurl" type="text" placeholder="https://…" style="margin-top:6px;display:none">
+        <label class="f">${L.accent}</label>
+        <div class="swatches" id="swatches">
+          ${ACCENTS.map((c) => `<span class="swatch" data-color="${c}" style="background:${c}"></span>`).join("")}
+          <input type="color" id="color" style="width:30px;height:28px;border:none;background:none;cursor:pointer">
+        </div>
+      </div>
+
+      <details class="sec adv">
+        <summary style="cursor:pointer;font-size:13px;font-weight:600">${L.advanced}</summary>
+        <p class="hint" style="margin-top:8px">${L.advancedHint}</p>
+        <div class="grid2">
+          ${OVERRIDES.map(
+      ([slot, label]) => `<label class="f">${label}</label>
+            <input class="tf" data-ov="${slot}" type="text" placeholder="sensor.xxx_${slot}">`
+    ).join("")}
+        </div>
+      </details>
+    </div>`;
+    this._built = true;
+    this._wire();
+    this._renderChips();
+  }
+  _wire() {
+    const q = (id) => this.shadowRoot.getElementById(id);
+    q("veh").addEventListener("change", (e) => {
+      const v = e.target.value;
+      if (v) this._config.hash = v;
+      else delete this._config.hash;
+      this._syncVehicles();
+      this._emit();
+    });
+    q("title").addEventListener("input", (e) => {
+      this._config.title = e.target.value.trim();
+      this._emit();
+    });
+    q("plate").addEventListener("click", () => {
+      this._config.show_plate = !this._config.show_plate;
+      this._sync();
+      this._emit();
+    });
+    this.shadowRoot.getElementById("layouts").addEventListener("click", (e) => {
+      const b = e.target.closest("[data-layout]");
+      if (!b) return;
+      this._config.layout = b.dataset.layout;
+      this._sync();
+      this._emit();
+    });
+    this.shadowRoot.getElementById("mods").addEventListener("click", (e) => {
+      const b = e.target.closest("[data-mod]");
+      if (!b) return;
+      const mod = b.dataset.mod;
+      const list = this._config.modules || [];
+      this._config.modules = list.includes(mod) ? list.filter((m) => m !== mod) : [...MODULES].filter((m) => m === mod || list.includes(m));
+      this._sync();
+      this._emit();
+    });
+    q("guard").addEventListener("click", () => {
+      this._config.confirm = this._config.confirm.length ? [] : DEFAULTS.confirm.slice();
+      this._sync();
+      this._emit();
+    });
+    q("hold").addEventListener("input", (e) => {
+      this._config.hold_ms = Number(e.target.value);
+      this.shadowRoot.getElementById("holdv").textContent = `${this._config.hold_ms} ms`;
+      this._emit();
+    });
+    this.shadowRoot.getElementById("confirms").addEventListener("click", (e) => {
+      const b = e.target.closest("[data-confirm]");
+      if (!b) return;
+      const key = b.dataset.confirm;
+      const list = this._config.confirm || [];
+      this._config.confirm = list.includes(key) ? list.filter((k) => k !== key) : [...list, key];
+      this._sync();
+      this._emit();
+    });
+    q("imgmode").addEventListener("change", (e) => {
+      this._config.image = e.target.value;
+      this._sync();
+      this._emit();
+    });
+    q("imgurl").addEventListener("input", (e) => {
+      this._config.image_url = e.target.value.trim();
+      this._emit();
+    });
+    this.shadowRoot.getElementById("swatches").addEventListener("click", (e) => {
+      const s = e.target.closest("[data-color]");
+      if (!s) return;
+      this._config.accent = s.dataset.color;
+      this._sync();
+      this._emit();
+    });
+    q("color").addEventListener("input", (e) => {
+      this._config.accent = e.target.value;
+      this._sync();
+      this._emit();
+    });
+    this.shadowRoot.querySelectorAll("[data-ov]").forEach((input) => {
+      input.addEventListener("input", (e) => {
+        const slot = e.target.dataset.ov;
+        const val = e.target.value.trim();
+        this._config.entities = this._config.entities || {};
+        if (val) this._config.entities[slot] = val;
+        else delete this._config.entities[slot];
+        this._emit();
+      });
+    });
+  }
+  _renderChips() {
+    const mods = this.shadowRoot.getElementById("mods");
+    mods.innerHTML = MODULES.map(
+      (m) => `<button class="tg" type="button" data-mod="${m}">${MODULE_LABELS[m] || m}</button>`
+    ).join("");
+    const confirms = this.shadowRoot.getElementById("confirms");
+    confirms.innerHTML = CONFIRMABLE.map(
+      (k) => `<button class="tg" type="button" data-confirm="${k}">${ACTION_LABELS[k] || k}</button>`
+    ).join("");
+  }
+  _syncVehicles() {
+    const sel = this.shadowRoot.getElementById("veh");
+    if (!sel) return;
+    const cars = this._hass ? detectVehicles(this._hass) : [];
+    const opts = [`<option value="">${L.autoDetect}</option>`];
+    for (const car of cars) {
+      const nick = car.ids.vehicle_nickname ? this._hass.states[car.ids.vehicle_nickname] : null;
+      const label = nick && nick.state || car.hash.slice(0, 8);
+      opts.push(`<option value="${esc(car.hash)}">${esc(label)}</option>`);
+    }
+    sel.innerHTML = opts.join("");
+    sel.value = this._config && this._config.hash || "";
+    const hint = this.shadowRoot.getElementById("vehhint");
+    if (hint) hint.textContent = cars.length ? "" : L.noVehicle;
+  }
+  _sync() {
+    if (!this._built) return;
+    const q = (id) => this.shadowRoot.getElementById(id);
+    this._syncVehicles();
+    q("title").value = this._config.title || "";
+    q("plate").setAttribute("aria-checked", String(Boolean(this._config.show_plate)));
+    this.shadowRoot.querySelectorAll("[data-layout]").forEach((b) => {
+      b.setAttribute("aria-pressed", String(b.dataset.layout === (this._config.layout || "full")));
+    });
+    this.shadowRoot.querySelectorAll("[data-mod]").forEach((b) => {
+      b.setAttribute("aria-pressed", String((this._config.modules || []).includes(b.dataset.mod)));
+    });
+    q("guard").setAttribute("aria-checked", String((this._config.confirm || []).length > 0));
+    const hold = Number(this._config.hold_ms) || 700;
+    q("hold").value = String(hold);
+    q("holdv").textContent = `${hold} ms`;
+    this.shadowRoot.querySelectorAll("[data-confirm]").forEach((b) => {
+      b.setAttribute("aria-pressed", String((this._config.confirm || []).includes(b.dataset.confirm)));
+    });
+    q("imgmode").value = this._config.image || "auto";
+    q("imgurl").style.display = this._config.image === "custom" ? "block" : "none";
+    q("imgurl").value = this._config.image_url || "";
+    q("color").value = /^#[0-9a-f]{6}$/i.test(this._config.accent || "") ? this._config.accent : "#37d6e8";
+    this.shadowRoot.querySelectorAll(".swatch").forEach((s) => {
+      s.classList.toggle("sel", s.dataset.color.toLowerCase() === String(this._config.accent || "").toLowerCase());
+    });
+    this.shadowRoot.querySelectorAll("[data-ov]").forEach((input) => {
+      input.value = this._config.entities && this._config.entities[input.dataset.ov] || "";
+    });
+  }
+  _emit() {
+    const cfg = Object.assign({}, this._config);
+    cfg.entities = Object.assign({}, cfg.entities || {});
+    for (const [k, v] of Object.entries(cfg.entities)) {
+      if (!v) delete cfg.entities[k];
+    }
+    if (!Object.keys(cfg.entities).length) delete cfg.entities;
+    if (!cfg.title) delete cfg.title;
+    if (!cfg.image_url) delete cfg.image_url;
+    if (cfg.image === "custom" && !cfg.image_url) delete cfg.image;
+    if (cfg.hold_ms === DEFAULTS.hold_ms) delete cfg.hold_ms;
+    if (cfg.accent === DEFAULTS.accent) delete cfg.accent;
+    if (cfg.image === "auto") delete cfg.image;
+    this.dispatchEvent(
+      new CustomEvent("config-changed", {
+        detail: { config: cfg },
+        bubbles: true,
+        composed: true
+      })
+    );
+  }
+};
+customElements.define("ha-car-editor", HaCarEditor);
+
+// src/main.js
+var VERSION = "1.0.0";
+window.customCards = window.customCards || [];
+window.customCards.push({
+  type: "ha-car",
+  name: "爱车卡片",
+  description: "福特派互联（FordPass CN）/ 林肯之道车辆卡片：车况、四轮胎压、门窗、充电与长按防误触控车。",
+  preview: true,
+  documentationURL: "https://github.com/RockJesus/ha-car#readme"
+});
+console.info(
+  `%c HA-CAR %c v${VERSION} %c适配福特派互联 / 林肯之道`,
+  "background:#37d6e8;color:#08121d;font-weight:700;border-radius:4px 0 0 4px;padding:2px 6px",
+  "background:#141d2b;color:#e9eff7;padding:2px 6px",
+  "background:#0b1220;color:#8496ad;padding:2px 6px;border-radius:0 4px 4px 0"
+);

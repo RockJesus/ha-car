@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="zh-CN">
+<head><meta charset="utf-8"><title>editor</title>
+<style>
+  body{margin:0;background:#111;font-family:-apple-system,"PingFang SC",sans-serif;}
+  .panel{width:420px;padding:16px;background:#1c1c1e;color:#eee;border-radius:12px;margin:16px}
+</style>
+</head>
+<body>
+<div class="panel"><ha-car-editor id="ed"></ha-car-editor></div>
+<script type="module">
+import "../ha-car.js";
+const HASH="3f9a1c0b7d2e4a58";
+const now=new Date().toISOString();
+const S={};
+S[`sensor.${HASH}_lock_status`]={state:"已锁定",attributes:{},last_changed:now,last_updated:now};
+S[`sensor.${HASH}_vehicle_nickname`]={state:"我的锐际",attributes:{},last_changed:now,last_updated:now};
+S[`sensor.${HASH}_odometer`]={state:"12345",attributes:{},last_changed:now,last_updated:now};
+const hass={states:S,locale:{language:"zh-Hans"},callService:async()=>{},entities:{}};
+const ed=document.getElementById("ed");
+let last=null;
+ed.addEventListener("config-changed",(e)=>{last=e.detail.config;console.log("[config-changed]",JSON.stringify(last));});
+ed.setConfig({hash:HASH});
+ed.hass=hass;
+window.__ed=ed;
+window.__last=()=>last;
+</script>
+</body>
+</html>

@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>ha-car preview harness</title>
+<style>
+  html,body { margin:0; background:#070b12; }
+  body { padding:20px; font-family:-apple-system,"PingFang SC",sans-serif; }
+  .grid { display:flex; gap:20px; align-items:flex-start; flex-wrap:wrap; }
+  .cell { width:378px; }
+  .cap { color:#5c6b7d; font-size:11px; letter-spacing:.1em; text-transform:uppercase; margin:0 0 8px; }
+  ha-car { display:block; }
+  .wide { width:520px; }
+</style>
+</head>
+<body>
+<div class="grid">
+  <div class="cell"><p class="cap">full · 已锁定</p><ha-car id="c1"></ha-car></div>
+  <div class="cell"><p class="cap">compact · 已解锁 + 告警</p><ha-car id="c2"></ha-car></div>
+</div>
+<div class="grid" style="margin-top:20px">
+  <div class="cell wide"><p class="cap">full · 宽卡</p><ha-car id="c3"></ha-car></div>
+</div>
+<script type="module">
+import "../ha-car.js";
+
+const HASH = "3f9a1c0b7d2e4a58";
+const now = new Date().toISOString();
+const st = (state, attributes = {}) => ({
+  state: String(state), attributes, last_changed: now, last_updated: now,
+});
+const S = {};
+const add = (domain, key, state, attributes) => {
+  S[`${domain}.${HASH}_${key}`] = st(state, attributes);
+};
+
+add("sensor", "vehicle_nickname", "我的座驾");
+add("sensor", "license_plate", "京A·12345");
+add("image", "vehicle_overlook_image", "ok", { entity_picture: "car.png" });
+add("sensor", "lock_status", "已锁定");
+add("sensor", "onlinernr", "在线");
+add("sensor", "fuel_level", 62, { unit_of_measurement: "%" });
+add("sensor", "distance_to_empty", 486, { unit_of_measurement: "km" });
+add("sensor", "odometer", 12345, { unit_of_measurement: "km" });
+add("sensor", "battery_voltage", 12.4, { unit_of_measurement: "V" });
+add("sensor", "prognostic", 78, { unit_of_measurement: "%" });
+add("sensor", "lf_tire", 245, { unit_of_measurement: "kPa" });
+add("sensor", "rf_tire", 248, { unit_of_measurement: "kPa" });
+add("sensor", "lr_tire", 243, { unit_of_measurement: "kPa" });
+add("sensor", "rr_tire", 226, { unit_of_measurement: "kPa" });
+add("sensor", "rr_tire_status", "Fault");
+add("sensor", "driver_door", "关闭");
+add("sensor", "passenger_door", "关闭");
+add("sensor", "tailgate", "关闭");
+add("sensor", "driver_window", "关闭");
+add("sensor", "maintenance_plan", "下次保养 5000 km 或 90 天后");
+add("sensor", "recall", "无");
+add("sensor", "messages", 2, { unit_of_measurement: "条" });
+add("sensor", "sync_health", "正常");
+add("sensor", "vehicle_data_time", now);
+add("sensor", "location", "示例市 云杉路 8 号");
+add("device_tracker", "tracker", "home");
+add("button", "lock_door", "unknown");
+add("button", "unlock_door", "unknown");
+add("button", "trunk_unlock", "unknown");
+add("button", "manual_refresh", "unknown");
+add("switch", "engine", "off");
+add("switch", "honk", "off");
+add("switch", "va_switch", "off");
+add("switch", "light_find", "off");
+
+const hass = {
+  states: S,
+  locale: { language: "zh-Hans" },
+  callService: async (dom, svc, data) => {
+    console.log("[service]", dom, svc, JSON.stringify(data));
+  },
+  moreInfo: (id) => console.log("[more-info]", id),
+  entities: {},
+};
+window.__hass = hass;
+
+const mk = (id, cfg) => {
+  const el = document.getElementById(id);
+  el.setConfig(cfg);
+  el.hass = hass;
+  return el;
+};
+
+mk("c1", { hash: HASH });
+mk("c2", {
+  hash: HASH, layout: "compact", show_plate: true,
+  entities: { alerts: `sensor.${HASH}_vehicle_alerts` },
+});
+S[`sensor.${HASH}_vehicle_alerts`] = st("胎压监测系统警告");
+mk("c3", { hash: HASH, accent: "#6ea8ff" });
+
+// 供截图脚本切换状态用
+window.__setUnlocked = () => {
+  S[`sensor.${HASH}_lock_status`].state = "已解锁";
+  window.__hass.states = { ...S };
+  mk("c2", { hash: HASH, layout: "compact", entities: { alerts: `sensor.${HASH}_vehicle_alerts` } });
+};
+</script>
+</body>
+</html>
