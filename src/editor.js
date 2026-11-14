@@ -11,7 +11,6 @@ import { esc } from "./util.js";
 const ACTION_LABELS = {
   btn_unlock: "开锁",
   btn_lock: "上锁",
-  btn_trunk: "后备箱",
   sw_engine: "远程启动/熄火",
   sw_honk: "鸣笛寻车",
   sw_va: "声光寻车",

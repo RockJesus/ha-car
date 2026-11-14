@@ -859,6 +859,7 @@ var ZH = {
   notCharging: "未充电",
   lock: "车锁",
   lockUp: "上锁",
+  lockDown: "关锁",
   unlock: "开锁",
   unlockShort: "解锁",
   trunk: "后备箱",
@@ -952,6 +953,7 @@ var EN = {
   notCharging: "Idle",
   lock: "Lock",
   lockUp: "Lock",
+  lockDown: "Lock",
   unlock: "Unlock",
   unlockShort: "Unlock",
   trunk: "Trunk",
@@ -1163,7 +1165,6 @@ var BLOCK_TYPES = ["meta", "hero", "energy", "alerts", "doors", "charging", "ser
 var CONFIRMABLE = [
   "btn_unlock",
   "btn_lock",
-  "btn_trunk",
   "sw_engine",
   "sw_honk",
   "sw_va",
@@ -1184,7 +1185,7 @@ var DEFAULTS = {
   modules: MODULES.filter((m) => m !== "service"),
   // 模块顺序：null 时按 modules 兼容推导（老配置无需迁移）
   blocks: null,
-  confirm: ["btn_unlock", "btn_lock", "btn_trunk", "sw_engine", "sw_honk"],
+  confirm: ["btn_unlock", "btn_lock", "sw_engine", "sw_honk"],
   hold_ms: 2e3,
   accent: "#37d6e8",
   show_plate: true,
@@ -1729,31 +1730,26 @@ var HaCarCard = class extends HTMLElement {
     const tiles = [];
     const hold = (key) => cfg.confirm.includes(key) ? ' data-hold="1"' : "";
     const lockNorm = normLock(data.get("lock"));
-    if (data.id("btn_unlock") || data.id("btn_lock")) {
-      const key = lockNorm === "unlocked" ? "btn_lock" : "btn_unlock";
-      const ent = data.id(key);
-      if (ent) {
-        const label = lockNorm === "unlocked" ? t.lockUp : t.unlock;
-        const ic = lockNorm === "unlocked" ? "lock" : "unlock";
-        tiles.push(this._tile({
-          key,
-          ent,
-          cls: lockNorm === "locked" ? "on" : "hot",
-          ic,
-          label,
-          dom: "button",
-          svc: "press",
-          hold,
-          offline
-        }));
-      }
-    }
-    if (data.id("btn_trunk")) {
+    if (data.id("btn_unlock")) {
       tiles.push(this._tile({
-        key: "btn_trunk",
-        ent: data.id("btn_trunk"),
-        ic: "trunk",
-        label: t.trunk,
+        key: "btn_unlock",
+        ent: data.id("btn_unlock"),
+        ic: "unlock",
+        label: t.unlock,
+        cls: lockNorm === "unlocked" ? "hot" : "",
+        dom: "button",
+        svc: "press",
+        hold,
+        offline
+      }));
+    }
+    if (data.id("btn_lock")) {
+      tiles.push(this._tile({
+        key: "btn_lock",
+        ent: data.id("btn_lock"),
+        ic: "lock",
+        label: t.lockDown,
+        cls: lockNorm === "locked" ? "on" : "",
         dom: "button",
         svc: "press",
         hold,
@@ -2161,7 +2157,6 @@ var BLOCK_LABELS = {
 var ACTION_LABELS = {
   btn_unlock: "开锁",
   btn_lock: "上锁",
-  btn_trunk: "后备箱",
   sw_engine: "远程启动/熄火",
   sw_honk: "鸣笛寻车",
   sw_va: "声光寻车",
@@ -2574,7 +2569,7 @@ var HaCarEditor = class extends HTMLElement {
 customElements.define("ha-car-editor", HaCarEditor);
 
 // src/main.js
-var VERSION = "1.4.1";
+var VERSION = "1.4.2";
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "ha-car",

@@ -16,7 +16,6 @@ const BLOCK_TYPES = ["meta", "hero", "energy", "alerts", "doors", "charging", "s
 const CONFIRMABLE = [
   "btn_unlock",
   "btn_lock",
-  "btn_trunk",
   "sw_engine",
   "sw_honk",
   "sw_va",
@@ -39,7 +38,7 @@ const DEFAULTS = {
   modules: MODULES.filter((m) => m !== "service"),
   // 模块顺序：null 时按 modules 兼容推导（老配置无需迁移）
   blocks: null,
-  confirm: ["btn_unlock", "btn_lock", "btn_trunk", "sw_engine", "sw_honk"],
+  confirm: ["btn_unlock", "btn_lock", "sw_engine", "sw_honk"],
   hold_ms: 2000,
   accent: "#37d6e8",
   show_plate: true,
@@ -671,28 +670,18 @@ class HaCarCard extends HTMLElement {
 
     const lockNorm = normLock(data.get("lock"));
 
-    if (data.id("btn_unlock") || data.id("btn_lock")) {
-      const key = lockNorm === "unlocked" ? "btn_lock" : "btn_unlock";
-      const ent = data.id(key);
-      if (ent) {
-        const label = lockNorm === "unlocked" ? t.lockUp : t.unlock;
-        const ic = lockNorm === "unlocked" ? "lock" : "unlock";
-        tiles.push(this._tile({
-          key,
-          ent,
-          cls: lockNorm === "locked" ? "on" : "hot",
-          ic,
-          label,
-          dom: "button",
-          svc: "press",
-          hold,
-          offline,
-        }));
-      }
-    }
-    if (data.id("btn_trunk")) {
+    // 开锁 / 关锁固定并列（不再按当前锁态切换，也不占用后备箱位）
+    if (data.id("btn_unlock")) {
       tiles.push(this._tile({
-        key: "btn_trunk", ent: data.id("btn_trunk"), ic: "trunk", label: t.trunk,
+        key: "btn_unlock", ent: data.id("btn_unlock"), ic: "unlock", label: t.unlock,
+        cls: lockNorm === "unlocked" ? "hot" : "",
+        dom: "button", svc: "press", hold, offline,
+      }));
+    }
+    if (data.id("btn_lock")) {
+      tiles.push(this._tile({
+        key: "btn_lock", ent: data.id("btn_lock"), ic: "lock", label: t.lockDown,
+        cls: lockNorm === "locked" ? "on" : "",
         dom: "button", svc: "press", hold, offline,
       }));
     }
