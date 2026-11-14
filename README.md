@@ -68,7 +68,7 @@ type: custom:ha-car
 | `device` | string | — | 也可直接给设备 ID，卡片只取该设备下的实体 |
 | `title` | string | 设备名 | 卡片标题，默认取设备名（如「锐际 Escape」），其次取车辆昵称 |
 | `show_plate` | bool | `true` | 顶部是否显示车牌 |
-| `layout` | `full` / `compact` | `full` | `compact` 只留主视觉、状态、续航与操作，适合手机首屏 |
+| `layout` | `full` / `compact` | `full` | `compact` 只留主视觉、状态、续航与操作，适合手机首屏；`full` 在宽屏（面板视图/桌面）自动变双栏：车图在左、仪表与副指标在右 |
 | `modules` | list | 全部 | `status` `actions` `energy` `tires` `doors` `charging` `alerts` `service` |
 | `confirm` | list | 5 项 | 需要长按的动作键，见下表 |
 | `hold_ms` | number | `700` | 长按时长，300–3000 |

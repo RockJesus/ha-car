@@ -285,10 +285,14 @@ ha-card { display: block; overflow: hidden;
   border: 1px solid rgba(55,214,232,.14);
   border-radius: var(--ha-card-border-radius, 24px);
   color: var(--hc-ink);
-  background:
+  background-image:
+    linear-gradient(rgba(255,255,255,.011) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.011) 1px, transparent 1px),
     radial-gradient(92% 56% at 50% 0%, rgba(55,214,232,.11), transparent 64%),
     radial-gradient(72% 42% at 50% 102%, rgba(55,214,232,.06), transparent 72%),
     linear-gradient(170deg, #101b29 0%, #0a1119 56%, #070c13 100%);
+  background-size: 44px 44px, 44px 44px, auto, auto, auto;
+  background-repeat: repeat, repeat, no-repeat, no-repeat, no-repeat;
   box-shadow: 0 26px 52px -28px rgba(2,6,12,.95), 0 0 44px -22px rgba(55,214,232,.4),
     inset 0 1px 0 rgba(255,255,255,.07);
   font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "PingFang SC", "Microsoft YaHei", "Segoe UI", Roboto, sans-serif;
@@ -297,6 +301,8 @@ ha-card { display: block; overflow: hidden;
 .plate, .gn b, .tc b, .stat b { font-variant-numeric: tabular-nums; }
 .plate { font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace; }
 .wrap { padding: 18px 16px 14px; display: flex; flex-direction: column; gap: 14px; }
+.duo { display: flex; flex-direction: column; gap: 14px; }
+.dleft, .dright { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
 .ic { width: 20px; height: 20px; fill: currentColor; display: block; flex: none; }
 
 /* 头部：大标题 + 右上状态胶囊（参考图同构） */
@@ -404,8 +410,8 @@ h1 { margin: 0; font-size: 25px; line-height: 1.12; font-weight: 650; letter-spa
   border-radius: 50%; background: var(--hc-accent); animation: hc-pulse 1.4s ease-in-out infinite; }
 
 /* 能耗：双环形仪表 + 中间量纲图标（参考图同构） */
-.energy { display: grid; grid-template-columns: 1fr 26px 1fr; align-items: center; gap: 4px; padding: 2px 2px 0; }
-.gauge { position: relative; width: 100%; max-width: 118px; aspect-ratio: 1; margin: 0 auto; }
+.energy { display: grid; grid-template-columns: 1fr 1px 1fr; align-items: center; column-gap: 14px; padding: 2px 2px 0; }
+.gauge { position: relative; width: 100%; max-width: 132px; aspect-ratio: 1; margin: 0 auto; }
 .gauge > svg { position: absolute; inset: 0; width: 100%; height: 100%; }
 .gt { fill: none; stroke: rgba(255,255,255,.085); stroke-width: 5; }
 .gp { fill: none; stroke: var(--hc-accent); stroke-width: 5; stroke-linecap: round;
@@ -417,13 +423,16 @@ h1 { margin: 0; font-size: 25px; line-height: 1.12; font-weight: 650; letter-spa
 .gn { display: flex; align-items: baseline; gap: 2px; line-height: 1; }
 .gn b { font-size: 31px; font-weight: 620; letter-spacing: -.01em; }
 .gn i { font-size: 11px; font-style: normal; font-weight: 600; color: var(--hc-dim); letter-spacing: .04em; }
-.egmid { display: grid; place-items: center; color: var(--hc-dim); opacity: .6; }
-.egmid .ic { width: 15px; height: 15px; }
-.substats { display: flex; justify-content: center; flex-wrap: wrap; gap: 16px; margin-top: 2px;
+.egdiv { width: 1px; height: 64px; align-self: center;
+  background: linear-gradient(180deg, transparent, rgba(255,255,255,.16) 22%, rgba(255,255,255,.16) 78%, transparent); }
+.substats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-top: 10px;
   font-size: 10.5px; color: var(--hc-dim); }
-.substats .sstat { display: inline-flex; align-items: baseline; gap: 4px; letter-spacing: .04em; }
-.substats .sstat i { font-style: normal; font-size: 9.5px; letter-spacing: .1em; text-transform: uppercase; opacity: .85; }
-.substats .sstat b { font-size: 11.5px; font-weight: 650; color: var(--hc-ink); }
+.substats .sstat { display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 8px 6px 7px;
+  border-radius: 12px; border: 1px solid rgba(255,255,255,.06); background: rgba(255,255,255,.028);
+  letter-spacing: .04em; text-align: center; min-width: 0; }
+.substats .sstat i { font-style: normal; font-size: 9px; letter-spacing: .1em; text-transform: uppercase; opacity: .8; }
+.substats .sstat b { font-size: 14px; font-weight: 650; color: var(--hc-ink); line-height: 1.1; }
+.substats .sstat span { font-size: 9.5px; opacity: .8; }
 
 /* 底座条：四轮胎压 + 同步时间（参考图同构） */
 .baseline { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 16px;
@@ -521,10 +530,17 @@ h1 { margin: 0; font-size: 25px; line-height: 1.12; font-weight: 650; letter-spa
 
 /* 宽屏（面板视图 / 桌面仪表盘）：手机尺寸的内容居中收窄，避免拉成一条横贯全屏的卡片 */
 @media (min-width: 860px) {
-  :host { max-width: 820px; margin: 0 auto; }
-  .wrap { padding: 22px 20px 18px; }
-  .hero { height: 252px; }
+  :host { max-width: 860px; margin: 0 auto; }
+  .wrap { padding: 24px 22px 18px; gap: 16px; }
+  .hero { height: 268px; --r: 104px; }
   .head { align-items: center; }
+  /* 桌面/面板视图：车图在左，仪表与副指标在右 */
+  .duo { display: grid; grid-template-columns: minmax(0, 1.06fr) minmax(0, 1fr); column-gap: 26px;
+    align-items: center; }
+  .dright { gap: 14px; }
+  .gauge { max-width: 152px; }
+  .acts { max-width: 540px; margin: 2px auto 0; width: 100%; }
+  .pills { max-width: 540px; margin: 10px auto 0; width: 100%; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -1063,14 +1079,18 @@ var HaCarCard = class extends HTMLElement {
     parts.push(`<div class="head"><div class="ttl"><h1>${esc(title)}</h1>
       ${cfg.show_plate && plate ? `<p class="plate">${esc(plate)}</p>` : ""}
       </div><span class="status ${status.cls}"><span class="dot"></span>${esc(status.label)}</span></div>`);
-    parts.push(this._hero(this._imageUrl(data)));
+    const side = [];
     if (mods.includes("status") && chips.length) {
-      parts.push(`<div class="chips">${chips.slice(0, 3).map((c) => `<span class="chip ${c.cls}">${esc(c.label)}</span>`).join("")}</div>`);
+      side.push(`<div class="chips">${chips.slice(0, 3).map((c) => `<span class="chip ${c.cls}">${esc(c.label)}</span>`).join("")}</div>`);
     }
     if (mods.includes("energy")) {
       const energy = this._energy(data, t);
-      if (energy) parts.push(energy);
+      if (energy) side.push(energy);
     }
+    const heroHtml = this._hero(this._imageUrl(data));
+    parts.push(
+      side.length ? `<div class="duo"><div class="dleft">${heroHtml}</div><div class="dright">${side.join("")}</div></div>` : heroHtml
+    );
     if (mods.includes("actions")) {
       parts.push(this._actions(data, t, running, offline, compact));
     }
@@ -1179,15 +1199,15 @@ var HaCarCard = class extends HTMLElement {
     }) : this._gauge({ pct: 100, label: t.odo, value: fmtNum(odo), unit: odoUnit, ic: "gauge" });
     const stats = [];
     if (odo != null && range != null) {
-      stats.push(`<span class="sstat"><i>${esc(t.odo)}</i><b>${fmtNum(odo)}</b> ${esc(odoUnit)}</span>`);
+      stats.push(`<span class="sstat"><i>${esc(t.odo)}</i><b>${fmtNum(odo)}</b><span>${esc(odoUnit)}</span></span>`);
     }
     if (volt != null) {
-      stats.push(`<span class="sstat"><i>${esc(t.volt)}</i><b>${fmtNum(volt, 1)}</b> V</span>`);
+      stats.push(`<span class="sstat"><i>${esc(t.volt)}</i><b>${fmtNum(volt, 1)}</b><span>V</span></span>`);
     }
     if (oil != null) {
-      stats.push(`<span class="sstat"><i>${esc(t.oil)}</i><b>${Math.round(oil)}</b> %</span>`);
+      stats.push(`<span class="sstat"><i>${esc(t.oil)}</i><b>${Math.round(oil)}</b><span>%</span></span>`);
     }
-    return `<div class="energy">${left}${left ? `<span class="egmid">${icon(pctIc)}</span>` : ""}${right}</div>
+    return `<div class="energy">${left}${left ? `<span class="egdiv"></span>` : ""}${right}</div>
       ${stats.length ? `<div class="substats">${stats.join("")}</div>` : ""}`;
   }
   // 环形仪表：SVG 描边弧，从 12 点起顺时针
@@ -1897,7 +1917,7 @@ var HaCarEditor = class extends HTMLElement {
 customElements.define("ha-car-editor", HaCarEditor);
 
 // src/main.js
-var VERSION = "1.0.4";
+var VERSION = "1.0.5";
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "ha-car",

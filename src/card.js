@@ -268,20 +268,24 @@ class HaCarCard extends HTMLElement {
       ${cfg.show_plate && plate ? `<p class="plate">${esc(plate)}</p>` : ""}
       </div><span class="status ${status.cls}"><span class="dot"></span>${esc(status.label)}</span></div>`);
 
-    // 主视觉：车图 + 轨道 + 节点
-    parts.push(this._hero(this._imageUrl(data)));
-
+    // 主视觉 + 右侧数据区：窄屏上下叠放，宽屏（桌面/面板视图）左右分栏
+    const side = [];
     if (mods.includes("status") && chips.length) {
-      parts.push(`<div class="chips">${chips
+      side.push(`<div class="chips">${chips
         .slice(0, 3)
         .map((c) => `<span class="chip ${c.cls}">${esc(c.label)}</span>`)
         .join("")}</div>`);
     }
-
     if (mods.includes("energy")) {
       const energy = this._energy(data, t);
-      if (energy) parts.push(energy);
+      if (energy) side.push(energy);
     }
+    const heroHtml = this._hero(this._imageUrl(data));
+    parts.push(
+      side.length
+        ? `<div class="duo"><div class="dleft">${heroHtml}</div><div class="dright">${side.join("")}</div></div>`
+        : heroHtml,
+    );
 
     if (mods.includes("actions")) {
       parts.push(this._actions(data, t, running, offline, compact));
@@ -417,16 +421,16 @@ class HaCarCard extends HTMLElement {
 
     const stats = [];
     if (odo != null && range != null) {
-      stats.push(`<span class="sstat"><i>${esc(t.odo)}</i><b>${fmtNum(odo)}</b> ${esc(odoUnit)}</span>`);
+      stats.push(`<span class="sstat"><i>${esc(t.odo)}</i><b>${fmtNum(odo)}</b><span>${esc(odoUnit)}</span></span>`);
     }
     if (volt != null) {
-      stats.push(`<span class="sstat"><i>${esc(t.volt)}</i><b>${fmtNum(volt, 1)}</b> V</span>`);
+      stats.push(`<span class="sstat"><i>${esc(t.volt)}</i><b>${fmtNum(volt, 1)}</b><span>V</span></span>`);
     }
     if (oil != null) {
-      stats.push(`<span class="sstat"><i>${esc(t.oil)}</i><b>${Math.round(oil)}</b> %</span>`);
+      stats.push(`<span class="sstat"><i>${esc(t.oil)}</i><b>${Math.round(oil)}</b><span>%</span></span>`);
     }
 
-    return `<div class="energy">${left}${left ? `<span class="egmid">${icon(pctIc)}</span>` : ""}${right}</div>
+    return `<div class="energy">${left}${left ? `<span class="egdiv"></span>` : ""}${right}</div>
       ${stats.length ? `<div class="substats">${stats.join("")}</div>` : ""}`;
   }
 
