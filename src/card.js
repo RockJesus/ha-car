@@ -2,20 +2,7 @@ import { icon } from "./icons.js";
 import { resolve, detectVehicles, SLOTS } from "./resolve.js";
 import { STYLES } from "./styles.js";
 import { dict, isEn } from "./strings.js";
-import {
-  esc,
-  isBad,
-  num,
-  text,
-  attrs,
-  clamp,
-  fmtNum,
-  relTime,
-  normLock,
-  normOpen,
-  normTire,
-  chargingNow,
-} from "./util.js";
+import { attrs, chargingNow, clamp, esc, fmtNum, isBad, maskAddr, maskPlate, maskText, normLock, normOpen, normTire, num, relTime, text } from "./util.js";
 
 const MODULES = ["status", "actions", "energy", "tires", "doors", "charging", "alerts", "service"];
 const CONFIRMABLE = [
@@ -43,6 +30,7 @@ const DEFAULTS = {
   hold_ms: 700,
   accent: "#37d6e8",
   show_plate: true,
+  privacy: false,
   image: "auto",
   image_url: "",
   entities: {},
@@ -265,7 +253,7 @@ class HaCarCard extends HTMLElement {
 
     // 顶部：车型名 + 锁态胶囊
     parts.push(`<div class="head"><div class="ttl"><h1>${esc(title)}</h1>
-      ${cfg.show_plate && plate ? `<p class="plate">${esc(plate)}</p>` : ""}
+      ${cfg.show_plate && plate ? `<p class="plate">${esc(cfg.privacy ? maskPlate(plate) : plate)}</p>` : ""}
       </div><span class="status ${status.cls}"><span class="dot"></span>${esc(status.label)}</span></div>`);
 
     // 主视觉 + 右侧数据区：窄屏上下叠放，宽屏（桌面/面板视图）左右分栏
@@ -370,8 +358,11 @@ class HaCarCard extends HTMLElement {
       const st = data.get(slot);
       if (!st) return null;
       const direct = attrs(st, "image_url");
-      if (direct && /^https?:\/\//.test(String(direct))) return direct;
-      return attrs(st, "entity_picture") || null;
+      const proxy = attrs(st, "entity_picture") || null;
+      const okDirect = direct && /^https?:\/\//.test(String(direct));
+      // 脱敏模式优先走 HA 代理图，浏览器不直连第三方 CDN
+      if (cfg.privacy) return proxy || (okDirect ? direct : null);
+      return okDirect ? direct : proxy;
     };
     if (cfg.image === "custom" && cfg.image_url) return cfg.image_url;
     if (cfg.image && cfg.image !== "auto") {
@@ -627,11 +618,13 @@ class HaCarCard extends HTMLElement {
 
   _service(data, t) {
     const rows = [];
+    const mask = Boolean(this._config.privacy);
     const push = (label, slot, suffix) => {
       const st = data.get(slot);
       const raw = text(st);
       if (!raw) return;
-      rows.push({ label, value: suffix ? raw + suffix : raw, ent: data.id(slot) });
+      const v = mask ? maskText(raw) : raw;
+      rows.push({ label, value: suffix ? v + suffix : v, ent: data.id(slot) });
     };
     push(t.maintenance, "maint");
     push(t.recallInfo, "recall");
@@ -648,9 +641,10 @@ class HaCarCard extends HTMLElement {
 
   _location(data, _t) {
     const addr = text(data.get("addr"));
+    const shown = addr && this._config.privacy ? maskAddr(addr) : addr;
     const tracker = data.id("tracker");
     if (!addr && !tracker) return "";
-    const label = addr || (isEn(this._hass) ? "Open map" : "查看地图");
+    const label = shown || (isEn(this._hass) ? "Open map" : "查看地图");
     return `<div class="doors"><span class="door" data-more="${esc(tracker || data.id("addr"))}">
       ${icon("pin")}<span class="addr">${esc(label)}</span></span></div>`;
   }

@@ -662,6 +662,8 @@ var ZH = {
   vehicle: "车辆",
   titleLabel: "卡片标题",
   showPlate: "显示车牌",
+  privacy: "脱敏显示",
+  privacyHint: "分享截图时把车牌、地址、电话与 VIN 打码，数据本身不变",
   layoutLabel: "布局",
   layoutFull: "完整",
   layoutCompact: "紧凑",
@@ -751,6 +753,8 @@ var EN = {
   vehicle: "Vehicle",
   titleLabel: "Title",
   showPlate: "Show plate",
+  privacy: "Mask for sharing",
+  privacyHint: "Blur plate, address, phone and VIN — data itself stays unchanged",
   layoutLabel: "Layout",
   layoutFull: "Full",
   layoutCompact: "Compact",
@@ -869,6 +873,27 @@ function chargingNow(state) {
   const s = String(state.state).toLowerCase();
   return s.includes("充电中") || s.includes("charging");
 }
+var ADMIN = /[省市区的县旗盟州]/;
+function maskAddr(a) {
+  if (!a) return "";
+  let count = 0;
+  for (let i = 0; i < a.length; i += 1) {
+    if (ADMIN.test(a[i])) {
+      count += 1;
+      if (count >= 2) return `${a.slice(0, i + 1)}…`;
+    }
+  }
+  return a.length > 3 ? `${a.slice(0, 2)}••` : "••";
+}
+function maskPlate(p) {
+  if (!p) return "";
+  const plain = p.replace(/[·\s]/g, "");
+  return plain.length >= 2 ? `${plain.slice(0, 2)}${"•".repeat(Math.max(3, plain.length - 2))}` : "••••";
+}
+function maskText(s) {
+  if (!s) return "";
+  return String(s).replace(/\b[A-Z0-9]{12,}\b/g, (m) => m.match(/\d/) ? `${m.slice(0, 4)}${"•".repeat(Math.max(4, m.length - 4))}` : m).replace(/\d{7,}/g, (m) => `${m.slice(0, 3)}${"•".repeat(Math.max(4, m.length - 3))}`);
+}
 
 // src/card.js
 var MODULES = ["status", "actions", "energy", "tires", "doors", "charging", "alerts", "service"];
@@ -896,6 +921,7 @@ var DEFAULTS = {
   hold_ms: 700,
   accent: "#37d6e8",
   show_plate: true,
+  privacy: false,
   image: "auto",
   image_url: "",
   entities: {}
@@ -1077,7 +1103,7 @@ var HaCarCard = class extends HTMLElement {
     if (running) chips.push({ cls: "warn", label: t.running });
     const parts = [];
     parts.push(`<div class="head"><div class="ttl"><h1>${esc(title)}</h1>
-      ${cfg.show_plate && plate ? `<p class="plate">${esc(plate)}</p>` : ""}
+      ${cfg.show_plate && plate ? `<p class="plate">${esc(cfg.privacy ? maskPlate(plate) : plate)}</p>` : ""}
       </div><span class="status ${status.cls}"><span class="dot"></span>${esc(status.label)}</span></div>`);
     const side = [];
     if (mods.includes("status") && chips.length) {
@@ -1159,8 +1185,10 @@ var HaCarCard = class extends HTMLElement {
       const st = data.get(slot);
       if (!st) return null;
       const direct = attrs(st, "image_url");
-      if (direct && /^https?:\/\//.test(String(direct))) return direct;
-      return attrs(st, "entity_picture") || null;
+      const proxy = attrs(st, "entity_picture") || null;
+      const okDirect = direct && /^https?:\/\//.test(String(direct));
+      if (cfg.privacy) return proxy || (okDirect ? direct : null);
+      return okDirect ? direct : proxy;
     };
     if (cfg.image === "custom" && cfg.image_url) return cfg.image_url;
     if (cfg.image && cfg.image !== "auto") {
@@ -1404,11 +1432,13 @@ var HaCarCard = class extends HTMLElement {
   }
   _service(data, t) {
     const rows = [];
+    const mask = Boolean(this._config.privacy);
     const push = (label, slot, suffix) => {
       const st = data.get(slot);
       const raw = text(st);
       if (!raw) return;
-      rows.push({ label, value: suffix ? raw + suffix : raw, ent: data.id(slot) });
+      const v = mask ? maskText(raw) : raw;
+      rows.push({ label, value: suffix ? v + suffix : v, ent: data.id(slot) });
     };
     push(t.maintenance, "maint");
     push(t.recallInfo, "recall");
@@ -1421,9 +1451,10 @@ var HaCarCard = class extends HTMLElement {
   }
   _location(data, _t) {
     const addr = text(data.get("addr"));
+    const shown = addr && this._config.privacy ? maskAddr(addr) : addr;
     const tracker = data.id("tracker");
     if (!addr && !tracker) return "";
-    const label = addr || (isEn(this._hass) ? "Open map" : "查看地图");
+    const label = shown || (isEn(this._hass) ? "Open map" : "查看地图");
     return `<div class="doors"><span class="door" data-more="${esc(tracker || data.id("addr"))}">
       ${icon("pin")}<span class="addr">${esc(label)}</span></span></div>`;
   }
@@ -1642,6 +1673,8 @@ var L = {
   noVehicle: "没有检测到福特派互联的车辆实体，请先在集成里完成登录。",
   title: "卡片标题",
   showPlate: "显示车牌",
+  privacy: "脱敏显示",
+  privacyHint: "分享截图时把车牌、地址、电话与 VIN 打码，数据本身不变",
   layout: "布局",
   layoutFull: DEFAULTS.layout === "full" ? "完整" : "完整",
   layoutCompact: "紧凑",
@@ -1697,6 +1730,9 @@ var HaCarEditor = class extends HTMLElement {
         <input class="tf" id="title" type="text" placeholder="我的座驾">
         <div class="row"><span class="rl">${L.showPlate}</span>
           <button class="sw" id="plate" role="switch" aria-checked="true"></button></div>
+        <div class="row"><span class="rl">${L.privacy}</span>
+          <button class="sw" id="privacy" role="switch" aria-checked="false"></button></div>
+        <p class="hint">${L.privacyHint}</p>
         <label class="f">${L.layout}</label>
         <div class="chips2" id="layouts">
           <button class="tg" type="button" data-layout="full">完整（含胎压/门窗/服务）</button>
@@ -1762,6 +1798,11 @@ var HaCarEditor = class extends HTMLElement {
     });
     q("title").addEventListener("input", (e) => {
       this._config.title = e.target.value.trim();
+      this._emit();
+    });
+    q("privacy").addEventListener("click", () => {
+      this._config.privacy = !this._config.privacy;
+      q("privacy").setAttribute("aria-checked", String(Boolean(this._config.privacy)));
       this._emit();
     });
     q("plate").addEventListener("click", () => {
@@ -1868,6 +1909,7 @@ var HaCarEditor = class extends HTMLElement {
     this._syncVehicles();
     q("title").value = this._config.title || "";
     q("plate").setAttribute("aria-checked", String(Boolean(this._config.show_plate)));
+    q("privacy").setAttribute("aria-checked", String(Boolean(this._config.privacy)));
     this.shadowRoot.querySelectorAll("[data-layout]").forEach((b) => {
       b.setAttribute("aria-pressed", String(b.dataset.layout === (this._config.layout || "full")));
     });
@@ -1917,7 +1959,7 @@ var HaCarEditor = class extends HTMLElement {
 customElements.define("ha-car-editor", HaCarEditor);
 
 // src/main.js
-var VERSION = "1.0.5";
+var VERSION = "1.0.6";
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "ha-car",

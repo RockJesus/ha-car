@@ -44,6 +44,8 @@ const L = {
   noVehicle: "没有检测到福特派互联的车辆实体，请先在集成里完成登录。",
   title: "卡片标题",
   showPlate: "显示车牌",
+  privacy: "脱敏显示",
+  privacyHint: "分享截图时把车牌、地址、电话与 VIN 打码，数据本身不变",
   layout: "布局",
   layoutFull: DEFAULTS.layout === "full" ? "完整" : "完整",
   layoutCompact: "紧凑",
@@ -103,6 +105,9 @@ class HaCarEditor extends HTMLElement {
         <input class="tf" id="title" type="text" placeholder="我的座驾">
         <div class="row"><span class="rl">${L.showPlate}</span>
           <button class="sw" id="plate" role="switch" aria-checked="true"></button></div>
+        <div class="row"><span class="rl">${L.privacy}</span>
+          <button class="sw" id="privacy" role="switch" aria-checked="false"></button></div>
+        <p class="hint">${L.privacyHint}</p>
         <label class="f">${L.layout}</label>
         <div class="chips2" id="layouts">
           <button class="tg" type="button" data-layout="full">完整（含胎压/门窗/服务）</button>
@@ -172,6 +177,12 @@ class HaCarEditor extends HTMLElement {
 
     q("title").addEventListener("input", (e) => {
       this._config.title = e.target.value.trim();
+      this._emit();
+    });
+
+    q("privacy").addEventListener("click", () => {
+      this._config.privacy = !this._config.privacy;
+      q("privacy").setAttribute("aria-checked", String(Boolean(this._config.privacy)));
       this._emit();
     });
 
@@ -293,6 +304,7 @@ class HaCarEditor extends HTMLElement {
     this._syncVehicles();
     q("title").value = this._config.title || "";
     q("plate").setAttribute("aria-checked", String(Boolean(this._config.show_plate)));
+    q("privacy").setAttribute("aria-checked", String(Boolean(this._config.privacy)));
     this.shadowRoot.querySelectorAll("[data-layout]").forEach((b) => {
       b.setAttribute("aria-pressed", String(b.dataset.layout === (this._config.layout || "full")));
     });

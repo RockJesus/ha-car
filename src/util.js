@@ -97,3 +97,35 @@ export function chargingNow(state) {
   const s = String(state.state).toLowerCase();
   return s.includes("充电中") || s.includes("charging");
 }
+
+
+// ---- 脱敏（分享截图用）----
+const ADMIN = /[省市区的县旗盟州]/;
+
+// 地址只留两级行政区（省级+市级 或 市级+区级），街道门牌用省略号替代
+export function maskAddr(a) {
+  if (!a) return "";
+  let count = 0;
+  for (let i = 0; i < a.length; i += 1) {
+    if (ADMIN.test(a[i])) {
+      count += 1;
+      if (count >= 2) return `${a.slice(0, i + 1)}…`;
+    }
+  }
+  return a.length > 3 ? `${a.slice(0, 2)}••` : "••";
+}
+
+// 车牌只留省份简称 + 字母位，其余打点
+export function maskPlate(p) {
+  if (!p) return "";
+  const plain = p.replace(/[·\s]/g, "");
+  return plain.length >= 2 ? `${plain.slice(0, 2)}${"•".repeat(Math.max(3, plain.length - 2))}` : "••••";
+}
+
+// 文本里的长数字（电话/单号）与类 VIN 串打码，保留首尾便于核对
+export function maskText(s) {
+  if (!s) return "";
+  return String(s)
+    .replace(/\b[A-Z0-9]{12,}\b/g, (m) => (m.match(/\d/) ? `${m.slice(0, 4)}${"•".repeat(Math.max(4, m.length - 4))}` : m))
+    .replace(/\d{7,}/g, (m) => `${m.slice(0, 3)}${"•".repeat(Math.max(4, m.length - 3))}`);
+}
