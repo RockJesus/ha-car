@@ -1,0 +1,11 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><style>body{margin:0;background:#0b1220;padding:24px;font-family:-apple-system,"PingFang SC",sans-serif}ha-card{display:block}</style></head>
+<body><div id="host"></div>
+<script>
+ class HaCard extends HTMLElement{constructor(){super();this.attachShadow({mode:"open"}).innerHTML="<style>:host{display:block;background:#101a28;border-radius:26px;overflow:hidden}</style><slot></slot>"}}
+ customElements.define("ha-card",HaCard);
+</script>
+<script type="module">
+ import "./_live/ha-car-live.js";
+ const hass={states:window.__realStates||{},entities:{},devices:{},locale:{language:"zh-Hans"},language:"zh-Hans",callService(d,s,data){(window.__calls=window.__calls||[]).push({domain:d,service:s,data});return Promise.resolve()}};
+ window.__mount=(cfg,w)=>{const h=document.getElementById("host");h.style.width=(w||400)+"px";h.innerHTML="";const el=document.createElement("ha-car");h.appendChild(el);el.setConfig(cfg||{});el.hass=hass;return el};
+</script></body></html>

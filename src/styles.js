@@ -241,6 +241,14 @@ h1 { margin: 0; font-size: 25px; line-height: 1.12; font-weight: 650; letter-spa
 @keyframes hc-pulse { 0%, 100% { opacity: .35; } 50% { opacity: 1; } }
 @keyframes hc-node { 0%, 100% { opacity: .5; } 50% { opacity: 1; } }
 
+/* 宽屏（面板视图 / 桌面仪表盘）：手机尺寸的内容居中收窄，避免拉成一条横贯全屏的卡片 */
+@media (min-width: 860px) {
+  :host { max-width: 820px; margin: 0 auto; }
+  .wrap { padding: 22px 20px 18px; }
+  .hero { height: 252px; }
+  .head { align-items: center; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .tile, .orb, .pill { transition: none; }
   .tile.pressing .hring circle, .pill.pressing .holdbar { transition: none; }
