@@ -2,7 +2,7 @@
 // 色板是推导值，不是框架默认色：车身钢板 #101B29 / 深夜座舱 #0A1119 / 仪表背光 #37D6E8。
 export const STYLES = `
 :host { display: block; --hc-accent: #37d6e8; --hc-ink: #e9eff7; --hc-dim: #8496ad;
-  --hc-ok: #6fe0a8; --hc-warn: #ffc46b; --hc-bad: #ff9182; --hc-holdms: 700ms; }
+  --hc-ok: #6fe0a8; --hc-warn: #ffc46b; --hc-bad: #ff9182; --hc-holdms: 2000ms; }
 ha-card { display: block; overflow: hidden; position: relative;
   border: 1px solid rgba(120,190,215,.16);
   border-radius: var(--ha-card-border-radius, 28px);

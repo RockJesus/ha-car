@@ -35,7 +35,7 @@ const DEFAULTS = {
   layout: "full",
   modules: MODULES,
   confirm: ["btn_unlock", "btn_lock", "btn_trunk", "sw_engine", "sw_honk"],
-  hold_ms: 700,
+  hold_ms: 2000,
   accent: "#37d6e8",
   show_plate: true,
   privacy: false,
@@ -82,7 +82,7 @@ class HaCarCard extends HTMLElement {
       ? cfg.confirm.filter((k) => CONFIRMABLE.includes(k))
       : DEFAULTS.confirm.slice();
     cfg.entities = cfg.entities && typeof cfg.entities === "object" ? cfg.entities : {};
-    cfg.hold_ms = clamp(Number(cfg.hold_ms) || 700, 300, 3000);
+    cfg.hold_ms = clamp(Number(cfg.hold_ms) || DEFAULTS.hold_ms, 300, 3000);
     this._config = cfg;
     this._sig = "";
     this._toast = null;
@@ -829,7 +829,7 @@ class HaCarCard extends HTMLElement {
   }
 
   _holdMs() {
-    return clamp(Number(this._config && this._config.hold_ms) || 700, 300, 3000);
+    return clamp(Number(this._config && this._config.hold_ms) || DEFAULTS.hold_ms, 300, 3000);
   }
 
   _onDown(ev) {

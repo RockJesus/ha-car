@@ -141,7 +141,7 @@ class HaCarEditor extends HTMLElement {
           <button class="sw" id="guard" role="switch" aria-checked="true"></button></div>
         <label class="f">${L.holdMs}</label>
         <div class="ranged"><input type="range" id="hold" min="300" max="2000" step="100">
-          <span id="holdv" style="font-size:12px;min-width:64px">700 ms</span></div>
+          <span id="holdv" style="font-size:12px;min-width:64px">2000 ms</span></div>
         <label class="f">${L.confirmWhich}</label>
         <div class="chips2" id="confirms"></div>
       </div>
@@ -343,7 +343,7 @@ class HaCarEditor extends HTMLElement {
       b.setAttribute("aria-pressed", String((this._config.modules || []).includes(b.dataset.mod)));
     });
     q("guard").setAttribute("aria-checked", String((this._config.confirm || []).length > 0));
-    const hold = Number(this._config.hold_ms) || 700;
+    const hold = Number(this._config.hold_ms) || 2000;
     q("hold").value = String(hold);
     q("holdv").textContent = `${hold} ms`;
     this.shadowRoot.querySelectorAll("[data-confirm]").forEach((b) => {

@@ -302,7 +302,7 @@ function resolve(hass, config) {
 // src/styles.js
 var STYLES = `
 :host { display: block; --hc-accent: #37d6e8; --hc-ink: #e9eff7; --hc-dim: #8496ad;
-  --hc-ok: #6fe0a8; --hc-warn: #ffc46b; --hc-bad: #ff9182; --hc-holdms: 700ms; }
+  --hc-ok: #6fe0a8; --hc-warn: #ffc46b; --hc-bad: #ff9182; --hc-holdms: 2000ms; }
 ha-card { display: block; overflow: hidden; position: relative;
   border: 1px solid rgba(120,190,215,.16);
   border-radius: var(--ha-card-border-radius, 28px);
@@ -818,7 +818,7 @@ var ZH = {
   light: "灯光寻车",
   refresh: "刷新",
   refreshOk: "已请求云端刷新，约 30–60 秒回传",
-  holdHint: "长按 0.7 秒执行，防误触",
+  holdHint: "长按确认后执行，防误触",
   armed: "松手执行",
   sent: "已发送指令，等待车辆响应",
   failed: "指令发送失败",
@@ -909,7 +909,7 @@ var EN = {
   light: "Find by lights",
   refresh: "Refresh",
   refreshOk: "Cloud refresh requested, 30–60 s",
-  holdHint: "Hold 0.7 s to prevent mis-touch",
+  holdHint: "Hold to confirm and prevent mis-touch",
   armed: "Release to run",
   sent: "Command sent, waiting for the car",
   failed: "Command failed",
@@ -1126,7 +1126,7 @@ var DEFAULTS = {
   layout: "full",
   modules: MODULES,
   confirm: ["btn_unlock", "btn_lock", "btn_trunk", "sw_engine", "sw_honk"],
-  hold_ms: 700,
+  hold_ms: 2e3,
   accent: "#37d6e8",
   show_plate: true,
   privacy: false,
@@ -1164,7 +1164,7 @@ var HaCarCard = class extends HTMLElement {
     cfg.modules = Array.isArray(cfg.modules) ? cfg.modules.filter((m) => MODULES.includes(m)) : MODULES.slice();
     cfg.confirm = Array.isArray(cfg.confirm) ? cfg.confirm.filter((k) => CONFIRMABLE.includes(k)) : DEFAULTS.confirm.slice();
     cfg.entities = cfg.entities && typeof cfg.entities === "object" ? cfg.entities : {};
-    cfg.hold_ms = clamp(Number(cfg.hold_ms) || 700, 300, 3e3);
+    cfg.hold_ms = clamp(Number(cfg.hold_ms) || DEFAULTS.hold_ms, 300, 3e3);
     this._config = cfg;
     this._sig = "";
     this._toast = null;
@@ -1819,7 +1819,7 @@ var HaCarCard = class extends HTMLElement {
     });
   }
   _holdMs() {
-    return clamp(Number(this._config && this._config.hold_ms) || 700, 300, 3e3);
+    return clamp(Number(this._config && this._config.hold_ms) || DEFAULTS.hold_ms, 300, 3e3);
   }
   _onDown(ev) {
     const el = ev.target.closest && ev.target.closest("[data-act]");
@@ -2105,7 +2105,7 @@ var HaCarEditor = class extends HTMLElement {
           <button class="sw" id="guard" role="switch" aria-checked="true"></button></div>
         <label class="f">${L.holdMs}</label>
         <div class="ranged"><input type="range" id="hold" min="300" max="2000" step="100">
-          <span id="holdv" style="font-size:12px;min-width:64px">700 ms</span></div>
+          <span id="holdv" style="font-size:12px;min-width:64px">2000 ms</span></div>
         <label class="f">${L.confirmWhich}</label>
         <div class="chips2" id="confirms"></div>
       </div>
@@ -2289,7 +2289,7 @@ var HaCarEditor = class extends HTMLElement {
       b.setAttribute("aria-pressed", String((this._config.modules || []).includes(b.dataset.mod)));
     });
     q("guard").setAttribute("aria-checked", String((this._config.confirm || []).length > 0));
-    const hold = Number(this._config.hold_ms) || 700;
+    const hold = Number(this._config.hold_ms) || 2e3;
     q("hold").value = String(hold);
     q("holdv").textContent = `${hold} ms`;
     this.shadowRoot.querySelectorAll("[data-confirm]").forEach((b) => {
@@ -2331,7 +2331,7 @@ var HaCarEditor = class extends HTMLElement {
 customElements.define("ha-car-editor", HaCarEditor);
 
 // src/main.js
-var VERSION = "1.2.1";
+var VERSION = "1.2.2";
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "ha-car",
