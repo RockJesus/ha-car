@@ -37,6 +37,8 @@ h1 { margin: 0; font-size: 25px; line-height: 1.12; font-weight: 650; letter-spa
   border-radius: 999px; font-size: 11.5px; font-weight: 650; letter-spacing: .02em;
   color: var(--hc-dim); background: rgba(255,255,255,.05);
   border: 1px solid rgba(255,255,255,.12); white-space: nowrap; }
+.brand { display: inline-flex; align-items: center; margin-right: 7px; vertical-align: -1px; }
+.brand svg { width: 34px; height: 15px; display: block; }
 .status .dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; flex: none;
   box-shadow: 0 0 8px currentColor; }
 .status.ok { color: #7ef0b4; background: rgba(111,224,168,.11); border-color: rgba(111,224,168,.34); }
@@ -51,7 +53,7 @@ h1 { margin: 0; font-size: 25px; line-height: 1.12; font-weight: 650; letter-spa
   border-radius: 50%; pointer-events: none; width: calc(var(--r) * 2); height: calc(var(--r) * 2); }
 .orbit { border: 1px solid rgba(55,214,232,.18);
   box-shadow: inset 0 0 26px -12px rgba(55,214,232,.4); }
-.orbit.o2 { width: calc(var(--r) * 2.42); height: calc(var(--r) * 2.42);
+.orbit.o2 { width: calc(var(--r) * 2.2); height: calc(var(--r) * 2.2);
   border: 1px solid rgba(55,214,232,.07); }
 .node { position: absolute; left: 50%; top: 50%; width: 6px; height: 6px; margin: -3px 0 0 -3px;
   border-radius: 50%; background: var(--hc-accent);
@@ -262,16 +264,16 @@ h1 { margin: 0; font-size: 25px; line-height: 1.12; font-weight: 650; letter-spa
 .cst.open { color: #ffcf90; background: rgba(52,34,10,.86); border-color: rgba(255,196,107,.55);
   box-shadow: 0 1px 8px rgba(0,0,0,.45), 0 0 10px rgba(255,196,107,.28); }
 .cst.bad { color: #ffc8c2; background: rgba(56,16,16,.86); border-color: rgba(255,145,130,.5); }
-.cst.hood { left: 50%; top: 5%; }
-.cst.trunk { left: 50%; top: 92%; }
-.cst.dfl { left: 12%; top: 30%; }
-.cst.wfl { left: 12%; top: 42%; }
-.cst.drl { left: 12%; top: 54%; }
-.cst.wrl { left: 12%; top: 66%; }
-.cst.dfr { left: 88%; top: 30%; }
-.cst.wfr { left: 88%; top: 42%; }
-.cst.drr { left: 88%; top: 54%; }
-.cst.wrr { left: 88%; top: 66%; }
+.cst.hood { left: 50%; top: 6%; }
+.cst.trunk { left: 50%; top: 88%; }
+.cst.dfl { left: 8%; top: 30%; }
+.cst.wfl { left: 8%; top: 42%; }
+.cst.drl { left: 8%; top: 54%; }
+.cst.wrl { left: 8%; top: 66%; }
+.cst.dfr { left: 92%; top: 30%; }
+.cst.wfr { left: 92%; top: 42%; }
+.cst.drr { left: 92%; top: 54%; }
+.cst.wrr { left: 92%; top: 66%; }
 .ctire { position: absolute; transform: translate(-50%, -50%); font-size: 11px; font-weight: 650;
   color: #b9c9dc; font-variant-numeric: tabular-nums; letter-spacing: .02em;
   padding: 2px 7px; border-radius: 999px; background: rgba(10,17,26,.8); border: 1px solid rgba(255,255,255,.16);
@@ -297,11 +299,11 @@ ha-card.panel:not(.fit) .cst { font-size: 8.5px; padding: 2px 4px; }
 ha-card.panel:not(.fit) .cst.dfl,
 ha-card.panel:not(.fit) .cst.wfl,
 ha-card.panel:not(.fit) .cst.drl,
-ha-card.panel:not(.fit) .cst.wrl { left: calc(50% - 84px); }
+ha-card.panel:not(.fit) .cst.wrl { left: calc(50% - 92px); }
 ha-card.panel:not(.fit) .cst.dfr,
 ha-card.panel:not(.fit) .cst.wfr,
 ha-card.panel:not(.fit) .cst.drr,
-ha-card.panel:not(.fit) .cst.wrr { left: calc(50% + 84px); }
+ha-card.panel:not(.fit) .cst.wrr { left: calc(50% + 92px); }
 ha-card.panel:not(.fit) .cst.dfl { top: 24%; }
 ha-card.panel:not(.fit) .cst.wfl { top: 40%; }
 ha-card.panel:not(.fit) .cst.drl { top: 58%; }
@@ -312,10 +314,11 @@ ha-card.panel:not(.fit) .cst.drr { top: 58%; }
 ha-card.panel:not(.fit) .cst.wrr { top: 74%; }
 ha-card.panel:not(.fit) .cst.hood { top: 2%; }
 ha-card.panel:not(.fit) .cst.trunk { top: 98%; }
-ha-card.panel:not(.fit) .ctire.tlf { left: 30%; top: 14%; }
-ha-card.panel:not(.fit) .ctire.trf { left: 70%; top: 14%; }
-ha-card.panel:not(.fit) .ctire.tlr { left: 30%; top: 80%; }
-ha-card.panel:not(.fit) .ctire.trr { left: 70%; top: 80%; }
+ha-card.panel:not(.fit) .ctire.tlf { left: calc(50% - 108px); top: 12%; }
+ha-card.panel:not(.fit) .ctire.trf { left: calc(50% + 108px); top: 12%; }
+ha-card.panel:not(.fit) .ctire.tlr { left: calc(50% - 108px); top: 88%; }
+ha-card.panel:not(.fit) .ctire.trr { left: calc(50% + 108px); top: 88%; }
+ha-card.panel:not(.fit) .hero { --r: 72px; }
 ha-card.panel:not(.fit) .energy { column-gap: 6px; }
 ha-card.panel:not(.fit) .orb { width: 44px; height: 44px; }
 ha-card.panel:not(.fit) .tile .ic { width: 17px; height: 17px; }

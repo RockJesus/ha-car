@@ -66,7 +66,7 @@ type: custom:ha-car
 |---|---|---|---|
 | `hash` | string | 自动 | 车辆标识（设备名或实体前缀），由编辑器选择车辆时写入；也可手填 |
 | `device` | string | — | 也可直接给设备 ID，卡片只取该设备下的实体 |
-| `title` | string | 设备名 | 卡片标题，默认取设备名（如「锐际 Escape」），其次取车辆昵称 |
+| `title` | string | 设备名 | 卡片标题，默认取设备名（如Ford 椭圆标 + 「锐际 Escape」），其次取车辆昵称 |
 | `show_plate` | bool | `true` | 顶部是否显示车牌 |
 | `layout` | `full` / `compact` | `full` | `compact` 只留主视觉、状态、续航与操作，适合手机首屏；`full` 在宽屏（面板视图/桌面）自动变双栏：车图在左、仪表与副指标在右 |
 | `modules` | list | 全部 | `status` `actions` `energy` `tires` `doors` `charging` `alerts` `service` |
@@ -115,7 +115,7 @@ entities:
 卡片读取的都是集成现有实体，不新增后端。车辆绑定分三步：
 
 1. **认槽位**：用实体 ID 后缀和友好名后缀双线索。集成把中文实体名转成 pinyin 作为 `entity_id`（`sensor.<设备>_men_suo_zhuang_tai`），英文环境则是 translation key（`..._lock_status`），部分实体还是历史英文名（`button.<设备>_lock_doors`）；三条都给 `lock` 之类的槽位对上号。
-2. **认车辆**：优先用实体注册表的 `device_id` 分组；没有注册表时退回「友好名共同前缀」（如「锐际 Escape」），不会把电风扇、门锁这类同后缀实体算成车。
+2. **认车辆**：优先用实体注册表的 `device_id` 分组；没有注册表时退回「友好名共同前缀」（如Ford 椭圆标 + 「锐际 Escape」），不会把电风扇、门锁这类同后缀实体算成车。
 3. **认配置**：`hash` / `device` / 单车辆自动。
 
 状态值按中英文模糊匹配（`已锁定` / `locked`、`开启` / `open`、`故障` / `fault`），界面语言切换后照样成立；充电中优先读 `charging_status` 的 `evcc_charge_state` 属性。

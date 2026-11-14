@@ -4,6 +4,12 @@ import { STYLES } from "./styles.js";
 import { dict, isEn } from "./strings.js";
 import { attrs, chargingNow, clamp, esc, fmtNum, isBad, maskAddr, maskPlate, maskText, normLock, normOpen, normTire, num, relTime, text } from "./util.js";
 
+const FORD_LOGO = `<span class="brand" aria-hidden="true"><svg viewBox="0 0 44 20" xmlns="http://www.w3.org/2000/svg">
+<ellipse cx="22" cy="10" rx="21" ry="9" fill="#0b3f92" stroke="#eef4ff" stroke-width="1.6"/>
+<ellipse cx="22" cy="10" rx="17.6" ry="6.6" fill="none" stroke="#eef4ff" stroke-width=".9" opacity=".85"/>
+<text x="22" y="13.4" text-anchor="middle" font-family="Georgia,'Times New Roman',serif" font-style="italic"
+ font-weight="700" font-size="9.4" fill="#f4f8ff" letter-spacing=".4">Ford</text></svg></span>`;
+
 const MODULES = ["status", "actions", "energy", "tires", "doors", "charging", "alerts", "service"];
 const CONFIRMABLE = [
   "btn_unlock",
@@ -324,7 +330,7 @@ class HaCarCard extends HTMLElement {
     const parts = [];
 
     // 顶部：车型名 + 锁态胶囊
-    parts.push(`<div class="head"><div class="ttl"><h1>${esc(title)}</h1>
+    parts.push(`<div class="head"><div class="ttl"><h1>${FORD_LOGO}${esc(title)}</h1>
       ${cfg.show_plate && plate ? `<p class="plate">${esc(cfg.privacy ? maskPlate(plate) : plate)}</p>` : ""}
       </div><span class="status ${status.cls}"><span class="dot"></span>${esc(status.label)}</span></div>`);
 
