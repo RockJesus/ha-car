@@ -213,8 +213,19 @@ function scanGroups(hass, ids) {
   return groups;
 }
 
+// 只保留像「车」的分组：必须有车辆独有锚点，避免把设备自身的位置/状态实体列成车
+function isVehicle(rec) {
+  return (
+    rec.slots.has("lock") ||
+    rec.slots.has("nickname") ||
+    rec.slots.has("odo") ||
+    rec.slots.has("plate") ||
+    rec.slots.has("btn_refresh")
+  );
+}
+
 function ranked(groups) {
-  return [...groups.values()].sort((a, b) => b.score - a.score);
+  return [...groups.values()].filter(isVehicle).sort((a, b) => b.score - a.score);
 }
 
 function keyOf(rec) {

@@ -218,8 +218,11 @@ function scanGroups(hass, ids) {
   }
   return groups;
 }
+function isVehicle(rec) {
+  return rec.slots.has("lock") || rec.slots.has("nickname") || rec.slots.has("odo") || rec.slots.has("plate") || rec.slots.has("btn_refresh");
+}
 function ranked(groups) {
-  return [...groups.values()].sort((a, b) => b.score - a.score);
+  return [...groups.values()].filter(isVehicle).sort((a, b) => b.score - a.score);
 }
 function keyOf(rec) {
   return rec.key.replace(/^(dev|pfx):/, "");
@@ -1821,7 +1824,8 @@ var HaCarEditor = class extends HTMLElement {
     const cars = this._hass ? detectVehicles(this._hass) : [];
     const opts = [`<option value="">${L.autoDetect}</option>`];
     for (const car of cars) {
-      const nick = car.ids.vehicle_nickname ? this._hass.states[car.ids.vehicle_nickname] : null;
+      const nickHit = car.slots && car.slots.get("nickname");
+      const nick = nickHit ? this._hass.states[nickHit.id] : null;
       const label = car.name || nick && nick.state || car.hash;
       opts.push(`<option value="${esc(car.hash)}">${esc(label)}</option>`);
     }
@@ -1885,7 +1889,7 @@ var HaCarEditor = class extends HTMLElement {
 customElements.define("ha-car-editor", HaCarEditor);
 
 // src/main.js
-var VERSION = "1.0.2";
+var VERSION = "1.0.3";
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "ha-car",
