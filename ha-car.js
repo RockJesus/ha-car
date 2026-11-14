@@ -529,6 +529,17 @@ h1 { margin: 0; font-size: 25px; line-height: 1.12; font-weight: 650; letter-spa
 @keyframes hc-node { 0%, 100% { opacity: .5; } 50% { opacity: 1; } }
 
 /* 宽屏（面板视图 / 桌面仪表盘）：手机尺寸的内容居中收窄，避免拉成一条横贯全屏的卡片 */
+
+/* ---- 面板模式：卡片自适应占满面板 ---- */
+ha-card.panel { height: 100%; }
+ha-card.panel .wrap { height: 100%; min-height: 100%; box-sizing: border-box; padding: 24px 24px 18px;
+  max-width: 1600px; margin-inline: auto; }
+ha-card.panel .duo { flex: 1 1 auto; min-height: 0; }
+ha-card.panel .dleft { justify-content: center; min-height: 0; }
+ha-card.panel .dright { justify-content: center; }
+ha-card.panel .hero { flex: 1 1 auto; height: auto; min-height: 300px; }
+ha-card.panel .carimg { max-height: 88%; max-width: min(60%, 320px); }
+
 @media (min-width: 860px) {
   :host { max-width: 860px; margin: 0 auto; }
   .wrap { padding: 24px 22px 18px; gap: 16px; }
@@ -541,6 +552,34 @@ h1 { margin: 0; font-size: 25px; line-height: 1.12; font-weight: 650; letter-spa
   .gauge { max-width: 152px; }
   .acts { max-width: 540px; margin: 2px auto 0; width: 100%; }
   .pills { max-width: 540px; margin: 10px auto 0; width: 100%; }
+  /* 面板模式：容器多宽就排多宽，车图列跟着面板高度走 */
+  :host(.panel) { max-width: none; margin: 0; }
+  ha-card.panel .wrap { padding: 28px 34px 24px; gap: 18px; }
+  ha-card.panel .duo { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); column-gap: 40px; align-items: stretch; }
+  ha-card.panel .dleft .hero { height: 100%; min-height: 320px; --r: 124px; }
+  ha-card.panel .carimg { max-height: 90%; max-width: min(64%, 360px); }
+  ha-card.panel .gauge { max-width: 176px; }
+  ha-card.panel .acts { max-width: 620px; }
+  ha-card.panel .pills { max-width: 620px; }
+}
+
+@media (min-width: 1500px) {
+  ha-card.panel .wrap { padding: 34px 44px 28px; }
+  ha-card.panel .duo { column-gap: 52px; }
+  ha-card.panel .dleft .hero { --r: 152px; }
+  ha-card.panel .carimg { max-height: 88%; max-width: min(62%, 430px); }
+  ha-card.panel .gauge { max-width: 208px; }
+  ha-card.panel .gn b { font-size: 42px; }
+  ha-card.panel .acts, ha-card.panel .pills { max-width: 680px; }
+}
+
+@media (min-width: 1900px) {
+  ha-card.panel .wrap { max-width: 1900px; }
+  ha-card.panel .dleft .hero { --r: 176px; }
+  ha-card.panel .carimg { max-height: 90%; max-width: min(60%, 480px); }
+  ha-card.panel .gauge { max-width: 240px; }
+  ha-card.panel .gn b { font-size: 48px; }
+  ha-card.panel .acts, ha-card.panel .pills { max-width: 780px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -913,6 +952,7 @@ var PREVIEW_TAGS = /* @__PURE__ */ new Set([
   "hui-card-editor",
   "ha-editor"
 ]);
+var PANEL_TAGS = /* @__PURE__ */ new Set(["hui-panel-view", "hui-grid-view"]);
 var DEFAULTS = {
   title: "",
   layout: "full",
@@ -983,6 +1023,28 @@ var HaCarCard = class extends HTMLElement {
     };
   }
   // ---------- 上下文 ----------
+  // 面板视图（path: hacar 那种 panel）→ 卡片撑满整个面板
+  _isPanel() {
+    let node = this.parentElement;
+    let depth = 0;
+    while (node && depth < 10) {
+      const n = (node.localName || "").toLowerCase();
+      if (PANEL_TAGS.has(n)) return true;
+      node = node.parentElement || node.parentNode && node.parentNode.host || null;
+      depth += 1;
+    }
+    return false;
+  }
+  _syncPanel() {
+    const panel = this._isPanel() && !this._isPreview();
+    if (panel === this._panel) return;
+    this._panel = panel;
+    this._card.classList.toggle("panel", panel);
+    this.style.maxWidth = panel ? "none" : "";
+    this.style.margin = panel ? "0" : "";
+    this.style.height = panel ? "100%" : "";
+    this.style.width = panel ? "100%" : "";
+  }
   _isPreview() {
     if (this._preview) return true;
     let node = this.parentElement;
@@ -1008,6 +1070,8 @@ var HaCarCard = class extends HTMLElement {
       if (force) this._wrap.innerHTML = this._empty(dict(null));
       return;
     }
+    if (!this._built) this._build();
+    this._syncPanel();
     if (this._isPreview()) {
       this._wrap.className = "wrap";
       this.shadowRoot.querySelector("ha-card").classList.add("compact");
@@ -1041,6 +1105,7 @@ var HaCarCard = class extends HTMLElement {
   }
   _paint(data) {
     const cfg = this._config;
+    this._syncPanel();
     this._card.classList.toggle("compact", cfg.layout === "compact");
     this._wrap.className = "wrap";
     if (cfg.accent) this._card.style.setProperty("--hc-accent", cfg.accent);
@@ -1976,7 +2041,7 @@ var HaCarEditor = class extends HTMLElement {
 customElements.define("ha-car-editor", HaCarEditor);
 
 // src/main.js
-var VERSION = "1.0.7";
+var VERSION = "1.0.8";
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "ha-car",

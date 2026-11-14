@@ -22,6 +22,8 @@ const PREVIEW_TAGS = new Set([
   "ha-editor",
 ]);
 
+const PANEL_TAGS = new Set(["hui-panel-view", "hui-grid-view"]);
+
 const DEFAULTS = {
   title: "",
   layout: "full",
@@ -107,6 +109,31 @@ class HaCarCard extends HTMLElement {
 
   // ---------- 上下文 ----------
 
+  // 面板视图（path: hacar 那种 panel）→ 卡片撑满整个面板
+  _isPanel() {
+    let node = this.parentElement;
+    let depth = 0;
+    while (node && depth < 10) {
+      const n = (node.localName || "").toLowerCase();
+      if (PANEL_TAGS.has(n)) return true;
+      node = node.parentElement || (node.parentNode && node.parentNode.host) || null;
+      depth += 1;
+    }
+    return false;
+  }
+
+  _syncPanel() {
+    const panel = this._isPanel() && !this._isPreview();
+    if (panel === this._panel) return;
+    this._panel = panel;
+    this._card.classList.toggle("panel", panel);
+    // :host 的 860px 上限只对普通卡片有意义；面板模式交给容器决定尺寸
+    this.style.maxWidth = panel ? "none" : "";
+    this.style.margin = panel ? "0" : "";
+    this.style.height = panel ? "100%" : "";
+    this.style.width = panel ? "100%" : "";
+  }
+
   _isPreview() {
     if (this._preview) return true;
     let node = this.parentElement;
@@ -134,6 +161,8 @@ class HaCarCard extends HTMLElement {
       if (force) this._wrap.innerHTML = this._empty(dict(null));
       return;
     }
+    if (!this._built) this._build();
+    this._syncPanel();
     if (this._isPreview()) {
       this._wrap.className = "wrap";
       this.shadowRoot.querySelector("ha-card").classList.add("compact");
@@ -171,6 +200,7 @@ class HaCarCard extends HTMLElement {
 
   _paint(data) {
     const cfg = this._config;
+    this._syncPanel();
     this._card.classList.toggle("compact", cfg.layout === "compact");
     this._wrap.className = "wrap";
     if (cfg.accent) this._card.style.setProperty("--hc-accent", cfg.accent);
