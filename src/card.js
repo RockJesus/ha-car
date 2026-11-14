@@ -162,8 +162,12 @@ class HaCarCard extends HTMLElement {
     const pfit = !fit && w > 0 && h > 0;
     this._card.classList.toggle("pfit", pfit);
     if (pfit) {
+      // 版式画布按容器等比反算（canvas = 容器 / 缩放），内容随画布重新排布，
+      // 所以两边都能占满：先满足高就把画布排宽，先满足宽就把画布排高。
       const k = Math.max(0.42, Math.min(2.2, Math.min(w / 390, h / 840)));
       this._card.style.setProperty("--pscale", String(Math.round(k * 1000) / 1000));
+      this._card.style.width = `${Math.round(w / k)}px`;
+      this._card.style.height = `${Math.round(h / k)}px`;
       return;
     }
     if (!fit) return;

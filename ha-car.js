@@ -705,8 +705,8 @@ ha-card.panel .carimg { max-height: min(62%, 460px); max-width: min(60%, 330px);
 /* 宽面板：车图占左栏满高，仪表/操作/告警等叠成右栏，避免中间大片留白 */
 /* 手机面板：固定 390×840 版式，整体等比缩放到容器内，一屏铺满且不出滚动条 */
 :host(.panel) { position: relative; overflow: hidden; }
-ha-card.panel.pfit { position: absolute; left: 50%; top: 50%; width: 390px; height: 840px;
-  transform: translate(-50%, -50%) scale(var(--pscale, 1)); transform-origin: 50% 50%; }
+ha-card.panel.pfit { position: absolute; left: 0; top: 0;
+  transform: scale(var(--pscale, 1)); transform-origin: 0 0; }
 ha-card.panel.pfit .wrap { height: 100%; }
 ha-card.panel.fit .wrap { display: grid; grid-template-columns: minmax(0,1.04fr) minmax(0,.96fr);
   column-gap: 52px; row-gap: 20px; align-content: center; }
@@ -1241,6 +1241,8 @@ var HaCarCard = class extends HTMLElement {
     if (pfit) {
       const k2 = Math.max(0.42, Math.min(2.2, Math.min(w / 390, h / 840)));
       this._card.style.setProperty("--pscale", String(Math.round(k2 * 1e3) / 1e3));
+      this._card.style.width = `${Math.round(w / k2)}px`;
+      this._card.style.height = `${Math.round(h / k2)}px`;
       return;
     }
     if (!fit) return;
@@ -2343,7 +2345,7 @@ var HaCarEditor = class extends HTMLElement {
 customElements.define("ha-car-editor", HaCarEditor);
 
 // src/main.js
-var VERSION = "1.2.3";
+var VERSION = "1.2.4";
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "ha-car",
