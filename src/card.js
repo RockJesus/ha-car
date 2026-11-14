@@ -204,12 +204,17 @@ class HaCarCard extends HTMLElement {
   }
 
   _previewBody() {
-    return `<div class="head"><div class="ttl">
-      <p class="kicker">HA CAR</p><h1>${isEn(this._hass) ? "My car" : "我的座驾"}</h1>
-      </div><div class="iconbtn">${icon("refresh")}</div></div>
-      <div class="stage"><div class="glow"></div><div class="carph">${icon("car")}</div><div class="ground"></div></div>
-      <div class="chips"><span class="chip ok"><span class="dot"></span>已锁定</span>
-      <span class="chip">${isEn(this._hass) ? "Range" : "续航"} · 486 km</span></div>`;
+    const t = dict(this._hass);
+    const en = isEn(this._hass);
+    return `<div class="head"><div class="ttl"><h1>${esc(en ? "My car" : "我的座驾")}</h1>
+        <p class="plate">HA CAR</p></div>
+        <span class="status ok"><span class="dot"></span>${esc(t.locked)}</span></div>
+      ${this._hero(null)}
+      <div class="energy">
+        ${this._gauge({ pct: 62, label: t.fuel, value: 62, unit: "%", ic: "fuel" })}
+        <span class="egmid">${icon("fuel")}</span>
+        ${this._gauge({ pct: 81, label: t.range, value: 486, unit: "km", ic: "gauge" })}
+      </div>`;
   }
 
   // ---------- 卡片主体 ----------
@@ -235,41 +240,38 @@ class HaCarCard extends HTMLElement {
     const title = cfg.title || text(s("nickname")) || (isEn(this._hass) ? "My car" : "我的座驾");
     const plate = text(s("plate"));
 
+    const status = offline
+      ? { cls: "bad", label: t.offline }
+      : lockNorm === "unlocked"
+        ? { cls: "bad", label: t.unlocked }
+        : lockNorm === "locked"
+          ? { cls: "ok", label: t.locked }
+          : { cls: "", label: t.locking };
+
     const chips = [];
-    if (offline) chips.push({ cls: "bad", label: t.offline, dot: true });
-    if (lockNorm === "locked") chips.push({ cls: "ok", label: t.locked, dot: true });
-    else if (lockNorm === "unlocked") chips.push({ cls: "bad", label: t.unlocked, dot: true });
-    if (chgNow) chips.push({ cls: "info", label: t.charging, dot: true });
-    if (running) chips.push({ cls: "warn", label: t.running, dot: true });
-    if (!chips.length) chips.push({ cls: "", label: t.locking });
+    if (chgNow) chips.push({ cls: "info", label: t.charging });
+    if (running) chips.push({ cls: "warn", label: t.running });
 
     const parts = [];
 
-    // 头部 + 车图
-    parts.push(`<div class="head"><div class="ttl">
-      <p class="kicker">${esc(cfg.show_plate && plate ? plate : "HA CAR")}</p>
-      <h1>${esc(title)}</h1>
-      ${cfg.show_plate && plate ? "" : ""}
-    </div>
-    ${this._syncButton(data)}
-    </div>`);
+    // 顶部：车型名 + 锁态胶囊
+    parts.push(`<div class="head"><div class="ttl"><h1>${esc(title)}</h1>
+      ${cfg.show_plate && plate ? `<p class="plate">${esc(plate)}</p>` : ""}
+      </div><span class="status ${status.cls}"><span class="dot"></span>${esc(status.label)}</span></div>`);
 
-    const imgUrl = this._imageUrl(data);
-    parts.push(`<div class="stage"><div class="glow"></div>
-      ${imgUrl ? `<img class="carimg" src="${esc(imgUrl)}" alt="">` : `<div class="carph">${icon("car")}</div>`}
-      <div class="ground"></div></div>`);
+    // 主视觉：车图 + 轨道 + 节点
+    parts.push(this._hero(this._imageUrl(data)));
 
-    if (mods.includes("status")) {
-      parts.push(
-        `<div class="chips">${chips
-          .slice(0, 3)
-          .map((c) => `<span class="chip ${c.cls}">${c.dot ? '<span class="dot"></span>' : ""}${esc(c.label)}</span>`)
-          .join("")}</div>`,
-      );
+    if (mods.includes("status") && chips.length) {
+      parts.push(`<div class="chips">${chips
+        .slice(0, 3)
+        .map((c) => `<span class="chip ${c.cls}">${esc(c.label)}</span>`)
+        .join("")}</div>`);
     }
 
     if (mods.includes("energy")) {
-      parts.push(this._energy(data, t));
+      const energy = this._energy(data, t);
+      if (energy) parts.push(energy);
     }
 
     if (mods.includes("actions")) {
@@ -282,8 +284,7 @@ class HaCarCard extends HTMLElement {
     }
 
     if (!compact && mods.includes("tires")) {
-      const tires = this._tires(data, t);
-      if (tires) parts.push(tires);
+      this._tread = this._tires(data, t);
     }
 
     if (!compact && mods.includes("doors")) {
@@ -306,21 +307,47 @@ class HaCarCard extends HTMLElement {
       if (loc) parts.push(loc);
     }
 
-    parts.push(this._footer(data, t));
+    // 底部：胎压 + 同步时间合成一条底座
+    parts.push(this._baseline(data, t));
+
     if (this._toast) parts.push(this._toastHtml());
 
     return parts.join("");
   }
 
-  _syncButton(data) {
+  // 车图 + 同心轨道 + 四枚发光节点（无图时落回圆形占位）
+  _hero(imgUrl) {
+    return `<div class="hero"><div class="halo"></div>
+      <span class="orbit"></span><span class="orbit o2"></span>
+      <i class="node n1"></i><i class="node n2"></i><i class="node n3"></i><i class="node n4"></i>
+      ${imgUrl ? `<img class="carimg" src="${esc(imgUrl)}" alt="">` : `<div class="carph">${icon("car")}</div>`}
+      <div class="ground"></div></div>`;
+  }
+
+  // 底座条：四轮胎压 + 同步（同步入口就是刷新按钮）
+  _baseline(data, t) {
+    const tread = this._tread || "";
+    this._tread = "";
+    const sync = this._syncChip(data, t);
+    if (!tread && !sync) return "";
+    return `<div class="baseline${tread ? "" : " solo"}">${tread}${tread && sync ? '<span class="bdiv"></span>' : ""}${sync}</div>`;
+  }
+
+  _syncChip(data, t) {
     const ent = data.id("btn_refresh");
     const pending = ent && this._pending.has(ent);
-    if (!ent) {
-      return `<div class="iconbtn spin">${icon("refresh")}</div>`;
-    }
-    return `<button class="iconbtn${pending ? " spin" : ""}" data-act="btn_refresh" data-ent="${esc(ent)}"
-      data-dom="button" data-svc="press" data-label="${esc(dict(this._hass).refresh)}"
-      title="${esc(dict(this._hass).refresh)}">${icon("refresh")}</button>`;
+    const syncText = text(data.get("sync"));
+    const bad = syncText ? /异常|error|失败/.test(syncText.toLowerCase()) : false;
+    const when = relTime(
+      attrs(data.get("data_time"), "when") || (data.get("data_time") ? data.get("data_time").state : ""),
+      (this._hass.locale || {}).language,
+    );
+    const label = when ? when : syncText ? (bad ? t.syncBad : t.syncOk) : t.never;
+    const inner = `${icon("refresh")}<span class="sdot${bad ? " bad" : ""}"></span><span class="stx">${esc(label)}</span>`;
+    if (!ent) return `<span class="sync">${inner}</span>`;
+    return `<button class="sync${pending ? " spin" : ""}" data-act="btn_refresh" data-ent="${esc(ent)}"
+      data-dom="button" data-svc="press" data-label="${esc(t.refresh)}"
+      title="${esc(t.syncTime + label)}">${inner}</button>`;
   }
 
   _imageUrl(data) {
@@ -343,8 +370,9 @@ class HaCarCard extends HTMLElement {
   _energy(data, t) {
     const fuel = num(data.get("fuel"));
     const batt = num(data.get("battery"));
-    const ringVal = batt != null ? batt : fuel;
-    const ringLabel = batt != null ? t.battery : t.fuel;
+    const pct = batt != null ? batt : fuel;
+    const pctLabel = batt != null ? t.battery : t.fuel;
+    const pctIc = batt != null ? "bolt" : "fuel";
     const range = num(data.get("range")) != null ? num(data.get("range")) : num(data.get("ev_range"));
     const rangeUnit = attrs(data.get("range"), "unit_of_measurement") || "km";
     const odo = num(data.get("odo"));
@@ -352,32 +380,53 @@ class HaCarCard extends HTMLElement {
     const volt = num(data.get("volt"));
     const oil = num(data.get("oil"));
 
-    if (ringVal == null && range == null && odo == null) return "";
+    if (pct == null && range == null && odo == null) return "";
 
-    const ring =
-      ringVal == null
+    // 续航环的满量程只是视觉参考（汽油 ~620km / 纯电 ~500km），不做任何数据推断
+    const left =
+      pct == null
         ? ""
-        : `<div class="ring" style="--v:${clamp(ringVal, 0, 100)}">
-            <div class="rv"><b>${Math.round(ringVal)}%</b><i>${esc(ringLabel)}</i></div></div>`;
+        : this._gauge({ pct: clamp(pct, 2, 100), label: pctLabel, value: Math.round(pct), unit: "%", ic: pctIc });
+    const right =
+      range != null
+        ? this._gauge({
+            pct: clamp((range / (batt != null ? 500 : 620)) * 100, 2, 100),
+            label: t.range,
+            value: fmtNum(range),
+            unit: rangeUnit,
+            ic: "gauge",
+          })
+        : this._gauge({ pct: 100, label: t.odo, value: fmtNum(odo), unit: odoUnit, ic: "gauge" });
 
     const stats = [];
-    if (odo != null) {
-      stats.push(`<div class="stat"><span class="k">${esc(t.odo)}</span><span class="v"><b>${fmtNum(odo)}</b> ${esc(odoUnit)}</span></div>`);
+    if (odo != null && range != null) {
+      stats.push(`<span class="sstat"><i>${esc(t.odo)}</i><b>${fmtNum(odo)}</b> ${esc(odoUnit)}</span>`);
     }
     if (volt != null) {
-      stats.push(`<div class="stat"><span class="k">${esc(t.volt)}</span><span class="v"><b>${fmtNum(volt, 1)}</b> V</span></div>`);
+      stats.push(`<span class="sstat"><i>${esc(t.volt)}</i><b>${fmtNum(volt, 1)}</b> V</span>`);
     }
     if (oil != null) {
-      stats.push(`<div class="stat"><span class="k">${esc(t.oil)}</span><span class="v"><b>${Math.round(oil)}</b> %</span></div>`);
+      stats.push(`<span class="sstat"><i>${esc(t.oil)}</i><b>${Math.round(oil)}</b> %</span>`);
     }
 
-    const main =
-      range == null
-        ? `<div class="big">${odo != null ? fmtNum(odo) : ""}<small>${odo != null ? esc(odoUnit) : ""}</small></div>`
-        : `<div class="big">${fmtNum(range)}<small>${esc(rangeUnit)}</small></div>`;
+    return `<div class="energy">${left}${left ? `<span class="egmid">${icon(pctIc)}</span>` : ""}${right}</div>
+      ${stats.length ? `<div class="substats">${stats.join("")}</div>` : ""}`;
+  }
 
-    return `<div class="energy">${ring}<div class="main">${range == null ? "" : `<span class="k" style="font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--hc-dim)">${esc(t.range)}</span>`}${main}
-      ${stats.length ? `<div class="subrow">${stats.join("")}</div>` : ""}</div></div>`;
+  // 环形仪表：SVG 描边弧，从 12 点起顺时针
+  _gauge(o) {
+    const C = 2 * Math.PI * 44;
+    const pct = clamp(Number(o.pct) || 0, 0, 100);
+    const arc = (C * pct) / 100;
+    return `<div class="gauge">
+      <svg viewBox="0 0 100 100" aria-hidden="true">
+        <circle class="gt" cx="50" cy="50" r="44"/>
+        <circle class="gp" cx="50" cy="50" r="44"
+          stroke-dasharray="${arc.toFixed(1)} ${C.toFixed(1)}" transform="rotate(-90 50 50)"/>
+      </svg>
+      <div class="gv"><span class="gl">${icon(o.ic)}${esc(o.label)}</span>
+        <span class="gn"><b>${esc(String(o.value))}</b>${o.unit ? `<i>${esc(o.unit)}</i>` : ""}</span></div>
+    </div>`;
   }
 
   _actions(data, t, running, offline, compact) {
@@ -450,7 +499,8 @@ class HaCarCard extends HTMLElement {
       data-act="${esc(o.key)}" data-ent="${esc(o.ent)}" data-dom="${esc(o.dom)}" data-svc="${esc(o.svc)}"
       data-label="${esc(o.label)}"${o.hold(o.key)} role="button" tabindex="0"
       aria-label="${esc(o.label + "，" + t.holdHint)}">
-      ${icon(o.ic)}<span class="lbl">${esc(o.label)}</span><span class="holdbar"></span></button>`;
+      <span class="orb"><svg class="hring" viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="47"/></svg>${icon(o.ic)}</span>
+      <span class="lbl">${esc(o.label)}</span></button>`;
   }
 
   _pill(o) {
@@ -475,12 +525,11 @@ class HaCarCard extends HTMLElement {
       const v = num(st);
       const unit = attrs(st, "unit_of_measurement") || "kPa";
       const warn = normTire(data.get(d.sslot)) === "warn";
-      cells.push(`<div class="tire${warn ? " warn" : ""}" data-more="${esc(data.id(d.slot))}">
-        <span class="p">${esc(d.label)}</span>
-        <span class="v">${v == null ? "—" : fmtNum(v)}<small>${esc(unit)}</small></span></div>`);
+      cells.push(`<span class="tc${warn ? " warn" : ""}" data-more="${esc(data.id(d.slot))}">
+        ${icon("tire")}<b>${v == null ? "—" : fmtNum(v)}</b><small>${esc(unit)}</small></span>`);
     }
     if (!cells.length) return "";
-    return `<div class="tires">${cells.join("")}</div>`;
+    return `<div class="tread">${cells.join("")}</div>`;
   }
 
   _doors(data, t) {
@@ -583,20 +632,6 @@ class HaCarCard extends HTMLElement {
     const label = addr || (isEn(this._hass) ? "Open map" : "查看地图");
     return `<div class="doors"><span class="door" data-more="${esc(tracker || data.id("addr"))}">
       ${icon("pin")}<span class="addr">${esc(label)}</span></span></div>`;
-  }
-
-  _footer(data, t) {
-    const sync = data.get("sync");
-    const syncText = text(sync);
-    const bad = syncText ? /异常|error|失败/.test(syncText.toLowerCase()) : false;
-    const when = relTime(attrs(data.get("data_time"), "when") || (data.get("data_time") ? data.get("data_time").state : ""), (this._hass.locale || {}).language);
-    const left = [];
-    if (syncText) {
-      left.push(`<span class="syncwrap"><span class="sdot${bad ? " bad" : ""}"></span>${esc(bad ? t.syncBad : t.syncOk)}</span>`);
-    }
-    if (when) left.push(`<span>${esc(t.syncTime)} ${esc(when)}</span>`);
-    if (!left.length) left.push(`<span>${esc(t.never)}</span>`);
-    return `<div class="foot"><span class="left">${left.join("")}</span></div>`;
   }
 
   _toastHtml() {
