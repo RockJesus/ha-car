@@ -278,10 +278,10 @@ h1 { margin: 0; font-size: 25px; line-height: 1.12; font-weight: 650; letter-spa
   padding: 2px 6px; border-radius: 8px; background: rgba(8,13,20,.62); border: 1px solid rgba(255,255,255,.07);
   text-shadow: 0 1px 2px rgba(0,0,0,.6); }
 .ctire.warn { color: var(--hc-warn); border-color: rgba(255,196,107,.5); }
-.ctire.tlf { left: 25%; top: 21%; }
-.ctire.trf { left: 75%; top: 21%; }
-.ctire.tlr { left: 25%; top: 68%; }
-.ctire.trr { left: 75%; top: 68%; }
+.ctire.tlf { left: 6%; top: 21%; }
+.ctire.trf { left: 94%; top: 21%; }
+.ctire.tlr { left: 6%; top: 68%; }
+.ctire.trr { left: 94%; top: 68%; }
 
 /* ---- 面板模式：1440×900 设计稿等比缩放，整页装下不滚动 ---- */
 :host(.panel) { position: relative; overflow: hidden;
