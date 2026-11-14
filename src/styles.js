@@ -292,14 +292,14 @@ h1 { margin: 0; font-size: 26px; line-height: 1.1; font-weight: 700; letter-spac
 
 .b-actions { position: relative; }
 .toast.free { bottom: 64px; }
-
-/* 长按进度：贴在控制区底部的一条发光进度线，手指挡不住两端 */
-.holdbar { position: absolute; left: 2px; right: 2px; bottom: -2px; height: 3px; z-index: 7;
-  pointer-events: none; opacity: 0; transition: opacity .16s ease; }
-.holdbar.on { opacity: 1; }
-.holdbar i { display: block; height: 100%; width: 100%; transform: scaleX(0); transform-origin: 0 50%;
-  background: linear-gradient(90deg, rgba(55,214,232,.2), var(--hc-accent) 55%, #eaf9ff);
-  box-shadow: 0 0 14px rgba(55,214,232,.55); border-radius: 2px; }
+/* 长按进度：车底轨道圈顺时针转满一圈（起点 12 点方向） */
+.orbit .hring2 { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
+.orbit .hring2 { transform: rotate(-90deg); }
+.orbit .hring2 circle { fill: none; stroke: var(--hc-accent); stroke-width: .6; stroke-linecap: round;
+  opacity: 0; transition: opacity .18s ease;
+  filter: drop-shadow(0 0 3px rgba(55,214,232,.55)); }
+.orbit.prog .hring2 circle, .orbit.armed .hring2 circle { opacity: 1; }
+.orbit.armed .hring2 circle { stroke: #dffbff; filter: drop-shadow(0 0 7px rgba(55,214,232,.85)); }
 .toast { position: absolute; right: 0; left: auto; bottom: calc(100% + 6px); z-index: 6;
   pointer-events: none; max-width: 100%;
   box-shadow: 0 14px 30px -16px rgba(0,0,0,.95);

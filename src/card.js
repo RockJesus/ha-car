@@ -294,16 +294,7 @@ class HaCarCard extends HTMLElement {
     if (cfg.accent) this._card.style.setProperty("--hc-accent", cfg.accent);
     this._prunePending(data);
     this._wrap.innerHTML = this._body(data, this._card.classList.contains("fit"));
-    this._holdbar = this._wrap.querySelector(".b-actions .holdbar");
-    if (!this._holdbar) {
-      this._holdbar = document.createElement("div");
-      this._holdbar.className = "holdbar";
-      this._holdbar.setAttribute("aria-hidden", "true");
-      this._holdbar.style.bottom = "10px";
-      this._holdbar.innerHTML = "<i></i>";
-      this._wrap.appendChild(this._holdbar);
-    }
-    this._holdbarFill = this._holdbar.querySelector("i");
+
     this._placeOverlay();
     const img = this._wrap.querySelector("img.carimg");
     if (img) img.addEventListener("load", () => this._placeOverlay(), { once: true });
@@ -479,7 +470,7 @@ class HaCarCard extends HTMLElement {
     const inner = typeof overlay === "string" ? overlay : (overlay && overlay.inner) || "";
     const edge = (overlay && overlay.edge) || "";
     return `<div class="hero"><div class="halo"></div>
-      <span class="orbit"><i class="node n1"></i><i class="node n2"></i><i class="node n3"></i><i class="node n4"></i></span>
+      <span class="orbit"><svg class="hring2" viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="49"/></svg><i class="node n1"></i><i class="node n2"></i><i class="node n3"></i><i class="node n4"></i></span>
       <span class="orbit o2"></span>
       ${
         imgUrl
@@ -735,8 +726,7 @@ class HaCarCard extends HTMLElement {
 
     if (!tiles.length && !pills.length) return "";
     return `${tiles.length ? `<div class="acts">${tiles.join("")}</div>` : ""}
-      ${pills.length ? `<div class="pills">${pills.join("")}</div>` : ""}
-      <div class="holdbar" aria-hidden="true"><i></i></div>`;
+      ${pills.length ? `<div class="pills">${pills.join("")}</div>` : ""}`;
   }
 
   _tile(o) {
@@ -978,16 +968,22 @@ class HaCarCard extends HTMLElement {
       /* 忽略：部分 WebView 不支持指针捕获 */
     }
 
-    // 底边进度条：手指挡不住的两端也能看到进度
-    const bar = this._holdbar;
-    const fill = this._holdbarFill;
-    if (bar && fill) {
-      bar.classList.add("on");
-      fill.style.transition = "none";
-      fill.style.transform = "scaleX(0)";
-      void fill.offsetWidth;
-      fill.style.transition = `transform ${ms}ms linear`;
-      fill.style.transform = "scaleX(1)";
+    // 车底轨道圈：按住时从 12 点方向顺时针转满一圈（用 rAF 逐帧推进，长度单位不受缩放影响）
+    const ring = this.shadowRoot.querySelector(".orbit .hring2");
+    const circle = ring ? ring.querySelector("circle") : null;
+    if (ring && circle) {
+      const C = 2 * Math.PI * 49;
+      circle.setAttribute("stroke-dasharray", String(C));
+      circle.setAttribute("stroke-dashoffset", String(C));
+      if (ring.parentElement) ring.parentElement.classList.add("prog");
+      const t0 = Date.now();
+      const tickRing = () => {
+        if (!this._hold) return;
+        const p = Math.min(1, (Date.now() - t0) / ms);
+        circle.setAttribute("stroke-dashoffset", String(C * (1 - p)));
+        if (p < 1) this._holdRaf = requestAnimationFrame(tickRing);
+      };
+      this._holdRaf = requestAnimationFrame(tickRing);
     }
 
     const buzz = (pattern) => {
@@ -1013,6 +1009,8 @@ class HaCarCard extends HTMLElement {
       el.classList.add("armed");
       if (this._holdTick) clearInterval(this._holdTick);
       this._holdTick = null;
+      const rg = this.shadowRoot.querySelector(".orbit .hring2");
+      if (rg && rg.parentElement) { rg.parentElement.classList.remove("prog"); rg.parentElement.classList.add("armed"); }
       if (lbl) lbl.textContent = t.armed;
       buzz(40);
     }, ms);
@@ -1036,7 +1034,7 @@ class HaCarCard extends HTMLElement {
     this._clearHoldTimers();
     h.el.classList.remove("pressing", "armed");
     if (h.lbl) h.lbl.textContent = armed ? h.el.dataset.label || h.orig : h.orig;
-    this._resetHoldBar();
+    this._resetHoldRing();
     if (armed) {
       this._justArmed = true;
       this._exec(h.el);
@@ -1050,19 +1048,20 @@ class HaCarCard extends HTMLElement {
 
   _clearHoldTimers() {
     clearTimeout(this._holdTimer);
+    if (this._holdRaf) cancelAnimationFrame(this._holdRaf);
+    this._holdRaf = null;
     (this._holdStages || []).forEach((id) => clearTimeout(id));
     this._holdStages = [];
     if (this._holdTick) clearInterval(this._holdTick);
     this._holdTick = null;
   }
 
-  _resetHoldBar() {
-    const bar = this._holdbar;
-    const fill = this._holdbarFill;
-    if (!bar || !fill) return;
-    bar.classList.remove("on");
-    fill.style.transition = "none";
-    fill.style.transform = "scaleX(0)";
+  _resetHoldRing() {
+    const ring = this.shadowRoot.querySelector(".orbit .hring2");
+    const circle = ring ? ring.querySelector("circle") : null;
+    if (!ring || !circle) return;
+    if (ring.parentElement) ring.parentElement.classList.remove("prog", "armed");
+    circle.setAttribute("stroke-dashoffset", String(2 * Math.PI * 49));
   }
 
   _cancelHold() {
@@ -1071,7 +1070,7 @@ class HaCarCard extends HTMLElement {
     this._hold.el.classList.remove("pressing", "armed");
     if (this._hold.lbl) this._hold.lbl.textContent = this._hold.orig;
     this._hold = null;
-    this._resetHoldBar();
+    this._resetHoldRing();
     if (this._pendingRender) {
       this._pendingRender = false;
       this._render(true);

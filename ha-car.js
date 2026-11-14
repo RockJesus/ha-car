@@ -593,14 +593,14 @@ h1 { margin: 0; font-size: 26px; line-height: 1.1; font-weight: 700; letter-spac
 
 .b-actions { position: relative; }
 .toast.free { bottom: 64px; }
-
-/* 长按进度：贴在控制区底部的一条发光进度线，手指挡不住两端 */
-.holdbar { position: absolute; left: 2px; right: 2px; bottom: -2px; height: 3px; z-index: 7;
-  pointer-events: none; opacity: 0; transition: opacity .16s ease; }
-.holdbar.on { opacity: 1; }
-.holdbar i { display: block; height: 100%; width: 100%; transform: scaleX(0); transform-origin: 0 50%;
-  background: linear-gradient(90deg, rgba(55,214,232,.2), var(--hc-accent) 55%, #eaf9ff);
-  box-shadow: 0 0 14px rgba(55,214,232,.55); border-radius: 2px; }
+/* 长按进度：车底轨道圈顺时针转满一圈（起点 12 点方向） */
+.orbit .hring2 { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
+.orbit .hring2 { transform: rotate(-90deg); }
+.orbit .hring2 circle { fill: none; stroke: var(--hc-accent); stroke-width: .6; stroke-linecap: round;
+  opacity: 0; transition: opacity .18s ease;
+  filter: drop-shadow(0 0 3px rgba(55,214,232,.55)); }
+.orbit.prog .hring2 circle, .orbit.armed .hring2 circle { opacity: 1; }
+.orbit.armed .hring2 circle { stroke: #dffbff; filter: drop-shadow(0 0 7px rgba(55,214,232,.85)); }
 .toast { position: absolute; right: 0; left: auto; bottom: calc(100% + 6px); z-index: 6;
   pointer-events: none; max-width: 100%;
   box-shadow: 0 14px 30px -16px rgba(0,0,0,.95);
@@ -1426,16 +1426,6 @@ var HaCarCard = class extends HTMLElement {
     if (cfg.accent) this._card.style.setProperty("--hc-accent", cfg.accent);
     this._prunePending(data);
     this._wrap.innerHTML = this._body(data, this._card.classList.contains("fit"));
-    this._holdbar = this._wrap.querySelector(".b-actions .holdbar");
-    if (!this._holdbar) {
-      this._holdbar = document.createElement("div");
-      this._holdbar.className = "holdbar";
-      this._holdbar.setAttribute("aria-hidden", "true");
-      this._holdbar.style.bottom = "10px";
-      this._holdbar.innerHTML = "<i></i>";
-      this._wrap.appendChild(this._holdbar);
-    }
-    this._holdbarFill = this._holdbar.querySelector("i");
     this._placeOverlay();
     const img = this._wrap.querySelector("img.carimg");
     if (img) img.addEventListener("load", () => this._placeOverlay(), { once: true });
@@ -1589,7 +1579,7 @@ var HaCarCard = class extends HTMLElement {
     const inner = typeof overlay === "string" ? overlay : overlay && overlay.inner || "";
     const edge = overlay && overlay.edge || "";
     return `<div class="hero"><div class="halo"></div>
-      <span class="orbit"><i class="node n1"></i><i class="node n2"></i><i class="node n3"></i><i class="node n4"></i></span>
+      <span class="orbit"><svg class="hring2" viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="49"/></svg><i class="node n1"></i><i class="node n2"></i><i class="node n3"></i><i class="node n4"></i></span>
       <span class="orbit o2"></span>
       ${imgUrl ? `<img class="carimg" src="${esc(imgUrl)}"${fbUrl ? ` data-fb="${esc(fbUrl)}"` : ""} alt="">` : `<div class="carph">${icon("car")}</div>`}
       <div class="ground"></div><div class="covl">${inner}</div>${edge ? `<div class="cedge">${edge}</div>` : ""}</div>`;
@@ -1832,8 +1822,7 @@ var HaCarCard = class extends HTMLElement {
     }
     if (!tiles.length && !pills.length) return "";
     return `${tiles.length ? `<div class="acts">${tiles.join("")}</div>` : ""}
-      ${pills.length ? `<div class="pills">${pills.join("")}</div>` : ""}
-      <div class="holdbar" aria-hidden="true"><i></i></div>`;
+      ${pills.length ? `<div class="pills">${pills.join("")}</div>` : ""}`;
   }
   _tile(o) {
     const t = dict(this._hass);
@@ -2049,15 +2038,21 @@ var HaCarCard = class extends HTMLElement {
       if (pointerId != null) el.setPointerCapture(pointerId);
     } catch {
     }
-    const bar = this._holdbar;
-    const fill = this._holdbarFill;
-    if (bar && fill) {
-      bar.classList.add("on");
-      fill.style.transition = "none";
-      fill.style.transform = "scaleX(0)";
-      void fill.offsetWidth;
-      fill.style.transition = `transform ${ms}ms linear`;
-      fill.style.transform = "scaleX(1)";
+    const ring = this.shadowRoot.querySelector(".orbit .hring2");
+    const circle = ring ? ring.querySelector("circle") : null;
+    if (ring && circle) {
+      const C = 2 * Math.PI * 49;
+      circle.setAttribute("stroke-dasharray", String(C));
+      circle.setAttribute("stroke-dashoffset", String(C));
+      if (ring.parentElement) ring.parentElement.classList.add("prog");
+      const t0 = Date.now();
+      const tickRing = () => {
+        if (!this._hold) return;
+        const p = Math.min(1, (Date.now() - t0) / ms);
+        circle.setAttribute("stroke-dashoffset", String(C * (1 - p)));
+        if (p < 1) this._holdRaf = requestAnimationFrame(tickRing);
+      };
+      this._holdRaf = requestAnimationFrame(tickRing);
     }
     const buzz = (pattern) => {
       if (navigator.vibrate) navigator.vibrate(pattern);
@@ -2077,6 +2072,11 @@ var HaCarCard = class extends HTMLElement {
       el.classList.add("armed");
       if (this._holdTick) clearInterval(this._holdTick);
       this._holdTick = null;
+      const rg = this.shadowRoot.querySelector(".orbit .hring2");
+      if (rg && rg.parentElement) {
+        rg.parentElement.classList.remove("prog");
+        rg.parentElement.classList.add("armed");
+      }
       if (lbl) lbl.textContent = t.armed;
       buzz(40);
     }, ms);
@@ -2098,7 +2098,7 @@ var HaCarCard = class extends HTMLElement {
     this._clearHoldTimers();
     h.el.classList.remove("pressing", "armed");
     if (h.lbl) h.lbl.textContent = armed ? h.el.dataset.label || h.orig : h.orig;
-    this._resetHoldBar();
+    this._resetHoldRing();
     if (armed) {
       this._justArmed = true;
       this._exec(h.el);
@@ -2111,18 +2111,19 @@ var HaCarCard = class extends HTMLElement {
   }
   _clearHoldTimers() {
     clearTimeout(this._holdTimer);
+    if (this._holdRaf) cancelAnimationFrame(this._holdRaf);
+    this._holdRaf = null;
     (this._holdStages || []).forEach((id) => clearTimeout(id));
     this._holdStages = [];
     if (this._holdTick) clearInterval(this._holdTick);
     this._holdTick = null;
   }
-  _resetHoldBar() {
-    const bar = this._holdbar;
-    const fill = this._holdbarFill;
-    if (!bar || !fill) return;
-    bar.classList.remove("on");
-    fill.style.transition = "none";
-    fill.style.transform = "scaleX(0)";
+  _resetHoldRing() {
+    const ring = this.shadowRoot.querySelector(".orbit .hring2");
+    const circle = ring ? ring.querySelector("circle") : null;
+    if (!ring || !circle) return;
+    if (ring.parentElement) ring.parentElement.classList.remove("prog", "armed");
+    circle.setAttribute("stroke-dashoffset", String(2 * Math.PI * 49));
   }
   _cancelHold() {
     if (!this._hold) return;
@@ -2130,7 +2131,7 @@ var HaCarCard = class extends HTMLElement {
     this._hold.el.classList.remove("pressing", "armed");
     if (this._hold.lbl) this._hold.lbl.textContent = this._hold.orig;
     this._hold = null;
-    this._resetHoldBar();
+    this._resetHoldRing();
     if (this._pendingRender) {
       this._pendingRender = false;
       this._render(true);
@@ -2648,7 +2649,7 @@ var HaCarEditor = class extends HTMLElement {
 customElements.define("ha-car-editor", HaCarEditor);
 
 // src/main.js
-var VERSION = "1.4.4";
+var VERSION = "1.4.5";
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "ha-car",
