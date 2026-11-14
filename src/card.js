@@ -124,6 +124,11 @@ class HaCarCard extends HTMLElement {
 
   _syncPanel() {
     const panel = this._isPanel() && !this._isPreview();
+    if (!panel && !this._panelTried) {
+      this._panelTried = true;
+      setTimeout(() => this._syncPanel(), 250);
+      setTimeout(() => this._syncPanel(), 900);
+    }
     if (panel === this._panel) {
       if (panel) this._fitPanel();
       return;
@@ -419,7 +424,8 @@ class HaCarCard extends HTMLElement {
       mark("win_rl", "thin wrl", zh ? "左后车窗" : "Rear left window");
       mark("win_rr", "thin wrr", zh ? "右后车窗" : "Rear right window");
     }
-    if (mods.includes("tires")) {
+    // 胎压属于车上信息，不受 modules 开关限制（旧配置里常没有 tires）
+    {
       const tp = [
         ["tp_lf", "tps_lf", "tlf", zh ? "左前" : "LF"],
         ["tp_rf", "tps_rf", "trf", zh ? "右前" : "RF"],

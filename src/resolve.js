@@ -263,6 +263,15 @@ export function resolve(hass, config) {
   const st = (hass && hass.states) || {};
   const groups = scanGroups(hass);
   const rec = chooseGroup(groups, hass, config);
+  // 同一辆车的实体可能挂在多个 device（如胎压自成一个 device），按共同前缀把槽位并回来
+  if (rec) {
+    for (const g of groups.values()) {
+      if (g === rec) continue;
+      const shared = [...rec.prefixes].some((p) => g.prefixes.has(p));
+      if (!shared) continue;
+      for (const [slot, hit] of g.slots) if (!rec.slots.has(slot)) rec.slots.set(slot, hit);
+    }
+  }
   const overrides = (config && config.entities) || {};
 
   const idOf = (slot) => {

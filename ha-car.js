@@ -255,6 +255,14 @@ function resolve(hass, config) {
   const st = hass && hass.states || {};
   const groups = scanGroups(hass);
   const rec = chooseGroup(groups, hass, config);
+  if (rec) {
+    for (const g of groups.values()) {
+      if (g === rec) continue;
+      const shared = [...rec.prefixes].some((p) => g.prefixes.has(p));
+      if (!shared) continue;
+      for (const [slot, hit] of g.slots) if (!rec.slots.has(slot)) rec.slots.set(slot, hit);
+    }
+  }
   const overrides = config && config.entities || {};
   const idOf = (slot) => {
     const forced = overrides[slot];
@@ -1053,6 +1061,11 @@ var HaCarCard = class extends HTMLElement {
   }
   _syncPanel() {
     const panel = this._isPanel() && !this._isPreview();
+    if (!panel && !this._panelTried) {
+      this._panelTried = true;
+      setTimeout(() => this._syncPanel(), 250);
+      setTimeout(() => this._syncPanel(), 900);
+    }
     if (panel === this._panel) {
       if (panel) this._fitPanel();
       return;
@@ -1294,7 +1307,7 @@ var HaCarCard = class extends HTMLElement {
       mark("win_rl", "thin wrl", zh ? "左后车窗" : "Rear left window");
       mark("win_rr", "thin wrr", zh ? "右后车窗" : "Rear right window");
     }
-    if (mods.includes("tires")) {
+    {
       const tp = [
         ["tp_lf", "tps_lf", "tlf", zh ? "左前" : "LF"],
         ["tp_rf", "tps_rf", "trf", zh ? "右前" : "RF"],
@@ -2133,7 +2146,7 @@ var HaCarEditor = class extends HTMLElement {
 customElements.define("ha-car-editor", HaCarEditor);
 
 // src/main.js
-var VERSION = "1.0.9";
+var VERSION = "1.1.0";
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "ha-car",
