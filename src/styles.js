@@ -59,7 +59,8 @@ ha-card::after { content: ""; position: absolute; left: 8%; right: 8%; top: 0; h
 .ttl { flex: 1; min-width: 0; }
 h1 { margin: 0; font-size: 26px; line-height: 1.1; font-weight: 700; letter-spacing: -.01em;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.plate { margin-top: 8px; font-size: 10.5px; font-weight: 600; letter-spacing: .18em; color: rgba(150,172,196,.72); }
+.plate { display: inline-block; margin-left: 10px; font-size: 11.5px; font-weight: 600;
+  letter-spacing: .16em; color: rgba(158,180,204,.78); vertical-align: .12em; }
 .status { flex: none; display: inline-flex; align-items: center; gap: 7px; height: 30px; padding: 0 14px;
   border-radius: 999px; font-size: 11.5px; font-weight: 650; letter-spacing: .03em;
   color: var(--hc-dim); background: rgba(255,255,255,.045);

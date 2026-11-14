@@ -361,7 +361,8 @@ ha-card::after { content: ""; position: absolute; left: 8%; right: 8%; top: 0; h
 .ttl { flex: 1; min-width: 0; }
 h1 { margin: 0; font-size: 26px; line-height: 1.1; font-weight: 700; letter-spacing: -.01em;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.plate { margin-top: 8px; font-size: 10.5px; font-weight: 600; letter-spacing: .18em; color: rgba(150,172,196,.72); }
+.plate { display: inline-block; margin-left: 10px; font-size: 11.5px; font-weight: 600;
+  letter-spacing: .16em; color: rgba(158,180,204,.78); vertical-align: .12em; }
 .status { flex: none; display: inline-flex; align-items: center; gap: 7px; height: 30px; padding: 0 14px;
   border-radius: 999px; font-size: 11.5px; font-weight: 650; letter-spacing: .03em;
   color: var(--hc-dim); background: rgba(255,255,255,.045);
@@ -1492,9 +1493,8 @@ var HaCarCard = class extends HTMLElement {
     if (running) chips.push({ cls: "warn", label: t.running });
     const blocks = [];
     let toastPlaced = false;
-    const head = `<div class="head"><div class="ttl"><h1>${FORD_LOGO}${esc(title)}</h1>
-      ${cfg.show_plate && plate ? `<p class="plate">${esc(cfg.privacy ? maskPlate(plate) : plate)}</p>` : ""}
-      </div><span class="status ${status.cls}"><span class="dot"></span>${esc(status.label)}</span></div>`;
+    const plateTxt = cfg.show_plate && plate ? cfg.privacy ? maskPlate(plate) : plate : "";
+    const head = `<div class="head"><div class="ttl"><h1>${FORD_LOGO}${esc(title)}` + (plateTxt ? `<span class="plate">${esc(plateTxt)}</span>` : "") + `</h1></div><span class="status ${status.cls}"><span class="dot"></span>${esc(status.label)}</span></div>`;
     const hero = this._imagePair(data);
     const list = cfg.blocks || normBlocks(cfg);
     for (const b of list) {
@@ -2667,7 +2667,7 @@ var HaCarEditor = class extends HTMLElement {
 customElements.define("ha-car-editor", HaCarEditor);
 
 // src/main.js
-var VERSION = "1.4.8";
+var VERSION = "1.4.9";
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "ha-car",
