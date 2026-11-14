@@ -393,6 +393,8 @@ class HaCarCard extends HTMLElement {
 
   // 车图 + 同心轨道 + 四枚发光节点（无图时落回圆形占位）
   _hero(imgUrl, fbUrl, overlay) {
+    const inner = typeof overlay === "string" ? overlay : (overlay && overlay.inner) || "";
+    const edge = (overlay && overlay.edge) || "";
     return `<div class="hero"><div class="halo"></div>
       <span class="orbit"></span><span class="orbit o2"></span>
       <i class="node n1"></i><i class="node n2"></i><i class="node n3"></i><i class="node n4"></i>
@@ -401,28 +403,29 @@ class HaCarCard extends HTMLElement {
           ? `<img class="carimg" src="${esc(imgUrl)}"${fbUrl ? ` data-fb="${esc(fbUrl)}"` : ""} alt="">`
           : `<div class="carph">${icon("car")}</div>`
       }
-      <div class="ground"></div><div class="covl">${overlay || ""}</div></div>`;
+      <div class="ground"></div><div class="covl">${inner}</div>${edge ? `<div class="cedge">${edge}</div>` : ""}</div>`;
   }
 
   // 俯视图状态层：车门/车窗/引擎盖/尾门按真实方位贴边，四轮胎压落在轮位
   _carOverlay(data, t, mods) {
     const zh = !isEn(this._hass);
     const out = [];
-    const mark = (slot, cls, label, short, ic) => {
+    const edge = [];
+    const mark = (slot, cls, label, short, ic, isEdge) => {
       const st = data.get(slot);
       if (!st) return;
       const bad = isBad(st);
       const open = !bad && normOpen(st) === "open";
       const txt = bad ? (zh ? "不可用" : "N/A") : open ? (zh ? "打开" : "Open") : zh ? "关闭" : "Shut";
-      out.push(
+      (isEdge ? edge : out).push(
         `<span class="cst ico ${cls}${bad ? " bad" : open ? " open" : ""}" data-more="${esc(data.id(slot))}"
           title="${esc(label)} · ${esc(txt)}" aria-label="${esc(label)} ${esc(txt)}">
           <span class="glyph">${icon(ic)}</span><b class="tx">${esc(txt)}</b><i class="tag">${esc(short)}</i></span>`,
       );
     };
     if (mods.includes("doors")) {
-      mark("hood", "hood", zh ? "引擎盖" : "Hood", zh ? "引擎盖" : "Hood", "engine");
-      mark("tailgate", "trunk", zh ? "尾门" : "Tailgate", zh ? "尾门" : "Trunk", "trunk");
+      mark("hood", "hood", zh ? "引擎盖" : "Hood", zh ? "引擎盖" : "Hood", "engine", true);
+      mark("tailgate", "trunk", zh ? "尾门" : "Tailgate", zh ? "尾门" : "Trunk", "trunk", true);
       mark("door_fl", "dfl", zh ? "主驾门" : "Driver door", zh ? "主驾门" : "FL door", "door");
       mark("door_fr", "dfr", zh ? "副驾门" : "Passenger door", zh ? "副驾门" : "FR door", "door");
       mark("door_rl", "drl", zh ? "左后门" : "Rear left door", zh ? "左后门" : "RL door", "door");
@@ -456,7 +459,7 @@ class HaCarCard extends HTMLElement {
         );
       }
     }
-    return out.join("");
+    return { inner: out.join(""), edge: edge.join("") };
   }
 
   // 状态层贴合真实车图矩形（图片 contain 后尺寸未知，渲染完再量）

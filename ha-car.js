@@ -557,6 +557,7 @@ h1 { margin: 0; font-size: 25px; line-height: 1.12; font-weight: 650; letter-spa
 
 /* 俯视图状态层：贴在车图上，位置由 JS 量出车图矩形 */
 .covl { position: absolute; pointer-events: none; }
+.cedge { position: absolute; inset: 0; pointer-events: none; }
 .cst { position: absolute; transform: translate(-50%, -50%); width: 44px; height: 44px; border-radius: 12px;
   background: rgba(9,15,23,.74); border: 1px solid rgba(255,255,255,.14); box-shadow: 0 2px 10px rgba(0,0,0,.45);
   transition: background .25s ease, border-color .25s ease, box-shadow .25s ease; }
@@ -572,8 +573,8 @@ h1 { margin: 0; font-size: 25px; line-height: 1.12; font-weight: 650; letter-spa
 .cst.open .tag { color: #c9a273; }
 .cst.bad { background: rgba(56,16,16,.8); border-color: rgba(255,145,130,.45); }
 .cst.bad .tx { color: #ffc8c2; }
-.cst.hood { left: 50%; top: 3%; }
-.cst.trunk { left: 50%; top: 98%; }
+.cst.hood { left: 50%; top: 4%; }
+.cst.trunk { left: 50%; top: 82%; }
 .cst.dfl { left: 3%; top: 30%; }
 .cst.wfl { left: 3%; top: 44%; }
 .cst.drl { left: 3%; top: 58%; }
@@ -593,10 +594,10 @@ h1 { margin: 0; font-size: 25px; line-height: 1.12; font-weight: 650; letter-spa
   color: #8496ad; letter-spacing: .04em; }
 .ctire.warn { color: var(--hc-warn); border-color: rgba(255,196,107,.5); box-shadow: 0 2px 10px rgba(0,0,0,.45), 0 0 12px rgba(255,196,107,.22); }
 .ctire.warn .tv { color: var(--hc-warn); }
-.ctire.tlf { left: 12%; top: 14%; }
-.ctire.trf { left: 88%; top: 14%; }
-.ctire.tlr { left: 12%; top: 86%; }
-.ctire.trr { left: 88%; top: 86%; }
+.ctire.tlf { left: 12%; top: 18%; }
+.ctire.trf { left: 88%; top: 18%; }
+.ctire.tlr { left: 12%; top: 84%; }
+.ctire.trr { left: 88%; top: 84%; }
 
 /* ---- 面板模式：1440×900 设计稿等比缩放，整页装下不滚动 ---- */
 
@@ -606,7 +607,7 @@ ha-card.panel:not(.fit) .head { gap: 2px; }
 ha-card.panel:not(.fit) .title { font-size: 21px; }
 ha-card.panel:not(.fit) .sub { font-size: 10px; }
 ha-card.panel:not(.fit) .hero { height: 178px; min-height: 0; --r: 88px; }
-ha-card.panel:not(.fit) .carimg { max-height: 86%; max-width: 58%; }
+ha-card.panel:not(.fit) .carimg { max-height: 80%; max-width: 58%; }
 ha-card.panel:not(.fit) .gauge { max-width: 86px; }
 /* 窄面板：车图变小，门窗/胎压图标挂到车图左右外侧，靠像素偏移避开车身 */
 ha-card.panel:not(.fit) .cst { width: 30px; height: 30px; border-radius: 8px; }
@@ -633,8 +634,8 @@ ha-card.panel:not(.fit) .cst.dfr { top: 22%; }
 ha-card.panel:not(.fit) .cst.wfr { top: 44%; }
 ha-card.panel:not(.fit) .cst.drr { top: 66%; }
 ha-card.panel:not(.fit) .cst.wrr { top: 88%; }
-ha-card.panel:not(.fit) .cst.hood { top: 0%; left: 50%; }
-ha-card.panel:not(.fit) .cst.trunk { top: 100%; left: 50%; }
+ha-card.panel:not(.fit) .cst.hood { top: 9.5%; left: 50%; }
+ha-card.panel:not(.fit) .cst.trunk { top: 90%; left: 50%; }
 ha-card.panel:not(.fit) .ctire.tlf { left: calc(50% - 116px); top: 7%; }
 ha-card.panel:not(.fit) .ctire.trf { left: calc(50% + 116px); top: 7%; }
 ha-card.panel:not(.fit) .ctire.tlr { left: calc(50% - 116px); top: 93%; }
@@ -1365,31 +1366,34 @@ var HaCarCard = class extends HTMLElement {
   }
   // 车图 + 同心轨道 + 四枚发光节点（无图时落回圆形占位）
   _hero(imgUrl, fbUrl, overlay) {
+    const inner = typeof overlay === "string" ? overlay : overlay && overlay.inner || "";
+    const edge = overlay && overlay.edge || "";
     return `<div class="hero"><div class="halo"></div>
       <span class="orbit"></span><span class="orbit o2"></span>
       <i class="node n1"></i><i class="node n2"></i><i class="node n3"></i><i class="node n4"></i>
       ${imgUrl ? `<img class="carimg" src="${esc(imgUrl)}"${fbUrl ? ` data-fb="${esc(fbUrl)}"` : ""} alt="">` : `<div class="carph">${icon("car")}</div>`}
-      <div class="ground"></div><div class="covl">${overlay || ""}</div></div>`;
+      <div class="ground"></div><div class="covl">${inner}</div>${edge ? `<div class="cedge">${edge}</div>` : ""}</div>`;
   }
   // 俯视图状态层：车门/车窗/引擎盖/尾门按真实方位贴边，四轮胎压落在轮位
   _carOverlay(data, t, mods) {
     const zh = !isEn(this._hass);
     const out = [];
-    const mark = (slot, cls, label, short, ic) => {
+    const edge = [];
+    const mark = (slot, cls, label, short, ic, isEdge) => {
       const st = data.get(slot);
       if (!st) return;
       const bad = isBad(st);
       const open = !bad && normOpen(st) === "open";
       const txt = bad ? zh ? "不可用" : "N/A" : open ? zh ? "打开" : "Open" : zh ? "关闭" : "Shut";
-      out.push(
+      (isEdge ? edge : out).push(
         `<span class="cst ico ${cls}${bad ? " bad" : open ? " open" : ""}" data-more="${esc(data.id(slot))}"
           title="${esc(label)} · ${esc(txt)}" aria-label="${esc(label)} ${esc(txt)}">
           <span class="glyph">${icon(ic)}</span><b class="tx">${esc(txt)}</b><i class="tag">${esc(short)}</i></span>`
       );
     };
     if (mods.includes("doors")) {
-      mark("hood", "hood", zh ? "引擎盖" : "Hood", zh ? "引擎盖" : "Hood", "engine");
-      mark("tailgate", "trunk", zh ? "尾门" : "Tailgate", zh ? "尾门" : "Trunk", "trunk");
+      mark("hood", "hood", zh ? "引擎盖" : "Hood", zh ? "引擎盖" : "Hood", "engine", true);
+      mark("tailgate", "trunk", zh ? "尾门" : "Tailgate", zh ? "尾门" : "Trunk", "trunk", true);
       mark("door_fl", "dfl", zh ? "主驾门" : "Driver door", zh ? "主驾门" : "FL door", "door");
       mark("door_fr", "dfr", zh ? "副驾门" : "Passenger door", zh ? "副驾门" : "FR door", "door");
       mark("door_rl", "drl", zh ? "左后门" : "Rear left door", zh ? "左后门" : "RL door", "door");
@@ -1421,7 +1425,7 @@ var HaCarCard = class extends HTMLElement {
         );
       }
     }
-    return out.join("");
+    return { inner: out.join(""), edge: edge.join("") };
   }
   // 状态层贴合真实车图矩形（图片 contain 后尺寸未知，渲染完再量）
   _placeOverlay() {
@@ -2274,7 +2278,7 @@ var HaCarEditor = class extends HTMLElement {
 customElements.define("ha-car-editor", HaCarEditor);
 
 // src/main.js
-var VERSION = "1.1.8";
+var VERSION = "1.1.9";
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "ha-car",
