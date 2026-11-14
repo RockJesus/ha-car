@@ -600,6 +600,9 @@ class HaCarCard extends HTMLElement {
     const arc = (C * pct) / 100;
     return `<div class="gauge">
       <svg viewBox="0 0 100 100" aria-hidden="true">
+        <defs><linearGradient id="hcArc" x1="50" y1="4" x2="50" y2="96" gradientUnits="userSpaceOnUse">
+          <stop offset="0" stop-color="#37d6e8"/><stop offset=".55" stop-color="#7f7bff"/>
+          <stop offset="1" stop-color="#ff3ea5"/></linearGradient></defs>
         <circle class="gt" cx="50" cy="50" r="44"/>
         <circle class="gp" cx="50" cy="50" r="44"
           stroke-dasharray="${arc.toFixed(1)} ${C.toFixed(1)}" transform="rotate(-90 50 50)"/>
