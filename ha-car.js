@@ -1841,6 +1841,17 @@ var ACTION_LABELS = {
 };
 var OVERRIDES = [
   ["lock", "门锁状态"],
+  ["door_fl", "主驾车门"],
+  ["door_fr", "副驾车门"],
+  ["door_rl", "左后车门"],
+  ["door_rr", "右后车门"],
+  ["win_fl", "主驾车窗"],
+  ["win_fr", "副驾车窗"],
+  ["win_rl", "左后车窗"],
+  ["win_rr", "右后车窗"],
+  ["hood", "引擎盖"],
+  ["tailgate", "后备箱（尾门）"],
+  ["inner_tailgate", "内尾门"],
   ["fuel", "燃油量"],
   ["battery", "动力电池电量"],
   ["range", "续航里程"],
@@ -2146,7 +2157,7 @@ var HaCarEditor = class extends HTMLElement {
 customElements.define("ha-car-editor", HaCarEditor);
 
 // src/main.js
-var VERSION = "1.1.1";
+var VERSION = "1.1.2";
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "ha-car",
