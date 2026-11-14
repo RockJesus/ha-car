@@ -713,10 +713,15 @@ class HaCarCard extends HTMLElement {
 
     const pills = [];
     if (!compact) {
-      if (data.id("sw_va")) {
+      // 寻车时长 / 寻车类型：直接绑定集成的 select 实体，点了选值即生效
+      const durEnt = data.id("honk_duration");
+      const typeEnt = data.id("chirp_type");
+      if (durEnt) pills.push(this._selectPill({ key: "honk_duration", ent: durEnt, label: t.soundDur }));
+      else if (data.id("sw_va")) {
         pills.push(this._pill({ key: "sw_va", ent: data.id("sw_va"), ic: "speaker", label: t.soundLight, dom: "homeassistant", svc: "toggle", hold, offline }));
       }
-      if (data.id("sw_light")) {
+      if (typeEnt) pills.push(this._selectPill({ key: "chirp_type", ent: typeEnt, label: t.soundType }));
+      else if (data.id("sw_light")) {
         pills.push(this._pill({ key: "sw_light", ent: data.id("sw_light"), ic: "bulb", label: t.light, dom: "homeassistant", svc: "toggle", hold, offline }));
       }
     }
@@ -736,6 +741,18 @@ class HaCarCard extends HTMLElement {
       aria-label="${esc(o.label + "，" + t.holdHint)}">
       <span class="orb"><svg class="hring" viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="47"/></svg>${icon(o.ic)}</span>
       <span class="lbl">${esc(o.label)}</span></button>`;
+  }
+
+  // 下拉型胶囊：本体是一条 pill，原生 select 透明铺满，点开即系统选择器
+  _selectPill(o) {
+    const st = this._hass && this._hass.states[o.ent] ? this._hass.states[o.ent] : null;
+    const opts = (st && st.attributes && st.attributes.options) || [];
+    const cur = st ? String(st.state) : "";
+    return `<label class="pill selpill" data-ent="${esc(o.ent)}">
+      <span class="sl">${esc(o.label)}</span><b>${esc(cur)}</b><i class="caret">▾</i>
+      <select data-sel="${esc(o.ent)}" aria-label="${esc(o.label)}">
+        ${opts.map((v) => `<option value="${esc(v)}"${v === cur ? " selected" : ""}>${esc(v)}</option>`).join("")}
+      </select></label>`;
   }
 
   _pill(o) {
@@ -826,7 +843,7 @@ class HaCarCard extends HTMLElement {
     const low = raw.toLowerCase();
     if (low === "none" || low === "no" || low === "无" || low === "正常" || low === "no alerts") return "";
     return `<div class="alert" data-more="${esc(data.id("alerts"))}">${icon("warning")}
-      <div><b>${esc(t.alert)}</b>${esc(raw)}</div></div>`;
+      <b>${esc(t.alert)}</b><span class="amsg">${esc(raw)}</span></div>`;
   }
 
   _charging(data, t, chgNow) {
@@ -905,6 +922,11 @@ class HaCarCard extends HTMLElement {
 
   _bind() {
     const w = this._wrap;
+    w.addEventListener("change", (ev) => {
+      const sel = ev.target.closest && ev.target.closest("select[data-sel]");
+      if (!sel || !this._hass) return;
+      this._hass.callService("select", "select_option", { entity_id: sel.dataset.sel, option: sel.value });
+    });
     w.addEventListener("pointerdown", (ev) => this._onDown(ev));
     w.addEventListener("pointerup", (ev) => this._onUp(ev));
     w.addEventListener("pointercancel", () => this._cancelHold());
@@ -1012,6 +1034,8 @@ class HaCarCard extends HTMLElement {
   }
 
   _onClick(ev) {
+    // 下拉胶囊里的原生 select：点开只走 change，不触发卡片动作
+    if (ev.target.closest && ev.target.closest("select[data-sel]")) return;
     const act = ev.target.closest && ev.target.closest("[data-act]");
     if (act) {
       if (act.dataset.hold) {

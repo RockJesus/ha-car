@@ -66,7 +66,7 @@ h1 { margin: 0; font-size: 26px; line-height: 1.1; font-weight: 700; letter-spac
   border: 1px solid rgba(255,255,255,.11); white-space: nowrap;
   backdrop-filter: blur(6px); }
 .brand { display: inline-flex; align-items: center; margin-right: 7px; vertical-align: -1px; }
-.brand svg { width: 34px; height: 15px; display: block; }
+.brand svg { width: 46px; height: 21px; display: block; }
 .status .dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; flex: none;
   box-shadow: 0 0 8px currentColor; }
 .status.ok { color: #85f2b8; background: rgba(111,224,168,.12); border-color: rgba(111,224,168,.32);
@@ -165,6 +165,13 @@ h1 { margin: 0; font-size: 26px; line-height: 1.1; font-weight: 700; letter-spac
   background: rgba(255,255,255,.03); color: var(--hc-dim); font: 600 11.5px/1 inherit;
   -webkit-tap-highlight-color: transparent; user-select: none;
   transition: color .18s, background .18s, border-color .18s; position: relative; overflow: hidden; }
+
+.selpill { position: relative; justify-content: center; gap: 7px; }
+.selpill .sl { font-size: 11px; letter-spacing: .06em; color: rgba(178,196,216,.86); }
+.selpill b { font-size: 12.5px; font-weight: 680; color: #eef5fd; white-space: nowrap; }
+.selpill .caret { font-style: normal; font-size: 9px; opacity: .55; margin-left: -2px; }
+.selpill select { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer;
+  border: none; appearance: none; }
 .pill .ic { width: 15px; height: 15px; }
 .pill:hover { color: var(--hc-ink); background: rgba(255,255,255,.06); }
 .pill.on { color: var(--hc-ok); border-color: rgba(111,224,168,.26); }
@@ -184,26 +191,27 @@ h1 { margin: 0; font-size: 26px; line-height: 1.1; font-weight: 700; letter-spac
 .gt { fill: none; stroke: rgba(255,255,255,.07); stroke-width: 6; }
 .gp { fill: none; stroke: var(--hc-accent); stroke-width: 6; stroke-linecap: round;
   filter: drop-shadow(0 0 8px rgba(55,214,232,.65)); }
-.gv { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; }
+.gv { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 3px; padding: 0 10px; box-sizing: border-box; }
 .gl { display: inline-flex; align-items: center; gap: 5px; font-size: 10px; font-weight: 650; letter-spacing: .1em;
   color: rgba(160,182,206,.85); text-transform: uppercase; }
 .gl .ic { width: 12px; height: 12px; opacity: .85; }
-.gn { display: flex; align-items: baseline; gap: 2px; line-height: 1; }
-.gn b { font-size: 33px; font-weight: 680; letter-spacing: -.02em; color: #f3f8ff;
+.gn { display: flex; flex-direction: column; align-items: center; gap: 1px; line-height: 1; max-width: 100%; }
+.gn b { font-size: 29px; font-weight: 680; letter-spacing: -.02em; color: #f3f8ff; white-space: nowrap;
   text-shadow: 0 0 22px rgba(55,214,232,.16); }
-.gn i { font-size: 11px; font-style: normal; font-weight: 600; color: rgba(150,172,196,.9); letter-spacing: .06em; }
+.gn i { font-size: 9.5px; font-style: normal; font-weight: 600; color: rgba(150,172,196,.9); letter-spacing: .06em; }
 .egdiv { width: 1px; height: 78px; align-self: center;
   background: linear-gradient(180deg, transparent, rgba(120,190,215,.28) 26%, rgba(120,190,215,.28) 74%, transparent); }
 .substats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); margin-top: 12px;
   border-radius: 18px; border: 1px solid rgba(255,255,255,.07); overflow: hidden;
   background: linear-gradient(180deg, rgba(255,255,255,.052), rgba(255,255,255,.018));
   box-shadow: inset 0 1px 0 rgba(255,255,255,.06); }
-.substats .sstat { display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 10px 6px 9px;
+.substats .sstat { display: flex; flex-direction: row; align-items: baseline; justify-content: center; gap: 5px; padding: 11px 6px;
   letter-spacing: .04em; text-align: center; min-width: 0; }
 .substats .sstat + .sstat { border-left: 1px solid rgba(255,255,255,.055); }
-.substats .sstat i { font-style: normal; font-size: 9px; letter-spacing: .14em; text-transform: uppercase;
+.substats .sstat i { font-style: normal; font-size: 10px; letter-spacing: .06em;
   color: rgba(150,172,196,.8); }
-.substats .sstat b { font-size: 15px; font-weight: 680; color: #eef5fd; line-height: 1.1; letter-spacing: -.01em; }
+.substats .sstat b { font-size: 15px; font-weight: 680; color: #eef5fd; line-height: 1; letter-spacing: -.01em; white-space: nowrap; }
 .substats .sstat span { font-size: 9.5px; color: rgba(150,172,196,.72); }
 
 /* 底座条：四轮胎压 + 同步时间（参考图同构） */
@@ -254,16 +262,18 @@ h1 { margin: 0; font-size: 26px; line-height: 1.1; font-weight: 700; letter-spac
 .mini.dim { border-color: rgba(255,255,255,.1); background: rgba(255,255,255,.04); color: var(--hc-dim); }
 .mini:active { transform: scale(.97); }
 
-.alert { position: relative; display: flex; gap: 10px; padding: 11px 13px 11px 16px; border-radius: 15px;
+.alert { position: relative; display: flex; align-items: center; gap: 9px; padding: 10px 13px 10px 16px; border-radius: 15px;
   font-size: 12px; line-height: 1.45; color: #ffd3c9;
   background: linear-gradient(180deg, rgba(255,145,130,.13), rgba(255,145,130,.07));
   border: 1px solid rgba(255,145,130,.24);
   box-shadow: inset 0 1px 0 rgba(255,255,255,.06), 0 8px 22px -16px rgba(255,145,130,.6); }
 .alert::before { content: ""; position: absolute; left: 0; top: 12px; bottom: 12px; width: 2px; border-radius: 2px;
   background: linear-gradient(180deg, rgba(255,145,130,.9), rgba(255,145,130,.2)); }
-.alert .ic { width: 16px; height: 16px; flex: none; color: var(--hc-bad); margin-top: 1px; }
-.alert b { display: block; font-size: 10px; letter-spacing: .12em; text-transform: uppercase;
-  color: var(--hc-bad); margin-bottom: 3px; font-weight: 700; }
+.alert .ic { width: 15px; height: 15px; flex: none; color: var(--hc-bad); }
+.alert b { flex: none; font-size: 11px; letter-spacing: .04em; white-space: nowrap;
+  color: var(--hc-bad); font-weight: 700; }
+.alert .amsg { flex: 1 1 auto; min-width: 0; font-size: 12.5px; color: var(--hc-text);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 .svc { border-radius: 15px; border: 1px solid rgba(255,255,255,.06);
   background: linear-gradient(180deg, rgba(255,255,255,.042), rgba(255,255,255,.014));
