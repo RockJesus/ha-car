@@ -124,14 +124,37 @@ class HaCarCard extends HTMLElement {
 
   _syncPanel() {
     const panel = this._isPanel() && !this._isPreview();
-    if (panel === this._panel) return;
+    if (panel === this._panel) {
+      if (panel) this._fitPanel();
+      return;
+    }
     this._panel = panel;
+    this.classList.toggle("panel", panel);
     this._card.classList.toggle("panel", panel);
     // :host 的 860px 上限只对普通卡片有意义；面板模式交给容器决定尺寸
     this.style.maxWidth = panel ? "none" : "";
     this.style.margin = panel ? "0" : "";
     this.style.height = panel ? "100%" : "";
     this.style.width = panel ? "100%" : "";
+    if (panel) this._fitPanel();
+  }
+
+  // 面板里按 1440×900 设计稿等比缩放：整页装下，不出现滚动条
+  _fitPanel() {
+    if (!this._panel || !this._card) return;
+    const w = this.clientWidth;
+    const h = this.clientHeight;
+    if (!w || !h) return;
+    // 小屏（手机面板）不缩放：1440 稿缩到 390 宽字就没了，改走常规自适应布局
+    const fit = w >= 900 && h >= 620;
+    this._card.classList.toggle("fit", fit);
+    if (!fit) return;
+    const k = Math.min(w / 1440, h / 900);
+    this._card.style.setProperty("--fit", String(Math.round(k * 1000) / 1000));
+    // 宽先到顶时把画布按比例拉高（不是拉伸像素），让纸面把面板铺满
+    const designH = Math.max(900, Math.round(h / k));
+    this._card.style.width = "1440px";
+    this._card.style.height = `${designH}px`;
   }
 
   _isPreview() {
@@ -184,6 +207,10 @@ class HaCarCard extends HTMLElement {
     this._card = root.querySelector("ha-card");
     this._built = true;
     this._bind();
+    this._panelRO = new ResizeObserver(() => this._fitPanel());
+    this._panelRO.observe(this);
+    this._ro = new ResizeObserver(() => this._placeOverlay());
+    this._ro.observe(this._wrap);
   }
 
   _signature(data) {
@@ -206,7 +233,9 @@ class HaCarCard extends HTMLElement {
     if (cfg.accent) this._card.style.setProperty("--hc-accent", cfg.accent);
     this._prunePending(data);
     this._wrap.innerHTML = this._body(data);
+    this._placeOverlay();
     const img = this._wrap.querySelector("img.carimg");
+    if (img) img.addEventListener("load", () => this._placeOverlay(), { once: true });
     if (img && img.dataset.fb) {
       img.addEventListener("error", () => {
         const fb = img.dataset.fb;
@@ -307,7 +336,7 @@ class HaCarCard extends HTMLElement {
       if (energy) side.push(energy);
     }
     const hero = this._imagePair(data);
-    const heroHtml = this._hero(hero.src, hero.fb);
+    const heroHtml = this._hero(hero.src, hero.fb, this._carOverlay(data, t, mods));
     parts.push(
       side.length
         ? `<div class="duo"><div class="dleft">${heroHtml}</div><div class="dright">${side.join("")}</div></div>`
@@ -321,10 +350,6 @@ class HaCarCard extends HTMLElement {
     if (mods.includes("alerts")) {
       const alert = this._alert(data, t);
       if (alert) parts.push(alert);
-    }
-
-    if (!compact && mods.includes("tires")) {
-      this._tread = this._tires(data, t);
     }
 
     if (!compact && mods.includes("doors")) {
@@ -356,7 +381,7 @@ class HaCarCard extends HTMLElement {
   }
 
   // 车图 + 同心轨道 + 四枚发光节点（无图时落回圆形占位）
-  _hero(imgUrl, fbUrl) {
+  _hero(imgUrl, fbUrl, overlay) {
     return `<div class="hero"><div class="halo"></div>
       <span class="orbit"></span><span class="orbit o2"></span>
       <i class="node n1"></i><i class="node n2"></i><i class="node n3"></i><i class="node n4"></i>
@@ -365,16 +390,74 @@ class HaCarCard extends HTMLElement {
           ? `<img class="carimg" src="${esc(imgUrl)}"${fbUrl ? ` data-fb="${esc(fbUrl)}"` : ""} alt="">`
           : `<div class="carph">${icon("car")}</div>`
       }
-      <div class="ground"></div></div>`;
+      <div class="ground"></div><div class="covl">${overlay || ""}</div></div>`;
+  }
+
+  // 俯视图状态层：车门/车窗/引擎盖/尾门按真实方位贴边，四轮胎压落在轮位
+  _carOverlay(data, t, mods) {
+    const zh = !isEn(this._hass);
+    const out = [];
+    const mark = (slot, cls, label) => {
+      const st = data.get(slot);
+      if (!st) return;
+      const bad = isBad(st);
+      const open = !bad && normOpen(st) === "open";
+      out.push(
+        `<i class="cst ${cls}${bad ? " bad" : open ? " open" : ""}" data-more="${esc(data.id(slot))}"
+          title="${esc(label)} · ${esc(bad ? t.never : open ? t.open : t.closed)}"></i>`,
+      );
+    };
+    if (mods.includes("doors")) {
+      mark("hood", "bar-h hood", zh ? "引擎盖" : "Hood");
+      mark("tailgate", "bar-h trunk", zh ? "尾门" : "Tailgate");
+      mark("door_fl", "bar-v dfl", zh ? "主驾门" : "Driver door");
+      mark("door_fr", "bar-v dfr", zh ? "副驾门" : "Passenger door");
+      mark("door_rl", "bar-v drl", zh ? "左后门" : "Rear left door");
+      mark("door_rr", "bar-v drr", zh ? "右后门" : "Rear right door");
+      mark("win_fl", "thin wfl", zh ? "主驾车窗" : "Driver window");
+      mark("win_fr", "thin wfr", zh ? "副驾车窗" : "Passenger window");
+      mark("win_rl", "thin wrl", zh ? "左后车窗" : "Rear left window");
+      mark("win_rr", "thin wrr", zh ? "右后车窗" : "Rear right window");
+    }
+    if (mods.includes("tires")) {
+      const tp = [
+        ["tp_lf", "tps_lf", "tlf", zh ? "左前" : "LF"],
+        ["tp_rf", "tps_rf", "trf", zh ? "右前" : "RF"],
+        ["tp_lr", "tps_lr", "tlr", zh ? "左后" : "LR"],
+        ["tp_rr", "tps_rr", "trr", zh ? "右后" : "RR"],
+      ];
+      for (const [slot, sslot, cls, label] of tp) {
+        const st = data.get(slot);
+        if (isBad(st)) continue;
+        const v = num(st);
+        const warn = normTire(data.get(sslot)) === "warn";
+        const unit = attrs(st, "unit_of_measurement") || "kPa";
+        out.push(
+          `<b class="ctire ${cls}${warn ? " warn" : ""}" data-more="${esc(data.id(slot))}"
+            title="${esc(t.tireLabel + " · " + label)} ${v == null ? "—" : fmtNum(v)} ${esc(unit)}">${v == null ? "—" : fmtNum(v)}</b>`,
+        );
+      }
+    }
+    return out.join("");
+  }
+
+  // 状态层贴合真实车图矩形（图片 contain 后尺寸未知，渲染完再量）
+  _placeOverlay() {
+    const img = this._wrap && this._wrap.querySelector("img.carimg");
+    const ovl = this._wrap && this._wrap.querySelector(".covl");
+    if (!img || !ovl) return;
+    // 用 offset 尺寸而不是 getBoundingClientRect：面板缩放后 rect 是屏幕坐标，会把状态层推歪
+    if (!img.offsetWidth) return;
+    ovl.style.left = `${img.offsetLeft}px`;
+    ovl.style.top = `${img.offsetTop}px`;
+    ovl.style.width = `${img.offsetWidth}px`;
+    ovl.style.height = `${img.offsetHeight}px`;
   }
 
   // 底座条：四轮胎压 + 同步（同步入口就是刷新按钮）
   _baseline(data, t) {
-    const tread = this._tread || "";
-    this._tread = "";
     const sync = this._syncChip(data, t);
-    if (!tread && !sync) return "";
-    return `<div class="baseline${tread ? "" : " solo"}">${tread}${tread && sync ? '<span class="bdiv"></span>' : ""}${sync}</div>`;
+    return sync ? `<div class="baseline solo">${sync}</div>` : "";
   }
 
   _syncChip(data, t) {
@@ -617,9 +700,7 @@ class HaCarCard extends HTMLElement {
       if (normOpen(st) === "open") open.push(d);
     }
     if (!known) return "";
-    if (!open.length) {
-      return `<div class="doors"><span class="door">${icon("carProfile")}${esc(t.doorsClosed)}</span></div>`;
-    }
+    if (!open.length) return "";
     return `<div class="doors">${open
       .map((d) => `<span class="door open" data-more="${esc(data.id(d.slot))}">${icon("carProfile")}${esc(d.label)} · ${esc(t.open)}</span>`)
       .join("")}</div>`;

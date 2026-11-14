@@ -439,7 +439,7 @@ h1 { margin: 0; font-size: 25px; line-height: 1.12; font-weight: 650; letter-spa
   border: 1px solid rgba(255,255,255,.07);
   background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.016));
   box-shadow: inset 0 1px 0 rgba(255,255,255,.05); min-width: 0; }
-.baseline.solo { justify-content: center; padding: 8px 12px; }
+.baseline.solo { align-self: flex-end; justify-content: flex-end; padding: 6px 10px; border-radius: 12px; }
 .tread { flex: 1; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 2px; min-width: 0; }
 .tc { display: inline-flex; align-items: center; gap: 3px; min-width: 0; font-size: 10px; color: var(--hc-dim);
   white-space: nowrap; }
@@ -530,10 +530,45 @@ h1 { margin: 0; font-size: 25px; line-height: 1.12; font-weight: 650; letter-spa
 
 /* 宽屏（面板视图 / 桌面仪表盘）：手机尺寸的内容居中收窄，避免拉成一条横贯全屏的卡片 */
 
-/* ---- 面板模式：卡片自适应占满面板 ---- */
-ha-card.panel { height: 100%; }
-ha-card.panel .wrap { height: 100%; min-height: 100%; box-sizing: border-box; padding: 24px 24px 18px;
-  max-width: 1600px; margin-inline: auto; }
+
+/* 俯视图状态层：贴在车图上，位置由 JS 量出车图矩形 */
+.covl { position: absolute; pointer-events: none; }
+.cst { position: absolute; transform: translate(-50%, -50%); border-radius: 999px; background: rgba(233,239,247,.22);
+  border: 1px solid rgba(233,239,247,.16); transition: background .25s ease, box-shadow .25s ease; }
+.cst.bar-h { width: 30%; height: 5px; border-radius: 3px; }
+.cst.bar-v { width: 5px; height: 14%; border-radius: 3px; }
+.cst.thin { width: 4px; height: 9%; border-radius: 2px; opacity: .8; }
+.cst.open { background: var(--hc-warn); border-color: rgba(255,196,107,.9);
+  box-shadow: 0 0 12px rgba(255,196,107,.85), 0 0 2px rgba(255,196,107,.9); }
+.cst.bad { background: var(--hc-bad); border-color: rgba(255,145,130,.9); box-shadow: 0 0 12px rgba(255,145,130,.7); }
+.cst.hood { left: 50%; top: 6%; }
+.cst.trunk { left: 50%; top: 87%; }
+.cst.dfl { left: 24%; top: 38%; }
+.cst.dfr { left: 76%; top: 38%; }
+.cst.drl { left: 24%; top: 63%; }
+.cst.drr { left: 76%; top: 63%; }
+.cst.wfl { left: 30%; top: 40%; }
+.cst.wfr { left: 70%; top: 40%; }
+.cst.wrl { left: 30%; top: 60%; }
+.cst.wrr { left: 70%; top: 60%; }
+.ctire { position: absolute; transform: translate(-50%, -50%); font-size: 11px; font-weight: 650;
+  color: var(--hc-dim); font-variant-numeric: tabular-nums; letter-spacing: .02em;
+  padding: 2px 6px; border-radius: 8px; background: rgba(8,13,20,.62); border: 1px solid rgba(255,255,255,.07);
+  text-shadow: 0 1px 2px rgba(0,0,0,.6); }
+.ctire.warn { color: var(--hc-warn); border-color: rgba(255,196,107,.5); }
+.ctire.tlf { left: 25%; top: 21%; }
+.ctire.trf { left: 75%; top: 21%; }
+.ctire.tlr { left: 25%; top: 68%; }
+.ctire.trr { left: 75%; top: 68%; }
+
+/* ---- 面板模式：1440×900 设计稿等比缩放，整页装下不滚动 ---- */
+:host(.panel) { position: relative; overflow: hidden;
+  background: radial-gradient(90% 60% at 50% 0%, rgba(55,214,232,.10), transparent 62%),
+    linear-gradient(170deg, #101b29 0%, #0a1119 60%, #070c13 100%); }
+ha-card.panel { box-sizing: border-box; width: 100%; height: 100%; margin: 0; }
+ha-card.panel.fit { box-sizing: border-box; position: absolute; left: 50%; top: 50%; width: 1440px; height: 900px;
+  transform: translate(-50%, -50%) scale(var(--fit, 1)); transform-origin: center center; }
+ha-card.panel .wrap { height: 100%; box-sizing: border-box; padding: 26px 30px 20px; overflow: hidden; }
 ha-card.panel .duo { flex: 1 1 auto; min-height: 0; }
 ha-card.panel .dleft { justify-content: center; min-height: 0; }
 ha-card.panel .dright { justify-content: center; }
@@ -554,32 +589,13 @@ ha-card.panel .carimg { max-height: 88%; max-width: min(60%, 320px); }
   .pills { max-width: 540px; margin: 10px auto 0; width: 100%; }
   /* 面板模式：容器多宽就排多宽，车图列跟着面板高度走 */
   :host(.panel) { max-width: none; margin: 0; }
-  ha-card.panel .wrap { padding: 28px 34px 24px; gap: 18px; }
-  ha-card.panel .duo { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); column-gap: 40px; align-items: stretch; }
-  ha-card.panel .dleft .hero { height: 100%; min-height: 320px; --r: 124px; }
-  ha-card.panel .carimg { max-height: 90%; max-width: min(64%, 360px); }
-  ha-card.panel .gauge { max-width: 176px; }
-  ha-card.panel .acts { max-width: 620px; }
-  ha-card.panel .pills { max-width: 620px; }
-}
-
-@media (min-width: 1500px) {
-  ha-card.panel .wrap { padding: 34px 44px 28px; }
-  ha-card.panel .duo { column-gap: 52px; }
-  ha-card.panel .dleft .hero { --r: 152px; }
-  ha-card.panel .carimg { max-height: 88%; max-width: min(62%, 430px); }
-  ha-card.panel .gauge { max-width: 208px; }
-  ha-card.panel .gn b { font-size: 42px; }
-  ha-card.panel .acts, ha-card.panel .pills { max-width: 680px; }
-}
-
-@media (min-width: 1900px) {
-  ha-card.panel .wrap { max-width: 1900px; }
-  ha-card.panel .dleft .hero { --r: 176px; }
-  ha-card.panel .carimg { max-height: 90%; max-width: min(60%, 480px); }
-  ha-card.panel .gauge { max-width: 240px; }
-  ha-card.panel .gn b { font-size: 48px; }
-  ha-card.panel .acts, ha-card.panel .pills { max-width: 780px; }
+  ha-card.panel .wrap { padding: 22px 26px 16px; gap: 12px; }
+  ha-card.panel .duo { grid-template-columns: minmax(0, 1.02fr) minmax(0, 1fr); column-gap: 34px; align-items: stretch; }
+  ha-card.panel .dleft .hero { height: 100%; min-height: 250px; --r: 106px; }
+  ha-card.panel .carimg { max-height: 92%; max-width: min(64%, 320px); }
+  ha-card.panel .gauge { max-width: 150px; }
+  ha-card.panel .acts { max-width: 560px; }
+  ha-card.panel .pills { max-width: 560px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -1037,13 +1053,33 @@ var HaCarCard = class extends HTMLElement {
   }
   _syncPanel() {
     const panel = this._isPanel() && !this._isPreview();
-    if (panel === this._panel) return;
+    if (panel === this._panel) {
+      if (panel) this._fitPanel();
+      return;
+    }
     this._panel = panel;
+    this.classList.toggle("panel", panel);
     this._card.classList.toggle("panel", panel);
     this.style.maxWidth = panel ? "none" : "";
     this.style.margin = panel ? "0" : "";
     this.style.height = panel ? "100%" : "";
     this.style.width = panel ? "100%" : "";
+    if (panel) this._fitPanel();
+  }
+  // 面板里按 1440×900 设计稿等比缩放：整页装下，不出现滚动条
+  _fitPanel() {
+    if (!this._panel || !this._card) return;
+    const w = this.clientWidth;
+    const h = this.clientHeight;
+    if (!w || !h) return;
+    const fit = w >= 900 && h >= 620;
+    this._card.classList.toggle("fit", fit);
+    if (!fit) return;
+    const k = Math.min(w / 1440, h / 900);
+    this._card.style.setProperty("--fit", String(Math.round(k * 1e3) / 1e3));
+    const designH = Math.max(900, Math.round(h / k));
+    this._card.style.width = "1440px";
+    this._card.style.height = `${designH}px`;
   }
   _isPreview() {
     if (this._preview) return true;
@@ -1091,6 +1127,10 @@ var HaCarCard = class extends HTMLElement {
     this._card = root.querySelector("ha-card");
     this._built = true;
     this._bind();
+    this._panelRO = new ResizeObserver(() => this._fitPanel());
+    this._panelRO.observe(this);
+    this._ro = new ResizeObserver(() => this._placeOverlay());
+    this._ro.observe(this._wrap);
   }
   _signature(data) {
     const parts = [];
@@ -1111,7 +1151,9 @@ var HaCarCard = class extends HTMLElement {
     if (cfg.accent) this._card.style.setProperty("--hc-accent", cfg.accent);
     this._prunePending(data);
     this._wrap.innerHTML = this._body(data);
+    this._placeOverlay();
     const img = this._wrap.querySelector("img.carimg");
+    if (img) img.addEventListener("load", () => this._placeOverlay(), { once: true });
     if (img && img.dataset.fb) {
       img.addEventListener("error", () => {
         const fb = img.dataset.fb;
@@ -1187,7 +1229,7 @@ var HaCarCard = class extends HTMLElement {
       if (energy) side.push(energy);
     }
     const hero = this._imagePair(data);
-    const heroHtml = this._hero(hero.src, hero.fb);
+    const heroHtml = this._hero(hero.src, hero.fb, this._carOverlay(data, t, mods));
     parts.push(
       side.length ? `<div class="duo"><div class="dleft">${heroHtml}</div><div class="dright">${side.join("")}</div></div>` : heroHtml
     );
@@ -1197,9 +1239,6 @@ var HaCarCard = class extends HTMLElement {
     if (mods.includes("alerts")) {
       const alert = this._alert(data, t);
       if (alert) parts.push(alert);
-    }
-    if (!compact && mods.includes("tires")) {
-      this._tread = this._tires(data, t);
     }
     if (!compact && mods.includes("doors")) {
       const doors = this._doors(data, t);
@@ -1222,20 +1261,75 @@ var HaCarCard = class extends HTMLElement {
     return parts.join("");
   }
   // 车图 + 同心轨道 + 四枚发光节点（无图时落回圆形占位）
-  _hero(imgUrl, fbUrl) {
+  _hero(imgUrl, fbUrl, overlay) {
     return `<div class="hero"><div class="halo"></div>
       <span class="orbit"></span><span class="orbit o2"></span>
       <i class="node n1"></i><i class="node n2"></i><i class="node n3"></i><i class="node n4"></i>
       ${imgUrl ? `<img class="carimg" src="${esc(imgUrl)}"${fbUrl ? ` data-fb="${esc(fbUrl)}"` : ""} alt="">` : `<div class="carph">${icon("car")}</div>`}
-      <div class="ground"></div></div>`;
+      <div class="ground"></div><div class="covl">${overlay || ""}</div></div>`;
+  }
+  // 俯视图状态层：车门/车窗/引擎盖/尾门按真实方位贴边，四轮胎压落在轮位
+  _carOverlay(data, t, mods) {
+    const zh = !isEn(this._hass);
+    const out = [];
+    const mark = (slot, cls, label) => {
+      const st = data.get(slot);
+      if (!st) return;
+      const bad = isBad(st);
+      const open = !bad && normOpen(st) === "open";
+      out.push(
+        `<i class="cst ${cls}${bad ? " bad" : open ? " open" : ""}" data-more="${esc(data.id(slot))}"
+          title="${esc(label)} · ${esc(bad ? t.never : open ? t.open : t.closed)}"></i>`
+      );
+    };
+    if (mods.includes("doors")) {
+      mark("hood", "bar-h hood", zh ? "引擎盖" : "Hood");
+      mark("tailgate", "bar-h trunk", zh ? "尾门" : "Tailgate");
+      mark("door_fl", "bar-v dfl", zh ? "主驾门" : "Driver door");
+      mark("door_fr", "bar-v dfr", zh ? "副驾门" : "Passenger door");
+      mark("door_rl", "bar-v drl", zh ? "左后门" : "Rear left door");
+      mark("door_rr", "bar-v drr", zh ? "右后门" : "Rear right door");
+      mark("win_fl", "thin wfl", zh ? "主驾车窗" : "Driver window");
+      mark("win_fr", "thin wfr", zh ? "副驾车窗" : "Passenger window");
+      mark("win_rl", "thin wrl", zh ? "左后车窗" : "Rear left window");
+      mark("win_rr", "thin wrr", zh ? "右后车窗" : "Rear right window");
+    }
+    if (mods.includes("tires")) {
+      const tp = [
+        ["tp_lf", "tps_lf", "tlf", zh ? "左前" : "LF"],
+        ["tp_rf", "tps_rf", "trf", zh ? "右前" : "RF"],
+        ["tp_lr", "tps_lr", "tlr", zh ? "左后" : "LR"],
+        ["tp_rr", "tps_rr", "trr", zh ? "右后" : "RR"]
+      ];
+      for (const [slot, sslot, cls, label] of tp) {
+        const st = data.get(slot);
+        if (isBad(st)) continue;
+        const v = num(st);
+        const warn = normTire(data.get(sslot)) === "warn";
+        const unit = attrs(st, "unit_of_measurement") || "kPa";
+        out.push(
+          `<b class="ctire ${cls}${warn ? " warn" : ""}" data-more="${esc(data.id(slot))}"
+            title="${esc(t.tireLabel + " · " + label)} ${v == null ? "—" : fmtNum(v)} ${esc(unit)}">${v == null ? "—" : fmtNum(v)}</b>`
+        );
+      }
+    }
+    return out.join("");
+  }
+  // 状态层贴合真实车图矩形（图片 contain 后尺寸未知，渲染完再量）
+  _placeOverlay() {
+    const img = this._wrap && this._wrap.querySelector("img.carimg");
+    const ovl = this._wrap && this._wrap.querySelector(".covl");
+    if (!img || !ovl) return;
+    if (!img.offsetWidth) return;
+    ovl.style.left = `${img.offsetLeft}px`;
+    ovl.style.top = `${img.offsetTop}px`;
+    ovl.style.width = `${img.offsetWidth}px`;
+    ovl.style.height = `${img.offsetHeight}px`;
   }
   // 底座条：四轮胎压 + 同步（同步入口就是刷新按钮）
   _baseline(data, t) {
-    const tread = this._tread || "";
-    this._tread = "";
     const sync = this._syncChip(data, t);
-    if (!tread && !sync) return "";
-    return `<div class="baseline${tread ? "" : " solo"}">${tread}${tread && sync ? '<span class="bdiv"></span>' : ""}${sync}</div>`;
+    return sync ? `<div class="baseline solo">${sync}</div>` : "";
   }
   _syncChip(data, t) {
     const ent = data.id("btn_refresh");
@@ -1467,9 +1561,7 @@ var HaCarCard = class extends HTMLElement {
       if (normOpen(st) === "open") open.push(d);
     }
     if (!known) return "";
-    if (!open.length) {
-      return `<div class="doors"><span class="door">${icon("carProfile")}${esc(t.doorsClosed)}</span></div>`;
-    }
+    if (!open.length) return "";
     return `<div class="doors">${open.map((d) => `<span class="door open" data-more="${esc(data.id(d.slot))}">${icon("carProfile")}${esc(d.label)} · ${esc(t.open)}</span>`).join("")}</div>`;
   }
   _alert(data, t) {
@@ -2041,7 +2133,7 @@ var HaCarEditor = class extends HTMLElement {
 customElements.define("ha-car-editor", HaCarEditor);
 
 // src/main.js
-var VERSION = "1.0.8";
+var VERSION = "1.0.9";
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "ha-car",

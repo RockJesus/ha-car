@@ -161,7 +161,7 @@ h1 { margin: 0; font-size: 25px; line-height: 1.12; font-weight: 650; letter-spa
   border: 1px solid rgba(255,255,255,.07);
   background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.016));
   box-shadow: inset 0 1px 0 rgba(255,255,255,.05); min-width: 0; }
-.baseline.solo { justify-content: center; padding: 8px 12px; }
+.baseline.solo { align-self: flex-end; justify-content: flex-end; padding: 6px 10px; border-radius: 12px; }
 .tread { flex: 1; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 2px; min-width: 0; }
 .tc { display: inline-flex; align-items: center; gap: 3px; min-width: 0; font-size: 10px; color: var(--hc-dim);
   white-space: nowrap; }
@@ -252,10 +252,45 @@ h1 { margin: 0; font-size: 25px; line-height: 1.12; font-weight: 650; letter-spa
 
 /* 宽屏（面板视图 / 桌面仪表盘）：手机尺寸的内容居中收窄，避免拉成一条横贯全屏的卡片 */
 
-/* ---- 面板模式：卡片自适应占满面板 ---- */
-ha-card.panel { height: 100%; }
-ha-card.panel .wrap { height: 100%; min-height: 100%; box-sizing: border-box; padding: 24px 24px 18px;
-  max-width: 1600px; margin-inline: auto; }
+
+/* 俯视图状态层：贴在车图上，位置由 JS 量出车图矩形 */
+.covl { position: absolute; pointer-events: none; }
+.cst { position: absolute; transform: translate(-50%, -50%); border-radius: 999px; background: rgba(233,239,247,.22);
+  border: 1px solid rgba(233,239,247,.16); transition: background .25s ease, box-shadow .25s ease; }
+.cst.bar-h { width: 30%; height: 5px; border-radius: 3px; }
+.cst.bar-v { width: 5px; height: 14%; border-radius: 3px; }
+.cst.thin { width: 4px; height: 9%; border-radius: 2px; opacity: .8; }
+.cst.open { background: var(--hc-warn); border-color: rgba(255,196,107,.9);
+  box-shadow: 0 0 12px rgba(255,196,107,.85), 0 0 2px rgba(255,196,107,.9); }
+.cst.bad { background: var(--hc-bad); border-color: rgba(255,145,130,.9); box-shadow: 0 0 12px rgba(255,145,130,.7); }
+.cst.hood { left: 50%; top: 6%; }
+.cst.trunk { left: 50%; top: 87%; }
+.cst.dfl { left: 24%; top: 38%; }
+.cst.dfr { left: 76%; top: 38%; }
+.cst.drl { left: 24%; top: 63%; }
+.cst.drr { left: 76%; top: 63%; }
+.cst.wfl { left: 30%; top: 40%; }
+.cst.wfr { left: 70%; top: 40%; }
+.cst.wrl { left: 30%; top: 60%; }
+.cst.wrr { left: 70%; top: 60%; }
+.ctire { position: absolute; transform: translate(-50%, -50%); font-size: 11px; font-weight: 650;
+  color: var(--hc-dim); font-variant-numeric: tabular-nums; letter-spacing: .02em;
+  padding: 2px 6px; border-radius: 8px; background: rgba(8,13,20,.62); border: 1px solid rgba(255,255,255,.07);
+  text-shadow: 0 1px 2px rgba(0,0,0,.6); }
+.ctire.warn { color: var(--hc-warn); border-color: rgba(255,196,107,.5); }
+.ctire.tlf { left: 25%; top: 21%; }
+.ctire.trf { left: 75%; top: 21%; }
+.ctire.tlr { left: 25%; top: 68%; }
+.ctire.trr { left: 75%; top: 68%; }
+
+/* ---- 面板模式：1440×900 设计稿等比缩放，整页装下不滚动 ---- */
+:host(.panel) { position: relative; overflow: hidden;
+  background: radial-gradient(90% 60% at 50% 0%, rgba(55,214,232,.10), transparent 62%),
+    linear-gradient(170deg, #101b29 0%, #0a1119 60%, #070c13 100%); }
+ha-card.panel { box-sizing: border-box; width: 100%; height: 100%; margin: 0; }
+ha-card.panel.fit { box-sizing: border-box; position: absolute; left: 50%; top: 50%; width: 1440px; height: 900px;
+  transform: translate(-50%, -50%) scale(var(--fit, 1)); transform-origin: center center; }
+ha-card.panel .wrap { height: 100%; box-sizing: border-box; padding: 26px 30px 20px; overflow: hidden; }
 ha-card.panel .duo { flex: 1 1 auto; min-height: 0; }
 ha-card.panel .dleft { justify-content: center; min-height: 0; }
 ha-card.panel .dright { justify-content: center; }
@@ -276,32 +311,13 @@ ha-card.panel .carimg { max-height: 88%; max-width: min(60%, 320px); }
   .pills { max-width: 540px; margin: 10px auto 0; width: 100%; }
   /* 面板模式：容器多宽就排多宽，车图列跟着面板高度走 */
   :host(.panel) { max-width: none; margin: 0; }
-  ha-card.panel .wrap { padding: 28px 34px 24px; gap: 18px; }
-  ha-card.panel .duo { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); column-gap: 40px; align-items: stretch; }
-  ha-card.panel .dleft .hero { height: 100%; min-height: 320px; --r: 124px; }
-  ha-card.panel .carimg { max-height: 90%; max-width: min(64%, 360px); }
-  ha-card.panel .gauge { max-width: 176px; }
-  ha-card.panel .acts { max-width: 620px; }
-  ha-card.panel .pills { max-width: 620px; }
-}
-
-@media (min-width: 1500px) {
-  ha-card.panel .wrap { padding: 34px 44px 28px; }
-  ha-card.panel .duo { column-gap: 52px; }
-  ha-card.panel .dleft .hero { --r: 152px; }
-  ha-card.panel .carimg { max-height: 88%; max-width: min(62%, 430px); }
-  ha-card.panel .gauge { max-width: 208px; }
-  ha-card.panel .gn b { font-size: 42px; }
-  ha-card.panel .acts, ha-card.panel .pills { max-width: 680px; }
-}
-
-@media (min-width: 1900px) {
-  ha-card.panel .wrap { max-width: 1900px; }
-  ha-card.panel .dleft .hero { --r: 176px; }
-  ha-card.panel .carimg { max-height: 90%; max-width: min(60%, 480px); }
-  ha-card.panel .gauge { max-width: 240px; }
-  ha-card.panel .gn b { font-size: 48px; }
-  ha-card.panel .acts, ha-card.panel .pills { max-width: 780px; }
+  ha-card.panel .wrap { padding: 22px 26px 16px; gap: 12px; }
+  ha-card.panel .duo { grid-template-columns: minmax(0, 1.02fr) minmax(0, 1fr); column-gap: 34px; align-items: stretch; }
+  ha-card.panel .dleft .hero { height: 100%; min-height: 250px; --r: 106px; }
+  ha-card.panel .carimg { max-height: 92%; max-width: min(64%, 320px); }
+  ha-card.panel .gauge { max-width: 150px; }
+  ha-card.panel .acts { max-width: 560px; }
+  ha-card.panel .pills { max-width: 560px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
