@@ -1,3 +1,7 @@
 node_modules/
 dev/shot-*.png
 dev/shot-page.png
+
+# 本地验证用的临时页与线上副本，不入库
+dev/_live/
+dev/_*.html
