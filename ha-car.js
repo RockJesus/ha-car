@@ -357,6 +357,16 @@ h1 { margin: 0; font-size: 26px; line-height: 1.1; font-weight: 700; letter-spac
   box-shadow: 0 0 18px -8px rgba(111,224,168,.65), inset 0 1px 0 rgba(255,255,255,.14); }
 .status.bad { color: #ff9d8e; background: rgba(255,145,130,.11); border-color: rgba(255,145,130,.34); }
 
+/* 锁态下面一行：定位 + 同步时间 */
+.hmeta { display: flex; align-items: center; gap: 8px; margin-top: -6px; min-width: 0; }
+.hmeta .doors { flex: 1 1 auto; min-width: 0; overflow: hidden; }
+.hmeta .door { flex: 1 1 auto; min-width: 0; max-width: 100%; overflow: hidden; height: 26px;
+  background: rgba(255,255,255,.024); border-color: rgba(255,255,255,.055); }
+.hmeta .door .addr { flex: 1 1 auto; min-width: 0; }
+.hmeta .door .ic { width: 14px; height: 14px; }
+.hmeta .baseline.solo { flex: none; margin: 0 0 0 auto; padding: 4px 9px; background: rgba(255,255,255,.024);
+  border-color: rgba(255,255,255,.055); }
+
 /* 主视觉：车图 + 双同心轨道 + 四枚发光节点（参考图同构） */
 .hero { position: relative; height: 224px; display: flex; align-items: center; justify-content: center;
   overflow: hidden; --r: 92px; }
@@ -723,7 +733,7 @@ ha-card.panel.fit .alert,
 ha-card.panel.fit .svc,
 ha-card.panel.fit .loc,
 ha-card.panel.fit .toast { grid-column: 2; }
-ha-card.panel.fit .baseline.solo { grid-column: 2; justify-self: end; align-self: end; margin-top: 2px; }
+ha-card.panel.fit .hmeta { grid-column: 2; }
 ha-card.panel.fit .acts { width: 100%; max-width: none; }
 ha-card.panel.fit .pills { width: 100%; max-width: none; }
 
@@ -1129,7 +1139,8 @@ var PANEL_TAGS = /* @__PURE__ */ new Set(["hui-panel-view", "hui-grid-view"]);
 var DEFAULTS = {
   title: "",
   layout: "full",
-  modules: MODULES,
+  // 默认不渲染「服务信息」，可在编辑器里手动勾选
+  modules: MODULES.filter((m) => m !== "service"),
   confirm: ["btn_unlock", "btn_lock", "btn_trunk", "sw_engine", "sw_honk"],
   hold_ms: 2e3,
   accent: "#37d6e8",
@@ -1166,7 +1177,7 @@ var HaCarCard = class extends HTMLElement {
       throw new Error("ha-car：配置必须是一个对象");
     }
     const cfg = Object.assign({}, DEFAULTS, config || {});
-    cfg.modules = Array.isArray(cfg.modules) ? cfg.modules.filter((m) => MODULES.includes(m)) : MODULES.slice();
+    cfg.modules = Array.isArray(cfg.modules) ? cfg.modules.filter((m) => MODULES.includes(m)) : DEFAULTS.modules.slice();
     cfg.confirm = Array.isArray(cfg.confirm) ? cfg.confirm.filter((k) => CONFIRMABLE.includes(k)) : DEFAULTS.confirm.slice();
     cfg.entities = cfg.entities && typeof cfg.entities === "object" ? cfg.entities : {};
     cfg.hold_ms = clamp(Number(cfg.hold_ms) || DEFAULTS.hold_ms, 300, 3e3);
@@ -1391,6 +1402,11 @@ var HaCarCard = class extends HTMLElement {
     parts.push(`<div class="head"><div class="ttl"><h1>${FORD_LOGO}${esc(title)}</h1>
       ${cfg.show_plate && plate ? `<p class="plate">${esc(cfg.privacy ? maskPlate(plate) : plate)}</p>` : ""}
       </div><span class="status ${status.cls}"><span class="dot"></span>${esc(status.label)}</span></div>`);
+    const locHtml = compact ? "" : this._location(data, t);
+    const syncHtml = this._baseline(data, t);
+    if (locHtml || syncHtml) {
+      parts.push(`<div class="hmeta">${locHtml}${syncHtml}</div>`);
+    }
     const side = [];
     if (mods.includes("status") && chips.length) {
       side.push(`<div class="chips">${chips.slice(0, 3).map((c) => `<span class="chip ${c.cls}">${esc(c.label)}</span>`).join("")}</div>`);
@@ -1404,9 +1420,6 @@ var HaCarCard = class extends HTMLElement {
     parts.push(
       side.length ? `<div class="duo"><div class="dleft">${heroHtml}</div><div class="dright">${side.join("")}</div></div>` : heroHtml
     );
-    if (mods.includes("actions")) {
-      parts.push(this._actions(data, t, running, offline, compact));
-    }
     if (mods.includes("alerts")) {
       const alert = this._alert(data, t);
       if (alert) parts.push(alert);
@@ -1423,11 +1436,9 @@ var HaCarCard = class extends HTMLElement {
       const svc = this._service(data, t);
       if (svc) parts.push(svc);
     }
-    if (!compact) {
-      const loc = this._location(data, t);
-      if (loc) parts.push(loc);
+    if (mods.includes("actions")) {
+      parts.push(this._actions(data, t, running, offline, compact));
     }
-    parts.push(this._baseline(data, t));
     if (this._toast) parts.push(this._toastHtml());
     return parts.join("");
   }
@@ -2074,7 +2085,7 @@ var HaCarEditor = class extends HTMLElement {
   setConfig(config) {
     this._config = Object.assign({}, DEFAULTS, config || {});
     this._config.entities = Object.assign({}, this._config.entities || {});
-    if (!Array.isArray(this._config.modules)) this._config.modules = MODULES.slice();
+    if (!Array.isArray(this._config.modules)) this._config.modules = DEFAULTS.modules.slice();
     if (!Array.isArray(this._config.confirm)) this._config.confirm = DEFAULTS.confirm.slice();
     if (!this._built) this._build();
     this._sync();
@@ -2345,7 +2356,7 @@ var HaCarEditor = class extends HTMLElement {
 customElements.define("ha-car-editor", HaCarEditor);
 
 // src/main.js
-var VERSION = "1.3.1";
+var VERSION = "1.3.2";
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "ha-car",

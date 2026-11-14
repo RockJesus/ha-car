@@ -57,6 +57,16 @@ h1 { margin: 0; font-size: 26px; line-height: 1.1; font-weight: 700; letter-spac
   box-shadow: 0 0 18px -8px rgba(111,224,168,.65), inset 0 1px 0 rgba(255,255,255,.14); }
 .status.bad { color: #ff9d8e; background: rgba(255,145,130,.11); border-color: rgba(255,145,130,.34); }
 
+/* 锁态下面一行：定位 + 同步时间 */
+.hmeta { display: flex; align-items: center; gap: 8px; margin-top: -6px; min-width: 0; }
+.hmeta .doors { flex: 1 1 auto; min-width: 0; overflow: hidden; }
+.hmeta .door { flex: 1 1 auto; min-width: 0; max-width: 100%; overflow: hidden; height: 26px;
+  background: rgba(255,255,255,.024); border-color: rgba(255,255,255,.055); }
+.hmeta .door .addr { flex: 1 1 auto; min-width: 0; }
+.hmeta .door .ic { width: 14px; height: 14px; }
+.hmeta .baseline.solo { flex: none; margin: 0 0 0 auto; padding: 4px 9px; background: rgba(255,255,255,.024);
+  border-color: rgba(255,255,255,.055); }
+
 /* 主视觉：车图 + 双同心轨道 + 四枚发光节点（参考图同构） */
 .hero { position: relative; height: 224px; display: flex; align-items: center; justify-content: center;
   overflow: hidden; --r: 92px; }
@@ -423,7 +433,7 @@ ha-card.panel.fit .alert,
 ha-card.panel.fit .svc,
 ha-card.panel.fit .loc,
 ha-card.panel.fit .toast { grid-column: 2; }
-ha-card.panel.fit .baseline.solo { grid-column: 2; justify-self: end; align-self: end; margin-top: 2px; }
+ha-card.panel.fit .hmeta { grid-column: 2; }
 ha-card.panel.fit .acts { width: 100%; max-width: none; }
 ha-card.panel.fit .pills { width: 100%; max-width: none; }
 

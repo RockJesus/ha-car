@@ -33,7 +33,8 @@ const PANEL_TAGS = new Set(["hui-panel-view", "hui-grid-view"]);
 const DEFAULTS = {
   title: "",
   layout: "full",
-  modules: MODULES,
+  // 默认不渲染「服务信息」，可在编辑器里手动勾选
+  modules: MODULES.filter((m) => m !== "service"),
   confirm: ["btn_unlock", "btn_lock", "btn_trunk", "sw_engine", "sw_honk"],
   hold_ms: 2000,
   accent: "#37d6e8",
@@ -77,7 +78,7 @@ class HaCarCard extends HTMLElement {
     const cfg = Object.assign({}, DEFAULTS, config || {});
     cfg.modules = Array.isArray(cfg.modules)
       ? cfg.modules.filter((m) => MODULES.includes(m))
-      : MODULES.slice();
+      : DEFAULTS.modules.slice();
     cfg.confirm = Array.isArray(cfg.confirm)
       ? cfg.confirm.filter((k) => CONFIRMABLE.includes(k))
       : DEFAULTS.confirm.slice();
@@ -345,6 +346,13 @@ class HaCarCard extends HTMLElement {
       ${cfg.show_plate && plate ? `<p class="plate">${esc(cfg.privacy ? maskPlate(plate) : plate)}</p>` : ""}
       </div><span class="status ${status.cls}"><span class="dot"></span>${esc(status.label)}</span></div>`);
 
+    // 锁态胶囊下面：定位 + 同步时间（一条紧凑元信息行）
+    const locHtml = compact ? "" : this._location(data, t);
+    const syncHtml = this._baseline(data, t);
+    if (locHtml || syncHtml) {
+      parts.push(`<div class="hmeta">${locHtml}${syncHtml}</div>`);
+    }
+
     // 主视觉 + 右侧数据区：窄屏上下叠放，宽屏（桌面/面板视图）左右分栏
     const side = [];
     if (mods.includes("status") && chips.length) {
@@ -364,10 +372,6 @@ class HaCarCard extends HTMLElement {
         ? `<div class="duo"><div class="dleft">${heroHtml}</div><div class="dright">${side.join("")}</div></div>`
         : heroHtml,
     );
-
-    if (mods.includes("actions")) {
-      parts.push(this._actions(data, t, running, offline, compact));
-    }
 
     if (mods.includes("alerts")) {
       const alert = this._alert(data, t);
@@ -389,13 +393,11 @@ class HaCarCard extends HTMLElement {
       if (svc) parts.push(svc);
     }
 
-    if (!compact) {
-      const loc = this._location(data, t);
-      if (loc) parts.push(loc);
-    }
 
-    // 底部：胎压 + 同步时间合成一条底座
-    parts.push(this._baseline(data, t));
+    // 控制按钮固定放最下面
+    if (mods.includes("actions")) {
+      parts.push(this._actions(data, t, running, offline, compact));
+    }
 
     if (this._toast) parts.push(this._toastHtml());
 

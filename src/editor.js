@@ -94,7 +94,7 @@ class HaCarEditor extends HTMLElement {
   setConfig(config) {
     this._config = Object.assign({}, DEFAULTS, config || {});
     this._config.entities = Object.assign({}, this._config.entities || {});
-    if (!Array.isArray(this._config.modules)) this._config.modules = MODULES.slice();
+    if (!Array.isArray(this._config.modules)) this._config.modules = DEFAULTS.modules.slice();
     if (!Array.isArray(this._config.confirm)) this._config.confirm = DEFAULTS.confirm.slice();
     if (!this._built) this._build();
     this._sync();
