@@ -640,51 +640,53 @@ h1 { margin: 0; font-size: 26px; line-height: 1.1; font-weight: 700; letter-spac
 /* 俯视图状态层：贴在车图上，位置由 JS 量出车图矩形 */
 .covl { position: absolute; pointer-events: none; }
 .cedge { position: absolute; inset: 0; pointer-events: none; }
-/* 车况卡（门/窗/盖/胎压共用同一套卡片样式）：玻璃卡 + 左图标 + 右两行文字 */
-.cst, .ctire { position: absolute; display: flex; align-items: center; gap: 6px; box-sizing: border-box;
-  width: 80px; height: 34px; padding: 0 9px; border-radius: 11px; transform: translateY(-50%);
+/* 车况聚合卡：每个车门一张（门 + 窗 + 该轮位胎压），全部落在圆环内侧、避开车身。
+   尺寸统一用容器查询单位 cqw（1cqw = 卡层宽度的 1%），随车图大小等比缩放。 */
+.covl { container-type: size; }
+.loc, .cap { position: absolute; box-sizing: border-box; display: flex; flex-direction: column;
   background: linear-gradient(180deg, rgba(24,38,55,.9), rgba(10,17,26,.94));
-  border: 1px solid rgba(160,205,230,.15);
-  box-shadow: 0 8px 18px rgba(2,7,12,.55), inset 0 1px 0 rgba(255,255,255,.08);
-  backdrop-filter: blur(10px); font-variant-numeric: tabular-nums;
+  border: 1px solid rgba(160,205,230,.16);
+  box-shadow: 0 2cqw 5cqw rgba(2,7,12,.5), inset 0 1cqw 0 rgba(255,255,255,.07);
+  backdrop-filter: blur(10cqw); font-variant-numeric: tabular-nums;
   transition: background .25s ease, border-color .25s ease, box-shadow .25s ease; }
-.cst .ci, .ctire .ci { flex: 0 0 17px; height: 17px; display: grid; place-items: center;
-  color: #8ed2e6; opacity: .92; transition: color .25s ease; }
-.cst .ci .ic, .ctire .ci .ic { width: 17px; height: 17px; display: block; }
-.cst .ct, .ctire .ct { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
-.cst .ct b, .ctire .ct b { font-size: 10.5px; font-weight: 650; line-height: 1; color: #d6e4f2;
-  white-space: nowrap; letter-spacing: .01em; }
-.cst .ct i, .ctire .ct i { font-style: normal; font-size: 7.5px; line-height: 1; color: #7d90a6;
-  white-space: nowrap; letter-spacing: .04em; }
-.cst.open, .ctire.warn { background: linear-gradient(180deg, rgba(60,40,13,.9), rgba(31,20,8,.94));
-  border-color: rgba(255,196,107,.52);
-  box-shadow: 0 8px 18px rgba(2,7,12,.55), 0 0 16px rgba(255,196,107,.18); }
-.cst.open .ct b, .ctire.warn .ct b { color: #ffcf90; }
-.cst.open .ct i, .ctire.warn .ct i { color: #c9a273; }
-.cst.open .ci, .ctire.warn .ci { color: #ffcf90; opacity: 1; }
-.cst.bad { background: linear-gradient(180deg, rgba(62,18,18,.9), rgba(32,11,11,.94));
-  border-color: rgba(255,145,130,.5); box-shadow: 0 8px 18px rgba(2,7,12,.55), 0 0 16px rgba(255,110,100,.18); }
-.cst.bad .ct b { color: #ffc8c2; }
-.cst.bad .ci { color: #ff9d92; opacity: 1; }
-/* 车身两侧：悬停车身左右边缘外侧。车图 PNG 含透明留白（官方俯视图车身约占宽度 10%–90%），
-   按 90% 锚点贴边，比按图片边界贴边更贴近车身。 */
-.cst.dfl, .cst.wfl, .cst.drl, .cst.wrl { right: calc(90% + 10px); }
-.cst.dfr, .cst.wfr, .cst.drr, .cst.wrr { left: calc(90% + 10px); }
-.cst.dfl, .cst.dfr { top: 26%; }
-.cst.wfl, .cst.wfr { top: 46%; }
-.cst.drl, .cst.drr { top: 66%; }
-.cst.wrl, .cst.wrr { top: 81%; }
-/* 前后盖：车头/车尾正外侧 */
-.cst.hood { left: 50%; top: 5%; transform: translate(-50%, -116%); }
-.cst.trunk { left: 50%; top: 99%; transform: translate(-50%, 16%); }
-/* 胎压：与门/窗卡片同一套样式，数值用大字 + 单位小字 */
-.ctire { width: 88px; }
-.ctire .ct b { font-size: 12.5px; color: #e9f3fb; }
-.ctire .ct b s { text-decoration: none; font-size: 7.5px; font-weight: 500; color: #7d90a6; margin-left: 3px; }
-.ctire.tlf, .ctire.tlr { right: calc(90% + 10px); }
-.ctire.trf, .ctire.trr { left: calc(90% + 10px); }
-.ctire.tlf, .ctire.trf { top: 7%; }
-.ctire.tlr, .ctire.trr { top: 96%; }
+.loc { width: 52cqw; transform: translate(-50%, -50%); padding: 4cqw 4.2cqw 4.2cqw; border-radius: 8.4cqw;
+  gap: 2cqw; }
+.loc.lf, .loc.lr { left: calc(50% - 67cqw); }
+.loc.rf, .loc.rr { left: calc(50% + 67cqw); }
+.loc.lf, .loc.rf { top: 37%; }
+.loc.lr, .loc.rr { top: 63%; }
+.loc .lh { display: flex; align-items: center; justify-content: space-between; }
+.loc .lh span { font-size: 4.5cqw; line-height: 1; color: #93a8bd; letter-spacing: .09em; }
+.loc .lh .lk { font-style: normal; width: 5.2cqw; height: 5.2cqw; color: #6d8298; opacity: .85; }
+.loc .lh .lk .ic { width: 100%; height: 100%; display: block; }
+.loc .lh .lk.on { color: #7ee0b3; opacity: 1; }
+.loc .lr { display: flex; align-items: center; gap: 2.8cqw; line-height: 1; }
+.loc .lr .ri { flex: 0 0 7cqw; height: 7cqw; display: grid; place-items: center; color: #86c9de; }
+.loc .lr .ri .ic { width: 100%; height: 100%; display: block; }
+.loc .lr b { font-size: 6.3cqw; font-weight: 620; color: #dbe7f5; letter-spacing: .01em; }
+.loc .lr.tire b { font-size: 7cqw; }
+.loc .lr.tire b s { text-decoration: none; font-size: 4.4cqw; font-weight: 500; color: #7d90a6; margin-left: 1.4cqw; }
+.loc .lr.open b { color: #ffcf90; }
+.loc .lr.open .ri { color: #ffcf90; }
+.loc .lr.warn b, .loc .lr.warn b s { color: var(--hc-warn); }
+.loc .lr.warn .ri { color: var(--hc-warn); }
+.loc .lr.bad b { color: #ffc8c2; }
+.loc.open { border-color: rgba(255,196,107,.5); background: linear-gradient(180deg, rgba(56,32,10,.9), rgba(28,17,7,.94));
+  box-shadow: 0 2cqw 5cqw rgba(2,7,12,.5), 0 0 4cqw rgba(255,196,107,.14); }
+.loc.bad { border-color: rgba(255,145,130,.5); background: linear-gradient(180deg, rgba(58,18,18,.9), rgba(30,10,10,.94)); }
+/* 前后盖小卡：车头/车尾正上方与正下方，仍落在圆环内侧 */
+.cap { left: 50%; transform: translate(-50%, -100%); width: 44cqw; flex-direction: row; align-items: center;
+  gap: 2.6cqw; padding: 3.2cqw 4cqw; border-radius: 6.4cqw; }
+.cap.hood { top: 0; }
+.cap.trunk { top: 100%; transform: translate(-50%, 0); }
+.cap .cx { display: flex; flex-direction: column; gap: 1.4cqw; min-width: 0; }
+.cap .ri { flex: 0 0 6cqw; height: 6cqw; display: grid; place-items: center; color: #86c9de; }
+.cap .ri .ic { width: 100%; height: 100%; display: block; }
+.cap b { font-size: 5.8cqw; font-weight: 620; color: #dbe7f5; line-height: 1; }
+.cap i { font-style: normal; font-size: 4.3cqw; color: #7d90a6; line-height: 1; letter-spacing: .05em; }
+.cap.open { border-color: rgba(255,196,107,.5); background: linear-gradient(180deg, rgba(56,32,10,.9), rgba(28,17,7,.94)); }
+.cap.open b, .cap.open .ri { color: #ffcf90; }
+.cap.bad { border-color: rgba(255,145,130,.5); }
 
 /* ---- 面板模式：1440×900 设计稿等比缩放，整页装下不滚动 ---- */
 
@@ -696,21 +698,7 @@ ha-card.panel:not(.fit) .sub { font-size: 10px; }
 ha-card.panel:not(.fit) .hero { height: 100%; min-height: 178px; --r: 96px; }
 ha-card.panel:not(.fit) .carimg { max-height: 78%; max-width: 56%; }
 ha-card.panel:not(.fit) .gauge { max-width: 86px; }
-/* 窄面板：卡片缩一档，车图收窄，让左右两列卡片放得下 */
-ha-card.panel:not(.fit) .cst, ha-card.panel:not(.fit) .ctire { width: 66px; height: 30px; padding: 0 7px; gap: 5px; border-radius: 9px; }
-ha-card.panel:not(.fit) .ctire { width: 72px; }
-ha-card.panel:not(.fit) .cst .ci, ha-card.panel:not(.fit) .ctire .ci { flex: 0 0 13px; height: 13px; }
-ha-card.panel:not(.fit) .cst .ci .ic, ha-card.panel:not(.fit) .ctire .ci .ic { width: 13px; height: 13px; }
-ha-card.panel:not(.fit) .cst .ct b { font-size: 9px; }
-ha-card.panel:not(.fit) .ctire .ct b { font-size: 10.5px; }
-ha-card.panel:not(.fit) .cst .ct i, ha-card.panel:not(.fit) .ctire .ct i { font-size: 6.5px; }
-ha-card.panel:not(.fit) .ctire .ct b s { font-size: 6.5px; }
-ha-card.panel:not(.fit) .cst.dfl, ha-card.panel:not(.fit) .cst.wfl,
-ha-card.panel:not(.fit) .cst.drl, ha-card.panel:not(.fit) .cst.wrl,
-ha-card.panel:not(.fit) .ctire.tlf, ha-card.panel:not(.fit) .ctire.tlr { right: calc(90% + 6px); }
-ha-card.panel:not(.fit) .cst.dfr, ha-card.panel:not(.fit) .cst.wfr,
-ha-card.panel:not(.fit) .cst.drr, ha-card.panel:not(.fit) .cst.wrr,
-ha-card.panel:not(.fit) .ctire.trf, ha-card.panel:not(.fit) .ctire.trr { left: calc(90% + 6px); }
+/* 窄面板：车图略收窄，保证左右两列聚合卡与圆环之间留白 */
 ha-card.panel:not(.fit) .hero { --r: 72px; }
 ha-card.panel:not(.fit) .energy { column-gap: 6px; }
 ha-card.panel:not(.fit) .orb { width: 44px; height: 44px; }
@@ -1595,60 +1583,67 @@ var HaCarCard = class extends HTMLElement {
       ${imgUrl ? `<img class="carimg" src="${esc(imgUrl)}"${fbUrl ? ` data-fb="${esc(fbUrl)}"` : ""} alt="">` : `<div class="carph">${icon("car")}</div>`}
       <div class="ground"></div><div class="covl">${inner}</div>${edge ? `<div class="cedge">${edge}</div>` : ""}</div>`;
   }
-  // 俯视图状态层：车门/车窗/引擎盖/尾门按真实方位贴边，四轮胎压落在轮位
+  // 俯视图状态层：每个车门一张聚合卡（门 + 窗 + 该轮位胎压），前后盖各一张小卡，全部落在圆环内侧
   _carOverlay(data, t, mods) {
     const zh = !isEn(this._hass);
+    const doors = mods.includes("doors");
+    const lockedRaw = text(data.get("lock") || {});
+    const locked = /锁|lock/i.test(lockedRaw) && !/未|解|unlock/i.test(lockedRaw);
+    const tireLine = (slot, sslot, unitFallback) => {
+      const st = data.get(slot);
+      if (!st) return null;
+      const v = num(st);
+      const flag = normTire(data.get(sslot)) === "warn";
+      const outOfRange = v != null && (v < 190 || v > 300);
+      const warn = outOfRange || flag && v == null;
+      const unit = attrs(st, "unit_of_measurement") || unitFallback;
+      const txt = v == null ? "—" : fmtNum(v);
+      const html = `<div class="lr tire${warn ? " warn" : ""}"><span class="ri">${icon("wheel")}</span><b>${txt}<s>${esc(unit)}</s></b></div>`;
+      return { slot, html, warn };
+    };
     const out = [];
-    const edge = [];
-    const mark = (slot, cls, label, short, ic, isEdge) => {
+    const quads = [
+      ["lf", zh ? "主驾" : "Driver", ["door_fl", "win_fl"], "tp_lf", "tps_lf"],
+      ["rf", zh ? "副驾" : "Front", ["door_fr", "win_fr"], "tp_rf", "tps_rf"],
+      ["lr", zh ? "左后" : "Rear L", ["door_rl", "win_rl"], "tp_lr", "tps_lr"],
+      ["rr", zh ? "右后" : "Rear R", ["door_rr", "win_rr"], "tp_rr", "tps_rr"]
+    ];
+    for (const [cls, label, dSlots, tSlot, tsSlot] of quads) {
+      const lines = [];
+      let bad = false;
+      if (doors) {
+        for (const [ic, slot] of [["door", dSlots[0]], ["window", dSlots[1]]]) {
+          const st = data.get(slot);
+          if (!st) continue;
+          const b = isBad(st);
+          if (b) bad = true;
+          const open = !b && normOpen(st) === "open";
+          lines.push(
+            `<div class="lr${b ? " bad" : open ? " open" : ""}"><span class="ri">${icon(ic)}</span><b>${b ? zh ? "不可用" : "N/A" : open ? zh ? "打开" : "Open" : zh ? "关闭" : "Shut"}</b></div>`
+          );
+        }
+      }
+      const tire = tireLine(tSlot, tsSlot, "kPa");
+      if (tire) lines.push(tire.html);
+      if (!lines.length) continue;
+      out.push(
+        `<div class="loc ${cls}${bad ? " bad" : ""}" data-more="${esc(data.id(dSlots[0] === "door_fl" ? "door_fl" : dSlots[0]))}"><div class="lh"><span>${esc(label)}</span><i class="lk${locked ? " on" : ""}">${icon(locked ? "lock" : "unlock")}</i></div>` + lines.join("") + `</div>`
+      );
+    }
+    const cap = (cls, label, slot, ic) => {
       const st = data.get(slot);
       if (!st) return;
-      const bad = isBad(st);
-      const open = !bad && normOpen(st) === "open";
-      const txt = bad ? zh ? "不可用" : "N/A" : open ? zh ? "打开" : "Open" : zh ? "关闭" : "Shut";
-      (isEdge ? edge : out).push(
-        `<span class="cst ${cls}${bad ? " bad" : open ? " open" : ""}" data-more="${esc(data.id(slot))}"
-          title="${esc(label)} · ${esc(txt)}" aria-label="${esc(label)} ${esc(txt)}">
-          <span class="ci">${icon(ic)}</span>
-          <span class="ct"><b>${esc(txt)}</b><i>${esc(short)}</i></span></span>`
+      const b = isBad(st);
+      const open = !b && normOpen(st) === "open";
+      out.push(
+        `<div class="cap ${cls}${b ? " bad" : open ? " open" : ""}" data-more="${esc(data.id(slot))}" title="${esc(label)}"><span class="ri">${icon(ic)}</span><span class="cx"><b>${b ? zh ? "不可用" : "N/A" : open ? zh ? "打开" : "Open" : zh ? "关闭" : "Shut"}</b><i>${esc(label)}</i></span></div>`
       );
     };
-    if (mods.includes("doors")) {
-      mark("hood", "hood", zh ? "引擎盖" : "Hood", zh ? "引擎盖" : "Hood", "engine");
-      mark("tailgate", "trunk", zh ? "尾门" : "Tailgate", zh ? "尾门" : "Trunk", "trunk");
-      mark("door_fl", "dfl", zh ? "主驾门" : "Driver door", zh ? "主驾门" : "FL door", "door");
-      mark("door_fr", "dfr", zh ? "副驾门" : "Passenger door", zh ? "副驾门" : "FR door", "door");
-      mark("door_rl", "drl", zh ? "左后门" : "Rear left door", zh ? "左后门" : "RL door", "door");
-      mark("door_rr", "drr", zh ? "右后门" : "Rear right door", zh ? "右后门" : "RR door", "door");
-      mark("win_fl", "wfl", zh ? "主驾车窗" : "Driver window", zh ? "主驾窗" : "FL win", "window");
-      mark("win_fr", "wfr", zh ? "副驾车窗" : "Passenger window", zh ? "副驾窗" : "FR win", "window");
-      mark("win_rl", "wrl", zh ? "左后车窗" : "Rear left window", zh ? "左后窗" : "RL win", "window");
-      mark("win_rr", "wrr", zh ? "右后车窗" : "Rear right window", zh ? "右后窗" : "RR win", "window");
+    if (doors) {
+      cap("hood", zh ? "引擎盖" : "Hood", "hood", "engine");
+      cap("trunk", zh ? "尾门" : "Tailgate", "tailgate", "trunk");
     }
-    {
-      const tp = [
-        ["tp_lf", "tps_lf", "tlf", zh ? "左前" : "LF"],
-        ["tp_rf", "tps_rf", "trf", zh ? "右前" : "RF"],
-        ["tp_lr", "tps_lr", "tlr", zh ? "左后" : "LR"],
-        ["tp_rr", "tps_rr", "trr", zh ? "右后" : "RR"]
-      ];
-      for (const [slot, sslot, cls, label] of tp) {
-        const st = data.get(slot);
-        if (isBad(st)) continue;
-        const v = num(st);
-        const flag = normTire(data.get(sslot)) === "warn";
-        const outOfRange = v != null && (v < 190 || v > 300);
-        const warn = outOfRange || flag && v == null;
-        const unit = attrs(st, "unit_of_measurement") || "kPa";
-        out.push(
-          `<span class="ctire ${cls}${warn ? " warn" : ""}" data-more="${esc(data.id(slot))}"
-            title="${esc(t.tireLabel + " · " + label)} ${v == null ? "—" : fmtNum(v)} ${esc(unit)}">
-            <span class="ci">${icon("wheel")}</span>
-            <span class="ct"><b>${v == null ? "—" : fmtNum(v)}<s>${esc(unit)}</s></b><i>${esc(label)}</i></span></span>`
-        );
-      }
-    }
-    return { inner: out.join(""), edge: edge.join("") };
+    return { inner: out.join(""), edge: "" };
   }
   // 状态层贴合真实车图矩形（图片 contain 后尺寸未知，渲染完再量）
   _placeOverlay() {
@@ -1660,6 +1655,16 @@ var HaCarCard = class extends HTMLElement {
     ovl.style.top = `${img.offsetTop}px`;
     ovl.style.width = `${img.offsetWidth}px`;
     ovl.style.height = `${img.offsetHeight}px`;
+    const hero = this._wrap.querySelector(".hero");
+    const orb = this._wrap.querySelector(".orbit:not(.o2)");
+    const orb2 = this._wrap.querySelector(".orbit.o2");
+    if (hero && orb) {
+      const d = Math.min(hero.clientWidth, hero.clientHeight) * 0.94;
+      if (d > 0) {
+        orb.style.width = orb.style.height = `${d}px`;
+        if (orb2) orb2.style.width = orb2.style.height = `${d * 1.035}px`;
+      }
+    }
   }
   // 底座条：四轮胎压 + 同步（同步入口就是刷新按钮）
   _baseline(data, t) {
@@ -2662,7 +2667,7 @@ var HaCarEditor = class extends HTMLElement {
 customElements.define("ha-car-editor", HaCarEditor);
 
 // src/main.js
-var VERSION = "1.4.7";
+var VERSION = "1.4.8";
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "ha-car",

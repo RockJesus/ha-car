@@ -497,62 +497,75 @@ class HaCarCard extends HTMLElement {
       <div class="ground"></div><div class="covl">${inner}</div>${edge ? `<div class="cedge">${edge}</div>` : ""}</div>`;
   }
 
-  // 俯视图状态层：车门/车窗/引擎盖/尾门按真实方位贴边，四轮胎压落在轮位
+  // 俯视图状态层：每个车门一张聚合卡（门 + 窗 + 该轮位胎压），前后盖各一张小卡，全部落在圆环内侧
   _carOverlay(data, t, mods) {
     const zh = !isEn(this._hass);
+    const doors = mods.includes("doors");
+    const lockedRaw = text(data.get("lock") || {});
+    const locked = /锁|lock/i.test(lockedRaw) && !/未|解|unlock/i.test(lockedRaw);
+    const tireLine = (slot, sslot, unitFallback) => {
+      const st = data.get(slot);
+      if (!st) return null;
+      const v = num(st);
+      const flag = normTire(data.get(sslot)) === "warn";
+      const outOfRange = v != null && (v < 190 || v > 300);
+      const warn = outOfRange || (flag && v == null);
+      const unit = attrs(st, "unit_of_measurement") || unitFallback;
+      const txt = v == null ? "—" : fmtNum(v);
+      const html = `<div class="lr tire${warn ? " warn" : ""}"><span class="ri">${icon("wheel")}</span>` +
+        `<b>${txt}<s>${esc(unit)}</s></b></div>`;
+      return { slot, html, warn };
+    };
     const out = [];
-    const edge = [];
-    const mark = (slot, cls, label, short, ic, isEdge) => {
+    const quads = [
+      ["lf", zh ? "主驾" : "Driver", ["door_fl", "win_fl"], "tp_lf", "tps_lf"],
+      ["rf", zh ? "副驾" : "Front", ["door_fr", "win_fr"], "tp_rf", "tps_rf"],
+      ["lr", zh ? "左后" : "Rear L", ["door_rl", "win_rl"], "tp_lr", "tps_lr"],
+      ["rr", zh ? "右后" : "Rear R", ["door_rr", "win_rr"], "tp_rr", "tps_rr"],
+    ];
+    for (const [cls, label, dSlots, tSlot, tsSlot] of quads) {
+      const lines = [];
+      let bad = false;
+      if (doors) {
+        for (const [ic, slot] of [["door", dSlots[0]], ["window", dSlots[1]]]) {
+          const st = data.get(slot);
+          if (!st) continue;
+          const b = isBad(st);
+          if (b) bad = true;
+          const open = !b && normOpen(st) === "open";
+          lines.push(
+            `<div class="lr${b ? " bad" : open ? " open" : ""}"><span class="ri">${icon(ic)}</span>` +
+              `<b>${b ? (zh ? "不可用" : "N/A") : open ? (zh ? "打开" : "Open") : zh ? "关闭" : "Shut"}</b></div>`,
+          );
+        }
+      }
+      const tire = tireLine(tSlot, tsSlot, "kPa");
+      if (tire) lines.push(tire.html);
+      if (!lines.length) continue;
+      out.push(
+        `<div class="loc ${cls}${bad ? " bad" : ""}" data-more="${esc(data.id(dSlots[0] === "door_fl" ? "door_fl" : dSlots[0]))}">` +
+          `<div class="lh"><span>${esc(label)}</span><i class="lk${locked ? " on" : ""}">${icon(locked ? "lock" : "unlock")}</i></div>` +
+          lines.join("") +
+          `</div>`,
+      );
+    }
+    const cap = (cls, label, slot, ic) => {
       const st = data.get(slot);
       if (!st) return;
-      const bad = isBad(st);
-      const open = !bad && normOpen(st) === "open";
-      const txt = bad ? (zh ? "不可用" : "N/A") : open ? (zh ? "打开" : "Open") : zh ? "关闭" : "Shut";
-      (isEdge ? edge : out).push(
-        `<span class="cst ${cls}${bad ? " bad" : open ? " open" : ""}" data-more="${esc(data.id(slot))}"
-          title="${esc(label)} · ${esc(txt)}" aria-label="${esc(label)} ${esc(txt)}">
-          <span class="ci">${icon(ic)}</span>
-          <span class="ct"><b>${esc(txt)}</b><i>${esc(short)}</i></span></span>`,
+      const b = isBad(st);
+      const open = !b && normOpen(st) === "open";
+      out.push(
+        `<div class="cap ${cls}${b ? " bad" : open ? " open" : ""}" data-more="${esc(data.id(slot))}" title="${esc(label)}">` +
+          `<span class="ri">${icon(ic)}</span><span class="cx">` +
+          `<b>${b ? (zh ? "不可用" : "N/A") : open ? (zh ? "打开" : "Open") : zh ? "关闭" : "Shut"}</b>` +
+          `<i>${esc(label)}</i></span></div>`,
       );
     };
-    if (mods.includes("doors")) {
-      mark("hood", "hood", zh ? "引擎盖" : "Hood", zh ? "引擎盖" : "Hood", "engine");
-      mark("tailgate", "trunk", zh ? "尾门" : "Tailgate", zh ? "尾门" : "Trunk", "trunk");
-      mark("door_fl", "dfl", zh ? "主驾门" : "Driver door", zh ? "主驾门" : "FL door", "door");
-      mark("door_fr", "dfr", zh ? "副驾门" : "Passenger door", zh ? "副驾门" : "FR door", "door");
-      mark("door_rl", "drl", zh ? "左后门" : "Rear left door", zh ? "左后门" : "RL door", "door");
-      mark("door_rr", "drr", zh ? "右后门" : "Rear right door", zh ? "右后门" : "RR door", "door");
-      mark("win_fl", "wfl", zh ? "主驾车窗" : "Driver window", zh ? "主驾窗" : "FL win", "window");
-      mark("win_fr", "wfr", zh ? "副驾车窗" : "Passenger window", zh ? "副驾窗" : "FR win", "window");
-      mark("win_rl", "wrl", zh ? "左后车窗" : "Rear left window", zh ? "左后窗" : "RL win", "window");
-      mark("win_rr", "wrr", zh ? "右后车窗" : "Rear right window", zh ? "右后窗" : "RR win", "window");
+    if (doors) {
+      cap("hood", zh ? "引擎盖" : "Hood", "hood", "engine");
+      cap("trunk", zh ? "尾门" : "Tailgate", "tailgate", "trunk");
     }
-    // 胎压属于车上信息，不受 modules 开关限制（旧配置里常没有 tires）
-    {
-      const tp = [
-        ["tp_lf", "tps_lf", "tlf", zh ? "左前" : "LF"],
-        ["tp_rf", "tps_rf", "trf", zh ? "右前" : "RF"],
-        ["tp_lr", "tps_lr", "tlr", zh ? "左后" : "LR"],
-        ["tp_rr", "tps_rr", "trr", zh ? "右后" : "RR"],
-      ];
-      for (const [slot, sslot, cls, label] of tp) {
-        const st = data.get(slot);
-        if (isBad(st)) continue;
-        const v = num(st);
-        // 只按压力区间判定：集成把四路轮状态都报「故障」时，压力正常就不逐轮泛黄
-        const flag = normTire(data.get(sslot)) === "warn";
-        const outOfRange = v != null && (v < 190 || v > 300);
-        const warn = outOfRange || (flag && v == null);
-        const unit = attrs(st, "unit_of_measurement") || "kPa";
-        out.push(
-          `<span class="ctire ${cls}${warn ? " warn" : ""}" data-more="${esc(data.id(slot))}"
-            title="${esc(t.tireLabel + " · " + label)} ${v == null ? "—" : fmtNum(v)} ${esc(unit)}">
-            <span class="ci">${icon("wheel")}</span>
-            <span class="ct"><b>${v == null ? "—" : fmtNum(v)}<s>${esc(unit)}</s></b><i>${esc(label)}</i></span></span>`,
-        );
-      }
-    }
-    return { inner: out.join(""), edge: edge.join("") };
+    return { inner: out.join(""), edge: "" };
   }
 
   // 状态层贴合真实车图矩形（图片 contain 后尺寸未知，渲染完再量）
@@ -566,6 +579,17 @@ class HaCarCard extends HTMLElement {
     ovl.style.top = `${img.offsetTop}px`;
     ovl.style.width = `${img.offsetWidth}px`;
     ovl.style.height = `${img.offsetHeight}px`;
+    // 圆环按 hero 短边定径：宽屏面板里不再被左右裁掉，始终是完整一个圆
+    const hero = this._wrap.querySelector(".hero");
+    const orb = this._wrap.querySelector(".orbit:not(.o2)");
+    const orb2 = this._wrap.querySelector(".orbit.o2");
+    if (hero && orb) {
+      const d = Math.min(hero.clientWidth, hero.clientHeight) * 0.94;
+      if (d > 0) {
+        orb.style.width = orb.style.height = `${d}px`;
+        if (orb2) orb2.style.width = orb2.style.height = `${d * 1.035}px`;
+      }
+    }
   }
 
   // 底座条：四轮胎压 + 同步（同步入口就是刷新按钮）
