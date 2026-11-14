@@ -37,7 +37,7 @@ ha-card::after { content: ""; position: absolute; left: 8%; right: 8%; top: 0; h
 .duo { display: flex; flex-direction: column; gap: 14px; }
 .dleft, .dright { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
 /* 模块栈：顺序由配置决定，手机单列、宽屏双栏（车图固定左栏） */
-.blocks { display: flex; flex-direction: column; gap: 14px; flex: 1 1 auto; min-height: 0; }
+.blocks { position: relative; display: flex; flex-direction: column; gap: 14px; flex: 1 1 auto; min-height: 0; }
 .b-hero-col, .b-side { display: contents; }
 .blk + .blk { margin-top: 0; }
 .blk { min-width: 0; }
@@ -292,6 +292,14 @@ h1 { margin: 0; font-size: 26px; line-height: 1.1; font-weight: 700; letter-spac
 
 .b-actions { position: relative; }
 .toast.free { bottom: 64px; }
+
+/* 长按进度：贴在控制区底部的一条发光进度线，手指挡不住两端 */
+.holdbar { position: absolute; left: 2px; right: 2px; bottom: -2px; height: 3px; z-index: 7;
+  pointer-events: none; opacity: 0; transition: opacity .16s ease; }
+.holdbar.on { opacity: 1; }
+.holdbar i { display: block; height: 100%; width: 100%; transform: scaleX(0); transform-origin: 0 50%;
+  background: linear-gradient(90deg, rgba(55,214,232,.2), var(--hc-accent) 55%, #eaf9ff);
+  box-shadow: 0 0 14px rgba(55,214,232,.55); border-radius: 2px; }
 .toast { position: absolute; right: 0; left: auto; bottom: calc(100% + 6px); z-index: 6;
   pointer-events: none; max-width: 100%;
   box-shadow: 0 14px 30px -16px rgba(0,0,0,.95);

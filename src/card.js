@@ -265,6 +265,7 @@ class HaCarCard extends HTMLElement {
     root.innerHTML = `<style>${STYLES}</style><ha-card><div class="wrap"></div></ha-card>`;
     this._wrap = root.querySelector(".wrap");
     this._card = root.querySelector("ha-card");
+
     this._built = true;
     this._bind();
     this._panelRO = new ResizeObserver(() => this._fitPanel());
@@ -293,6 +294,16 @@ class HaCarCard extends HTMLElement {
     if (cfg.accent) this._card.style.setProperty("--hc-accent", cfg.accent);
     this._prunePending(data);
     this._wrap.innerHTML = this._body(data, this._card.classList.contains("fit"));
+    this._holdbar = this._wrap.querySelector(".b-actions .holdbar");
+    if (!this._holdbar) {
+      this._holdbar = document.createElement("div");
+      this._holdbar.className = "holdbar";
+      this._holdbar.setAttribute("aria-hidden", "true");
+      this._holdbar.style.bottom = "10px";
+      this._holdbar.innerHTML = "<i></i>";
+      this._wrap.appendChild(this._holdbar);
+    }
+    this._holdbarFill = this._holdbar.querySelector("i");
     this._placeOverlay();
     const img = this._wrap.querySelector("img.carimg");
     if (img) img.addEventListener("load", () => this._placeOverlay(), { once: true });
@@ -724,7 +735,8 @@ class HaCarCard extends HTMLElement {
 
     if (!tiles.length && !pills.length) return "";
     return `${tiles.length ? `<div class="acts">${tiles.join("")}</div>` : ""}
-      ${pills.length ? `<div class="pills">${pills.join("")}</div>` : ""}`;
+      ${pills.length ? `<div class="pills">${pills.join("")}</div>` : ""}
+      <div class="holdbar" aria-hidden="true"><i></i></div>`;
   }
 
   _tile(o) {
@@ -954,21 +966,55 @@ class HaCarCard extends HTMLElement {
   _beginHold(el, pointerId) {
     this._cancelHold();
     const ms = this._holdMs();
+    const t = dict(this._hass);
     el.style.setProperty("--hc-holdms", ms + "ms");
     el.classList.add("pressing");
-    this._hold = { el, armed: false };
+    const lbl = el.querySelector(".lbl");
+    const orig = lbl ? lbl.textContent : "";
+    this._hold = { el, armed: false, lbl, orig, start: Date.now() };
     try {
       if (pointerId != null) el.setPointerCapture(pointerId);
     } catch {
       /* 忽略：部分 WebView 不支持指针捕获 */
     }
+
+    // 底边进度条：手指挡不住的两端也能看到进度
+    const bar = this._holdbar;
+    const fill = this._holdbarFill;
+    if (bar && fill) {
+      bar.classList.add("on");
+      fill.style.transition = "none";
+      fill.style.transform = "scaleX(0)";
+      void fill.offsetWidth;
+      fill.style.transition = `transform ${ms}ms linear`;
+      fill.style.transform = "scaleX(1)";
+    }
+
+    const buzz = (pattern) => {
+      if (navigator.vibrate) navigator.vibrate(pattern);
+    };
+    const stage = (frac, pattern) =>
+      setTimeout(() => {
+        if (this._hold) buzz(pattern);
+      }, Math.round(ms * frac));
+
+    this._holdStages = [stage(0.3, 15), stage(0.7, 20)];
+
+    // 按钮标签换成倒计时，数字落在按钮外侧
+    this._holdTick = setInterval(() => {
+      if (!this._hold || !this._hold.lbl) return;
+      const left = Math.max(0, (ms - (Date.now() - this._hold.start)) / 1000);
+      this._hold.lbl.textContent = `${t.holdMore} ${left.toFixed(1)}s`;
+    }, 100);
+
     this._holdTimer = setTimeout(() => {
       if (!this._hold) return;
       this._hold.armed = true;
       el.classList.add("armed");
-      const lbl = el.querySelector(".lbl");
-      if (lbl) lbl.textContent = dict(this._hass).armed;
-      if (navigator.vibrate) navigator.vibrate(14);
+      if (this._holdTick) clearInterval(this._holdTick);
+      this._holdTick = null;
+      if (lbl) lbl.textContent = t.armed;
+      buzz(40);
     }, ms);
   }
 
@@ -987,10 +1033,10 @@ class HaCarCard extends HTMLElement {
     if (!h) return;
     const armed = h.armed;
     this._hold = null;
-    clearTimeout(this._holdTimer);
+    this._clearHoldTimers();
     h.el.classList.remove("pressing", "armed");
-    const lbl = h.el.querySelector(".lbl");
-    if (lbl && armed) lbl.textContent = h.el.dataset.label || "";
+    if (h.lbl) h.lbl.textContent = armed ? h.el.dataset.label || h.orig : h.orig;
+    this._resetHoldBar();
     if (armed) {
       this._justArmed = true;
       this._exec(h.el);
@@ -1002,13 +1048,30 @@ class HaCarCard extends HTMLElement {
     }
   }
 
+  _clearHoldTimers() {
+    clearTimeout(this._holdTimer);
+    (this._holdStages || []).forEach((id) => clearTimeout(id));
+    this._holdStages = [];
+    if (this._holdTick) clearInterval(this._holdTick);
+    this._holdTick = null;
+  }
+
+  _resetHoldBar() {
+    const bar = this._holdbar;
+    const fill = this._holdbarFill;
+    if (!bar || !fill) return;
+    bar.classList.remove("on");
+    fill.style.transition = "none";
+    fill.style.transform = "scaleX(0)";
+  }
+
   _cancelHold() {
     if (!this._hold) return;
-    clearTimeout(this._holdTimer);
+    this._clearHoldTimers();
     this._hold.el.classList.remove("pressing", "armed");
-    const lbl = this._hold.el.querySelector(".lbl");
-    if (lbl) lbl.textContent = this._hold.el.dataset.label || "";
+    if (this._hold.lbl) this._hold.lbl.textContent = this._hold.orig;
     this._hold = null;
+    this._resetHoldBar();
     if (this._pendingRender) {
       this._pendingRender = false;
       this._render(true);
