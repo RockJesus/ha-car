@@ -364,19 +364,20 @@ h1 { margin: 0; font-size: 26px; line-height: 1.1; font-weight: 700; letter-spac
   background: radial-gradient(46% 52% at 50% 50%, rgba(55,214,232,.20), rgba(55,214,232,.06) 46%, transparent 72%);
   filter: blur(2px); }
 .orbit, .orbit.o2 { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
-  border-radius: 50%; pointer-events: none; width: calc(var(--r) * 2); height: calc(var(--r) * 2); }
+  border-radius: 50%; pointer-events: none; height: 94%; aspect-ratio: 1; width: auto; }
 .orbit { border: 1px solid rgba(70,220,240,.22);
   box-shadow: inset 0 0 34px -14px rgba(55,214,232,.55), 0 0 24px -16px rgba(55,214,232,.5); }
-.orbit.o2 { width: calc(var(--r) * 2.2); height: calc(var(--r) * 2.2);
+.orbit.o2 { height: 97%;
   border: 1px solid rgba(55,214,232,.08); }
 .node { position: absolute; left: 50%; top: 50%; width: 7px; height: 7px; margin: -3.5px 0 0 -3.5px;
+  transform: translate(-50%, -50%);
   border-radius: 50%; background: #9ef4ff;
   box-shadow: 0 0 6px 1px rgba(55,214,232,.9), 0 0 16px 5px rgba(55,214,232,.35);
   animation: hc-node 3.2s ease-in-out infinite; }
-.node.n1 { transform: translateY(calc(var(--r) * -1)); }
-.node.n2 { transform: translateX(var(--r)); animation-delay: .8s; }
-.node.n3 { transform: translateY(var(--r)); animation-delay: 1.6s; }
-.node.n4 { transform: translateX(calc(var(--r) * -1)); animation-delay: 2.4s; }
+.node.n1 { top: 0; animation-delay: 0s; }
+.node.n2 { top: 50%; left: 100%; animation-delay: .8s; }
+.node.n3 { top: 100%; animation-delay: 1.6s; }
+.node.n4 { top: 50%; left: 0; animation-delay: 2.4s; }
 .carimg { position: relative; max-width: 64%; max-height: 78%; object-fit: contain;
   filter: brightness(1.06) saturate(1.04) drop-shadow(0 30px 30px rgba(2,6,12,.8)) drop-shadow(0 0 18px rgba(55,214,232,.08)); }
 .carph { position: relative; width: 96px; height: 96px; display: grid; place-items: center; border-radius: 999px;
@@ -699,7 +700,7 @@ ha-card.panel .duo { flex: 1 1 auto; min-height: 0; }
 ha-card.panel .dleft { justify-content: center; min-height: 0; }
 ha-card.panel .dright { justify-content: center; }
 ha-card.panel .hero { flex: 1 1 auto; height: auto; min-height: 300px; }
-ha-card.panel .carimg { max-height: min(86%, 640px); max-width: min(66%, 400px); }
+ha-card.panel .carimg { max-height: min(62%, 460px); max-width: min(60%, 330px); }
 
 /* 宽面板：车图占左栏满高，仪表/操作/告警等叠成右栏，避免中间大片留白 */
 ha-card.panel.fit .wrap { display: grid; grid-template-columns: minmax(0,1.04fr) minmax(0,.96fr);
@@ -708,6 +709,8 @@ ha-card.panel.fit .head { grid-column: 1 / -1; }
 ha-card.panel.fit .duo { display: contents; }
 ha-card.panel.fit .dleft { grid-column: 1; grid-row: 2 / span 12; align-self: stretch; justify-content: center; }
 ha-card.panel.fit .dleft .hero { height: 100%; min-height: 600px; }
+ha-card.panel.fit .orbit { height: 78%; }
+ha-card.panel.fit .orbit.o2 { height: 86%; }
 ha-card.panel.fit .dright { grid-column: 2; align-self: start; gap: 18px; }
 ha-card.panel.fit .acts,
 ha-card.panel.fit .pills,
@@ -736,7 +739,7 @@ ha-card.panel.fit .pills { width: 100%; max-width: none; }
   ha-card.panel .wrap { padding: 22px 26px 16px; gap: 12px; }
   ha-card.panel .duo { grid-template-columns: minmax(0, 1.02fr) minmax(0, 1fr); column-gap: 34px; align-items: stretch; }
   ha-card.panel .dleft .hero { height: 100%; min-height: 250px; --r: 106px; }
-  ha-card.panel .carimg { max-height: 92%; max-width: min(64%, 320px); }
+  ha-card.panel .carimg { max-height: min(74%, 520px); max-width: min(60%, 330px); }
   ha-card.panel .gauge { max-width: 196px; }
   ha-card.panel .acts { max-width: 600px; }
   ha-card.panel .pills { max-width: 600px; }
@@ -1419,8 +1422,8 @@ var HaCarCard = class extends HTMLElement {
     const inner = typeof overlay === "string" ? overlay : overlay && overlay.inner || "";
     const edge = overlay && overlay.edge || "";
     return `<div class="hero"><div class="halo"></div>
-      <span class="orbit"></span><span class="orbit o2"></span>
-      <i class="node n1"></i><i class="node n2"></i><i class="node n3"></i><i class="node n4"></i>
+      <span class="orbit"><i class="node n1"></i><i class="node n2"></i><i class="node n3"></i><i class="node n4"></i></span>
+      <span class="orbit o2"></span>
       ${imgUrl ? `<img class="carimg" src="${esc(imgUrl)}"${fbUrl ? ` data-fb="${esc(fbUrl)}"` : ""} alt="">` : `<div class="carph">${icon("car")}</div>`}
       <div class="ground"></div><div class="covl">${inner}</div>${edge ? `<div class="cedge">${edge}</div>` : ""}</div>`;
   }
@@ -2328,7 +2331,7 @@ var HaCarEditor = class extends HTMLElement {
 customElements.define("ha-car-editor", HaCarEditor);
 
 // src/main.js
-var VERSION = "1.2.0";
+var VERSION = "1.2.1";
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "ha-car",

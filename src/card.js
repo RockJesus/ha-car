@@ -396,8 +396,8 @@ class HaCarCard extends HTMLElement {
     const inner = typeof overlay === "string" ? overlay : (overlay && overlay.inner) || "";
     const edge = (overlay && overlay.edge) || "";
     return `<div class="hero"><div class="halo"></div>
-      <span class="orbit"></span><span class="orbit o2"></span>
-      <i class="node n1"></i><i class="node n2"></i><i class="node n3"></i><i class="node n4"></i>
+      <span class="orbit"><i class="node n1"></i><i class="node n2"></i><i class="node n3"></i><i class="node n4"></i></span>
+      <span class="orbit o2"></span>
       ${
         imgUrl
           ? `<img class="carimg" src="${esc(imgUrl)}"${fbUrl ? ` data-fb="${esc(fbUrl)}"` : ""} alt="">`
