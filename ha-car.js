@@ -2345,7 +2345,7 @@ var HaCarEditor = class extends HTMLElement {
 customElements.define("ha-car-editor", HaCarEditor);
 
 // src/main.js
-var VERSION = "1.2.4";
+var VERSION = "1.3.1";
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "ha-car",
