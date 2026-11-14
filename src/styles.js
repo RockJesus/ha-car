@@ -350,8 +350,8 @@ h1 { margin: 0; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-s
   transition: background .25s ease, border-color .25s ease, box-shadow .25s ease; }
 .loc { width: 52cqw; transform: translate(-50%, -50%); padding: 4cqw 4.2cqw 4.2cqw; border-radius: 8.4cqw;
   gap: 2cqw; }
-.loc.lf, .loc.lr { left: calc(50% - 67cqw); }
-.loc.rf, .loc.rr { left: calc(50% + 67cqw); }
+.loc.lf, .loc.lr { left: calc(7.5% - 26cqw); }
+.loc.rf, .loc.rr { left: calc(92.5% + 26cqw); }
 .loc.lf, .loc.rf { top: 37%; }
 .loc.lr, .loc.rr { top: 63%; }
 .loc .lh { display: flex; align-items: center; justify-content: space-between; }

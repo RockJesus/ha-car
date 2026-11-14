@@ -652,8 +652,8 @@ h1 { margin: 0; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-s
   transition: background .25s ease, border-color .25s ease, box-shadow .25s ease; }
 .loc { width: 52cqw; transform: translate(-50%, -50%); padding: 4cqw 4.2cqw 4.2cqw; border-radius: 8.4cqw;
   gap: 2cqw; }
-.loc.lf, .loc.lr { left: calc(50% - 67cqw); }
-.loc.rf, .loc.rr { left: calc(50% + 67cqw); }
+.loc.lf, .loc.lr { left: calc(7.5% - 26cqw); }
+.loc.rf, .loc.rr { left: calc(92.5% + 26cqw); }
 .loc.lf, .loc.rf { top: 37%; }
 .loc.lr, .loc.rr { top: 63%; }
 .loc .lh { display: flex; align-items: center; justify-content: space-between; }
@@ -1651,6 +1651,15 @@ var HaCarCard = class extends HTMLElement {
     const img = this._wrap && this._wrap.querySelector("img.carimg");
     const ovl = this._wrap && this._wrap.querySelector(".covl");
     if (!img || !ovl) return;
+    if (!img._hcHooked) {
+      img._hcHooked = true;
+      img.addEventListener("load", () => this._placeOverlay());
+      requestAnimationFrame(() => this._placeOverlay());
+      if (typeof ResizeObserver !== "undefined") {
+        this._ro = new ResizeObserver(() => this._placeOverlay());
+        this._ro.observe(img);
+      }
+    }
     if (!img.offsetWidth) return;
     ovl.style.left = `${img.offsetLeft}px`;
     ovl.style.top = `${img.offsetTop}px`;
@@ -1665,11 +1674,11 @@ var HaCarCard = class extends HTMLElement {
         orb.style.width = orb.style.height = `${d}px`;
         if (orb2) orb2.style.width = orb2.style.height = `${d * 1.035}px`;
       }
+      const ovlR = ovl.getBoundingClientRect();
+      const orbR = orb.getBoundingClientRect();
       const capH = this._wrap.querySelector(".cap.hood");
       const capT = this._wrap.querySelector(".cap.trunk");
       if (capH && capT) {
-        const ovlR = ovl.getBoundingClientRect();
-        const orbR = orb.getBoundingClientRect();
         const hH = capH.offsetHeight;
         const tH = capT.offsetHeight;
         const topGap = ovlR.top - orbR.top;
@@ -2680,7 +2689,7 @@ var HaCarEditor = class extends HTMLElement {
 customElements.define("ha-car-editor", HaCarEditor);
 
 // src/main.js
-var VERSION = "1.5.0";
+var VERSION = "1.5.1";
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "ha-car",
