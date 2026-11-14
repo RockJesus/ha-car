@@ -1,5 +1,5 @@
 import { EDITOR_STYLES } from "./styles.js";
-import { detectVehicles } from "./resolve.js";
+import { detectVehicles, resolve } from "./resolve.js";
 import { MODULES, CONFIRMABLE, DEFAULTS } from "./card.js";
 import { esc } from "./util.js";
 
@@ -73,6 +73,8 @@ const L = {
   accent: "强调色",
   advanced: "高级：实体绑定",
   advancedHint: "留空即自动识别。只有实体被改名或一台车挂多个集成时才需要填。",
+  autofill: "自动适配集成实体",
+  autofillDone: "已把集成里识别到的实体填入下列位置",
 };
 const IMG_MODES = [
   ["auto", "自动（俯视 → 3D → 侧视）"],
@@ -161,6 +163,8 @@ class HaCarEditor extends HTMLElement {
       <details class="sec adv">
         <summary style="cursor:pointer;font-size:13px;font-weight:600">${L.advanced}</summary>
         <p class="hint" style="margin-top:8px">${L.advancedHint}</p>
+        <button class="btn" id="autofill" type="button" style="margin:8px 0 4px">${L.autofill}</button>
+        <p class="hint" id="autofillhint" style="margin-bottom:8px"></p>
         <div class="grid2">
           ${OVERRIDES.map(
             ([slot, label]) => `<label class="f">${label}</label>
@@ -177,6 +181,22 @@ class HaCarEditor extends HTMLElement {
 
   _wire() {
     const q = (id) => this.shadowRoot.getElementById(id);
+
+    q("autofill").addEventListener("click", () => {
+      if (!this._hass) return;
+      const d = resolve(this._hass, this._config);
+      const cfg = Object.assign({}, this._config, { entities: Object.assign({}, this._config.entities || {}) });
+      let n = 0;
+      for (const [slot] of OVERRIDES) {
+        const id = d.id(slot);
+        if (id) { cfg.entities[slot] = id; n += 1; }
+      }
+      this._config = cfg;
+      this._sync();
+      const hint = this.shadowRoot.getElementById("autofillhint");
+      if (hint) hint.textContent = `${L.autofillDone} ${n} 项`;
+      this._emit();
+    });
 
     q("veh").addEventListener("change", (e) => {
       const v = e.target.value;

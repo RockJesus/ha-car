@@ -224,8 +224,13 @@ function isVehicle(rec) {
   );
 }
 
+function rankScore(r) {
+  // 有车辆锚点（锁/昵称/里程/车牌/刷新按钮）优先；没有锚点的新集成按命中槽位多少兜底
+  return (isVehicle(r) ? 1000 : 0) + r.slots.size * 10 + r.score;
+}
+
 function ranked(groups) {
-  return [...groups.values()].filter(isVehicle).sort((a, b) => b.score - a.score);
+  return [...groups.values()].sort((a, b) => rankScore(b) - rankScore(a));
 }
 
 function keyOf(rec) {
@@ -250,7 +255,7 @@ function chooseGroup(groups, hass, config) {
 }
 
 export function detectVehicles(hass) {
-  return ranked(scanGroups(hass)).map((rec) => ({
+  return ranked(scanGroups(hass)).filter((r) => isVehicle(r) || r.slots.size >= 8).map((rec) => ({
     hash: rec.label || keyOf(rec),
     device: rec.key.startsWith("dev:") ? keyOf(rec) : "",
     label: rec.label,

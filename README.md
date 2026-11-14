@@ -142,7 +142,7 @@ entities:
 | 四个轮位胶囊 | 该轮胎压数值，异常胎压转琥珀色 |
 
 - 状态点由 JS 量出车图真实矩形后贴上去，换图、缩放、面板模式都不会错位；
-- 每一路都能在编辑器「高级：实体绑定」里单独指定实体（`door_fl/door_fr/door_rl/door_rr`、`win_fl/win_fr/win_rl/win_rr`、`hood`、`tailgate`、`inner_tailgate`、`lock`），留空即自动识别；
+- 每一路都能在编辑器「高级：实体绑定」里单独指定实体（`door_fl/door_fr/door_rl/door_rr`、`win_fl/win_fr/win_rl/win_rr`、`hood`、`tailgate`、`inner_tailgate`、`lock`），留空即自动识别；编辑器里还有一键「自动适配集成实体」，点一下会把当前识别到的实体逐项填好；
 - 有任一车门/车窗开启时，下方会补一行文字明细（如「主驾门 · 开启」），全关时不占高度。
 
 

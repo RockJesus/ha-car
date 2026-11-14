@@ -221,8 +221,11 @@ function scanGroups(hass, ids) {
 function isVehicle(rec) {
   return rec.slots.has("lock") || rec.slots.has("nickname") || rec.slots.has("odo") || rec.slots.has("plate") || rec.slots.has("btn_refresh");
 }
+function rankScore(r) {
+  return (isVehicle(r) ? 1e3 : 0) + r.slots.size * 10 + r.score;
+}
 function ranked(groups) {
-  return [...groups.values()].filter(isVehicle).sort((a, b) => b.score - a.score);
+  return [...groups.values()].sort((a, b) => rankScore(b) - rankScore(a));
 }
 function keyOf(rec) {
   return rec.key.replace(/^(dev|pfx):/, "");
@@ -243,7 +246,7 @@ function chooseGroup(groups, hass, config) {
   return list[0];
 }
 function detectVehicles(hass) {
-  return ranked(scanGroups(hass)).map((rec) => ({
+  return ranked(scanGroups(hass)).filter((r) => isVehicle(r) || r.slots.size >= 8).map((rec) => ({
     hash: rec.label || keyOf(rec),
     device: rec.key.startsWith("dev:") ? keyOf(rec) : "",
     label: rec.label,
@@ -1914,7 +1917,9 @@ var L = {
   imageUrl: "图片地址",
   accent: "强调色",
   advanced: "高级：实体绑定",
-  advancedHint: "留空即自动识别。只有实体被改名或一台车挂多个集成时才需要填。"
+  advancedHint: "留空即自动识别。只有实体被改名或一台车挂多个集成时才需要填。",
+  autofill: "自动适配集成实体",
+  autofillDone: "已把集成里识别到的实体填入下列位置"
 };
 var IMG_MODES = [
   ["auto", "自动（俯视 → 3D → 侧视）"],
@@ -1999,6 +2004,8 @@ var HaCarEditor = class extends HTMLElement {
       <details class="sec adv">
         <summary style="cursor:pointer;font-size:13px;font-weight:600">${L.advanced}</summary>
         <p class="hint" style="margin-top:8px">${L.advancedHint}</p>
+        <button class="btn" id="autofill" type="button" style="margin:8px 0 4px">${L.autofill}</button>
+        <p class="hint" id="autofillhint" style="margin-bottom:8px"></p>
         <div class="grid2">
           ${OVERRIDES.map(
       ([slot, label]) => `<label class="f">${label}</label>
@@ -2013,6 +2020,24 @@ var HaCarEditor = class extends HTMLElement {
   }
   _wire() {
     const q = (id) => this.shadowRoot.getElementById(id);
+    q("autofill").addEventListener("click", () => {
+      if (!this._hass) return;
+      const d = resolve(this._hass, this._config);
+      const cfg = Object.assign({}, this._config, { entities: Object.assign({}, this._config.entities || {}) });
+      let n = 0;
+      for (const [slot] of OVERRIDES) {
+        const id = d.id(slot);
+        if (id) {
+          cfg.entities[slot] = id;
+          n += 1;
+        }
+      }
+      this._config = cfg;
+      this._sync();
+      const hint = this.shadowRoot.getElementById("autofillhint");
+      if (hint) hint.textContent = `${L.autofillDone} ${n} 项`;
+      this._emit();
+    });
     q("veh").addEventListener("change", (e) => {
       const v = e.target.value;
       if (v) this._config.hash = v;
@@ -2183,7 +2208,7 @@ var HaCarEditor = class extends HTMLElement {
 customElements.define("ha-car-editor", HaCarEditor);
 
 // src/main.js
-var VERSION = "1.1.4";
+var VERSION = "1.1.5";
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "ha-car",
