@@ -14,6 +14,8 @@ var PATHS = {
   warning: "M236.8,188.09,149.35,36.22h0a24.76,24.76,0,0,0-42.7,0L19.2,188.09a23.51,23.51,0,0,0,0,23.72A24.35,24.35,0,0,0,40.55,224h174.9a24.35,24.35,0,0,0,21.33-12.19A23.51,23.51,0,0,0,236.8,188.09ZM222.93,203.8a8.5,8.5,0,0,1-7.48,4.2H40.55a8.5,8.5,0,0,1-7.48-4.2,7.59,7.59,0,0,1,0-7.72L120.52,44.21a8.75,8.75,0,0,1,15,0l87.45,151.87A7.59,7.59,0,0,1,222.93,203.8ZM120,144V104a8,8,0,0,1,16,0v40a8,8,0,0,1-16,0Zm20,36a12,12,0,1,1-12-12A12,12,0,0,1,140,180Z",
   wrench: "M226.76,69a8,8,0,0,0-12.84-2.88l-40.3,37.19-17.23-3.7-3.7-17.23,37.19-40.3A8,8,0,0,0,187,29.24,72,72,0,0,0,88,96,72.34,72.34,0,0,0,94,124.94L33.79,177c-.15.12-.29.26-.43.39a32,32,0,0,0,45.26,45.26c.13-.13.27-.28.39-.42L131.06,162A72,72,0,0,0,232,96,71.56,71.56,0,0,0,226.76,69ZM160,152a56.14,56.14,0,0,1-27.07-7,8,8,0,0,0-9.92,1.77L67.11,211.51a16,16,0,0,1-22.62-22.62L109.18,133a8,8,0,0,0,1.77-9.93,56,56,0,0,1,58.36-82.31l-31.2,33.81a8,8,0,0,0-1.94,7.1L141.83,108a8,8,0,0,0,6.14,6.14l26.35,5.66a8,8,0,0,0,7.1-1.94l33.81-31.2A56.06,56.06,0,0,1,160,152Z",
   bell: "M221.8,175.94C216.25,166.38,208,139.33,208,104a80,80,0,1,0-160,0c0,35.34-8.26,62.38-13.81,71.94A16,16,0,0,0,48,200H88.81a40,40,0,0,0,78.38,0H208a16,16,0,0,0,13.8-24.06ZM128,216a24,24,0,0,1-22.62-16h45.24A24,24,0,0,1,128,216ZM48,184c7.7-13.24,16-43.92,16-80a64,64,0,1,1,128,0c0,36.05,8.28,66.73,16,80Z",
+  engine: "M96,80h48a8,8,0,0,1,8,8v8H208a8,8,0,0,1,8,8v72a8,8,0,0,1-8,8H184v8a8,8,0,0,1-8,8H80a8,8,0,0,1-8-8v-8H48a8,8,0,0,1-8-8V136a8,8,0,0,1,8-8h24V96a8,8,0,0,1,8-8V80ZM64,152h24v32H64Zm96-32H96v64h64Z",
+  window: "M224,88v80a16,16,0,0,0,16,16H16a16,16,0,0,0-16-16V88a16,16,0,0,0,16-16H208A16,16,0,0,0,224,88ZM64,88V168H128V88Zm80,64V168h64V152Zm0,0V168h16V152Z",
   door: "M232,216H208V40a16,16,0,0,0-16-16H64A16,16,0,0,0,48,40V216H24a8,8,0,0,0,0,16H232a8,8,0,0,0,0-16ZM64,40H192V216H64Zm104,92a12,12,0,1,1-12-12A12,12,0,0,1,168,132Z",
   tire: "M149.26,159.26C155.09,173.82,163.5,176,168,176s12.91-2.18,18.74-16.74c3.39-8.48,5.26-19.58,5.26-31.26s-1.87-22.78-5.26-31.26C180.91,82.18,172.5,80,168,80s-12.91,2.18-18.74,16.74C145.87,105.22,144,116.32,144,128S145.87,150.78,149.26,159.26ZM168,96.2c2.62,2.06,8,13,8,31.8s-5.38,29.74-8,31.8c-2.62-2.06-8-13-8-31.8S165.38,98.26,168,96.2ZM232,216H196.41C213.12,197.73,224,165.47,224,128c0-58.32-26.35-104-60-104H92C58.35,24,32,69.68,32,128S58.35,232,92,232H232a8,8,0,0,0,0-16ZM48,128c0-2.5.07-5,.17-7.44L80,97.83l24.43,17.45c-.28,4.16-.43,8.41-.43,12.72a179.89,179.89,0,0,0,3.07,33.5l-22.42-16a8,8,0,0,0-9.3,0l-23.74,17A161,161,0,0,1,48,128Z",
   bolt: "M215.79,118.17a8,8,0,0,0-5-5.66L153.18,90.9l14.66-73.33a8,8,0,0,0-13.69-7l-112,120a8,8,0,0,0,3,13l57.63,21.61L88.16,238.43a8,8,0,0,0,13.69,7l112-120A8,8,0,0,0,215.79,118.17ZM109.37,214l10.47-52.38a8,8,0,0,0-5-9.06L62,132.71l84.62-90.66L136.16,94.43a8,8,0,0,0,5,9.06l52.8,19.8Z",
@@ -555,32 +557,46 @@ h1 { margin: 0; font-size: 25px; line-height: 1.12; font-weight: 650; letter-spa
 
 /* 俯视图状态层：贴在车图上，位置由 JS 量出车图矩形 */
 .covl { position: absolute; pointer-events: none; }
-.cst { position: absolute; transform: translate(-50%, -50%); white-space: nowrap; line-height: 1;
-  font-size: 9px; font-weight: 600; letter-spacing: .02em; padding: 2.5px 5px; border-radius: 999px;
-  color: #a8b8ca; background: rgba(8,13,20,.78); border: 1px solid rgba(255,255,255,.13);
-  box-shadow: 0 1px 6px rgba(0,0,0,.4); transition: background .25s ease, color .25s ease, box-shadow .25s ease; }
-.cst.open { color: #ffcf90; background: rgba(52,34,10,.86); border-color: rgba(255,196,107,.55);
-  box-shadow: 0 1px 8px rgba(0,0,0,.45), 0 0 10px rgba(255,196,107,.28); }
-.cst.bad { color: #ffc8c2; background: rgba(56,16,16,.86); border-color: rgba(255,145,130,.5); }
-.cst.hood { left: 50%; top: 6%; }
-.cst.trunk { left: 50%; top: 88%; }
-.cst.dfl { left: 8%; top: 30%; }
-.cst.wfl { left: 8%; top: 42%; }
-.cst.drl { left: 8%; top: 54%; }
-.cst.wrl { left: 8%; top: 66%; }
-.cst.dfr { left: 92%; top: 30%; }
-.cst.wfr { left: 92%; top: 42%; }
-.cst.drr { left: 92%; top: 54%; }
-.cst.wrr { left: 92%; top: 66%; }
-.ctire { position: absolute; transform: translate(-50%, -50%); font-size: 11px; font-weight: 650;
-  color: #b9c9dc; font-variant-numeric: tabular-nums; letter-spacing: .02em;
-  padding: 2px 7px; border-radius: 999px; background: rgba(10,17,26,.8); border: 1px solid rgba(255,255,255,.16);
-  box-shadow: 0 1px 6px rgba(0,0,0,.45); text-shadow: 0 1px 2px rgba(0,0,0,.6); }
-.ctire.warn { color: var(--hc-warn); border-color: rgba(255,196,107,.5); }
-.ctire.tlf { left: 7%; top: 18%; }
-.ctire.trf { left: 93%; top: 18%; }
-.ctire.tlr { left: 7%; top: 72%; }
-.ctire.trr { left: 93%; top: 72%; }
+.cst { position: absolute; transform: translate(-50%, -50%); width: 44px; height: 44px; border-radius: 12px;
+  background: rgba(9,15,23,.74); border: 1px solid rgba(255,255,255,.14); box-shadow: 0 2px 10px rgba(0,0,0,.45);
+  transition: background .25s ease, border-color .25s ease, box-shadow .25s ease; }
+.cst .glyph { position: absolute; inset: 5px 5px 12px; opacity: .3; }
+.cst .glyph .ic { width: 100%; height: 100%; display: block; }
+.cst .tx { position: absolute; left: 0; right: 0; top: 19px; text-align: center; font-size: 9px; font-weight: 650;
+  line-height: 1; color: #c5d3e4; letter-spacing: .02em; }
+.cst .tag { position: absolute; left: 0; right: 0; bottom: 4px; text-align: center; font-style: normal;
+  font-size: 7px; line-height: 1; color: #7f92a9; letter-spacing: .02em; }
+.cst.open { background: rgba(52,34,10,.8); border-color: rgba(255,196,107,.5);
+  box-shadow: 0 2px 10px rgba(0,0,0,.45), 0 0 12px rgba(255,196,107,.25); }
+.cst.open .tx { color: #ffcf90; }
+.cst.open .tag { color: #c9a273; }
+.cst.bad { background: rgba(56,16,16,.8); border-color: rgba(255,145,130,.45); }
+.cst.bad .tx { color: #ffc8c2; }
+.cst.hood { left: 50%; top: 3%; }
+.cst.trunk { left: 50%; top: 98%; }
+.cst.dfl { left: 3%; top: 30%; }
+.cst.wfl { left: 3%; top: 44%; }
+.cst.drl { left: 3%; top: 58%; }
+.cst.wrl { left: 3%; top: 72%; }
+.cst.dfr { left: 97%; top: 30%; }
+.cst.wfr { left: 97%; top: 44%; }
+.cst.drr { left: 97%; top: 58%; }
+.cst.wrr { left: 97%; top: 72%; }
+.ctire { position: absolute; transform: translate(-50%, -50%); width: 52px; height: 52px; border-radius: 50%;
+  background: rgba(10,17,26,.78); border: 1px solid rgba(255,255,255,.16); box-shadow: 0 2px 10px rgba(0,0,0,.45);
+  font-variant-numeric: tabular-nums; }
+.ctire .glyph { position: absolute; inset: 4px; opacity: .24; }
+.ctire .glyph .ic { width: 100%; height: 100%; display: block; }
+.ctire .tv { position: absolute; left: 0; right: 0; top: 12px; text-align: center; font-size: 13px; font-weight: 700;
+  line-height: 1; color: #dbe7f5; text-shadow: 0 1px 3px rgba(0,0,0,.6); }
+.ctire .tu { position: absolute; left: 0; right: 0; top: 30px; text-align: center; font-size: 7px; line-height: 1;
+  color: #8496ad; letter-spacing: .04em; }
+.ctire.warn { color: var(--hc-warn); border-color: rgba(255,196,107,.5); box-shadow: 0 2px 10px rgba(0,0,0,.45), 0 0 12px rgba(255,196,107,.22); }
+.ctire.warn .tv { color: var(--hc-warn); }
+.ctire.tlf { left: 12%; top: 14%; }
+.ctire.trf { left: 88%; top: 14%; }
+.ctire.tlr { left: 12%; top: 86%; }
+.ctire.trr { left: 88%; top: 86%; }
 
 /* ---- 面板模式：1440×900 设计稿等比缩放，整页装下不滚动 ---- */
 
@@ -590,32 +606,39 @@ ha-card.panel:not(.fit) .head { gap: 2px; }
 ha-card.panel:not(.fit) .title { font-size: 21px; }
 ha-card.panel:not(.fit) .sub { font-size: 10px; }
 ha-card.panel:not(.fit) .hero { height: 178px; min-height: 0; --r: 88px; }
-ha-card.panel:not(.fit) .carimg { max-height: 92%; max-width: 58%; }
+ha-card.panel:not(.fit) .carimg { max-height: 86%; max-width: 58%; }
 ha-card.panel:not(.fit) .gauge { max-width: 86px; }
-/* 窄面板：车图变小，门窗文字改挂到车图左右外侧（相对车图中心固定像素偏移，避免压车） */
-ha-card.panel:not(.fit) .cst { font-size: 8.5px; padding: 2px 4px; }
+/* 窄面板：车图变小，门窗/胎压图标挂到车图左右外侧，靠像素偏移避开车身 */
+ha-card.panel:not(.fit) .cst { width: 30px; height: 30px; border-radius: 8px; }
+ha-card.panel:not(.fit) .cst .glyph { inset: 3px 3px 8px; }
+ha-card.panel:not(.fit) .cst .tx { top: 12px; font-size: 7.5px; }
+ha-card.panel:not(.fit) .cst .tag { bottom: 2px; font-size: 6px; }
+ha-card.panel:not(.fit) .ctire { width: 34px; height: 34px; }
+ha-card.panel:not(.fit) .ctire .glyph { inset: 2px; }
+ha-card.panel:not(.fit) .ctire .tv { top: 8px; font-size: 10px; }
+ha-card.panel:not(.fit) .ctire .tu { top: 21px; font-size: 5.5px; }
 ha-card.panel:not(.fit) .cst.dfl,
 ha-card.panel:not(.fit) .cst.wfl,
 ha-card.panel:not(.fit) .cst.drl,
-ha-card.panel:not(.fit) .cst.wrl { left: calc(50% - 92px); }
+ha-card.panel:not(.fit) .cst.wrl { left: calc(50% - 84px); }
 ha-card.panel:not(.fit) .cst.dfr,
 ha-card.panel:not(.fit) .cst.wfr,
 ha-card.panel:not(.fit) .cst.drr,
-ha-card.panel:not(.fit) .cst.wrr { left: calc(50% + 92px); }
-ha-card.panel:not(.fit) .cst.dfl { top: 24%; }
-ha-card.panel:not(.fit) .cst.wfl { top: 40%; }
-ha-card.panel:not(.fit) .cst.drl { top: 58%; }
-ha-card.panel:not(.fit) .cst.wrl { top: 74%; }
-ha-card.panel:not(.fit) .cst.dfr { top: 24%; }
-ha-card.panel:not(.fit) .cst.wfr { top: 40%; }
-ha-card.panel:not(.fit) .cst.drr { top: 58%; }
-ha-card.panel:not(.fit) .cst.wrr { top: 74%; }
-ha-card.panel:not(.fit) .cst.hood { top: 2%; }
-ha-card.panel:not(.fit) .cst.trunk { top: 98%; }
-ha-card.panel:not(.fit) .ctire.tlf { left: calc(50% - 108px); top: 12%; }
-ha-card.panel:not(.fit) .ctire.trf { left: calc(50% + 108px); top: 12%; }
-ha-card.panel:not(.fit) .ctire.tlr { left: calc(50% - 108px); top: 88%; }
-ha-card.panel:not(.fit) .ctire.trr { left: calc(50% + 108px); top: 88%; }
+ha-card.panel:not(.fit) .cst.wrr { left: calc(50% + 84px); }
+ha-card.panel:not(.fit) .cst.dfl { top: 22%; }
+ha-card.panel:not(.fit) .cst.wfl { top: 44%; }
+ha-card.panel:not(.fit) .cst.drl { top: 66%; }
+ha-card.panel:not(.fit) .cst.wrl { top: 88%; }
+ha-card.panel:not(.fit) .cst.dfr { top: 22%; }
+ha-card.panel:not(.fit) .cst.wfr { top: 44%; }
+ha-card.panel:not(.fit) .cst.drr { top: 66%; }
+ha-card.panel:not(.fit) .cst.wrr { top: 88%; }
+ha-card.panel:not(.fit) .cst.hood { top: 0%; left: 50%; }
+ha-card.panel:not(.fit) .cst.trunk { top: 100%; left: 50%; }
+ha-card.panel:not(.fit) .ctire.tlf { left: calc(50% - 116px); top: 7%; }
+ha-card.panel:not(.fit) .ctire.trf { left: calc(50% + 116px); top: 7%; }
+ha-card.panel:not(.fit) .ctire.tlr { left: calc(50% - 116px); top: 93%; }
+ha-card.panel:not(.fit) .ctire.trr { left: calc(50% + 116px); top: 93%; }
 ha-card.panel:not(.fit) .hero { --r: 72px; }
 ha-card.panel:not(.fit) .energy { column-gap: 6px; }
 ha-card.panel:not(.fit) .orb { width: 44px; height: 44px; }
@@ -1352,29 +1375,29 @@ var HaCarCard = class extends HTMLElement {
   _carOverlay(data, t, mods) {
     const zh = !isEn(this._hass);
     const out = [];
-    const mark = (slot, cls, label, short) => {
+    const mark = (slot, cls, label, short, ic) => {
       const st = data.get(slot);
       if (!st) return;
       const bad = isBad(st);
       const open = !bad && normOpen(st) === "open";
       const txt = bad ? zh ? "不可用" : "N/A" : open ? zh ? "打开" : "Open" : zh ? "关闭" : "Shut";
-      const body = short ? `${short} ${txt}` : txt;
       out.push(
-        `<span class="cst ${cls}${bad ? " bad" : open ? " open" : ""}" data-more="${esc(data.id(slot))}"
-          title="${esc(label)} · ${esc(txt)}" aria-label="${esc(label)} ${esc(txt)}">${esc(body)}</span>`
+        `<span class="cst ico ${cls}${bad ? " bad" : open ? " open" : ""}" data-more="${esc(data.id(slot))}"
+          title="${esc(label)} · ${esc(txt)}" aria-label="${esc(label)} ${esc(txt)}">
+          <span class="glyph">${icon(ic)}</span><b class="tx">${esc(txt)}</b><i class="tag">${esc(short)}</i></span>`
       );
     };
     if (mods.includes("doors")) {
-      mark("hood", "txt hood", zh ? "引擎盖" : "Hood", zh ? "引擎盖" : "Hood");
-      mark("tailgate", "txt trunk", zh ? "尾门" : "Tailgate", zh ? "尾门" : "Trunk");
-      mark("door_fl", "txt dfl", zh ? "主驾门" : "Driver door", zh ? "主驾门" : "FL door");
-      mark("door_fr", "txt dfr", zh ? "副驾门" : "Passenger door", zh ? "副驾门" : "FR door");
-      mark("door_rl", "txt drl", zh ? "左后门" : "Rear left door", zh ? "左后门" : "RL door");
-      mark("door_rr", "txt drr", zh ? "右后门" : "Rear right door", zh ? "右后门" : "RR door");
-      mark("win_fl", "txt wfl", zh ? "主驾车窗" : "Driver window", zh ? "主驾窗" : "FL win");
-      mark("win_fr", "txt wfr", zh ? "副驾车窗" : "Passenger window", zh ? "副驾窗" : "FR win");
-      mark("win_rl", "txt wrl", zh ? "左后车窗" : "Rear left window", zh ? "左后窗" : "RL win");
-      mark("win_rr", "txt wrr", zh ? "右后车窗" : "Rear right window", zh ? "右后窗" : "RR win");
+      mark("hood", "hood", zh ? "引擎盖" : "Hood", zh ? "引擎盖" : "Hood", "engine");
+      mark("tailgate", "trunk", zh ? "尾门" : "Tailgate", zh ? "尾门" : "Trunk", "trunk");
+      mark("door_fl", "dfl", zh ? "主驾门" : "Driver door", zh ? "主驾门" : "FL door", "door");
+      mark("door_fr", "dfr", zh ? "副驾门" : "Passenger door", zh ? "副驾门" : "FR door", "door");
+      mark("door_rl", "drl", zh ? "左后门" : "Rear left door", zh ? "左后门" : "RL door", "door");
+      mark("door_rr", "drr", zh ? "右后门" : "Rear right door", zh ? "右后门" : "RR door", "door");
+      mark("win_fl", "wfl", zh ? "主驾车窗" : "Driver window", zh ? "主驾窗" : "FL win", "door");
+      mark("win_fr", "wfr", zh ? "副驾车窗" : "Passenger window", zh ? "副驾窗" : "FR win", "door");
+      mark("win_rl", "wrl", zh ? "左后车窗" : "Rear left window", zh ? "左后窗" : "RL win", "door");
+      mark("win_rr", "wrr", zh ? "右后车窗" : "Rear right window", zh ? "右后窗" : "RR win", "door");
     }
     {
       const tp = [
@@ -1392,8 +1415,9 @@ var HaCarCard = class extends HTMLElement {
         const warn = outOfRange || flag && v == null;
         const unit = attrs(st, "unit_of_measurement") || "kPa";
         out.push(
-          `<b class="ctire ${cls}${warn ? " warn" : ""}" data-more="${esc(data.id(slot))}"
-            title="${esc(t.tireLabel + " · " + label)} ${v == null ? "—" : fmtNum(v)} ${esc(unit)}">${v == null ? "—" : fmtNum(v)}</b>`
+          `<b class="ctire ico ${cls}${warn ? " warn" : ""}" data-more="${esc(data.id(slot))}"
+            title="${esc(t.tireLabel + " · " + label)} ${v == null ? "—" : fmtNum(v)} ${esc(unit)}">
+            <span class="glyph">${icon("tire")}</span><span class="tv">${v == null ? "—" : fmtNum(v)}</span><span class="tu">${esc(unit)}</span></b>`
         );
       }
     }
@@ -2250,7 +2274,7 @@ var HaCarEditor = class extends HTMLElement {
 customElements.define("ha-car-editor", HaCarEditor);
 
 // src/main.js
-var VERSION = "1.1.7";
+var VERSION = "1.1.8";
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "ha-car",

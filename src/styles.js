@@ -257,32 +257,46 @@ h1 { margin: 0; font-size: 25px; line-height: 1.12; font-weight: 650; letter-spa
 
 /* 俯视图状态层：贴在车图上，位置由 JS 量出车图矩形 */
 .covl { position: absolute; pointer-events: none; }
-.cst { position: absolute; transform: translate(-50%, -50%); white-space: nowrap; line-height: 1;
-  font-size: 9px; font-weight: 600; letter-spacing: .02em; padding: 2.5px 5px; border-radius: 999px;
-  color: #a8b8ca; background: rgba(8,13,20,.78); border: 1px solid rgba(255,255,255,.13);
-  box-shadow: 0 1px 6px rgba(0,0,0,.4); transition: background .25s ease, color .25s ease, box-shadow .25s ease; }
-.cst.open { color: #ffcf90; background: rgba(52,34,10,.86); border-color: rgba(255,196,107,.55);
-  box-shadow: 0 1px 8px rgba(0,0,0,.45), 0 0 10px rgba(255,196,107,.28); }
-.cst.bad { color: #ffc8c2; background: rgba(56,16,16,.86); border-color: rgba(255,145,130,.5); }
-.cst.hood { left: 50%; top: 6%; }
-.cst.trunk { left: 50%; top: 88%; }
-.cst.dfl { left: 8%; top: 30%; }
-.cst.wfl { left: 8%; top: 42%; }
-.cst.drl { left: 8%; top: 54%; }
-.cst.wrl { left: 8%; top: 66%; }
-.cst.dfr { left: 92%; top: 30%; }
-.cst.wfr { left: 92%; top: 42%; }
-.cst.drr { left: 92%; top: 54%; }
-.cst.wrr { left: 92%; top: 66%; }
-.ctire { position: absolute; transform: translate(-50%, -50%); font-size: 11px; font-weight: 650;
-  color: #b9c9dc; font-variant-numeric: tabular-nums; letter-spacing: .02em;
-  padding: 2px 7px; border-radius: 999px; background: rgba(10,17,26,.8); border: 1px solid rgba(255,255,255,.16);
-  box-shadow: 0 1px 6px rgba(0,0,0,.45); text-shadow: 0 1px 2px rgba(0,0,0,.6); }
-.ctire.warn { color: var(--hc-warn); border-color: rgba(255,196,107,.5); }
-.ctire.tlf { left: 7%; top: 18%; }
-.ctire.trf { left: 93%; top: 18%; }
-.ctire.tlr { left: 7%; top: 72%; }
-.ctire.trr { left: 93%; top: 72%; }
+.cst { position: absolute; transform: translate(-50%, -50%); width: 44px; height: 44px; border-radius: 12px;
+  background: rgba(9,15,23,.74); border: 1px solid rgba(255,255,255,.14); box-shadow: 0 2px 10px rgba(0,0,0,.45);
+  transition: background .25s ease, border-color .25s ease, box-shadow .25s ease; }
+.cst .glyph { position: absolute; inset: 5px 5px 12px; opacity: .3; }
+.cst .glyph .ic { width: 100%; height: 100%; display: block; }
+.cst .tx { position: absolute; left: 0; right: 0; top: 19px; text-align: center; font-size: 9px; font-weight: 650;
+  line-height: 1; color: #c5d3e4; letter-spacing: .02em; }
+.cst .tag { position: absolute; left: 0; right: 0; bottom: 4px; text-align: center; font-style: normal;
+  font-size: 7px; line-height: 1; color: #7f92a9; letter-spacing: .02em; }
+.cst.open { background: rgba(52,34,10,.8); border-color: rgba(255,196,107,.5);
+  box-shadow: 0 2px 10px rgba(0,0,0,.45), 0 0 12px rgba(255,196,107,.25); }
+.cst.open .tx { color: #ffcf90; }
+.cst.open .tag { color: #c9a273; }
+.cst.bad { background: rgba(56,16,16,.8); border-color: rgba(255,145,130,.45); }
+.cst.bad .tx { color: #ffc8c2; }
+.cst.hood { left: 50%; top: 3%; }
+.cst.trunk { left: 50%; top: 98%; }
+.cst.dfl { left: 3%; top: 30%; }
+.cst.wfl { left: 3%; top: 44%; }
+.cst.drl { left: 3%; top: 58%; }
+.cst.wrl { left: 3%; top: 72%; }
+.cst.dfr { left: 97%; top: 30%; }
+.cst.wfr { left: 97%; top: 44%; }
+.cst.drr { left: 97%; top: 58%; }
+.cst.wrr { left: 97%; top: 72%; }
+.ctire { position: absolute; transform: translate(-50%, -50%); width: 52px; height: 52px; border-radius: 50%;
+  background: rgba(10,17,26,.78); border: 1px solid rgba(255,255,255,.16); box-shadow: 0 2px 10px rgba(0,0,0,.45);
+  font-variant-numeric: tabular-nums; }
+.ctire .glyph { position: absolute; inset: 4px; opacity: .24; }
+.ctire .glyph .ic { width: 100%; height: 100%; display: block; }
+.ctire .tv { position: absolute; left: 0; right: 0; top: 12px; text-align: center; font-size: 13px; font-weight: 700;
+  line-height: 1; color: #dbe7f5; text-shadow: 0 1px 3px rgba(0,0,0,.6); }
+.ctire .tu { position: absolute; left: 0; right: 0; top: 30px; text-align: center; font-size: 7px; line-height: 1;
+  color: #8496ad; letter-spacing: .04em; }
+.ctire.warn { color: var(--hc-warn); border-color: rgba(255,196,107,.5); box-shadow: 0 2px 10px rgba(0,0,0,.45), 0 0 12px rgba(255,196,107,.22); }
+.ctire.warn .tv { color: var(--hc-warn); }
+.ctire.tlf { left: 12%; top: 14%; }
+.ctire.trf { left: 88%; top: 14%; }
+.ctire.tlr { left: 12%; top: 86%; }
+.ctire.trr { left: 88%; top: 86%; }
 
 /* ---- 面板模式：1440×900 设计稿等比缩放，整页装下不滚动 ---- */
 
@@ -292,32 +306,39 @@ ha-card.panel:not(.fit) .head { gap: 2px; }
 ha-card.panel:not(.fit) .title { font-size: 21px; }
 ha-card.panel:not(.fit) .sub { font-size: 10px; }
 ha-card.panel:not(.fit) .hero { height: 178px; min-height: 0; --r: 88px; }
-ha-card.panel:not(.fit) .carimg { max-height: 92%; max-width: 58%; }
+ha-card.panel:not(.fit) .carimg { max-height: 86%; max-width: 58%; }
 ha-card.panel:not(.fit) .gauge { max-width: 86px; }
-/* 窄面板：车图变小，门窗文字改挂到车图左右外侧（相对车图中心固定像素偏移，避免压车） */
-ha-card.panel:not(.fit) .cst { font-size: 8.5px; padding: 2px 4px; }
+/* 窄面板：车图变小，门窗/胎压图标挂到车图左右外侧，靠像素偏移避开车身 */
+ha-card.panel:not(.fit) .cst { width: 30px; height: 30px; border-radius: 8px; }
+ha-card.panel:not(.fit) .cst .glyph { inset: 3px 3px 8px; }
+ha-card.panel:not(.fit) .cst .tx { top: 12px; font-size: 7.5px; }
+ha-card.panel:not(.fit) .cst .tag { bottom: 2px; font-size: 6px; }
+ha-card.panel:not(.fit) .ctire { width: 34px; height: 34px; }
+ha-card.panel:not(.fit) .ctire .glyph { inset: 2px; }
+ha-card.panel:not(.fit) .ctire .tv { top: 8px; font-size: 10px; }
+ha-card.panel:not(.fit) .ctire .tu { top: 21px; font-size: 5.5px; }
 ha-card.panel:not(.fit) .cst.dfl,
 ha-card.panel:not(.fit) .cst.wfl,
 ha-card.panel:not(.fit) .cst.drl,
-ha-card.panel:not(.fit) .cst.wrl { left: calc(50% - 92px); }
+ha-card.panel:not(.fit) .cst.wrl { left: calc(50% - 84px); }
 ha-card.panel:not(.fit) .cst.dfr,
 ha-card.panel:not(.fit) .cst.wfr,
 ha-card.panel:not(.fit) .cst.drr,
-ha-card.panel:not(.fit) .cst.wrr { left: calc(50% + 92px); }
-ha-card.panel:not(.fit) .cst.dfl { top: 24%; }
-ha-card.panel:not(.fit) .cst.wfl { top: 40%; }
-ha-card.panel:not(.fit) .cst.drl { top: 58%; }
-ha-card.panel:not(.fit) .cst.wrl { top: 74%; }
-ha-card.panel:not(.fit) .cst.dfr { top: 24%; }
-ha-card.panel:not(.fit) .cst.wfr { top: 40%; }
-ha-card.panel:not(.fit) .cst.drr { top: 58%; }
-ha-card.panel:not(.fit) .cst.wrr { top: 74%; }
-ha-card.panel:not(.fit) .cst.hood { top: 2%; }
-ha-card.panel:not(.fit) .cst.trunk { top: 98%; }
-ha-card.panel:not(.fit) .ctire.tlf { left: calc(50% - 108px); top: 12%; }
-ha-card.panel:not(.fit) .ctire.trf { left: calc(50% + 108px); top: 12%; }
-ha-card.panel:not(.fit) .ctire.tlr { left: calc(50% - 108px); top: 88%; }
-ha-card.panel:not(.fit) .ctire.trr { left: calc(50% + 108px); top: 88%; }
+ha-card.panel:not(.fit) .cst.wrr { left: calc(50% + 84px); }
+ha-card.panel:not(.fit) .cst.dfl { top: 22%; }
+ha-card.panel:not(.fit) .cst.wfl { top: 44%; }
+ha-card.panel:not(.fit) .cst.drl { top: 66%; }
+ha-card.panel:not(.fit) .cst.wrl { top: 88%; }
+ha-card.panel:not(.fit) .cst.dfr { top: 22%; }
+ha-card.panel:not(.fit) .cst.wfr { top: 44%; }
+ha-card.panel:not(.fit) .cst.drr { top: 66%; }
+ha-card.panel:not(.fit) .cst.wrr { top: 88%; }
+ha-card.panel:not(.fit) .cst.hood { top: 0%; left: 50%; }
+ha-card.panel:not(.fit) .cst.trunk { top: 100%; left: 50%; }
+ha-card.panel:not(.fit) .ctire.tlf { left: calc(50% - 116px); top: 7%; }
+ha-card.panel:not(.fit) .ctire.trf { left: calc(50% + 116px); top: 7%; }
+ha-card.panel:not(.fit) .ctire.tlr { left: calc(50% - 116px); top: 93%; }
+ha-card.panel:not(.fit) .ctire.trr { left: calc(50% + 116px); top: 93%; }
 ha-card.panel:not(.fit) .hero { --r: 72px; }
 ha-card.panel:not(.fit) .energy { column-gap: 6px; }
 ha-card.panel:not(.fit) .orb { width: 44px; height: 44px; }
