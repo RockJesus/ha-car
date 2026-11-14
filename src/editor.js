@@ -277,7 +277,7 @@ class HaCarEditor extends HTMLElement {
     const opts = [`<option value="">${L.autoDetect}</option>`];
     for (const car of cars) {
       const nick = car.ids.vehicle_nickname ? this._hass.states[car.ids.vehicle_nickname] : null;
-      const label = (nick && nick.state) || car.hash.slice(0, 8);
+      const label = car.name || (nick && nick.state) || car.hash;
       opts.push(`<option value="${esc(car.hash)}">${esc(label)}</option>`);
     }
     sel.innerHTML = opts.join("");

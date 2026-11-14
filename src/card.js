@@ -222,6 +222,11 @@ class HaCarCard extends HTMLElement {
   _body(data) {
     const cfg = this._config;
     const t = dict(this._hass);
+    if (!data.group && !Object.keys(cfg.entities || {}).length) {
+      return this._empty(isEn(this._hass)
+        ? "No vehicle entity found. Check that FordPass integration is loaded, or pick a vehicle in the card editor."
+        : "没找到车辆实体。确认福特派互联集成已加载，或在卡片编辑器里选择车辆。");
+    }
     const compact = cfg.layout === "compact";
     const mods = cfg.modules || MODULES;
     const s = (slot) => data.get(slot);
@@ -231,13 +236,17 @@ class HaCarCard extends HTMLElement {
     const onlineRaw = text(s("online")).toLowerCase();
     const offline = onlineRaw ? /offline|离线|not[ _-]?online|不可用/.test(onlineRaw) : false;
     const running = (() => {
+      const rs = text(s("remote_start")).toLowerCase();
+      if (rs && !rs.includes("未") && !rs.includes("not")) {
+        if (rs.includes("已") || rs.includes("启动中") || rs.includes("running") || rs.includes("started")) return true;
+      }
       const st = s("sw_engine") || s("ignition");
       if (isBad(st)) return false;
       const v = String(st.state).toLowerCase();
       return v === "on" || v.includes("已启动") || v.includes("running") || v.includes("启动中");
     })();
 
-    const title = cfg.title || text(s("nickname")) || (isEn(this._hass) ? "My car" : "我的座驾");
+    const title = cfg.title || data.name || text(s("nickname")) || (isEn(this._hass) ? "My car" : "我的座驾");
     const plate = text(s("plate"));
 
     const status = offline
@@ -352,14 +361,22 @@ class HaCarCard extends HTMLElement {
 
   _imageUrl(data) {
     const cfg = this._config;
+    // 集成同时给了 image_url（车辆官方 CDN 图）和 entity_picture（HA 代理），CDN 直链更稳
     const pic = (slot) => {
       const st = data.get(slot);
-      return st ? attrs(st, "entity_picture") : null;
+      if (!st) return null;
+      const direct = attrs(st, "image_url");
+      if (direct && /^https?:\/\//.test(String(direct))) return direct;
+      return attrs(st, "entity_picture") || null;
     };
     if (cfg.image === "custom" && cfg.image_url) return cfg.image_url;
     if (cfg.image && cfg.image !== "auto") {
       if (/^https?:\/\//.test(cfg.image)) return cfg.image;
-      if (data.states[cfg.image]) return attrs(data.states[cfg.image], "entity_picture");
+      if (data.states[cfg.image]) {
+        const st = data.states[cfg.image];
+        const direct = attrs(st, "image_url");
+        return (direct && /^https?:\/\//.test(String(direct))) ? direct : attrs(st, "entity_picture");
+      }
       if (cfg.image === "overlook") return pic("image_overlook");
       if (cfg.image === "3d") return pic("image_3d");
       if (cfg.image === "side") return pic("image_side");

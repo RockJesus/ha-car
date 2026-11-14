@@ -58,15 +58,15 @@
 type: custom:ha-car
 ```
 
-**不需要填实体。** 卡片按集成的实体前缀（`sha256(VIN)` 前 16 位）自动识别车辆；账号下只有一辆车时连车辆都不用选，多辆车在可视化编辑器里选一台即可。
+**不需要填实体。** 卡片按「实体 ID 后缀 + 友好名后缀」识别槽位，账号下只有一辆车时连车辆都不用选；多辆车在可视化编辑器里选一台即可。
 
 ## 配置
 
 | 键 | 类型 | 默认 | 说明 |
 |---|---|---|---|
-| `hash` | string | 自动 | 车辆实体哈希前缀；由编辑器选择车辆时写入 |
-| `device` | string | — | 也可直接给设备 ID，卡片读注册表换算哈希 |
-| `title` | string | 车辆昵称 | 卡片标题，留空取 `vehicle_nickname` |
+| `hash` | string | 自动 | 车辆标识（设备名或实体前缀），由编辑器选择车辆时写入；也可手填 |
+| `device` | string | — | 也可直接给设备 ID，卡片只取该设备下的实体 |
+| `title` | string | 设备名 | 卡片标题，默认取设备名（如「锐际 Escape」），其次取车辆昵称 |
 | `show_plate` | bool | `true` | 顶部是否显示车牌 |
 | `layout` | `full` / `compact` | `full` | `compact` 只留主视觉、状态、续航与操作，适合手机首屏 |
 | `modules` | list | 全部 | `status` `actions` `energy` `tires` `doors` `charging` `alerts` `service` |
@@ -98,7 +98,7 @@ entities:
   tracker: device_tracker.my_car
 ```
 
-可用槽位：`lock` `fuel` `battery` `range` `ev_range` `odo` `volt` `oil` `tp_lf` `tp_rf` `tp_lr` `tp_rr` `door_fl` `door_fr` `door_rl` `door_rr` `tailgate` `hood` `win_fl` `win_fr` `tracker` `addr` `chg_status` `alerts` `maint` `recall` `messages` `sync` `data_time` `btn_lock` `btn_unlock` `btn_trunk` `btn_refresh` `sw_engine` `sw_honk` `sw_va` `sw_light`。
+可用槽位：`lock` `online` `ignition` `remote_start` `tpms` `alarm` `fuel` `battery` `range` `ev_range` `odo` `volt` `oil` `tp_lf` `tp_rf` `tp_lr` `tp_rr` `door_fl` `door_fr` `door_rl` `door_rr` `tailgate` `hood` `win_fl` `win_fr` `tracker` `addr` `chg_status` `alerts` `maint` `recall` `messages` `sync` `data_time` `fw` `support` `btn_lock` `btn_unlock` `btn_trunk` `btn_refresh` `sw_engine` `sw_honk` `sw_va` `sw_light`。
 
 ## 操作反馈怎么读
 
@@ -112,7 +112,22 @@ entities:
 
 ## 与集成的对应关系
 
-卡片读取的都是集成现有实体，不新增后端。状态值按中英文模糊匹配（`已锁定` / `locked`、`开启` / `open`），所以界面语言切换后照样成立；充电中优先读 `charging_status` 的 `evcc_charge_state` 属性。
+卡片读取的都是集成现有实体，不新增后端。车辆绑定分三步：
+
+1. **认槽位**：用实体 ID 后缀和友好名后缀双线索。集成把中文实体名转成 pinyin 作为 `entity_id`（`sensor.<设备>_men_suo_zhuang_tai`），英文环境则是 translation key（`..._lock_status`），部分实体还是历史英文名（`button.<设备>_lock_doors`）；三条都给 `lock` 之类的槽位对上号。
+2. **认车辆**：优先用实体注册表的 `device_id` 分组；没有注册表时退回「友好名共同前缀」（如「锐际 Escape」），不会把电风扇、门锁这类同后缀实体算成车。
+3. **认配置**：`hash` / `device` / 单车辆自动。
+
+状态值按中英文模糊匹配（`已锁定` / `locked`、`开启` / `open`、`故障` / `fault`），界面语言切换后照样成立；充电中优先读 `charging_status` 的 `evcc_charge_state` 属性。
+
+## 排错
+
+| 现象 | 处理 |
+|---|---|
+| 卡片显示「没找到车辆实体」 | 确认福特派互联集成已加载、实体可用；仍不行就在编辑器里手动选车辆，或用 `entities` 覆盖单个槽位 |
+| 顶部车辆图是空的 | 集成没提供车型图可直接用 `image: custom` + `image_url` 指定一张 |
+| 胎压/告警不亮 | 集成上报的是文字状态（`故障` / `系统故障`），卡片已同时匹配 `fault` / `warn` / `异常` / `故障` |
+| 改了新版还是旧样式 | 市场升级后浏览器强刷；App 杀进程重开 |
 
 ## 开发
 

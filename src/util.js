@@ -86,7 +86,7 @@ export function normOpen(state) {
 export function normTire(state) {
   const s = String(text(state)).toLowerCase();
   if (!s) return "ok";
-  if (s.includes("fault") || s.includes("warn") || s.includes("低") || s.includes("异常")) return "warn";
+  if (s.includes("fault") || s.includes("warn") || s.includes("故障") || s.includes("低") || s.includes("异常")) return "warn";
   return "ok";
 }
 
