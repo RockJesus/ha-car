@@ -156,9 +156,16 @@ class HaCarCard extends HTMLElement {
     const w = this.clientWidth;
     const h = this.clientHeight;
     if (!w || !h) return;
-    // 小屏（手机面板）不缩放：1440 稿缩到 390 宽字就没了，改走常规自适应布局
     const fit = w >= 900 && h >= 620;
     this._card.classList.toggle("fit", fit);
+    // 小屏（手机面板）按 390×840 的版式等比缩放，保证一屏铺满、绝不出滚动条
+    const pfit = !fit && w > 0 && h > 0;
+    this._card.classList.toggle("pfit", pfit);
+    if (pfit) {
+      const k = Math.max(0.42, Math.min(2.2, Math.min(w / 390, h / 840)));
+      this._card.style.setProperty("--pscale", String(Math.round(k * 1000) / 1000));
+      return;
+    }
     if (!fit) return;
     const k = Math.min(w / 1440, h / 900);
     this._card.style.setProperty("--fit", String(Math.round(k * 1000) / 1000));
