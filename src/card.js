@@ -398,9 +398,9 @@ class HaCarCard extends HTMLElement {
     const blocks = [];
     let toastPlaced = false;
     const plateTxt = cfg.show_plate && plate ? (cfg.privacy ? maskPlate(plate) : plate) : "";
-    const head = `<div class="head"><div class="ttl"><h1>${FORD_LOGO}${esc(title)}` +
+    const head = `<div class="head"><div class="ttl"><h1>${FORD_LOGO}${esc(title)}</h1>` +
       (plateTxt ? `<span class="plate">${esc(plateTxt)}</span>` : "") +
-      `</h1></div><span class="status ${status.cls}"><span class="dot"></span>${esc(status.label)}</span></div>`;
+      `</div><span class="status ${status.cls}"><span class="dot"></span>${esc(status.label)}</span></div>`;
 
     const hero = this._imagePair(data);
     const list = cfg.blocks || normBlocks(cfg);
@@ -585,10 +585,24 @@ class HaCarCard extends HTMLElement {
     const orb = this._wrap.querySelector(".orbit:not(.o2)");
     const orb2 = this._wrap.querySelector(".orbit.o2");
     if (hero && orb) {
-      const d = Math.min(hero.clientWidth, hero.clientHeight) * 0.94;
+      const d = Math.min(hero.clientWidth, hero.clientHeight) * 0.965;
       if (d > 0) {
         orb.style.width = orb.style.height = `${d}px`;
         if (orb2) orb2.style.width = orb2.style.height = `${d * 1.035}px`;
+      }
+      // 引擎盖/尾门小卡居中落在「圆环 — 车身」之间的空隙里，不压环线
+      const capH = this._wrap.querySelector(".cap.hood");
+      const capT = this._wrap.querySelector(".cap.trunk");
+      if (capH && capT) {
+        const ovlR = ovl.getBoundingClientRect();
+        const orbR = orb.getBoundingClientRect();
+        const hH = capH.offsetHeight;
+        const tH = capT.offsetHeight;
+        const topGap = ovlR.top - orbR.top;
+        const botGap = orbR.bottom - ovlR.bottom;
+        // 环与车图之间空间够时，小卡居中落在空隙里；不够时就贴在车头/车尾内侧（绝不压环线）
+        capH.style.top = topGap >= hH + 2 ? `${-Math.round((topGap + hH) / 2)}px` : "2px";
+        capT.style.top = botGap >= tH + 2 ? `${img.offsetHeight + Math.round((botGap - tH) / 2)}px` : `${img.offsetHeight - tH - 2}px`;
       }
     }
   }

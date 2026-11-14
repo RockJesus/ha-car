@@ -56,10 +56,10 @@ ha-card::after { content: ""; position: absolute; left: 8%; right: 8%; top: 0; h
 
 /* 头部：大标题 + 右上状态胶囊（参考图同构） */
 .head { display: flex; align-items: flex-start; gap: 12px; }
-.ttl { flex: 1; min-width: 0; }
-h1 { margin: 0; font-size: 26px; line-height: 1.1; font-weight: 700; letter-spacing: -.01em;
+.ttl { flex: 1; min-width: 0; display: flex; align-items: baseline; gap: 10px; }
+h1 { margin: 0; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 26px; line-height: 1.1; font-weight: 700; letter-spacing: -.01em;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.plate { display: inline-block; margin-left: 10px; font-size: 11.5px; font-weight: 600;
+.plate { flex: 0 0 auto; display: inline-block; font-size: 11.5px; font-weight: 600;
   letter-spacing: .16em; color: rgba(158,180,204,.78); vertical-align: .12em; }
 .status { flex: none; display: inline-flex; align-items: center; gap: 7px; height: 30px; padding: 0 14px;
   border-radius: 999px; font-size: 11.5px; font-weight: 650; letter-spacing: .03em;
@@ -374,15 +374,14 @@ h1 { margin: 0; font-size: 26px; line-height: 1.1; font-weight: 700; letter-spac
   box-shadow: 0 2cqw 5cqw rgba(2,7,12,.5), 0 0 4cqw rgba(255,196,107,.14); }
 .loc.bad { border-color: rgba(255,145,130,.5); background: linear-gradient(180deg, rgba(58,18,18,.9), rgba(30,10,10,.94)); }
 /* 前后盖小卡：车头/车尾正上方与正下方，仍落在圆环内侧 */
-.cap { left: 50%; transform: translate(-50%, -100%); width: 44cqw; flex-direction: row; align-items: center;
-  gap: 2.6cqw; padding: 3.2cqw 4cqw; border-radius: 6.4cqw; }
-.cap.hood { top: 0; }
-.cap.trunk { top: 100%; transform: translate(-50%, 0); }
-.cap .cx { display: flex; flex-direction: column; gap: 1.4cqw; min-width: 0; }
-.cap .ri { flex: 0 0 6cqw; height: 6cqw; display: grid; place-items: center; color: #86c9de; }
+.cap { left: 50%; width: 42cqw; flex-direction: row; align-items: center;
+  gap: 2.2cqw; padding: 2.4cqw 3.4cqw; border-radius: 5.6cqw; }
+.cap.hood, .cap.trunk { transform: translate(-50%, 0); }
+.cap .cx { display: flex; flex-direction: column; gap: 1cqw; min-width: 0; }
+.cap .ri { flex: 0 0 5.4cqw; height: 5.4cqw; display: grid; place-items: center; color: #86c9de; }
 .cap .ri .ic { width: 100%; height: 100%; display: block; }
-.cap b { font-size: 5.8cqw; font-weight: 620; color: #dbe7f5; line-height: 1; }
-.cap i { font-style: normal; font-size: 4.3cqw; color: #7d90a6; line-height: 1; letter-spacing: .05em; }
+.cap b { font-size: 5.3cqw; font-weight: 620; color: #dbe7f5; line-height: 1; }
+.cap i { font-style: normal; font-size: 4cqw; color: #7d90a6; line-height: 1; letter-spacing: .05em; }
 .cap.open { border-color: rgba(255,196,107,.5); background: linear-gradient(180deg, rgba(56,32,10,.9), rgba(28,17,7,.94)); }
 .cap.open b, .cap.open .ri { color: #ffcf90; }
 .cap.bad { border-color: rgba(255,145,130,.5); }
@@ -393,9 +392,11 @@ h1 { margin: 0; font-size: 26px; line-height: 1.1; font-weight: 700; letter-spac
 ha-card.panel:not(.fit) .wrap { padding: 10px 12px 8px; gap: 6px; }
 ha-card.panel:not(.fit) .head { gap: 2px; }
 ha-card.panel:not(.fit) .title { font-size: 21px; }
+ha-card.panel:not(.fit) h1 { font-size: 21px; }
+ha-card.panel:not(.fit) .plate { font-size: 10px; letter-spacing: .12em; }
 ha-card.panel:not(.fit) .sub { font-size: 10px; }
 ha-card.panel:not(.fit) .hero { height: 100%; min-height: 178px; --r: 96px; }
-ha-card.panel:not(.fit) .carimg { max-height: 78%; max-width: 56%; }
+ha-card.panel:not(.fit) .carimg { max-height: 74%; max-width: 56%; }
 ha-card.panel:not(.fit) .gauge { max-width: 86px; }
 /* 窄面板：车图略收窄，保证左右两列聚合卡与圆环之间留白 */
 ha-card.panel:not(.fit) .hero { --r: 72px; }
