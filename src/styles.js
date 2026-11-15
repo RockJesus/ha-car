@@ -490,34 +490,27 @@ ha-card.panel.fit .pills { width: 100%; max-width: none; }
 }
 
 
-/* 引擎启动后的灯光特效：前灯向前射出白色切光，尾灯在车后铺一片红光 */
-.beam { position: absolute; width: 30cqw; height: 34cqw; pointer-events: none; opacity: 0;
-  transform: translate(-50%, -100%); mix-blend-mode: screen; filter: blur(2.4px);
+/* 引擎启动后的灯光特效：前灯从灯位向前射出白色切光，尾灯点亮车尾红灯带
+   坐标依据官方车图（750×1320）实测：前灯中心 y≈10%、左右 29.9%/70.2%；尾灯带 x 23.6%–76.4%、y 69.9%–77.1% */
+.beam { position: absolute; width: 19cqw; height: 30cqw; pointer-events: none; opacity: 0;
+  transform: translate(-50%, -100%); mix-blend-mode: screen; filter: blur(2.2px);
   /* 顶边齐平 = 投影切光线，横向自然衰减 */
   clip-path: polygon(4% 100%, 96% 100%, 100% 0, 0 0);
-  background: radial-gradient(56% 96% at 50% 100%, rgba(255,255,255,.96) 0%,
-    rgba(232,248,255,.58) 30%, rgba(206,238,255,.26) 58%, rgba(190,230,255,.08) 78%, transparent 90%); }
+  background: radial-gradient(52% 96% at 50% 100%, rgba(255,255,255,.62) 0%,
+    rgba(228,247,255,.34) 32%, rgba(200,236,255,.14) 60%, rgba(190,230,255,.04) 80%, transparent 92%); }
 .beam::after { content: ""; position: absolute; left: 50%; bottom: 0; width: 60%; height: 88%;
   transform: translateX(-50%);
-  background: radial-gradient(50% 92% at 50% 100%, rgba(255,255,255,1) 0%, rgba(244,253,255,.62) 34%,
-    rgba(226,246,255,.20) 66%, transparent 86%); }
-.beam.lb { left: 30%; top: 9.6%; transform: translate(-50%, -100%) rotate(-7deg); transform-origin: 50% 100%; }
-.beam.rb { left: 70%; top: 9.6%; transform: translate(-50%, -100%) rotate(7deg); transform-origin: 50% 100%; }
-.tailglow { position: absolute; left: 50%; top: 85%; width: 86cqw; height: 34cqw; pointer-events: none;
-  opacity: 0; transform: translate(-50%, -50%); mix-blend-mode: screen; filter: blur(4px);
-  background: radial-gradient(50% 50% at 50% 50%, rgba(255,64,44,.82), rgba(255,34,26,.40) 48%, transparent 74%); }
-.lamp { position: absolute; width: 13cqw; height: 6.5cqw; border-radius: 50%; transform: translate(-50%,-50%);
-  pointer-events: none; opacity: 0; mix-blend-mode: screen; transition: opacity .3s ease; }
-.lamp.lf, .lamp.lr { left: 28%; }
-.lamp.rf, .lamp.rr { left: 72%; }
-.lamp.lf, .lamp.rf { top: 9.6%; width: 11cqw; height: 5cqw;
-  background: radial-gradient(52% 62% at 50% 50%, rgba(255,255,255,1), rgba(196,235,255,.72) 46%, transparent 76%);
-  box-shadow: 0 0 5cqw rgba(190,235,255,.7), 0 0 12cqw rgba(120,195,255,.34); }
-.lamp.lr, .lamp.rr { top: 78.6%; width: 16cqw; height: 5cqw;
-  background: radial-gradient(52% 62% at 50% 50%, rgba(255,120,100,1), rgba(255,44,32,.55) 50%, transparent 78%);
-  box-shadow: 0 0 5cqw rgba(255,70,50,.55); }
-.hero.run .beam, .hero.run .tailglow, .hero.run .lamp { animation: hc-lamp 2.6s ease-in-out infinite; }
-.hero.run .beam.rb, .hero.run .lamp.rf, .hero.run .lamp.lr { animation-delay: .16s; }
+  background: radial-gradient(50% 92% at 50% 100%, rgba(255,255,255,.88) 0%, rgba(244,253,255,.40) 36%,
+    rgba(226,246,255,.12) 68%, transparent 88%); }
+.beam.lb { left: 29.9%; top: 10.6%; transform: translate(-50%, -100%) rotate(-4deg); transform-origin: 50% 100%; }
+.beam.rb { left: 70.2%; top: 10.6%; transform: translate(-50%, -100%) rotate(4deg); transform-origin: 50% 100%; }
+.tailbar { position: absolute; left: 50%; top: 73.4%; width: 55cqw; height: 4cqw; pointer-events: none;
+  opacity: 0; transform: translate(-50%, -50%); mix-blend-mode: screen; border-radius: 999px;
+  background: linear-gradient(90deg, rgba(255,56,40,.22), rgba(255,118,92,.92) 18%, rgba(255,74,52,1) 50%,
+    rgba(255,118,92,.92) 82%, rgba(255,56,40,.22));
+  box-shadow: 0 0 4cqw 1.2cqw rgba(255,64,44,.55), 0 0 12cqw 3cqw rgba(255,44,32,.28); }
+.hero.run .beam, .hero.run .tailbar { animation: hc-lamp 2.6s ease-in-out infinite; }
+.hero.run .beam.rb { animation-delay: .16s; }
 @keyframes hc-lamp {
   0%, 100% { opacity: .5; }
   45% { opacity: 1; }
