@@ -806,12 +806,13 @@ ha-card.panel.fit .pills { width: 100%; max-width: none; }
 }
 @keyframes hc-ground { 0%, 100% { opacity: .55; } 50% { opacity: 1; } }
 .enp { position: absolute; left: 0; top: 0; transform: translate(-50%, -50%); z-index: 3;
-  display: inline-flex; align-items: center; gap: 6px; padding: 5px 11px 5px 9px; border-radius: 999px;
-  background: rgba(9,18,26,.82); border: 1px solid rgba(140,170,190,.22); color: #a9b6bf;
-  font-size: 11px; letter-spacing: .08em; white-space: nowrap; backdrop-filter: blur(8px);
+  display: flex; flex-direction: column; gap: 3px; padding: 6px 13px 7px 10px; border-radius: 13px;
+  background: rgba(9,18,26,.84); border: 1px solid rgba(140,170,190,.22); color: #a9b6bf;
+  letter-spacing: .08em; white-space: nowrap; backdrop-filter: blur(8px);
   box-shadow: 0 4px 14px rgba(0,0,0,.35); pointer-events: none; }
-.enp span { opacity: .72; }
-.enp b { font-size: 12px; font-weight: 600; color: #cfd9e0; letter-spacing: .04em; }
+.enp .row { display: flex; align-items: center; gap: 6px; }
+.enp span { font-size: 10px; opacity: .7; letter-spacing: .14em; }
+.enp b { font-size: 13px; font-weight: 600; color: #cfd9e0; letter-spacing: .04em; line-height: 1.1; }
 .enp .ed { width: 6px; height: 6px; border-radius: 50%; background: #6b7a84; flex: 0 0 auto; }
 .enp.on { border-color: rgba(76,255,178,.6); box-shadow: 0 0 16px rgba(40,255,160,.28), inset 0 0 12px rgba(40,255,160,.12); }
 .enp.on b { color: #8affcb; }
@@ -1640,7 +1641,7 @@ var HaCarCard = class extends HTMLElement {
     };
     const out = [];
     if (data.get("sw_engine") || data.get("remote_start")) {
-      out.push(`<div class="enp${running ? " on" : ""}"><i class="ed"></i><span>${zh ? "引擎" : "Engine"}</span><b>${running ? zh ? "已启动" : "Running" : zh ? "已熄火" : "Off"}</b></div>`);
+      out.push(`<div class="enp${running ? " on" : ""}"><div class="row"><i class="ed"></i><span>${zh ? "引擎" : "ENGINE"}</span></div><b>${running ? zh ? "已启动" : "Running" : zh ? "已熄火" : "Off"}</b></div>`);
     }
     const quads = [
       ["lf", zh ? "主驾" : "Driver", ["door_fl", "win_fl"], "tp_lf", "tps_lf"],
@@ -1819,10 +1820,12 @@ var HaCarCard = class extends HTMLElement {
         const cx0 = (ringL + ringR) / 2;
         const cy0 = (ringT + ringB) / 2;
         const rr = (ringR - ringL) / 2;
-        const w = enp.offsetWidth, h = enp.offsetHeight;
-        let ex = cx0 - rr * 0.82;
-        let ey = cy0 - rr * 0.82;
-        for (let pass = 0; pass < 2; pass++) {
+        const kp = Math.max(0.82, Math.min(1.1, rr / 190));
+        enp.style.transform = `translate(-50%, -50%) scale(${kp.toFixed(3)})`;
+        const w = enp.offsetWidth * kp, h = enp.offsetHeight * kp;
+        let ex = cx0 - rr * 0.78;
+        let ey = cy0 - rr * 0.78;
+        for (let pass = 0; pass < 3; pass++) {
           const dx = ex + w / 2 - cx0;
           const dy = ey + h / 2 - cy0;
           const dd = Math.hypot(dx, dy) || 1;
@@ -1833,7 +1836,7 @@ var HaCarCard = class extends HTMLElement {
             ey = cy0 + dy * lam - h / 2;
           }
         }
-        ex = Math.max(6 - img.offsetLeft + w / 2, ex);
+        ex = Math.max(6 - img.offsetLeft + w / 2, Math.min(hero.clientWidth - 6 - w / 2 - img.offsetLeft, ex));
         ey = Math.max(6 - (img.offsetTop + shift) + h / 2, ey);
         enp.style.left = `${Math.round(ex)}px`;
         enp.style.top = `${Math.round(ey)}px`;
@@ -2849,7 +2852,7 @@ var HaCarEditor = class extends HTMLElement {
 customElements.define("ha-car-editor", HaCarEditor);
 
 // src/main.js
-var VERSION = "1.5.8";
+var VERSION = "1.5.9";
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "ha-car",

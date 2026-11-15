@@ -504,12 +504,13 @@ ha-card.panel.fit .pills { width: 100%; max-width: none; }
 }
 @keyframes hc-ground { 0%, 100% { opacity: .55; } 50% { opacity: 1; } }
 .enp { position: absolute; left: 0; top: 0; transform: translate(-50%, -50%); z-index: 3;
-  display: inline-flex; align-items: center; gap: 6px; padding: 5px 11px 5px 9px; border-radius: 999px;
-  background: rgba(9,18,26,.82); border: 1px solid rgba(140,170,190,.22); color: #a9b6bf;
-  font-size: 11px; letter-spacing: .08em; white-space: nowrap; backdrop-filter: blur(8px);
+  display: flex; flex-direction: column; gap: 3px; padding: 6px 13px 7px 10px; border-radius: 13px;
+  background: rgba(9,18,26,.84); border: 1px solid rgba(140,170,190,.22); color: #a9b6bf;
+  letter-spacing: .08em; white-space: nowrap; backdrop-filter: blur(8px);
   box-shadow: 0 4px 14px rgba(0,0,0,.35); pointer-events: none; }
-.enp span { opacity: .72; }
-.enp b { font-size: 12px; font-weight: 600; color: #cfd9e0; letter-spacing: .04em; }
+.enp .row { display: flex; align-items: center; gap: 6px; }
+.enp span { font-size: 10px; opacity: .7; letter-spacing: .14em; }
+.enp b { font-size: 13px; font-weight: 600; color: #cfd9e0; letter-spacing: .04em; line-height: 1.1; }
 .enp .ed { width: 6px; height: 6px; border-radius: 50%; background: #6b7a84; flex: 0 0 auto; }
 .enp.on { border-color: rgba(76,255,178,.6); box-shadow: 0 0 16px rgba(40,255,160,.28), inset 0 0 12px rgba(40,255,160,.12); }
 .enp.on b { color: #8affcb; }

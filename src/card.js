@@ -529,7 +529,8 @@ class HaCarCard extends HTMLElement {
     const out = [];
     // 引擎状态胶囊（圆环左上角圈外）
     if (data.get("sw_engine") || data.get("remote_start")) {
-      out.push(`<div class="enp${running ? " on" : ""}"><i class="ed"></i><span>${zh ? "引擎" : "Engine"}</span>` +
+      out.push(`<div class="enp${running ? " on" : ""}"><div class="row"><i class="ed"></i>` +
+        `<span>${zh ? "引擎" : "ENGINE"}</span></div>` +
         `<b>${running ? (zh ? "已启动" : "Running") : (zh ? "已熄火" : "Off")}</b></div>`);
     }
     const quads = [
@@ -728,11 +729,14 @@ class HaCarCard extends HTMLElement {
         const cx0 = (ringL + ringR) / 2;
         const cy0 = (ringT + ringB) / 2;
         const rr = (ringR - ringL) / 2;
-        const w = enp.offsetWidth, h = enp.offsetHeight;
-        let ex = cx0 - rr * 0.82;
-        let ey = cy0 - rr * 0.82;
-        // 让胶囊右下角整块落在圆环外：再把中心沿径向推到「角到圆心的距离 ≥ r + 8」
-        for (let pass = 0; pass < 2; pass++) {
+        // 胶囊尺寸跟着圆环大小缩放（窄屏收、宽屏略放大）
+        const kp = Math.max(0.82, Math.min(1.1, rr / 190));
+        enp.style.transform = `translate(-50%, -50%) scale(${kp.toFixed(3)})`;
+        const w = enp.offsetWidth * kp, h = enp.offsetHeight * kp;
+        let ex = cx0 - rr * 0.78;
+        let ey = cy0 - rr * 0.78;
+        // 两行胶囊整套落在圆环外：右下角到圆心距离 ≥ 半径 + 8
+        for (let pass = 0; pass < 3; pass++) {
           const dx = ex + w / 2 - cx0;
           const dy = ey + h / 2 - cy0;
           const dd = Math.hypot(dx, dy) || 1;
@@ -743,7 +747,8 @@ class HaCarCard extends HTMLElement {
             ey = cy0 + dy * lam - h / 2;
           }
         }
-        ex = Math.max(6 - img.offsetLeft + w / 2, ex);
+        // 不超出 hero（否则会被裁切）
+        ex = Math.max(6 - img.offsetLeft + w / 2, Math.min(hero.clientWidth - 6 - w / 2 - img.offsetLeft, ex));
         ey = Math.max(6 - (img.offsetTop + shift) + h / 2, ey);
         enp.style.left = `${Math.round(ex)}px`;
         enp.style.top = `${Math.round(ey)}px`;
