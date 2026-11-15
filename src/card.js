@@ -529,7 +529,7 @@ class HaCarCard extends HTMLElement {
     const out = [];
     // 引擎启动后的前后车灯（纯光效，落在车图坐标系里）
     if (running) {
-      out.push(`<i class="beam lb"></i><i class="beam rb"></i><i class="gpool"></i><i class="tailglow"></i>`);
+      out.push(`<i class="beam lb"></i><i class="beam rb"></i><i class="gpool"></i><i class="tailbar"></i><i class="tailglow"></i>`);
     }
     // 引擎状态胶囊（圆环左上角圈外）
     if (data.get("sw_engine") || data.get("remote_start")) {
@@ -649,7 +649,7 @@ class HaCarCard extends HTMLElement {
     const beams = ovl.querySelectorAll(".beam");
     if (beams.length) {
       const lineY = img.offsetTop + shift + ih * 0.106;
-      const bh = Math.max(10, Math.min(lineY - 4, ih * 0.30));
+      const bh = Math.max(10, Math.min(lineY - 2, ih * 0.30));
       for (const bEl of beams) bEl.style.height = `${bh}px`;
       // 光锥打在地面上的落点：跟着光锥顶端走
       ovl.style.setProperty("--beamh", `${bh}px`);
