@@ -793,7 +793,7 @@ ha-card.panel.fit .pills { width: 100%; max-width: none; }
 
 
 .hero.run .halo { background: radial-gradient(46% 52% at 50% 50%, rgba(45,255,170,.22), rgba(45,255,170,.07) 46%, transparent 72%); }
-.orbit.run { border-color: rgba(76,255,178,.55); animation: hc-breathe 2.6s ease-in-out infinite; }
+.orbit.run { border-color: rgba(76,255,178,.55); animation: hc-breathe 2.6s ease-in-out infinite; box-shadow: inset 0 0 30px -12px rgba(52,255,168,.45); }
 .orbit.run.o2 { border-color: rgba(76,255,178,.26); animation-delay: .7s; }
 .hero.run .ground { background: radial-gradient(50% 50% at 50% 50%, rgba(48,255,166,.42), rgba(48,255,166,.10) 55%, transparent 74%);
   animation: hc-ground 2.6s ease-in-out infinite; }
@@ -801,8 +801,8 @@ ha-card.panel.fit .pills { width: 100%; max-width: none; }
   background: radial-gradient(50% 50% at 50% 50%, rgba(48,255,166,.40), transparent 72%); filter: blur(8px);
   animation: hc-ground 2.6s ease-in-out infinite; pointer-events: none; }
 @keyframes hc-breathe {
-  0%, 100% { box-shadow: inset 0 0 34px -14px rgba(52,255,168,.30), 0 0 18px -8px rgba(52,255,168,.22); }
-  50% { box-shadow: inset 0 0 52px -10px rgba(96,255,196,.85), 0 0 52px -6px rgba(52,255,168,.75); }
+  0%, 100% { box-shadow: inset 0 0 26px -12px rgba(52,255,168,.35); border-color: rgba(76,255,178,.42); }
+  50% { box-shadow: inset 0 0 64px -8px rgba(96,255,196,.95); border-color: rgba(150,255,214,.9); }
 }
 @keyframes hc-ground { 0%, 100% { opacity: .55; } 50% { opacity: 1; } }
 .enp { position: absolute; left: 0; top: 0; transform: translate(-50%, -50%); z-index: 3;
@@ -2852,7 +2852,7 @@ var HaCarEditor = class extends HTMLElement {
 customElements.define("ha-car-editor", HaCarEditor);
 
 // src/main.js
-var VERSION = "1.5.9";
+var VERSION = "1.6.0";
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "ha-car",
