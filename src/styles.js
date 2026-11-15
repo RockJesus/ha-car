@@ -492,32 +492,32 @@ ha-card.panel.fit .pills { width: 100%; max-width: none; }
 
 /* 引擎启动后的灯光特效：前灯从车头灯位向前射出白色切光，光锥末端在地面铺一片落光；
    尾灯在车后铺一片红光。灯位依据官方车图实测：前灯 x 29.9%/70.2%、y 10.6%；尾灯带 x 23.6%-76.4%、y 70%-77% */
-.beam { position: absolute; width: 24cqw; height: 34cqw; pointer-events: none; opacity: 0;
+.beam { position: absolute; width: 27cqw; height: 34cqw; pointer-events: none; opacity: 0;
   transform: translate(-50%, -100%); mix-blend-mode: screen; filter: blur(2.4px);
   /* 顶边齐平 = 投影切光线，横向自然衰减 */
   clip-path: polygon(4% 100%, 96% 100%, 100% 0, 0 0);
-  background: radial-gradient(56% 96% at 50% 100%, rgba(255,255,255,.80) 0%,
-    rgba(232,248,255,.42) 32%, rgba(206,238,255,.16) 62%, rgba(190,230,255,.04) 80%, transparent 92%); }
+  background: radial-gradient(58% 98% at 50% 100%, rgba(255,255,255,1) 0%,
+    rgba(238,251,255,.66) 30%, rgba(210,241,255,.30) 58%, rgba(194,232,255,.10) 78%, transparent 92%); }
 .beam::after { content: ""; position: absolute; left: 50%; bottom: 0; width: 60%; height: 88%;
   transform: translateX(-50%);
-  background: radial-gradient(50% 92% at 50% 100%, rgba(255,255,255,.86) 0%, rgba(244,253,255,.44) 36%,
-    rgba(226,246,255,.12) 68%, transparent 88%); }
+  background: radial-gradient(48% 92% at 50% 100%, rgba(255,255,255,1) 0%, rgba(250,255,255,.72) 30%,
+    rgba(232,250,255,.28) 62%, transparent 88%); }
 .beam.lb { left: 29.9%; top: 10.6%; transform: translate(-50%, -100%) rotate(-5deg); transform-origin: 50% 100%; }
 .beam.rb { left: 70.2%; top: 10.6%; transform: translate(-50%, -100%) rotate(5deg); transform-origin: 50% 100%; }
 /* 落在地面的光：椭圆的漫反射光斑，压在光锥末端 */
-.gpool { position: absolute; left: 50%; top: calc(10.6% - var(--beamh, 0px) * 0.82); width: 96cqw; height: 21cqw;
+.gpool { position: absolute; left: 50%; top: calc(10.6% - var(--beamh, 0px) * 0.82); width: 112cqw; height: 26cqw;
   pointer-events: none; opacity: 0; transform: translate(-50%, -50%); mix-blend-mode: screen; filter: blur(6px);
-  background: radial-gradient(50% 50% at 50% 50%, rgba(252,255,255,.86) 0%, rgba(228,247,255,.46) 40%,
-    rgba(198,235,255,.18) 68%, transparent 86%); }
+  background: radial-gradient(50% 50% at 50% 50%, rgba(255,255,255,1) 0%, rgba(236,250,255,.62) 38%,
+    rgba(204,238,255,.26) 66%, transparent 86%); }
 /* 尾灯在地面的红光 */
 .tailbar { position: absolute; left: 50%; top: 73.4%; width: 55cqw; height: 3.6cqw; pointer-events: none;
   opacity: 0; transform: translate(-50%, -50%); mix-blend-mode: screen; border-radius: 999px;
-  background: linear-gradient(90deg, rgba(255,56,40,.18), rgba(255,120,94,.86) 18%, rgba(255,74,52,.96) 50%,
-    rgba(255,120,94,.86) 82%, rgba(255,56,40,.18));
-  box-shadow: 0 0 3cqw 1cqw rgba(255,64,44,.5), 0 0 9cqw 2.4cqw rgba(255,44,32,.22); }
-.tailglow { position: absolute; left: 50%; top: 87.5%; width: 94cqw; height: 26cqw; pointer-events: none;
+  background: linear-gradient(90deg, rgba(255,64,44,.32), rgba(255,132,104,1) 18%, rgba(255,86,62,1) 50%,
+    rgba(255,132,104,1) 82%, rgba(255,64,44,.32));
+  box-shadow: 0 0 3.4cqw 1.2cqw rgba(255,74,50,.66), 0 0 11cqw 3cqw rgba(255,44,32,.34); }
+.tailglow { position: absolute; left: 50%; top: 87%; width: 108cqw; height: 32cqw; pointer-events: none;
   opacity: 0; transform: translate(-50%, -50%); mix-blend-mode: screen; filter: blur(4px);
-  background: radial-gradient(50% 50% at 50% 50%, rgba(255,66,46,.62), rgba(255,34,26,.28) 50%, transparent 76%); }
+  background: radial-gradient(50% 50% at 50% 50%, rgba(255,74,52,.86), rgba(255,36,26,.42) 48%, transparent 78%); }
 .hero.run .beam, .hero.run .gpool, .hero.run .tailbar, .hero.run .tailglow { animation: hc-lamp 2.6s ease-in-out infinite; }
 .hero.run .beam.rb { animation-delay: .16s; }
 @keyframes hc-lamp {
