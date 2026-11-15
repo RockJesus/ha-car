@@ -420,51 +420,106 @@ ha-card.panel:not(.fit) .baseline.solo { padding: 3px 8px; font-size: 10px; }
   background: radial-gradient(90% 60% at 50% 0%, rgba(55,214,232,.10), transparent 62%),
     linear-gradient(170deg, #101b29 0%, #0a1119 60%, #070c13 100%); }
 ha-card.panel { box-sizing: border-box; width: 100%; height: 100%; margin: 0; }
-/* 卡片选择器缩略图：固定高度，绝不把整张面板卡塞进小格子；版式按真机卡等比缩小 */
-ha-card.preview { height: 186px; overflow: hidden; }
+/* 选择器缩略卡：照真机卡整体版式缩小（竖版小卡），车牌/位置/数值全是假数据 */
+ha-card.preview { height: 452px; overflow: hidden; }
 ha-card.preview .wrap {
-  padding: 10px 11px 9px; height: 100%; box-sizing: border-box;
-  display: flex; flex-direction: column; justify-content: space-between; gap: 6px;
+  padding: 11px 12px 9px; height: 100%; box-sizing: border-box;
+  display: flex; flex-direction: column; gap: 6px;
   container-type: inline-size; pointer-events: none;
 }
-.pv-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 0; }
-.pv-ttl { display: flex; align-items: baseline; gap: 7px; min-width: 0; }
-.pv-head h1 { margin: 0; font-size: 14px; font-weight: 700; letter-spacing: .01em; white-space: nowrap; }
-.pv-code { white-space: nowrap; font-size: 9px; letter-spacing: .12em; opacity: .5; font-weight: 600; }
-.pv-head .status { flex: 0 0 auto; padding: 3px 8px; font-size: 10px; }
-/* 中段：左侧车身 + 淡轨道（带四个节点，呼应真机卡的四角），右侧两个仪表环 */
-.pv-main { flex: 1 1 auto; display: flex; align-items: center; gap: 10px; min-height: 0; }
-.pv-stage { position: relative; flex: 0 0 36%; display: flex; align-items: center; justify-content: center; min-width: 0; }
+.pv-head { display: flex; align-items: center; gap: 6px; min-height: 0; }
+.pv-brand { flex: 0 0 auto; width: 18px; height: 18px; display: inline-flex; align-items: center; justify-content: center; color: #7fe6ff; opacity: .9; }
+.pv-brand svg { width: 18px; height: 18px; }
+.pv-head h1 { margin: 0; font-size: 13.5px; font-weight: 700; letter-spacing: .01em; white-space: nowrap; }
+.pv-plate { flex: 0 0 auto; font-size: 8.5px; letter-spacing: .05em; padding: 2px 5px; border-radius: 4px; background: rgba(255, 255, 255, .07); color: rgba(220, 238, 250, .78); }
+.pv-head .status { margin-left: auto; flex: 0 0 auto; height: auto; padding: 2px 7px; font-size: 9px; gap: 4px; line-height: 1.45; }
+.pv-head .status .dot { width: 4px; height: 4px; }
+.pv-meta { display: flex; align-items: center; gap: 6px; font-size: 8.5px; color: rgba(210, 232, 244, .52); }
+.pv-loc { display: inline-flex; align-items: center; gap: 3px; flex: 1 1 auto; min-width: 0; white-space: nowrap; overflow: hidden; }
+.pv-loc svg, .pv-sync svg { flex: 0 0 auto; width: 10px; height: 10px; opacity: .75; }
+.pv-sync { display: inline-flex; align-items: center; gap: 3px; flex: 0 0 auto; }
+/* 中段：圆环 + 车身 + 引擎/前后盖胶囊 + 四角状态块 */
+.pv-hero { position: relative; flex: 1 1 auto; min-height: 152px; display: flex; align-items: center; justify-content: center; }
 .pv-ring {
-  position: absolute; width: 88px; height: 88px; border-radius: 50%;
+  position: absolute; width: 136px; height: 136px; border-radius: 50%;
   border: 1px solid rgba(64, 224, 255, .20);
-  box-shadow: inset 0 0 22px -10px rgba(64, 224, 255, .45), 0 0 16px -8px rgba(64, 224, 255, .3);
+  box-shadow: inset 0 0 24px -10px rgba(64, 224, 255, .42), 0 0 18px -8px rgba(64, 224, 255, .28);
 }
 .pv-nd { position: absolute; width: 4px; height: 4px; border-radius: 50%; background: rgba(96, 236, 255, .85); box-shadow: 0 0 6px rgba(96, 236, 255, .8); }
 .pv-nd.n1 { left: 50%; top: -2px; transform: translateX(-50%); }
 .pv-nd.n2 { left: 50%; bottom: -2px; transform: translateX(-50%); }
 .pv-nd.n3 { left: -2px; top: 50%; transform: translateY(-50%); }
 .pv-nd.n4 { right: -2px; top: 50%; transform: translateY(-50%); }
-/* 缩略图不加载真实车辆图（脱敏），用中性俯视车身轮廓 */
-.pv-carsvg { position: relative; z-index: 1; width: 40px; height: 64px; }
+.pv-carsvg { position: relative; z-index: 1; width: 58px; height: 94px; }
 .pv-carsvg .pc-body { fill: rgba(150, 230, 255, .10); stroke: rgba(170, 236, 255, .72); stroke-width: 3; }
 .pv-carsvg .pc-cab { fill: rgba(6, 14, 22, .55); stroke: rgba(140, 214, 240, .5); stroke-width: 2.4; }
-.pv-carsvg .pc-ln { stroke: rgba(140, 214, 240, .42); stroke-width: 2; }
-.pv-gauges { flex: 1 1 auto; display: flex; align-items: center; justify-content: space-evenly; gap: 3px; min-width: 0; }
-ha-card.preview .gauge { max-width: 72px; }
-ha-card.preview .gn b { font-size: 17px; }
-ha-card.preview .gl { font-size: 8px; }
-/* 底部四个控制按钮（图标 + 文字），只表达结构，不接事件 */
-.pv-acts { display: flex; align-items: center; justify-content: space-between; gap: 4px; margin-top: 3px; }
-.pv-act { flex: 1 1 0; display: flex; flex-direction: column; align-items: center; gap: 2px; min-width: 0; }
+.pv-carsvg .pc-ln { stroke: rgba(140, 214, 240, .42); stroke-width: 1.8; }
+.pv-carsvg .pc-wh { stroke: rgba(150, 226, 250, .30); stroke-width: 3.2; stroke-linecap: round; }
+.pv-eng {
+  position: absolute; left: 0; top: 0; display: flex; flex-direction: column; gap: 1px;
+  padding: 4px 7px; border-radius: 8px; font-size: 8px; color: rgba(214, 234, 246, .6);
+  background: rgba(255, 255, 255, .05); border: 1px solid rgba(255, 255, 255, .08);
+}
+.pv-eng b { font-size: 10px; color: #dff0fb; font-weight: 600; }
+.pv-cap {
+  position: absolute; left: 50%; transform: translateX(-50%); display: inline-flex; align-items: center; gap: 3px;
+  padding: 3px 7px; border-radius: 8px; font-size: 7.5px; white-space: nowrap;
+  background: rgba(255, 255, 255, .045); border: 1px solid rgba(255, 255, 255, .08); color: rgba(214, 234, 246, .55);
+}
+.pv-cap svg { width: 9px; height: 9px; opacity: .8; }
+.pv-cap i { font-style: normal; color: #dff0fb; }
+.pv-cap b { font-weight: 600; color: rgba(214, 234, 246, .45); }
+.pv-cap.top { top: -2px; }
+.pv-cap.bot { bottom: -2px; }
+.pv-quad { position: absolute; inset: 0; }
+.pv-q {
+  position: absolute; width: 58px; display: flex; flex-direction: column; gap: 1px;
+  padding: 3px 5px; border-radius: 8px;
+  background: rgba(255, 255, 255, .04); border: 1px solid rgba(255, 255, 255, .07);
+}
+.pv-q b { font-size: 7px; color: rgba(214, 234, 246, .55); font-weight: 600; }
+.pv-q i { font-style: normal; font-size: 8px; color: #dff0fb; }
+.pv-q em { font-style: normal; font-size: 7px; opacity: .55; }
+.pv-q:nth-child(1) { left: 0; top: 26%; }
+.pv-q:nth-child(2) { right: 0; top: 26%; }
+.pv-q:nth-child(3) { left: 0; bottom: 2%; }
+.pv-q:nth-child(4) { right: 0; bottom: 2%; }
+.pv-gauges { flex: 0 0 auto; display: flex; align-items: center; justify-content: space-evenly; gap: 6px; }
+ha-card.preview .gauge { max-width: 84px; }
+ha-card.preview .gn b { font-size: 19px; }
+ha-card.preview .gl { font-size: 9px; }
+.pv-chips { flex: 0 0 auto; display: flex; gap: 5px; }
+.pv-chips span {
+  flex: 1 1 0; display: inline-flex; align-items: baseline; justify-content: center; gap: 3px; white-space: nowrap;
+  padding: 4px 6px; border-radius: 7px; background: rgba(255, 255, 255, .035); border: 1px solid rgba(255, 255, 255, .06);
+  font-size: 8.5px; color: rgba(226, 240, 250, .5);
+}
+.pv-chips span b { font-size: 11px; color: #eaf6ff; }
+.pv-chips span em { font-style: normal; font-size: 8px; opacity: .7; }
+.pv-alert {
+  flex: 0 0 auto; display: flex; align-items: center; gap: 5px; padding: 4px 7px; border-radius: 7px;
+  background: rgba(255, 86, 86, .10); border: 1px solid rgba(255, 96, 96, .25);
+  font-size: 8.5px; color: rgba(255, 198, 198, .85); white-space: nowrap; overflow: hidden;
+}
+.pv-alert svg { width: 11px; height: 11px; flex: 0 0 auto; }
+.pv-alert b { font-weight: 700; color: #ff9d9d; }
+.pv-acts { flex: 0 0 auto; display: flex; justify-content: space-between; gap: 4px; }
+.pv-act { flex: 1 1 0; display: flex; flex-direction: column; align-items: center; gap: 3px; }
 .pv-act b {
-  display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; border-radius: 50%;
+  display: inline-flex; align-items: center; justify-content: center; width: 30px; height: 30px; border-radius: 50%;
   background: radial-gradient(120% 120% at 50% 0%, rgba(255, 255, 255, .10), rgba(255, 255, 255, .03));
   border: 1px solid rgba(255, 255, 255, .10); color: rgba(214, 234, 246, .82);
 }
-.pv-act b svg { width: 12px; height: 12px; }
-.pv-act em { font-style: normal; font-size: 8.5px; color: rgba(226, 240, 250, .55); white-space: nowrap; }
+.pv-act b svg { width: 14px; height: 14px; }
+.pv-act em { font-style: normal; font-size: 8px; color: rgba(226, 240, 250, .55); white-space: nowrap; }
 .pv-act.on b { color: #3ff0c4; border-color: rgba(63, 240, 196, .5); box-shadow: 0 0 12px -4px rgba(63, 240, 196, .6); }
+.pv-selects { flex: 0 0 auto; display: flex; gap: 5px; }
+.pv-selects span {
+  flex: 1 1 0; display: flex; align-items: center; justify-content: space-between; gap: 4px;
+  padding: 4px 7px; border-radius: 7px; background: rgba(255, 255, 255, .03); border: 1px solid rgba(255, 255, 255, .06);
+  font-size: 8px; color: rgba(226, 240, 250, .5); white-space: nowrap;
+}
+.pv-selects b { font-size: 9px; color: #dff0fb; font-weight: 600; }
 
 /* 宽面板：车图占左栏满高，仪表/操作/告警等叠成右栏，避免中间大片留白 */
 /* 手机面板：固定 390×840 版式，整体等比缩放到容器内，一屏铺满且不出滚动条 */

@@ -495,38 +495,74 @@ class HaCarCard extends HTMLElement {
     return `<div class="empty">${icon("car")}<div>${esc(msg)}</div></div>`;
   }
 
-  // 选择器缩略卡：按真机卡片版式做等比缩小，但**全部脱敏** ——
-  // 不显示车牌、位置、VIN，也不接任何实体实时值（数值是示意值），只保留结构与按钮语义
+  // 选择器缩略卡：照真机卡片整体版式做等比缩小；所有隐私字段（车牌 / 位置 / 数值）一律用随机假数据
   _previewBody() {
     const t = dict(this._hass);
     const en = isEn(this._hass);
+    const fake = {
+      plate: en ? "XYZ-4821" : "蒙A·8K52X",
+      loc: en ? "Sample Ave 88, Example City" : "示例市示例区示例路 88 号",
+      sync: en ? "6 hours ago" : "6 小时前",
+      tire: ["228", "231", "236", "242"],
+      odo: "60,775",
+      batt: "13",
+      oil: "25",
+      fuel: "62",
+      range: "486",
+      dur: "10",
+      ring: en ? "Soft rain" : "雨落荷叶",
+    };
+    const door = (pos, tire) => `<span class="pv-q"><b>${esc(pos)}</b><i>${esc(en ? "Closed" : "已关闭")}</i><em>${esc(tire)} kPa</em></span>`;
     const acts = [
       { ic: "unlock", lb: t.unlock || "开锁" },
       { ic: "lock", lb: t.lockDown || "关锁", on: true },
       { ic: "power", lb: t.engine || "远程启动" },
       { ic: "megaphone", lb: t.honk || "鸣笛寻车" },
     ];
-    return `<div class="pv-head"><div class="pv-ttl"><h1>${esc(en ? "My car" : "我的座驾")}</h1><span class="pv-code">HA CAR</span></div>
+    return `<div class="pv-head"><span class="pv-brand">${icon("car")}</span><h1>${esc(en ? "My car" : "我的座驾")}</h1>
+        <span class="pv-plate">${esc(fake.plate)}</span>
         <span class="status ok"><span class="dot"></span>${esc(t.locked)}</span></div>
-      <div class="pv-main">
-        <div class="pv-stage"><span class="pv-ring"><i class="pv-nd n1"></i><i class="pv-nd n2"></i><i class="pv-nd n3"></i><i class="pv-nd n4"></i></span>
-          <svg class="pv-carsvg" viewBox="0 0 100 160" aria-hidden="true">
-            <path class="pc-body" d="M50,5 C59,5 67,12 70,25 L77,54 C80,66 81,82 81,98 L81,133 C81,145 72,153 50,153 C28,153 19,145 19,133 L19,98 C19,82 20,66 23,54 L30,25 C33,12 41,5 50,5 Z"/>
-            <path class="pc-cab" d="M50,42 C60,42 66,50 66,66 L66,88 C66,97 60,101 50,101 C40,101 34,97 34,88 L34,66 C34,50 40,42 50,42 Z"/>
-            <path class="pc-ln" d="M36,49 L64,49"/><path class="pc-ln" d="M36,95 L64,95"/>
-            <path class="pc-ln" d="M29,60 L24,66"/><path class="pc-ln" d="M71,60 L76,66"/>
-          </svg></div>
-        <div class="pv-gauges">
-          ${this._gauge({ pct: 62, label: t.fuel, value: 62, unit: "%", ic: "fuel" })}
-          ${this._gauge({ pct: 81, label: t.range, value: 486, unit: "km", ic: "gauge" })}
+      <div class="pv-meta"><span class="pv-loc">${icon("pin")}${esc(fake.loc)}</span><span class="pv-sync">${icon("refresh")}${esc(fake.sync)}</span></div>
+      <div class="pv-hero">
+        <span class="pv-ring"><i class="pv-nd n1"></i><i class="pv-nd n2"></i><i class="pv-nd n3"></i><i class="pv-nd n4"></i></span>
+        <svg class="pv-carsvg" viewBox="0 0 100 170" aria-hidden="true">
+          <path class="pc-body" d="M50,7 C64,7 74,16 77,32 L82,72 C84,87 85,105 85,121 L85,140 C85,158 72,164 50,164 C28,164 15,158 15,140 L15,121 C15,105 16,87 18,72 L23,32 C26,16 36,7 50,7 Z"/>
+          <path class="pc-cab" d="M50,45 C62,45 70,56 70,76 L70,104 C70,115 62,119 50,119 C38,119 30,115 30,104 L30,76 C30,56 38,45 50,45 Z"/>
+          <path class="pc-ln" d="M31,54 L69,54"/><path class="pc-ln" d="M31,111 L69,111"/>
+          <path class="pc-ln" d="M24,76 L17,84"/><path class="pc-ln" d="M76,76 L83,84"/>
+          <path class="pc-wh" d="M16,46 L16,66"/><path class="pc-wh" d="M84,46 L84,66"/>
+          <path class="pc-wh" d="M16,120 L16,140"/><path class="pc-wh" d="M84,120 L84,140"/>
+        </svg>
+        <span class="pv-eng"><i></i>${esc(t.engine || "引擎")}<b>${esc(en ? "Off" : "已熄火")}</b></span>
+        <span class="pv-cap top">${icon("car")}<i>${esc(en ? "Closed" : "已关闭")}</i><b>${esc(en ? "Hood" : "引擎盖")}</b></span>
+        <span class="pv-cap bot">${icon("trunk")}<i>${esc(en ? "Closed" : "已关闭")}</i><b>${esc(en ? "Trunk" : "尾门")}</b></span>
+        <div class="pv-quad">
+          ${door(en ? "Driver" : "主驾", fake.tire[0])}
+          ${door(en ? "Pass." : "副驾", fake.tire[1])}
+          ${door(en ? "Rear L" : "左后", fake.tire[2])}
+          ${door(en ? "Rear R" : "右后", fake.tire[3])}
         </div>
       </div>
+      <div class="pv-gauges">
+        ${this._gauge({ pct: 62, label: t.fuel, value: fake.fuel, unit: "%", ic: "fuel" })}
+        ${this._gauge({ pct: 81, label: t.range, value: fake.range, unit: "km", ic: "gauge" })}
+      </div>
+      <div class="pv-chips">
+        <span><i>${esc(t.odo || "总里程")}</i><b>${esc(fake.odo)}</b><em>km</em></span>
+        <span><i>${esc(en ? "Battery" : "蓄电池")}</i><b>${esc(fake.batt)}</b><em>V</em></span>
+        <span><i>${esc(en ? "Oil" : "机油寿命")}</i><b>${esc(fake.oil)}</b><em>%</em></span>
+      </div>
+      <div class="pv-alert">${icon("warning")}<b>${esc(en ? "Alert" : "车辆告警")}</b>${esc(en ? "Tire pressure warning" : "胎压监测系统警告")}</div>
       <div class="pv-acts">
         ${acts
           .map(
             (a) => `<span class="pv-act${a.on ? " on" : ""}"><b>${icon(a.ic)}</b><em>${esc(a.lb)}</em></span>`,
           )
           .join("")}
+      </div>
+      <div class="pv-selects">
+        <span>${esc(t.soundDur || "寻车时长")}<b>${esc(fake.dur)} ${esc(en ? "sec" : "秒")}</b></span>
+        <span>${esc(t.soundType || "寻车类型")}<b>${esc(fake.ring)}</b></span>
       </div>`;
   }
 

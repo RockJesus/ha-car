@@ -734,51 +734,106 @@ ha-card.panel:not(.fit) .baseline.solo { padding: 3px 8px; font-size: 10px; }
   background: radial-gradient(90% 60% at 50% 0%, rgba(55,214,232,.10), transparent 62%),
     linear-gradient(170deg, #101b29 0%, #0a1119 60%, #070c13 100%); }
 ha-card.panel { box-sizing: border-box; width: 100%; height: 100%; margin: 0; }
-/* 卡片选择器缩略图：固定高度，绝不把整张面板卡塞进小格子；版式按真机卡等比缩小 */
-ha-card.preview { height: 186px; overflow: hidden; }
+/* 选择器缩略卡：照真机卡整体版式缩小（竖版小卡），车牌/位置/数值全是假数据 */
+ha-card.preview { height: 452px; overflow: hidden; }
 ha-card.preview .wrap {
-  padding: 10px 11px 9px; height: 100%; box-sizing: border-box;
-  display: flex; flex-direction: column; justify-content: space-between; gap: 6px;
+  padding: 11px 12px 9px; height: 100%; box-sizing: border-box;
+  display: flex; flex-direction: column; gap: 6px;
   container-type: inline-size; pointer-events: none;
 }
-.pv-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 0; }
-.pv-ttl { display: flex; align-items: baseline; gap: 7px; min-width: 0; }
-.pv-head h1 { margin: 0; font-size: 14px; font-weight: 700; letter-spacing: .01em; white-space: nowrap; }
-.pv-code { white-space: nowrap; font-size: 9px; letter-spacing: .12em; opacity: .5; font-weight: 600; }
-.pv-head .status { flex: 0 0 auto; padding: 3px 8px; font-size: 10px; }
-/* 中段：左侧车身 + 淡轨道（带四个节点，呼应真机卡的四角），右侧两个仪表环 */
-.pv-main { flex: 1 1 auto; display: flex; align-items: center; gap: 10px; min-height: 0; }
-.pv-stage { position: relative; flex: 0 0 36%; display: flex; align-items: center; justify-content: center; min-width: 0; }
+.pv-head { display: flex; align-items: center; gap: 6px; min-height: 0; }
+.pv-brand { flex: 0 0 auto; width: 18px; height: 18px; display: inline-flex; align-items: center; justify-content: center; color: #7fe6ff; opacity: .9; }
+.pv-brand svg { width: 18px; height: 18px; }
+.pv-head h1 { margin: 0; font-size: 13.5px; font-weight: 700; letter-spacing: .01em; white-space: nowrap; }
+.pv-plate { flex: 0 0 auto; font-size: 8.5px; letter-spacing: .05em; padding: 2px 5px; border-radius: 4px; background: rgba(255, 255, 255, .07); color: rgba(220, 238, 250, .78); }
+.pv-head .status { margin-left: auto; flex: 0 0 auto; height: auto; padding: 2px 7px; font-size: 9px; gap: 4px; line-height: 1.45; }
+.pv-head .status .dot { width: 4px; height: 4px; }
+.pv-meta { display: flex; align-items: center; gap: 6px; font-size: 8.5px; color: rgba(210, 232, 244, .52); }
+.pv-loc { display: inline-flex; align-items: center; gap: 3px; flex: 1 1 auto; min-width: 0; white-space: nowrap; overflow: hidden; }
+.pv-loc svg, .pv-sync svg { flex: 0 0 auto; width: 10px; height: 10px; opacity: .75; }
+.pv-sync { display: inline-flex; align-items: center; gap: 3px; flex: 0 0 auto; }
+/* 中段：圆环 + 车身 + 引擎/前后盖胶囊 + 四角状态块 */
+.pv-hero { position: relative; flex: 1 1 auto; min-height: 152px; display: flex; align-items: center; justify-content: center; }
 .pv-ring {
-  position: absolute; width: 88px; height: 88px; border-radius: 50%;
+  position: absolute; width: 136px; height: 136px; border-radius: 50%;
   border: 1px solid rgba(64, 224, 255, .20);
-  box-shadow: inset 0 0 22px -10px rgba(64, 224, 255, .45), 0 0 16px -8px rgba(64, 224, 255, .3);
+  box-shadow: inset 0 0 24px -10px rgba(64, 224, 255, .42), 0 0 18px -8px rgba(64, 224, 255, .28);
 }
 .pv-nd { position: absolute; width: 4px; height: 4px; border-radius: 50%; background: rgba(96, 236, 255, .85); box-shadow: 0 0 6px rgba(96, 236, 255, .8); }
 .pv-nd.n1 { left: 50%; top: -2px; transform: translateX(-50%); }
 .pv-nd.n2 { left: 50%; bottom: -2px; transform: translateX(-50%); }
 .pv-nd.n3 { left: -2px; top: 50%; transform: translateY(-50%); }
 .pv-nd.n4 { right: -2px; top: 50%; transform: translateY(-50%); }
-/* 缩略图不加载真实车辆图（脱敏），用中性俯视车身轮廓 */
-.pv-carsvg { position: relative; z-index: 1; width: 40px; height: 64px; }
+.pv-carsvg { position: relative; z-index: 1; width: 58px; height: 94px; }
 .pv-carsvg .pc-body { fill: rgba(150, 230, 255, .10); stroke: rgba(170, 236, 255, .72); stroke-width: 3; }
 .pv-carsvg .pc-cab { fill: rgba(6, 14, 22, .55); stroke: rgba(140, 214, 240, .5); stroke-width: 2.4; }
-.pv-carsvg .pc-ln { stroke: rgba(140, 214, 240, .42); stroke-width: 2; }
-.pv-gauges { flex: 1 1 auto; display: flex; align-items: center; justify-content: space-evenly; gap: 3px; min-width: 0; }
-ha-card.preview .gauge { max-width: 72px; }
-ha-card.preview .gn b { font-size: 17px; }
-ha-card.preview .gl { font-size: 8px; }
-/* 底部四个控制按钮（图标 + 文字），只表达结构，不接事件 */
-.pv-acts { display: flex; align-items: center; justify-content: space-between; gap: 4px; margin-top: 3px; }
-.pv-act { flex: 1 1 0; display: flex; flex-direction: column; align-items: center; gap: 2px; min-width: 0; }
+.pv-carsvg .pc-ln { stroke: rgba(140, 214, 240, .42); stroke-width: 1.8; }
+.pv-carsvg .pc-wh { stroke: rgba(150, 226, 250, .30); stroke-width: 3.2; stroke-linecap: round; }
+.pv-eng {
+  position: absolute; left: 0; top: 0; display: flex; flex-direction: column; gap: 1px;
+  padding: 4px 7px; border-radius: 8px; font-size: 8px; color: rgba(214, 234, 246, .6);
+  background: rgba(255, 255, 255, .05); border: 1px solid rgba(255, 255, 255, .08);
+}
+.pv-eng b { font-size: 10px; color: #dff0fb; font-weight: 600; }
+.pv-cap {
+  position: absolute; left: 50%; transform: translateX(-50%); display: inline-flex; align-items: center; gap: 3px;
+  padding: 3px 7px; border-radius: 8px; font-size: 7.5px; white-space: nowrap;
+  background: rgba(255, 255, 255, .045); border: 1px solid rgba(255, 255, 255, .08); color: rgba(214, 234, 246, .55);
+}
+.pv-cap svg { width: 9px; height: 9px; opacity: .8; }
+.pv-cap i { font-style: normal; color: #dff0fb; }
+.pv-cap b { font-weight: 600; color: rgba(214, 234, 246, .45); }
+.pv-cap.top { top: -2px; }
+.pv-cap.bot { bottom: -2px; }
+.pv-quad { position: absolute; inset: 0; }
+.pv-q {
+  position: absolute; width: 58px; display: flex; flex-direction: column; gap: 1px;
+  padding: 3px 5px; border-radius: 8px;
+  background: rgba(255, 255, 255, .04); border: 1px solid rgba(255, 255, 255, .07);
+}
+.pv-q b { font-size: 7px; color: rgba(214, 234, 246, .55); font-weight: 600; }
+.pv-q i { font-style: normal; font-size: 8px; color: #dff0fb; }
+.pv-q em { font-style: normal; font-size: 7px; opacity: .55; }
+.pv-q:nth-child(1) { left: 0; top: 26%; }
+.pv-q:nth-child(2) { right: 0; top: 26%; }
+.pv-q:nth-child(3) { left: 0; bottom: 2%; }
+.pv-q:nth-child(4) { right: 0; bottom: 2%; }
+.pv-gauges { flex: 0 0 auto; display: flex; align-items: center; justify-content: space-evenly; gap: 6px; }
+ha-card.preview .gauge { max-width: 84px; }
+ha-card.preview .gn b { font-size: 19px; }
+ha-card.preview .gl { font-size: 9px; }
+.pv-chips { flex: 0 0 auto; display: flex; gap: 5px; }
+.pv-chips span {
+  flex: 1 1 0; display: inline-flex; align-items: baseline; justify-content: center; gap: 3px; white-space: nowrap;
+  padding: 4px 6px; border-radius: 7px; background: rgba(255, 255, 255, .035); border: 1px solid rgba(255, 255, 255, .06);
+  font-size: 8.5px; color: rgba(226, 240, 250, .5);
+}
+.pv-chips span b { font-size: 11px; color: #eaf6ff; }
+.pv-chips span em { font-style: normal; font-size: 8px; opacity: .7; }
+.pv-alert {
+  flex: 0 0 auto; display: flex; align-items: center; gap: 5px; padding: 4px 7px; border-radius: 7px;
+  background: rgba(255, 86, 86, .10); border: 1px solid rgba(255, 96, 96, .25);
+  font-size: 8.5px; color: rgba(255, 198, 198, .85); white-space: nowrap; overflow: hidden;
+}
+.pv-alert svg { width: 11px; height: 11px; flex: 0 0 auto; }
+.pv-alert b { font-weight: 700; color: #ff9d9d; }
+.pv-acts { flex: 0 0 auto; display: flex; justify-content: space-between; gap: 4px; }
+.pv-act { flex: 1 1 0; display: flex; flex-direction: column; align-items: center; gap: 3px; }
 .pv-act b {
-  display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; border-radius: 50%;
+  display: inline-flex; align-items: center; justify-content: center; width: 30px; height: 30px; border-radius: 50%;
   background: radial-gradient(120% 120% at 50% 0%, rgba(255, 255, 255, .10), rgba(255, 255, 255, .03));
   border: 1px solid rgba(255, 255, 255, .10); color: rgba(214, 234, 246, .82);
 }
-.pv-act b svg { width: 12px; height: 12px; }
-.pv-act em { font-style: normal; font-size: 8.5px; color: rgba(226, 240, 250, .55); white-space: nowrap; }
+.pv-act b svg { width: 14px; height: 14px; }
+.pv-act em { font-style: normal; font-size: 8px; color: rgba(226, 240, 250, .55); white-space: nowrap; }
 .pv-act.on b { color: #3ff0c4; border-color: rgba(63, 240, 196, .5); box-shadow: 0 0 12px -4px rgba(63, 240, 196, .6); }
+.pv-selects { flex: 0 0 auto; display: flex; gap: 5px; }
+.pv-selects span {
+  flex: 1 1 0; display: flex; align-items: center; justify-content: space-between; gap: 4px;
+  padding: 4px 7px; border-radius: 7px; background: rgba(255, 255, 255, .03); border: 1px solid rgba(255, 255, 255, .06);
+  font-size: 8px; color: rgba(226, 240, 250, .5); white-space: nowrap;
+}
+.pv-selects b { font-size: 9px; color: #dff0fb; font-weight: 600; }
 
 /* 宽面板：车图占左栏满高，仪表/操作/告警等叠成右栏，避免中间大片留白 */
 /* 手机面板：固定 390×840 版式，整体等比缩放到容器内，一屏铺满且不出滚动条 */
@@ -1685,36 +1740,72 @@ var HaCarCard = class extends HTMLElement {
   _empty(msg) {
     return `<div class="empty">${icon("car")}<div>${esc(msg)}</div></div>`;
   }
-  // 选择器缩略卡：按真机卡片版式做等比缩小，但**全部脱敏** ——
-  // 不显示车牌、位置、VIN，也不接任何实体实时值（数值是示意值），只保留结构与按钮语义
+  // 选择器缩略卡：照真机卡片整体版式做等比缩小；所有隐私字段（车牌 / 位置 / 数值）一律用随机假数据
   _previewBody() {
     const t = dict(this._hass);
     const en = isEn(this._hass);
+    const fake = {
+      plate: en ? "XYZ-4821" : "蒙A·8K52X",
+      loc: en ? "Sample Ave 88, Example City" : "示例市示例区示例路 88 号",
+      sync: en ? "6 hours ago" : "6 小时前",
+      tire: ["228", "231", "236", "242"],
+      odo: "60,775",
+      batt: "13",
+      oil: "25",
+      fuel: "62",
+      range: "486",
+      dur: "10",
+      ring: en ? "Soft rain" : "雨落荷叶"
+    };
+    const door = (pos, tire) => `<span class="pv-q"><b>${esc(pos)}</b><i>${esc(en ? "Closed" : "已关闭")}</i><em>${esc(tire)} kPa</em></span>`;
     const acts = [
       { ic: "unlock", lb: t.unlock || "开锁" },
       { ic: "lock", lb: t.lockDown || "关锁", on: true },
       { ic: "power", lb: t.engine || "远程启动" },
       { ic: "megaphone", lb: t.honk || "鸣笛寻车" }
     ];
-    return `<div class="pv-head"><div class="pv-ttl"><h1>${esc(en ? "My car" : "我的座驾")}</h1><span class="pv-code">HA CAR</span></div>
+    return `<div class="pv-head"><span class="pv-brand">${icon("car")}</span><h1>${esc(en ? "My car" : "我的座驾")}</h1>
+        <span class="pv-plate">${esc(fake.plate)}</span>
         <span class="status ok"><span class="dot"></span>${esc(t.locked)}</span></div>
-      <div class="pv-main">
-        <div class="pv-stage"><span class="pv-ring"><i class="pv-nd n1"></i><i class="pv-nd n2"></i><i class="pv-nd n3"></i><i class="pv-nd n4"></i></span>
-          <svg class="pv-carsvg" viewBox="0 0 100 160" aria-hidden="true">
-            <path class="pc-body" d="M50,5 C59,5 67,12 70,25 L77,54 C80,66 81,82 81,98 L81,133 C81,145 72,153 50,153 C28,153 19,145 19,133 L19,98 C19,82 20,66 23,54 L30,25 C33,12 41,5 50,5 Z"/>
-            <path class="pc-cab" d="M50,42 C60,42 66,50 66,66 L66,88 C66,97 60,101 50,101 C40,101 34,97 34,88 L34,66 C34,50 40,42 50,42 Z"/>
-            <path class="pc-ln" d="M36,49 L64,49"/><path class="pc-ln" d="M36,95 L64,95"/>
-            <path class="pc-ln" d="M29,60 L24,66"/><path class="pc-ln" d="M71,60 L76,66"/>
-          </svg></div>
-        <div class="pv-gauges">
-          ${this._gauge({ pct: 62, label: t.fuel, value: 62, unit: "%", ic: "fuel" })}
-          ${this._gauge({ pct: 81, label: t.range, value: 486, unit: "km", ic: "gauge" })}
+      <div class="pv-meta"><span class="pv-loc">${icon("pin")}${esc(fake.loc)}</span><span class="pv-sync">${icon("refresh")}${esc(fake.sync)}</span></div>
+      <div class="pv-hero">
+        <span class="pv-ring"><i class="pv-nd n1"></i><i class="pv-nd n2"></i><i class="pv-nd n3"></i><i class="pv-nd n4"></i></span>
+        <svg class="pv-carsvg" viewBox="0 0 100 170" aria-hidden="true">
+          <path class="pc-body" d="M50,7 C64,7 74,16 77,32 L82,72 C84,87 85,105 85,121 L85,140 C85,158 72,164 50,164 C28,164 15,158 15,140 L15,121 C15,105 16,87 18,72 L23,32 C26,16 36,7 50,7 Z"/>
+          <path class="pc-cab" d="M50,45 C62,45 70,56 70,76 L70,104 C70,115 62,119 50,119 C38,119 30,115 30,104 L30,76 C30,56 38,45 50,45 Z"/>
+          <path class="pc-ln" d="M31,54 L69,54"/><path class="pc-ln" d="M31,111 L69,111"/>
+          <path class="pc-ln" d="M24,76 L17,84"/><path class="pc-ln" d="M76,76 L83,84"/>
+          <path class="pc-wh" d="M16,46 L16,66"/><path class="pc-wh" d="M84,46 L84,66"/>
+          <path class="pc-wh" d="M16,120 L16,140"/><path class="pc-wh" d="M84,120 L84,140"/>
+        </svg>
+        <span class="pv-eng"><i></i>${esc(t.engine || "引擎")}<b>${esc(en ? "Off" : "已熄火")}</b></span>
+        <span class="pv-cap top">${icon("car")}<i>${esc(en ? "Closed" : "已关闭")}</i><b>${esc(en ? "Hood" : "引擎盖")}</b></span>
+        <span class="pv-cap bot">${icon("trunk")}<i>${esc(en ? "Closed" : "已关闭")}</i><b>${esc(en ? "Trunk" : "尾门")}</b></span>
+        <div class="pv-quad">
+          ${door(en ? "Driver" : "主驾", fake.tire[0])}
+          ${door(en ? "Pass." : "副驾", fake.tire[1])}
+          ${door(en ? "Rear L" : "左后", fake.tire[2])}
+          ${door(en ? "Rear R" : "右后", fake.tire[3])}
         </div>
       </div>
+      <div class="pv-gauges">
+        ${this._gauge({ pct: 62, label: t.fuel, value: fake.fuel, unit: "%", ic: "fuel" })}
+        ${this._gauge({ pct: 81, label: t.range, value: fake.range, unit: "km", ic: "gauge" })}
+      </div>
+      <div class="pv-chips">
+        <span><i>${esc(t.odo || "总里程")}</i><b>${esc(fake.odo)}</b><em>km</em></span>
+        <span><i>${esc(en ? "Battery" : "蓄电池")}</i><b>${esc(fake.batt)}</b><em>V</em></span>
+        <span><i>${esc(en ? "Oil" : "机油寿命")}</i><b>${esc(fake.oil)}</b><em>%</em></span>
+      </div>
+      <div class="pv-alert">${icon("warning")}<b>${esc(en ? "Alert" : "车辆告警")}</b>${esc(en ? "Tire pressure warning" : "胎压监测系统警告")}</div>
       <div class="pv-acts">
         ${acts.map(
       (a) => `<span class="pv-act${a.on ? " on" : ""}"><b>${icon(a.ic)}</b><em>${esc(a.lb)}</em></span>`
     ).join("")}
+      </div>
+      <div class="pv-selects">
+        <span>${esc(t.soundDur || "寻车时长")}<b>${esc(fake.dur)} ${esc(en ? "sec" : "秒")}</b></span>
+        <span>${esc(t.soundType || "寻车类型")}<b>${esc(fake.ring)}</b></span>
       </div>`;
   }
   // ---------- 卡片主体 ----------
@@ -3094,7 +3185,7 @@ var HaCarEditor = class extends HTMLElement {
 customElements.define("ha-car-editor", HaCarEditor);
 
 // src/main.js
-var VERSION = "1.7.4";
+var VERSION = "1.7.5";
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "ha-car",
