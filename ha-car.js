@@ -792,26 +792,30 @@ ha-card.panel.fit .pills { width: 100%; max-width: none; }
 }
 
 
-/* 引擎启动后的灯光特效：前灯从灯位向前射出白色切光，尾灯点亮车尾红灯带
-   坐标依据官方车图（750×1320）实测：前灯中心 y≈10%、左右 29.9%/70.2%；尾灯带 x 23.6%–76.4%、y 69.9%–77.1% */
-.beam { position: absolute; width: 19cqw; height: 30cqw; pointer-events: none; opacity: 0;
-  transform: translate(-50%, -100%); mix-blend-mode: screen; filter: blur(2.2px);
+/* 引擎启动后的灯光特效：前灯从车头灯位向前射出白色切光，光锥末端在地面铺一片落光；
+   尾灯在车后铺一片红光。灯位依据官方车图实测：前灯 x 29.9%/70.2%、y 10.6%；尾灯带 x 23.6%-76.4%、y 70%-77% */
+.beam { position: absolute; width: 30cqw; height: 34cqw; pointer-events: none; opacity: 0;
+  transform: translate(-50%, -100%); mix-blend-mode: screen; filter: blur(2.4px);
   /* 顶边齐平 = 投影切光线，横向自然衰减 */
   clip-path: polygon(4% 100%, 96% 100%, 100% 0, 0 0);
-  background: radial-gradient(52% 96% at 50% 100%, rgba(255,255,255,.62) 0%,
-    rgba(228,247,255,.34) 32%, rgba(200,236,255,.14) 60%, rgba(190,230,255,.04) 80%, transparent 92%); }
+  background: radial-gradient(56% 96% at 50% 100%, rgba(255,255,255,.96) 0%,
+    rgba(232,248,255,.58) 30%, rgba(206,238,255,.26) 58%, rgba(190,230,255,.08) 78%, transparent 90%); }
 .beam::after { content: ""; position: absolute; left: 50%; bottom: 0; width: 60%; height: 88%;
   transform: translateX(-50%);
-  background: radial-gradient(50% 92% at 50% 100%, rgba(255,255,255,.88) 0%, rgba(244,253,255,.40) 36%,
-    rgba(226,246,255,.12) 68%, transparent 88%); }
-.beam.lb { left: 29.9%; top: 10.6%; transform: translate(-50%, -100%) rotate(-4deg); transform-origin: 50% 100%; }
-.beam.rb { left: 70.2%; top: 10.6%; transform: translate(-50%, -100%) rotate(4deg); transform-origin: 50% 100%; }
-.tailbar { position: absolute; left: 50%; top: 73.4%; width: 55cqw; height: 4cqw; pointer-events: none;
-  opacity: 0; transform: translate(-50%, -50%); mix-blend-mode: screen; border-radius: 999px;
-  background: linear-gradient(90deg, rgba(255,56,40,.22), rgba(255,118,92,.92) 18%, rgba(255,74,52,1) 50%,
-    rgba(255,118,92,.92) 82%, rgba(255,56,40,.22));
-  box-shadow: 0 0 4cqw 1.2cqw rgba(255,64,44,.55), 0 0 12cqw 3cqw rgba(255,44,32,.28); }
-.hero.run .beam, .hero.run .tailbar { animation: hc-lamp 2.6s ease-in-out infinite; }
+  background: radial-gradient(50% 92% at 50% 100%, rgba(255,255,255,1) 0%, rgba(244,253,255,.62) 34%,
+    rgba(226,246,255,.20) 66%, transparent 86%); }
+.beam.lb { left: 29.9%; top: 10.6%; transform: translate(-50%, -100%) rotate(-7deg); transform-origin: 50% 100%; }
+.beam.rb { left: 70.2%; top: 10.6%; transform: translate(-50%, -100%) rotate(7deg); transform-origin: 50% 100%; }
+/* 落在地面的光：椭圆的漫反射光斑，压在光锥末端 */
+.gpool { position: absolute; left: 50%; top: calc(14.6% - var(--beamh, 0px)); width: 82cqw; height: 18cqw;
+  pointer-events: none; opacity: 0; transform: translate(-50%, -50%); mix-blend-mode: screen; filter: blur(6px);
+  background: radial-gradient(52% 50% at 50% 50%, rgba(252,255,255,.72) 0%, rgba(222,246,255,.40) 34%,
+    rgba(192,233,255,.14) 62%, transparent 82%); }
+/* 尾灯在地面的红光 */
+.tailglow { position: absolute; left: 50%; top: 84%; width: 86cqw; height: 34cqw; pointer-events: none;
+  opacity: 0; transform: translate(-50%, -50%); mix-blend-mode: screen; filter: blur(4px);
+  background: radial-gradient(50% 50% at 50% 50%, rgba(255,64,44,.82), rgba(255,34,26,.40) 48%, transparent 74%); }
+.hero.run .beam, .hero.run .gpool, .hero.run .tailglow { animation: hc-lamp 2.6s ease-in-out infinite; }
 .hero.run .beam.rb { animation-delay: .16s; }
 @keyframes hc-lamp {
   0%, 100% { opacity: .5; }
@@ -1666,7 +1670,7 @@ var HaCarCard = class extends HTMLElement {
     };
     const out = [];
     if (running) {
-      out.push(`<i class="beam lb"></i><i class="beam rb"></i><i class="tailbar"></i>`);
+      out.push(`<i class="beam lb"></i><i class="beam rb"></i><i class="gpool"></i><i class="tailglow"></i>`);
     }
     if (data.get("sw_engine") || data.get("remote_start")) {
       out.push(`<div class="enp${running ? " on" : ""}"><div class="row"><i class="ed"></i><span>${zh ? "引擎" : "ENGINE"}</span></div><b>${running ? zh ? "已启动" : "Running" : zh ? "已熄火" : "Off"}</b></div>`);
@@ -1769,9 +1773,10 @@ var HaCarCard = class extends HTMLElement {
     ovl.style.height = `${ih}px`;
     const beams = ovl.querySelectorAll(".beam");
     if (beams.length) {
-      const lineY = img.offsetTop + shift + ih * 0.096;
-      const bh = Math.max(10, Math.min(lineY, ih * 0.27));
+      const lineY = img.offsetTop + shift + ih * 0.106;
+      const bh = Math.max(10, Math.min(lineY - 4, ih * 0.3));
       for (const bEl of beams) bEl.style.height = `${bh}px`;
+      ovl.style.setProperty("--beamh", `${bh}px`);
     }
     if (hero && orb) {
       const capH0 = this._wrap.querySelector(".cap.hood");
@@ -2899,7 +2904,7 @@ var HaCarEditor = class extends HTMLElement {
 customElements.define("ha-car-editor", HaCarEditor);
 
 // src/main.js
-var VERSION = "1.6.4";
+var VERSION = "1.6.5";
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "ha-car",
