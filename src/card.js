@@ -529,7 +529,8 @@ class HaCarCard extends HTMLElement {
     const out = [];
     // 引擎启动后的前后车灯（纯光效，落在车图坐标系里）
     if (running) {
-      out.push(`<i class="lamp lf"></i><i class="lamp rf"></i><i class="lamp lr"></i><i class="lamp rr"></i>`);
+      out.push(`<i class="beam lb"></i><i class="beam rb"></i><i class="tailglow"></i>` +
+        `<i class="lamp lf"></i><i class="lamp rf"></i><i class="lamp lr"></i><i class="lamp rr"></i>`);
     }
     // 引擎状态胶囊（圆环左上角圈外）
     if (data.get("sw_engine") || data.get("remote_start")) {
@@ -645,6 +646,13 @@ class HaCarCard extends HTMLElement {
     ovl.style.top = `${img.offsetTop + shift}px`;
     ovl.style.width = `${img.offsetWidth}px`;
     ovl.style.height = `${ih}px`;
+    // 前灯切光：高度正好顶到 hero 上沿，保证光锥不被裁掉、远端的切光线可见
+    const beams = ovl.querySelectorAll(".beam");
+    if (beams.length) {
+      const lineY = img.offsetTop + shift + ih * 0.096;
+      const bh = Math.max(10, Math.min(lineY, ih * 0.42));
+      for (const bEl of beams) bEl.style.height = `${bh}px`;
+    }
     if (hero && orb) {
       // 引擎盖/尾门胶囊 + 四张位置卡：统一按「车身轮廓 / 圆环边界」自适应落位
       // 空间太窄时先把圆环收一点，给前后盖胶囊腾出位置（胶囊优先保持可读尺寸）
