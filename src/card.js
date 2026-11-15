@@ -323,7 +323,7 @@ class HaCarCard extends HTMLElement {
     this._fitKey = key;
     // 双栏 fit 版式只在「宽不小于高」的容器里用；竖屏平板走单列 pfit，
     // 否则 1440×N 的横版画布被拉成竖条，中间会空出一大片
-    const fit = w >= 760 && h >= 460 && w >= h * 1.02;
+    const fit = w >= 760 && h >= 460 && w >= h * 1.2;
     const wasFit = this._fitState;
     this._fitState = fit;
     this._card.classList.toggle("fit", fit);
