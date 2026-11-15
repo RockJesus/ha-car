@@ -426,7 +426,8 @@ class HaCarCard extends HTMLElement {
           html = `<div class="blk b-hero">${this._hero(
             this._imgFrom(b.entity, hero.src),
             hero.fb,
-            this._carOverlay(data, t, mods),
+            this._carOverlay(data, t, mods, running),
+            running,
           )}</div>`;
           break;
         case "energy": {
@@ -492,11 +493,11 @@ class HaCarCard extends HTMLElement {
   }
 
   // 车图 + 同心轨道 + 四枚发光节点（无图时落回圆形占位）
-  _hero(imgUrl, fbUrl, overlay) {
+  _hero(imgUrl, fbUrl, overlay, running) {
     const inner = typeof overlay === "string" ? overlay : (overlay && overlay.inner) || "";
     const edge = (overlay && overlay.edge) || "";
-    return `<div class="hero"><div class="halo"></div>
-      <span class="orbit"><svg class="hring2" viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="49"/></svg><i class="node n1"></i><i class="node n2"></i><i class="node n3"></i><i class="node n4"></i></span>
+    return `<div class="hero${running ? " run" : ""}"><div class="halo"></div>
+      <span class="orbit${running ? " run" : ""}"><svg class="hring2" viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="49"/></svg><i class="node n1"></i><i class="node n2"></i><i class="node n3"></i><i class="node n4"></i></span>
       <span class="orbit o2"></span>
       ${
         imgUrl
@@ -507,7 +508,7 @@ class HaCarCard extends HTMLElement {
   }
 
   // 俯视图状态层：每个车门一张聚合卡（门 + 窗 + 该轮位胎压），前后盖各一张小卡，全部落在圆环内侧
-  _carOverlay(data, t, mods) {
+  _carOverlay(data, t, mods, running) {
     const zh = !isEn(this._hass);
     const doors = mods.includes("doors");
     const lockedRaw = text(data.get("lock") || {});
@@ -526,6 +527,11 @@ class HaCarCard extends HTMLElement {
       return { slot, html, warn };
     };
     const out = [];
+    // 引擎状态胶囊（圆环左上角圈外）
+    if (data.get("sw_engine") || data.get("remote_start")) {
+      out.push(`<div class="enp${running ? " on" : ""}"><i class="ed"></i><span>${zh ? "引擎" : "Engine"}</span>` +
+        `<b>${running ? (zh ? "已启动" : "Running") : (zh ? "已熄火" : "Off")}</b></div>`);
+    }
     const quads = [
       ["lf", zh ? "主驾" : "Driver", ["door_fl", "win_fl"], "tp_lf", "tps_lf"],
       ["rf", zh ? "副驾" : "Front", ["door_fr", "win_fr"], "tp_rf", "tps_rf"],
@@ -641,7 +647,8 @@ class HaCarCard extends HTMLElement {
         const bB = img.offsetTop + shift + pad0 + shown0 * 0.855;
         const rT = (r0.top - heroR0.top) * kk0;
         const rB = (r0.bottom - heroR0.top) * kk0;
-        const need = Math.max(capH0.offsetHeight + 8 - (bT - rT), 0, capT0.offsetHeight + 8 - (rB - bB));
+        const gap0 = Math.max(10, Math.round(shown0 * 0.042));
+        const need = Math.max(capH0.offsetHeight + gap0 + 2 - (bT - rT), 0, capT0.offsetHeight + 8 - (rB - bB));
         if (need > 1) {
           const d0 = Math.min(hero.clientWidth, hero.clientHeight) * 0.965;
           const d2 = Math.max(d0 * 0.72, d0 - need * 2);
@@ -685,9 +692,10 @@ class HaCarCard extends HTMLElement {
           }
           return h;
         };
-        const hH = fit(capH, bodyT - ringT);
+        const gapHood = Math.max(10, Math.round(shownH * 0.042));
+        const hH = fit(capH, bodyT - ringT - gapHood + 8);
         const tH = fit(capT, ringB - bodyB);
-        let hTop = bodyT - 4 - hH;
+        let hTop = bodyT - gapHood - hH;
         if (hTop < ringT + 3) hTop = ringT + 3;
         let tTop = bodyB + 4;
         if (tTop + tH > ringB - 3) tTop = ringB - 3 - tH;
@@ -713,6 +721,42 @@ class HaCarCard extends HTMLElement {
         // 竖向对齐车门行：前排偏车头、后排偏车尾，随车身高度自适应
         card.style.top = `${Math.round(bodyT + (bodyB - bodyT) * (front ? 0.34 : 0.66))}px`;
       });
+
+      // 引擎状态胶囊：贴在圆环左上角的圈外，跟着圆圈一起自适应
+      const enp = this._wrap.querySelector(".enp");
+      if (enp) {
+        const cx0 = (ringL + ringR) / 2;
+        const cy0 = (ringT + ringB) / 2;
+        const rr = (ringR - ringL) / 2;
+        const w = enp.offsetWidth, h = enp.offsetHeight;
+        let ex = cx0 - rr * 0.82;
+        let ey = cy0 - rr * 0.82;
+        // 让胶囊右下角整块落在圆环外：再把中心沿径向推到「角到圆心的距离 ≥ r + 8」
+        for (let pass = 0; pass < 2; pass++) {
+          const dx = ex + w / 2 - cx0;
+          const dy = ey + h / 2 - cy0;
+          const dd = Math.hypot(dx, dy) || 1;
+          const target = rr + 8;
+          if (dd < target) {
+            const lam = target / dd;
+            ex = cx0 + dx * lam - w / 2;
+            ey = cy0 + dy * lam - h / 2;
+          }
+        }
+        ex = Math.max(6 - img.offsetLeft + w / 2, ex);
+        ey = Math.max(6 - (img.offsetTop + shift) + h / 2, ey);
+        enp.style.left = `${Math.round(ex)}px`;
+        enp.style.top = `${Math.round(ey)}px`;
+        // 别压到主驾卡片
+        const first = this._wrap.querySelector(".loc.lf");
+        if (first) {
+          const fb = first.getBoundingClientRect();
+          const eb = enp.getBoundingClientRect();
+          if (eb.bottom > fb.top - 4 && eb.left < fb.right + 6) {
+            enp.style.top = `${Math.round(ey - (eb.bottom - fb.top + 8))}px`;
+          }
+        }
+      }
     }
   }
 

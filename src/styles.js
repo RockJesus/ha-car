@@ -488,6 +488,33 @@ ha-card.panel.fit .pills { width: 100%; max-width: none; }
   .tile.pressing .hring circle, .pill.pressing .holdbar { transition: none; }
   .sync.spin .ic, .tile.pending .orb::after, .node { animation: none; }
 }
+
+
+.hero.run .halo { background: radial-gradient(46% 52% at 50% 50%, rgba(45,255,170,.22), rgba(45,255,170,.07) 46%, transparent 72%); }
+.orbit.run { border-color: rgba(76,255,178,.55); animation: hc-breathe 2.6s ease-in-out infinite; }
+.orbit.run.o2 { border-color: rgba(76,255,178,.26); animation-delay: .7s; }
+.hero.run .ground { background: radial-gradient(50% 50% at 50% 50%, rgba(48,255,166,.42), rgba(48,255,166,.10) 55%, transparent 74%);
+  animation: hc-ground 2.6s ease-in-out infinite; }
+.covl.run::after { content: ""; position: absolute; left: 14%; right: 14%; bottom: 1%; height: 22%; border-radius: 50%;
+  background: radial-gradient(50% 50% at 50% 50%, rgba(48,255,166,.40), transparent 72%); filter: blur(8px);
+  animation: hc-ground 2.6s ease-in-out infinite; pointer-events: none; }
+@keyframes hc-breathe {
+  0%, 100% { box-shadow: inset 0 0 34px -14px rgba(52,255,168,.30), 0 0 18px -8px rgba(52,255,168,.22); }
+  50% { box-shadow: inset 0 0 52px -10px rgba(96,255,196,.85), 0 0 52px -6px rgba(52,255,168,.75); }
+}
+@keyframes hc-ground { 0%, 100% { opacity: .55; } 50% { opacity: 1; } }
+.enp { position: absolute; left: 0; top: 0; transform: translate(-50%, -50%); z-index: 3;
+  display: inline-flex; align-items: center; gap: 6px; padding: 5px 11px 5px 9px; border-radius: 999px;
+  background: rgba(9,18,26,.82); border: 1px solid rgba(140,170,190,.22); color: #a9b6bf;
+  font-size: 11px; letter-spacing: .08em; white-space: nowrap; backdrop-filter: blur(8px);
+  box-shadow: 0 4px 14px rgba(0,0,0,.35); pointer-events: none; }
+.enp span { opacity: .72; }
+.enp b { font-size: 12px; font-weight: 600; color: #cfd9e0; letter-spacing: .04em; }
+.enp .ed { width: 6px; height: 6px; border-radius: 50%; background: #6b7a84; flex: 0 0 auto; }
+.enp.on { border-color: rgba(76,255,178,.6); box-shadow: 0 0 16px rgba(40,255,160,.28), inset 0 0 12px rgba(40,255,160,.12); }
+.enp.on b { color: #8affcb; }
+.enp.on .ed { background: #3dffa2; box-shadow: 0 0 8px 2px rgba(61,255,162,.8); animation: hc-engpulse 1.6s ease-in-out infinite; }
+@keyframes hc-engpulse { 0%, 100% { opacity: .55; transform: scale(.9); } 50% { opacity: 1; transform: scale(1.15); } }
 `;
 
 export const EDITOR_STYLES = `

@@ -790,6 +790,33 @@ ha-card.panel.fit .pills { width: 100%; max-width: none; }
   .tile.pressing .hring circle, .pill.pressing .holdbar { transition: none; }
   .sync.spin .ic, .tile.pending .orb::after, .node { animation: none; }
 }
+
+
+.hero.run .halo { background: radial-gradient(46% 52% at 50% 50%, rgba(45,255,170,.22), rgba(45,255,170,.07) 46%, transparent 72%); }
+.orbit.run { border-color: rgba(76,255,178,.55); animation: hc-breathe 2.6s ease-in-out infinite; }
+.orbit.run.o2 { border-color: rgba(76,255,178,.26); animation-delay: .7s; }
+.hero.run .ground { background: radial-gradient(50% 50% at 50% 50%, rgba(48,255,166,.42), rgba(48,255,166,.10) 55%, transparent 74%);
+  animation: hc-ground 2.6s ease-in-out infinite; }
+.covl.run::after { content: ""; position: absolute; left: 14%; right: 14%; bottom: 1%; height: 22%; border-radius: 50%;
+  background: radial-gradient(50% 50% at 50% 50%, rgba(48,255,166,.40), transparent 72%); filter: blur(8px);
+  animation: hc-ground 2.6s ease-in-out infinite; pointer-events: none; }
+@keyframes hc-breathe {
+  0%, 100% { box-shadow: inset 0 0 34px -14px rgba(52,255,168,.30), 0 0 18px -8px rgba(52,255,168,.22); }
+  50% { box-shadow: inset 0 0 52px -10px rgba(96,255,196,.85), 0 0 52px -6px rgba(52,255,168,.75); }
+}
+@keyframes hc-ground { 0%, 100% { opacity: .55; } 50% { opacity: 1; } }
+.enp { position: absolute; left: 0; top: 0; transform: translate(-50%, -50%); z-index: 3;
+  display: inline-flex; align-items: center; gap: 6px; padding: 5px 11px 5px 9px; border-radius: 999px;
+  background: rgba(9,18,26,.82); border: 1px solid rgba(140,170,190,.22); color: #a9b6bf;
+  font-size: 11px; letter-spacing: .08em; white-space: nowrap; backdrop-filter: blur(8px);
+  box-shadow: 0 4px 14px rgba(0,0,0,.35); pointer-events: none; }
+.enp span { opacity: .72; }
+.enp b { font-size: 12px; font-weight: 600; color: #cfd9e0; letter-spacing: .04em; }
+.enp .ed { width: 6px; height: 6px; border-radius: 50%; background: #6b7a84; flex: 0 0 auto; }
+.enp.on { border-color: rgba(76,255,178,.6); box-shadow: 0 0 16px rgba(40,255,160,.28), inset 0 0 12px rgba(40,255,160,.12); }
+.enp.on b { color: #8affcb; }
+.enp.on .ed { background: #3dffa2; box-shadow: 0 0 8px 2px rgba(61,255,162,.8); animation: hc-engpulse 1.6s ease-in-out infinite; }
+@keyframes hc-engpulse { 0%, 100% { opacity: .55; transform: scale(.9); } 50% { opacity: 1; transform: scale(1.15); } }
 `;
 var EDITOR_STYLES = `
 :host { display: block; }
@@ -1520,7 +1547,8 @@ var HaCarCard = class extends HTMLElement {
           html = `<div class="blk b-hero">${this._hero(
             this._imgFrom(b.entity, hero.src),
             hero.fb,
-            this._carOverlay(data, t, mods)
+            this._carOverlay(data, t, mods, running),
+            running
           )}</div>`;
           break;
         case "energy": {
@@ -1583,17 +1611,17 @@ var HaCarCard = class extends HTMLElement {
     return `${head}<div class="blocks">${inner}</div>${this._toast ? this._toastHtml() : ""}`;
   }
   // 车图 + 同心轨道 + 四枚发光节点（无图时落回圆形占位）
-  _hero(imgUrl, fbUrl, overlay) {
+  _hero(imgUrl, fbUrl, overlay, running) {
     const inner = typeof overlay === "string" ? overlay : overlay && overlay.inner || "";
     const edge = overlay && overlay.edge || "";
-    return `<div class="hero"><div class="halo"></div>
-      <span class="orbit"><svg class="hring2" viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="49"/></svg><i class="node n1"></i><i class="node n2"></i><i class="node n3"></i><i class="node n4"></i></span>
+    return `<div class="hero${running ? " run" : ""}"><div class="halo"></div>
+      <span class="orbit${running ? " run" : ""}"><svg class="hring2" viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="49"/></svg><i class="node n1"></i><i class="node n2"></i><i class="node n3"></i><i class="node n4"></i></span>
       <span class="orbit o2"></span>
       ${imgUrl ? `<img class="carimg" src="${esc(imgUrl)}"${fbUrl ? ` data-fb="${esc(fbUrl)}"` : ""} alt="">` : `<div class="carph">${icon("car")}</div>`}
       <div class="ground"></div><div class="covl">${inner}</div>${edge ? `<div class="cedge">${edge}</div>` : ""}</div>`;
   }
   // 俯视图状态层：每个车门一张聚合卡（门 + 窗 + 该轮位胎压），前后盖各一张小卡，全部落在圆环内侧
-  _carOverlay(data, t, mods) {
+  _carOverlay(data, t, mods, running) {
     const zh = !isEn(this._hass);
     const doors = mods.includes("doors");
     const lockedRaw = text(data.get("lock") || {});
@@ -1611,6 +1639,9 @@ var HaCarCard = class extends HTMLElement {
       return { slot, html, warn };
     };
     const out = [];
+    if (data.get("sw_engine") || data.get("remote_start")) {
+      out.push(`<div class="enp${running ? " on" : ""}"><i class="ed"></i><span>${zh ? "引擎" : "Engine"}</span><b>${running ? zh ? "已启动" : "Running" : zh ? "已熄火" : "Off"}</b></div>`);
+    }
     const quads = [
       ["lf", zh ? "主驾" : "Driver", ["door_fl", "win_fl"], "tp_lf", "tps_lf"],
       ["rf", zh ? "副驾" : "Front", ["door_fr", "win_fr"], "tp_rf", "tps_rf"],
@@ -1713,7 +1744,8 @@ var HaCarCard = class extends HTMLElement {
         const bB = img.offsetTop + shift + pad0 + shown0 * 0.855;
         const rT = (r0.top - heroR0.top) * kk0;
         const rB = (r0.bottom - heroR0.top) * kk0;
-        const need = Math.max(capH0.offsetHeight + 8 - (bT - rT), 0, capT0.offsetHeight + 8 - (rB - bB));
+        const gap0 = Math.max(10, Math.round(shown0 * 0.042));
+        const need = Math.max(capH0.offsetHeight + gap0 + 2 - (bT - rT), 0, capT0.offsetHeight + 8 - (rB - bB));
         if (need > 1) {
           const d0 = Math.min(hero.clientWidth, hero.clientHeight) * 0.965;
           const d2 = Math.max(d0 * 0.72, d0 - need * 2);
@@ -1755,9 +1787,10 @@ var HaCarCard = class extends HTMLElement {
           }
           return h;
         };
-        const hH = fit(capH, bodyT - ringT);
+        const gapHood = Math.max(10, Math.round(shownH * 0.042));
+        const hH = fit(capH, bodyT - ringT - gapHood + 8);
         const tH = fit(capT, ringB - bodyB);
-        let hTop = bodyT - 4 - hH;
+        let hTop = bodyT - gapHood - hH;
         if (hTop < ringT + 3) hTop = ringT + 3;
         let tTop = bodyB + 4;
         if (tTop + tH > ringB - 3) tTop = ringB - 3 - tH;
@@ -1781,6 +1814,38 @@ var HaCarCard = class extends HTMLElement {
         card.style.left = `${Math.round(cx)}px`;
         card.style.top = `${Math.round(bodyT + (bodyB - bodyT) * (front ? 0.34 : 0.66))}px`;
       });
+      const enp = this._wrap.querySelector(".enp");
+      if (enp) {
+        const cx0 = (ringL + ringR) / 2;
+        const cy0 = (ringT + ringB) / 2;
+        const rr = (ringR - ringL) / 2;
+        const w = enp.offsetWidth, h = enp.offsetHeight;
+        let ex = cx0 - rr * 0.82;
+        let ey = cy0 - rr * 0.82;
+        for (let pass = 0; pass < 2; pass++) {
+          const dx = ex + w / 2 - cx0;
+          const dy = ey + h / 2 - cy0;
+          const dd = Math.hypot(dx, dy) || 1;
+          const target = rr + 8;
+          if (dd < target) {
+            const lam = target / dd;
+            ex = cx0 + dx * lam - w / 2;
+            ey = cy0 + dy * lam - h / 2;
+          }
+        }
+        ex = Math.max(6 - img.offsetLeft + w / 2, ex);
+        ey = Math.max(6 - (img.offsetTop + shift) + h / 2, ey);
+        enp.style.left = `${Math.round(ex)}px`;
+        enp.style.top = `${Math.round(ey)}px`;
+        const first = this._wrap.querySelector(".loc.lf");
+        if (first) {
+          const fb = first.getBoundingClientRect();
+          const eb = enp.getBoundingClientRect();
+          if (eb.bottom > fb.top - 4 && eb.left < fb.right + 6) {
+            enp.style.top = `${Math.round(ey - (eb.bottom - fb.top + 8))}px`;
+          }
+        }
+      }
     }
   }
   // 底座条：四轮胎压 + 同步（同步入口就是刷新按钮）
@@ -2784,7 +2849,7 @@ var HaCarEditor = class extends HTMLElement {
 customElements.define("ha-car-editor", HaCarEditor);
 
 // src/main.js
-var VERSION = "1.5.7";
+var VERSION = "1.5.8";
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "ha-car",
