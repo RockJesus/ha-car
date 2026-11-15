@@ -858,7 +858,13 @@ ha-card.panel:not(.fit) .blocks { flex-direction: column; }
 ha-card.panel.fit .b-hero-col { display: flex; flex: 1.02 1 0; min-width: 0; }
 ha-card.panel.fit .b-hero-col .b-hero { flex: 1 1 auto; justify-content: center; }
 ha-card.panel.fit .b-side { display: flex; flex-direction: column; flex: .98 1 0; min-width: 0;
-  justify-content: center; gap: 16px; }
+  justify-content: flex-start; gap: 16px; }
+/* 右栏纵向铺满：仪表吃掉多余高度并居中，副指标/告警/按钮组自然下移贴底，底部不再留大片空白 */
+ha-card.panel.fit .b-side > .b-energy { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; justify-content: center; }
+ha-card.panel.fit .b-side > .b-energy > .energy { width: 100%; }
+ha-card.panel.fit .b-side > .b-meta,
+ha-card.panel.fit .b-side > .b-alerts,
+ha-card.panel.fit .b-side > .b-actions { flex: 0 0 auto; }
 ha-card.panel.fit .b-hero .hero { height: 100%; min-height: 600px; }
 ha-card.panel.fit .orbit { height: 78%; }
 ha-card.panel.fit .orbit.o2 { height: 86%; }
@@ -3194,7 +3200,7 @@ var HaCarEditor = class extends HTMLElement {
 customElements.define("ha-car-editor", HaCarEditor);
 
 // src/main.js
-var VERSION = "1.7.6";
+var VERSION = "1.7.7";
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "ha-car",
