@@ -42,7 +42,22 @@ const PATHS = {
 
 export const ICON_NAMES = Object.keys(PATHS);
 
+// 小尺寸下更清晰的线条图标（描边而非填充），用于车况行
+const STROKE_PATHS = {
+  // 车门：门板轮廓 + 门把手
+  cardoor: "M56,32 H200 V224 H56 Z M176,128 m-10,0 a10,10 0,1,0 20,0 a10,10 0,1,0 -20,0",
+  // 车窗：窗框 + 中分线
+  carwin: "M32,64 H224 V192 H32 Z M128,64 V192",
+  // 胎压：轮胎外圈 + 内圈 + 胎面纹
+  tireo: "M128,36 a92,92 0,1,0 0,184 a92,92 0,1,0 0,-184 M128,96 a32,32 0,1,0 0,64 a32,32 0,1,0 0,-64",
+};
+
 export function icon(name, cls) {
+  const s = STROKE_PATHS[name];
+  if (s) {
+    return `<svg class="ic${cls ? " " + cls : ""}" viewBox="0 0 256 256" aria-hidden="true" focusable="false">` +
+      `<path d="${s}" fill="none" stroke="currentColor" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+  }
   const d = PATHS[name] || PATHS.car;
   return `<svg class="ic${cls ? " " + cls : ""}" viewBox="0 0 256 256" aria-hidden="true" focusable="false"><path d="${d}"/></svg>`;
 }

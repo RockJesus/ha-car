@@ -360,11 +360,11 @@ h1 { margin: 0; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-s
 .loc .lh .lk { font-style: normal; width: 5.2cqw; height: 5.2cqw; color: #6d8298; opacity: .85; }
 .loc .lh .lk .ic { width: 100%; height: 100%; display: block; }
 .loc .lh .lk.on { color: #7ee0b3; opacity: 1; }
-.loc .lr { display: flex; align-items: center; gap: 2.8cqw; line-height: 1; }
-.loc .lr .ri { flex: 0 0 7cqw; height: 7cqw; display: grid; place-items: center; color: #86c9de; }
+.loc .lr { display: flex; align-items: center; justify-content: center; gap: 2.4cqw; line-height: 1; }
+.loc .lr .ri { flex: 0 0 7.4cqw; height: 7.4cqw; display: grid; place-items: center; color: #8fd6ea; }
 .loc .lr .ri .ic { width: 100%; height: 100%; display: block; }
-.loc .lr b { font-size: 6.3cqw; font-weight: 620; color: #dbe7f5; letter-spacing: .01em; }
-.loc .lr.tire b { font-size: 7cqw; }
+.loc .lr b { font-size: 5.9cqw; font-weight: 620; color: #dbe7f5; letter-spacing: .01em; white-space: nowrap; }
+.loc .lr.tire b { font-size: 6.6cqw; }
 .loc .lr.tire b s { text-decoration: none; font-size: 4.4cqw; font-weight: 500; color: #7d90a6; margin-left: 1.4cqw; }
 .loc .lr.open b { color: #ffcf90; }
 .loc .lr.open .ri { color: #ffcf90; }
@@ -375,13 +375,13 @@ h1 { margin: 0; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-s
   box-shadow: 0 2cqw 5cqw rgba(2,7,12,.5), 0 0 4cqw rgba(255,196,107,.14); }
 .loc.bad { border-color: rgba(255,145,130,.5); background: linear-gradient(180deg, rgba(58,18,18,.9), rgba(30,10,10,.94)); }
 /* 前后盖小卡：车头/车尾正上方与正下方，仍落在圆环内侧 */
-.cap { left: 50%; width: 42cqw; flex-direction: row; align-items: center;
+.cap { left: 50%; width: 44cqw; flex-direction: row; align-items: center; justify-content: center;
   gap: 2.2cqw; padding: 2.4cqw 3.4cqw; border-radius: 5.6cqw; }
 .cap.hood, .cap.trunk { transform: translate(-50%, 0); }
-.cap .cx { display: flex; flex-direction: column; gap: 1cqw; min-width: 0; }
+.cap .cx { display: flex; flex-direction: column; align-items: center; gap: 1cqw; min-width: 0; text-align: center; }
 .cap .ri { flex: 0 0 5.4cqw; height: 5.4cqw; display: grid; place-items: center; color: #86c9de; }
 .cap .ri .ic { width: 100%; height: 100%; display: block; }
-.cap b { font-size: 5.3cqw; font-weight: 620; color: #dbe7f5; line-height: 1; }
+.cap b { font-size: 5.3cqw; font-weight: 620; color: #dbe7f5; line-height: 1; white-space: nowrap; }
 .cap i { font-style: normal; font-size: 4cqw; color: #7d90a6; line-height: 1; letter-spacing: .05em; }
 .cap.open { border-color: rgba(255,196,107,.5); background: linear-gradient(180deg, rgba(56,32,10,.9), rgba(28,17,7,.94)); }
 .cap.open b, .cap.open .ri { color: #ffcf90; }

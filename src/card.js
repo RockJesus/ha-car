@@ -522,7 +522,7 @@ class HaCarCard extends HTMLElement {
       const warn = outOfRange || (flag && v == null);
       const unit = attrs(st, "unit_of_measurement") || unitFallback;
       const txt = v == null ? "—" : fmtNum(v);
-      const html = `<div class="lr tire${warn ? " warn" : ""}"><span class="ri">${icon("wheel")}</span>` +
+      const html = `<div class="lr tire${warn ? " warn" : ""}"><span class="ri">${icon("tireo")}</span>` +
         `<b>${txt}<s>${esc(unit)}</s></b></div>`;
       return { slot, html, warn };
     };
@@ -547,7 +547,7 @@ class HaCarCard extends HTMLElement {
       const lines = [];
       let bad = false;
       if (doors) {
-        for (const [ic, slot] of [["door", dSlots[0]], ["window", dSlots[1]]]) {
+        for (const [ic, slot] of [["cardoor", dSlots[0]], ["carwin", dSlots[1]]]) {
           const st = data.get(slot);
           if (!st) continue;
           const b = isBad(st);
@@ -555,7 +555,7 @@ class HaCarCard extends HTMLElement {
           const open = !b && normOpen(st) === "open";
           lines.push(
             `<div class="lr${b ? " bad" : open ? " open" : ""}"><span class="ri">${icon(ic)}</span>` +
-              `<b>${b ? (zh ? "不可用" : "N/A") : open ? (zh ? "打开" : "Open") : zh ? "关闭" : "Shut"}</b></div>`,
+              `<b>${b ? (zh ? "不可用" : "N/A") : open ? (zh ? "已打开" : "Open") : zh ? "已关闭" : "Closed"}</b></div>`,
           );
         }
       }
@@ -577,7 +577,7 @@ class HaCarCard extends HTMLElement {
       out.push(
         `<div class="cap ${cls}${b ? " bad" : open ? " open" : ""}" data-more="${esc(data.id(slot))}" title="${esc(label)}">` +
           `<span class="ri">${icon(ic)}</span><span class="cx">` +
-          `<b>${b ? (zh ? "不可用" : "N/A") : open ? (zh ? "打开" : "Open") : zh ? "关闭" : "Shut"}</b>` +
+          `<b>${b ? (zh ? "不可用" : "N/A") : open ? (zh ? "已打开" : "Open") : zh ? "已关闭" : "Closed"}</b>` +
           `<i>${esc(label)}</i></span></div>`,
       );
     };
