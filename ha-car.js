@@ -1465,7 +1465,7 @@ var HaCarCard = class extends HTMLElement {
     const key = `${w}x${h}`;
     if (key === this._fitKey) return;
     this._fitKey = key;
-    const fit = w >= 760 && h >= 460;
+    const fit = w >= 760 && h >= 460 && w >= h * 1.02;
     const wasFit = this._fitState;
     this._fitState = fit;
     this._card.classList.toggle("fit", fit);
@@ -2980,7 +2980,7 @@ var HaCarEditor = class extends HTMLElement {
 customElements.define("ha-car-editor", HaCarEditor);
 
 // src/main.js
-var VERSION = "1.7.0";
+var VERSION = "1.7.1";
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "ha-car",
