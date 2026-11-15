@@ -1690,8 +1690,15 @@ var HaCarCard = class extends HTMLElement {
         const hH = capH.offsetHeight;
         const tH = capT.offsetHeight;
         const ih = img.offsetHeight;
-        const bodyTop = ih * 0.056;
-        const bodyBot = ih * 0.987;
+        const nw = img.naturalWidth, nh = img.naturalHeight;
+        let topPad = 0, shownH = ih;
+        if (nw && nh) {
+          const sc = Math.min(img.clientWidth / nw, ih / nh);
+          shownH = nh * sc;
+          topPad = (ih - shownH) / 2;
+        }
+        const bodyTop = topPad + shownH * 0.058;
+        const bodyBot = topPad + shownH * 0.855;
         const ratio = ovlR.width ? ovl.clientWidth / ovlR.width : 1;
         const ringTop = (orbR.top - ovlR.top) * ratio;
         const ringBot = (orbR.bottom - ovlR.top) * ratio;
@@ -2705,7 +2712,7 @@ var HaCarEditor = class extends HTMLElement {
 customElements.define("ha-car-editor", HaCarEditor);
 
 // src/main.js
-var VERSION = "1.5.4";
+var VERSION = "1.5.5";
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "ha-car",

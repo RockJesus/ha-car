@@ -616,9 +616,17 @@ class HaCarCard extends HTMLElement {
         const hH = capH.offsetHeight;
         const tH = capT.offsetHeight;
         const ih = img.offsetHeight;
-        // 车图上下各有透明留白：车身轮廓约占图高的 5.6%–98.7%，小卡贴着车身头/尾外侧摆
-        const bodyTop = ih * 0.056;
-        const bodyBot = ih * 0.987;
+        // 车图在 img 里是 object-fit: contain，可能上下留出空白带；先还原实际绘制区域
+        const nw = img.naturalWidth, nh = img.naturalHeight;
+        let topPad = 0, shownH = ih;
+        if (nw && nh) {
+          const sc = Math.min(img.clientWidth / nw, ih / nh);
+          shownH = nh * sc;
+          topPad = (ih - shownH) / 2;
+        }
+        // 车身轮廓约占图片内容高的 5.8%–85.5%，小卡贴着车身头/尾外侧摆
+        const bodyTop = topPad + shownH * 0.058;
+        const bodyBot = topPad + shownH * 0.855;
         // rect 是屏幕坐标（面板可能整体缩放过），换算回布局 px 再和 cap 的 offsetHeight 比较
         const ratio = ovlR.width ? ovl.clientWidth / ovlR.width : 1;
         const ringTop = (orbR.top - ovlR.top) * ratio;
