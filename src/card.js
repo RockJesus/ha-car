@@ -323,7 +323,10 @@ class HaCarCard extends HTMLElement {
     this._fitKey = key;
     // 双栏 fit 版式只在「宽不小于高」的容器里用；竖屏平板走单列 pfit，
     // 否则 1440×N 的横版画布被拉成竖条，中间会空出一大片
-    const fit = w >= 760 && h >= 460 && w >= h * 1.2;
+    // 横版双栏的门槛：至少 900px 可用宽度且宽高比 ≥1.02。
+    // 4:3 平板横屏扣掉侧栏只剩 768px，硬塞 1440 画布字会缩得过小、元件互相压住，
+    // 这类窄横屏走单列 pfit 保证可读性；16:10/16:9 平板横屏与桌面宽屏一律双栏。
+    const fit = w >= 900 && h >= 460 && w >= h * 1.02;
     const wasFit = this._fitState;
     this._fitState = fit;
     this._card.classList.toggle("fit", fit);
@@ -347,7 +350,7 @@ class HaCarCard extends HTMLElement {
     const k = Math.min(w / 1440, h / 900);
     this._card.style.setProperty("--fit", String(Math.round(k * 1000) / 1000));
     // 画布按等比缩放后的容器尺寸反算：宽/高两侧都补到容器边界，
-    // 避免高受限时固定 1440px 画布只占满高度、左右留下大片空白。
+    // 避免高受限时固定画布只占满高度、左右留下大片空白。
     const designW = Math.max(1440, Math.round(w / k));
     const designH = Math.max(900, Math.round(h / k));
     this._card.style.width = `${designW}px`;
