@@ -489,20 +489,21 @@ h1 { margin: 0; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-s
 
 /* 能耗：双环形仪表 + 中间量纲图标（参考图同构） */
 .energy { display: grid; grid-template-columns: 1fr 1px 1fr; align-items: center; column-gap: 14px; padding: 2px 2px 0; }
-.gauge { position: relative; width: 100%; max-width: 132px; aspect-ratio: 1; margin: 0 auto; overflow: visible; }
+.gauge { position: relative; width: 100%; max-width: 132px; aspect-ratio: 1; margin: 0 auto; overflow: visible;
+  container-type: inline-size; }
 .gauge > svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
 .gt { fill: none; stroke: rgba(255,255,255,.07); stroke-width: 6; }
 .gp { fill: none; stroke: var(--hc-accent); stroke-width: 6; stroke-linecap: round;
   filter: drop-shadow(0 0 8px rgba(55,214,232,.65)); }
 .gv { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;
-  gap: 3px; padding: 0 10px; box-sizing: border-box; }
-.gl { display: inline-flex; align-items: center; gap: 5px; font-size: 10px; font-weight: 650; letter-spacing: .1em;
+  gap: 2.4cqw; padding: 0 6cqw; box-sizing: border-box; }
+.gl { display: inline-flex; align-items: center; gap: 3.6cqw; font-size: clamp(9px, 8.4cqw, 15px); font-weight: 650; letter-spacing: .1em;
   color: rgba(160,182,206,.85); text-transform: uppercase; }
-.gl .ic { width: 12px; height: 12px; opacity: .85; }
-.gn { display: flex; flex-direction: column; align-items: center; gap: 1px; line-height: 1; max-width: 100%; }
-.gn b { font-size: 29px; font-weight: 680; letter-spacing: -.02em; color: #f3f8ff; white-space: nowrap;
+.gl .ic { width: clamp(11px, 9.6cqw, 17px); height: clamp(11px, 9.6cqw, 17px); opacity: .85; }
+.gn { display: flex; flex-direction: column; align-items: center; gap: .8cqw; line-height: 1; max-width: 100%; }
+.gn b { font-size: clamp(18px, 26cqw, 44px); font-weight: 680; letter-spacing: -.02em; color: #f3f8ff; white-space: nowrap;
   text-shadow: 0 0 22px rgba(55,214,232,.16); }
-.gn i { font-size: 9.5px; font-style: normal; font-weight: 600; color: rgba(150,172,196,.9); letter-spacing: .06em; }
+.gn i { font-size: clamp(9px, 8cqw, 14px); font-style: normal; font-weight: 600; color: rgba(150,172,196,.9); letter-spacing: .06em; }
 .egdiv { width: 1px; height: 62%; align-self: center;
   background: linear-gradient(180deg, transparent, rgba(120,190,215,.28) 26%, rgba(120,190,215,.28) 74%, transparent); }
 .substats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); margin-top: 12px;
@@ -2689,7 +2690,7 @@ var HaCarEditor = class extends HTMLElement {
 customElements.define("ha-car-editor", HaCarEditor);
 
 // src/main.js
-var VERSION = "1.5.2";
+var VERSION = "1.5.3";
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "ha-car",
