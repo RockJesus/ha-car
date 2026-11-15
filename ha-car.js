@@ -489,8 +489,8 @@ h1 { margin: 0; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-s
 
 /* 能耗：双环形仪表 + 中间量纲图标（参考图同构） */
 .energy { display: grid; grid-template-columns: 1fr 1px 1fr; align-items: center; column-gap: 14px; padding: 2px 2px 0; }
-.gauge { position: relative; width: 100%; max-width: 132px; aspect-ratio: 1; margin: 0 auto; }
-.gauge > svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.gauge { position: relative; width: 100%; max-width: 132px; aspect-ratio: 1; margin: 0 auto; overflow: visible; }
+.gauge > svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
 .gt { fill: none; stroke: rgba(255,255,255,.07); stroke-width: 6; }
 .gp { fill: none; stroke: var(--hc-accent); stroke-width: 6; stroke-linecap: round;
   filter: drop-shadow(0 0 8px rgba(55,214,232,.65)); }
@@ -503,7 +503,7 @@ h1 { margin: 0; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-s
 .gn b { font-size: 29px; font-weight: 680; letter-spacing: -.02em; color: #f3f8ff; white-space: nowrap;
   text-shadow: 0 0 22px rgba(55,214,232,.16); }
 .gn i { font-size: 9.5px; font-style: normal; font-weight: 600; color: rgba(150,172,196,.9); letter-spacing: .06em; }
-.egdiv { width: 1px; height: 78px; align-self: center;
+.egdiv { width: 1px; height: 62%; align-self: center;
   background: linear-gradient(180deg, transparent, rgba(120,190,215,.28) 26%, rgba(120,190,215,.28) 74%, transparent); }
 .substats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); margin-top: 12px;
   border-radius: 18px; border: 1px solid rgba(255,255,255,.07); overflow: hidden;
@@ -2689,7 +2689,7 @@ var HaCarEditor = class extends HTMLElement {
 customElements.define("ha-car-editor", HaCarEditor);
 
 // src/main.js
-var VERSION = "1.5.1";
+var VERSION = "1.5.2";
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "ha-car",
