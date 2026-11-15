@@ -521,6 +521,15 @@ ha-card.preview .gl { font-size: 9px; }
 }
 .pv-selects b { font-size: 9px; color: #dff0fb; font-weight: 600; }
 
+/* 面板模式：1440×900 设计稿居中并按 --fit 等比缩放 */
+ha-card.panel.fit { box-sizing: border-box; position: absolute; left: 50%; top: 50%; width: 1440px; height: 900px;
+  transform: translate(-50%, -50%) scale(var(--fit, 1)); transform-origin: center center; }
+ha-card.panel .wrap { height: 100%; box-sizing: border-box; padding: 26px 30px 20px; overflow: hidden; }
+ha-card.panel .blocks { flex: 1 1 auto; min-height: 0; }
+ha-card.panel .b-hero { justify-content: center; min-height: 0; }
+ha-card.panel .hero { flex: 1 1 auto; height: auto; min-height: 300px; }
+ha-card.panel .carimg { max-height: min(62%, 460px); max-width: min(60%, 330px); }
+
 /* 宽面板：车图占左栏满高，仪表/操作/告警等叠成右栏，避免中间大片留白 */
 /* 手机面板：固定 390×840 版式，整体等比缩放到容器内，一屏铺满且不出滚动条 */
 :host(.panel) { position: relative; overflow: hidden; }
