@@ -508,6 +508,18 @@ ha-card.gfit {
 }
 ha-card.gfit .wrap { height: 100%; box-sizing: border-box; overflow: hidden; }
 
+/* 宽格子里的双栏版式（与面板同一套左右分栏） */
+ha-card.gfit.gtwo .blocks { display: flex; flex-direction: row; align-items: stretch; gap: 26px; }
+ha-card.gfit.gtwo .b-hero-col { display: flex; flex: 1.02 1 0; min-width: 0; }
+ha-card.gfit.gtwo .b-hero-col .b-hero { flex: 1 1 auto; justify-content: center; }
+ha-card.gfit.gtwo .b-side { display: flex; flex-direction: column; flex: .98 1 0; min-width: 0; justify-content: flex-start; gap: 16px; }
+ha-card.gfit.gtwo .b-side > .b-energy { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; justify-content: center; }
+ha-card.gfit.gtwo .b-side > .b-energy > .energy { width: 100%; }
+ha-card.gfit.gtwo .b-side > .b-meta,
+ha-card.gfit.gtwo .b-side > .b-alerts,
+ha-card.gfit.gtwo .b-side > .b-actions { flex: 0 0 auto; }
+ha-card.gfit.gtwo .gauge { max-width: 132px; }
+
 /* 面板模式：1440×900 设计稿居中并按 --fit 等比缩放 */
 ha-card.panel.fit { box-sizing: border-box; position: absolute; left: 50%; top: 50%; width: 1440px; height: 900px;
   transform: translate(-50%, -50%) scale(var(--fit, 1)); transform-origin: center center; }

@@ -161,7 +161,8 @@ class HaCarCard extends HTMLElement {
 
   getGridOptions() {
     const rows = this.getCardSize();
-    return { columns: 12, rows, min_columns: 6, min_rows: 3, max_rows: 12 };
+    // 允许把格子拉得更高：行数上限放宽到 24（编辑面板里的竖向滑块跟着变长），最小 4 行保证不挤成一团
+    return { columns: 12, rows, min_columns: 6, min_rows: 4, max_rows: 24 };
   }
 
   getLayoutOptions() {
@@ -318,40 +319,83 @@ class HaCarCard extends HTMLElement {
     this._card.classList.toggle("gfit", grid);
     if (grid) {
       this._card.classList.remove("preview");
+      // 布局编辑里拖动行数滑块会直接改格子高度，宿主尺寸不变，必须盯着格子盒
+      if (typeof ResizeObserver !== "undefined" && !this._boxRO) {
+        this._boxRO = new ResizeObserver(() => this._fitGrid());
+        const box = this._gridBox();
+        if (box) this._boxRO.observe(box);
+      }
       this._fitGrid();
     } else {
-      this._card.classList.remove("gfit");
+      this._card.classList.remove("gfit", "gtwo", "fit");
+      if (this._panel) this._card.classList.add("panel");
+      else this._card.classList.remove("panel");
       this._card.style.removeProperty("--gscale");
+      this._card.style.removeProperty("--fit");
       this._card.style.width = "";
       this._card.style.height = "";
       this.style.width = "";
       this.style.height = "";
       this._pinW = null;
       this._pinH = null;
+      if (this._boxRO) {
+        this._boxRO.disconnect();
+        this._boxRO = null;
+      }
     }
+  }
+
+  _gridBox() {
+    return this.parentElement && this.parentElement.parentElement ? this.parentElement.parentElement : null;
   }
 
   _fitGrid() {
     if (this._panel || !this._grid || !this._card) return;
     // 格子盒 = 卡片元素外侧的栅格单元（编辑态是 hui-card-edit-mode，普通态是栅格 div）
-    const boxEl = this.parentElement && this.parentElement.parentElement;
+    const boxEl = this._gridBox();
     if (!boxEl) return;
     const r = boxEl.getBoundingClientRect();
     if (r.width < 40 || r.height < 40) return;
     const w = Math.round(r.width);
     const h = Math.round(r.height);
-    const k = Math.max(0.3, Math.min(1, w / 390, h / 840));
+    // 宽格子直接复用面板的 1440×900 双栏设计稿（同一套左右分栏与字号），窄格子走单栏缩放
+    const wide = w / h >= 1.15;
     if (this.style.width !== `${w}px` || this.style.height !== `${h}px`) {
       this._pinW = w;
       this._pinH = h;
       this.style.width = `${w}px`;
       this.style.height = `${h}px`;
     }
+    const wideChanged = wide !== this._wide;
+    this._wide = wide;
+    if (wide) {
+      const k = Math.max(0.3, Math.min(1, w / 1440, h / 900));
+      this._card.classList.add("panel", "fit");
+      this._card.classList.remove("gfit", "gtwo");
+      this._card.style.width = "";
+      this._card.style.height = "";
+      this._card.style.left = "";
+      this._card.style.top = "";
+      this._card.style.removeProperty("--gscale");
+      this._card.style.setProperty("--fit", String(Math.round(k * 1000) / 1000));
+      if (wideChanged && this._hass) this._render(true);
+      return;
+    }
+    this._card.classList.remove("panel", "fit", "gtwo");
+    this._card.classList.add("gfit");
+    this._card.style.removeProperty("--fit");
+    const k = Math.max(0.3, Math.min(1, w / 390, h / 840));
     this._card.style.setProperty("--gscale", String(Math.round(k * 1000) / 1000));
-    const cw = Math.max(390, Math.round(w / k));
+    // 单栏画布宽度收在 960 内：再宽的话英雄区会被拉得过大、比例失衡
+    const cw = Math.min(960, Math.max(390, Math.round(w / k)));
     const ch = Math.max(840, Math.round(h / k));
+    const left = Math.max(0, Math.round((w - cw * k) / 2));
+    const top = Math.max(0, Math.round((h - ch * k) / 2));
     this._card.style.width = `${cw}px`;
     this._card.style.height = `${ch}px`;
+    this._card.style.left = `${left}px`;
+    this._card.style.top = `${top}px`;
+    if (wideChanged && this._hass) this._render(true);
   }
 
   _pinHostSize() {
@@ -563,7 +607,8 @@ class HaCarCard extends HTMLElement {
     this._wrap.className = "wrap";
     if (cfg.accent) this._card.style.setProperty("--hc-accent", cfg.accent);
     this._prunePending(data);
-    this._wrap.innerHTML = this._body(data, this._card.classList.contains("fit"));
+    const twoCol = this._card.classList.contains("fit") || this._card.classList.contains("gtwo");
+    this._wrap.innerHTML = this._body(data, twoCol);
 
     this._placeOverlay();
     // 面板缩放/字体度量落定后几何还会变一次，补两轮重算，避免首帧用旧尺寸定位

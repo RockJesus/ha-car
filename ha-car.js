@@ -822,6 +822,18 @@ ha-card.gfit {
 }
 ha-card.gfit .wrap { height: 100%; box-sizing: border-box; overflow: hidden; }
 
+/* 宽格子里的双栏版式（与面板同一套左右分栏） */
+ha-card.gfit.gtwo .blocks { display: flex; flex-direction: row; align-items: stretch; gap: 26px; }
+ha-card.gfit.gtwo .b-hero-col { display: flex; flex: 1.02 1 0; min-width: 0; }
+ha-card.gfit.gtwo .b-hero-col .b-hero { flex: 1 1 auto; justify-content: center; }
+ha-card.gfit.gtwo .b-side { display: flex; flex-direction: column; flex: .98 1 0; min-width: 0; justify-content: flex-start; gap: 16px; }
+ha-card.gfit.gtwo .b-side > .b-energy { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; justify-content: center; }
+ha-card.gfit.gtwo .b-side > .b-energy > .energy { width: 100%; }
+ha-card.gfit.gtwo .b-side > .b-meta,
+ha-card.gfit.gtwo .b-side > .b-alerts,
+ha-card.gfit.gtwo .b-side > .b-actions { flex: 0 0 auto; }
+ha-card.gfit.gtwo .gauge { max-width: 132px; }
+
 /* 面板模式：1440×900 设计稿居中并按 --fit 等比缩放 */
 ha-card.panel.fit { box-sizing: border-box; position: absolute; left: 50%; top: 50%; width: 1440px; height: 900px;
   transform: translate(-50%, -50%) scale(var(--fit, 1)); transform-origin: center center; }
@@ -1449,7 +1461,7 @@ var HaCarCard = class extends HTMLElement {
   }
   getGridOptions() {
     const rows = this.getCardSize();
-    return { columns: 12, rows, min_columns: 6, min_rows: 3, max_rows: 12 };
+    return { columns: 12, rows, min_columns: 6, min_rows: 4, max_rows: 24 };
   }
   getLayoutOptions() {
     const g = this.getGridOptions();
@@ -1590,38 +1602,77 @@ var HaCarCard = class extends HTMLElement {
     this._card.classList.toggle("gfit", grid);
     if (grid) {
       this._card.classList.remove("preview");
+      if (typeof ResizeObserver !== "undefined" && !this._boxRO) {
+        this._boxRO = new ResizeObserver(() => this._fitGrid());
+        const box = this._gridBox();
+        if (box) this._boxRO.observe(box);
+      }
       this._fitGrid();
     } else {
-      this._card.classList.remove("gfit");
+      this._card.classList.remove("gfit", "gtwo", "fit");
+      if (this._panel) this._card.classList.add("panel");
+      else this._card.classList.remove("panel");
       this._card.style.removeProperty("--gscale");
+      this._card.style.removeProperty("--fit");
       this._card.style.width = "";
       this._card.style.height = "";
       this.style.width = "";
       this.style.height = "";
       this._pinW = null;
       this._pinH = null;
+      if (this._boxRO) {
+        this._boxRO.disconnect();
+        this._boxRO = null;
+      }
     }
+  }
+  _gridBox() {
+    return this.parentElement && this.parentElement.parentElement ? this.parentElement.parentElement : null;
   }
   _fitGrid() {
     if (this._panel || !this._grid || !this._card) return;
-    const boxEl = this.parentElement && this.parentElement.parentElement;
+    const boxEl = this._gridBox();
     if (!boxEl) return;
     const r = boxEl.getBoundingClientRect();
     if (r.width < 40 || r.height < 40) return;
     const w = Math.round(r.width);
     const h = Math.round(r.height);
-    const k = Math.max(0.3, Math.min(1, w / 390, h / 840));
+    const wide = w / h >= 1.15;
     if (this.style.width !== `${w}px` || this.style.height !== `${h}px`) {
       this._pinW = w;
       this._pinH = h;
       this.style.width = `${w}px`;
       this.style.height = `${h}px`;
     }
+    const wideChanged = wide !== this._wide;
+    this._wide = wide;
+    if (wide) {
+      const k2 = Math.max(0.3, Math.min(1, w / 1440, h / 900));
+      this._card.classList.add("panel", "fit");
+      this._card.classList.remove("gfit", "gtwo");
+      this._card.style.width = "";
+      this._card.style.height = "";
+      this._card.style.left = "";
+      this._card.style.top = "";
+      this._card.style.removeProperty("--gscale");
+      this._card.style.setProperty("--fit", String(Math.round(k2 * 1e3) / 1e3));
+      if (wideChanged && this._hass) this._render(true);
+      return;
+    }
+    this._card.classList.remove("panel", "fit", "gtwo");
+    this._card.classList.add("gfit");
+    this._card.style.removeProperty("--fit");
+    const k = Math.max(0.3, Math.min(1, w / 390, h / 840));
     this._card.style.setProperty("--gscale", String(Math.round(k * 1e3) / 1e3));
-    const cw = Math.max(390, Math.round(w / k));
+    const cw = Math.min(960, Math.max(390, Math.round(w / k)));
     const ch = Math.max(840, Math.round(h / k));
+    const left = Math.max(0, Math.round((w - cw * k) / 2));
+    const top = Math.max(0, Math.round((h - ch * k) / 2));
     this._card.style.width = `${cw}px`;
     this._card.style.height = `${ch}px`;
+    this._card.style.left = `${left}px`;
+    this._card.style.top = `${top}px`;
+    if (wideChanged && this._hass) this._render(true);
   }
   _pinHostSize() {
     if (!this._panel) return;
@@ -1798,7 +1849,8 @@ var HaCarCard = class extends HTMLElement {
     this._wrap.className = "wrap";
     if (cfg.accent) this._card.style.setProperty("--hc-accent", cfg.accent);
     this._prunePending(data);
-    this._wrap.innerHTML = this._body(data, this._card.classList.contains("fit"));
+    const twoCol = this._card.classList.contains("fit") || this._card.classList.contains("gtwo");
+    this._wrap.innerHTML = this._body(data, twoCol);
     this._placeOverlay();
     cancelAnimationFrame(this._pt1);
     this._pt1 = requestAnimationFrame(() => {
@@ -3256,7 +3308,7 @@ var HaCarEditor = class extends HTMLElement {
 customElements.define("ha-car-editor", HaCarEditor);
 
 // src/main.js
-var VERSION = "1.8.2";
+var VERSION = "1.8.3";
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "ha-car",
