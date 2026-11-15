@@ -421,105 +421,84 @@ ha-card.panel:not(.fit) .baseline.solo { padding: 3px 8px; font-size: 10px; }
     linear-gradient(170deg, #101b29 0%, #0a1119 60%, #070c13 100%); }
 ha-card.panel { box-sizing: border-box; width: 100%; height: 100%; margin: 0; }
 /* 选择器缩略卡：照真机卡整体版式缩小（竖版小卡），车牌/位置/数值全是假数据 */
-ha-card.preview { height: 452px; overflow: hidden; }
+ha-card.preview { height: 660px; overflow: hidden; }
 ha-card.preview .wrap {
-  padding: 11px 12px 9px; height: 100%; box-sizing: border-box;
-  display: flex; flex-direction: column; gap: 6px;
+  padding: 13px 14px 11px; height: 100%; box-sizing: border-box;
+  display: flex; flex-direction: column; gap: 9px;
   container-type: inline-size; pointer-events: none;
 }
-.pv-head { display: flex; align-items: center; gap: 6px; min-height: 0; }
-.pv-brand { flex: 0 0 auto; width: 18px; height: 18px; display: inline-flex; align-items: center; justify-content: center; color: #7fe6ff; opacity: .9; }
-.pv-brand svg { width: 18px; height: 18px; }
-.pv-head h1 { margin: 0; font-size: 13.5px; font-weight: 700; letter-spacing: .01em; white-space: nowrap; }
-.pv-plate { flex: 0 0 auto; font-size: 8.5px; letter-spacing: .05em; padding: 2px 5px; border-radius: 4px; background: rgba(255, 255, 255, .07); color: rgba(220, 238, 250, .78); }
-.pv-head .status { margin-left: auto; flex: 0 0 auto; height: auto; padding: 2px 7px; font-size: 9px; gap: 4px; line-height: 1.45; }
-.pv-head .status .dot { width: 4px; height: 4px; }
-.pv-meta { display: flex; align-items: center; gap: 6px; font-size: 8.5px; color: rgba(210, 232, 244, .52); }
-.pv-loc { display: inline-flex; align-items: center; gap: 3px; flex: 1 1 auto; min-width: 0; white-space: nowrap; overflow: hidden; }
-.pv-loc svg, .pv-sync svg { flex: 0 0 auto; width: 10px; height: 10px; opacity: .75; }
-.pv-sync { display: inline-flex; align-items: center; gap: 3px; flex: 0 0 auto; }
-/* 中段：圆环 + 车身 + 引擎/前后盖胶囊 + 四角状态块 */
-.pv-hero { position: relative; flex: 1 1 auto; min-height: 152px; display: flex; align-items: center; justify-content: center; }
+.pv-top { display: flex; align-items: center; gap: 8px; }
+.pv-top h1 { margin: 0; font-size: 17px; font-weight: 700; letter-spacing: .01em; }
+.pv-top .status { margin-left: auto; flex: 0 0 auto; height: auto; padding: 3px 9px; font-size: 9.5px; gap: 4px; line-height: 1.5; }
+.pv-top .status .dot { width: 5px; height: 5px; }
+.pv-plate { font-size: 9.5px; letter-spacing: .10em; color: rgba(206, 228, 242, .62); margin-top: -3px; }
+.pv-hero { position: relative; flex: 1 1 auto; min-height: 168px; display: flex; align-items: center; justify-content: center; }
 .pv-ring {
-  position: absolute; width: 136px; height: 136px; border-radius: 50%;
-  border: 1px solid rgba(64, 224, 255, .20);
-  box-shadow: inset 0 0 24px -10px rgba(64, 224, 255, .42), 0 0 18px -8px rgba(64, 224, 255, .28);
+  position: absolute; width: 172px; height: 172px; border-radius: 50%;
+  border: 1px solid rgba(64, 224, 255, .16);
+  box-shadow: inset 0 0 26px -10px rgba(64, 224, 255, .38), 0 0 20px -9px rgba(64, 224, 255, .26);
 }
 .pv-nd { position: absolute; width: 4px; height: 4px; border-radius: 50%; background: rgba(96, 236, 255, .85); box-shadow: 0 0 6px rgba(96, 236, 255, .8); }
 .pv-nd.n1 { left: 50%; top: -2px; transform: translateX(-50%); }
 .pv-nd.n2 { left: 50%; bottom: -2px; transform: translateX(-50%); }
 .pv-nd.n3 { left: -2px; top: 50%; transform: translateY(-50%); }
 .pv-nd.n4 { right: -2px; top: 50%; transform: translateY(-50%); }
-.pv-carsvg { position: relative; z-index: 1; width: 58px; height: 94px; }
-.pv-carsvg .pc-body { fill: rgba(150, 230, 255, .10); stroke: rgba(170, 236, 255, .72); stroke-width: 3; }
-.pv-carsvg .pc-cab { fill: rgba(6, 14, 22, .55); stroke: rgba(140, 214, 240, .5); stroke-width: 2.4; }
-.pv-carsvg .pc-ln { stroke: rgba(140, 214, 240, .42); stroke-width: 1.8; }
-.pv-carsvg .pc-wh { stroke: rgba(150, 226, 250, .30); stroke-width: 3.2; stroke-linecap: round; }
-.pv-eng {
-  position: absolute; left: 0; top: 0; display: flex; flex-direction: column; gap: 1px;
-  padding: 4px 7px; border-radius: 8px; font-size: 8px; color: rgba(214, 234, 246, .6);
-  background: rgba(255, 255, 255, .05); border: 1px solid rgba(255, 255, 255, .08);
-}
-.pv-eng b { font-size: 10px; color: #dff0fb; font-weight: 600; }
-.pv-cap {
-  position: absolute; left: 50%; transform: translateX(-50%); display: inline-flex; align-items: center; gap: 3px;
-  padding: 3px 7px; border-radius: 8px; font-size: 7.5px; white-space: nowrap;
-  background: rgba(255, 255, 255, .045); border: 1px solid rgba(255, 255, 255, .08); color: rgba(214, 234, 246, .55);
-}
-.pv-cap svg { width: 9px; height: 9px; opacity: .8; }
-.pv-cap i { font-style: normal; color: #dff0fb; }
-.pv-cap b { font-weight: 600; color: rgba(214, 234, 246, .45); }
-.pv-cap.top { top: -2px; }
-.pv-cap.bot { bottom: -2px; }
-.pv-quad { position: absolute; inset: 0; }
-.pv-q {
-  position: absolute; width: 58px; display: flex; flex-direction: column; gap: 1px;
-  padding: 3px 5px; border-radius: 8px;
-  background: rgba(255, 255, 255, .04); border: 1px solid rgba(255, 255, 255, .07);
-}
-.pv-q b { font-size: 7px; color: rgba(214, 234, 246, .55); font-weight: 600; }
-.pv-q i { font-style: normal; font-size: 8px; color: #dff0fb; }
-.pv-q em { font-style: normal; font-size: 7px; opacity: .55; }
-.pv-q:nth-child(1) { left: 0; top: 26%; }
-.pv-q:nth-child(2) { right: 0; top: 26%; }
-.pv-q:nth-child(3) { left: 0; bottom: 2%; }
-.pv-q:nth-child(4) { right: 0; bottom: 2%; }
-.pv-gauges { flex: 0 0 auto; display: flex; align-items: center; justify-content: space-evenly; gap: 6px; }
-ha-card.preview .gauge { max-width: 84px; }
-ha-card.preview .gn b { font-size: 19px; }
+.pv-carimg { position: relative; z-index: 1; width: 128px; height: 150px; object-fit: contain; }
+.pv-gauges { flex: 0 0 auto; display: flex; align-items: center; justify-content: space-evenly; gap: 4px; }
+.pv-gsep { flex: 0 0 auto; display: inline-flex; color: rgba(150, 196, 220, .38); }
+.pv-gsep svg { width: 15px; height: 15px; }
+ha-card.preview .gauge { max-width: 92px; }
+ha-card.preview .gn b { font-size: 21px; }
 ha-card.preview .gl { font-size: 9px; }
-.pv-chips { flex: 0 0 auto; display: flex; gap: 5px; }
-.pv-chips span {
-  flex: 1 1 0; display: inline-flex; align-items: baseline; justify-content: center; gap: 3px; white-space: nowrap;
-  padding: 4px 6px; border-radius: 7px; background: rgba(255, 255, 255, .035); border: 1px solid rgba(255, 255, 255, .06);
-  font-size: 8.5px; color: rgba(226, 240, 250, .5);
-}
-.pv-chips span b { font-size: 11px; color: #eaf6ff; }
-.pv-chips span em { font-style: normal; font-size: 8px; opacity: .7; }
-.pv-alert {
-  flex: 0 0 auto; display: flex; align-items: center; gap: 5px; padding: 4px 7px; border-radius: 7px;
-  background: rgba(255, 86, 86, .10); border: 1px solid rgba(255, 96, 96, .25);
-  font-size: 8.5px; color: rgba(255, 198, 198, .85); white-space: nowrap; overflow: hidden;
-}
-.pv-alert svg { width: 11px; height: 11px; flex: 0 0 auto; }
-.pv-alert b { font-weight: 700; color: #ff9d9d; }
+.pv-chips { flex: 0 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 4px; }
+.pv-chips span { display: inline-flex; align-items: baseline; gap: 3px; font-size: 8.5px; color: rgba(206, 228, 242, .42); white-space: nowrap; }
+.pv-chips span + span { padding-left: 2px; }
+.pv-chips span b { font-size: 10.5px; color: rgba(226, 240, 250, .82); }
+.pv-chips span em { font-style: normal; font-size: 8px; opacity: .6; }
 .pv-acts { flex: 0 0 auto; display: flex; justify-content: space-between; gap: 4px; }
-.pv-act { flex: 1 1 0; display: flex; flex-direction: column; align-items: center; gap: 3px; }
+.pv-act { flex: 1 1 0; display: flex; flex-direction: column; align-items: center; gap: 4px; }
 .pv-act b {
-  display: inline-flex; align-items: center; justify-content: center; width: 30px; height: 30px; border-radius: 50%;
+  display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 50%;
   background: radial-gradient(120% 120% at 50% 0%, rgba(255, 255, 255, .10), rgba(255, 255, 255, .03));
   border: 1px solid rgba(255, 255, 255, .10); color: rgba(214, 234, 246, .82);
 }
 .pv-act b svg { width: 14px; height: 14px; }
-.pv-act em { font-style: normal; font-size: 8px; color: rgba(226, 240, 250, .55); white-space: nowrap; }
-.pv-act.on b { color: #3ff0c4; border-color: rgba(63, 240, 196, .5); box-shadow: 0 0 12px -4px rgba(63, 240, 196, .6); }
-.pv-selects { flex: 0 0 auto; display: flex; gap: 5px; }
-.pv-selects span {
-  flex: 1 1 0; display: flex; align-items: center; justify-content: space-between; gap: 4px;
-  padding: 4px 7px; border-radius: 7px; background: rgba(255, 255, 255, .03); border: 1px solid rgba(255, 255, 255, .06);
-  font-size: 8px; color: rgba(226, 240, 250, .5); white-space: nowrap;
+.pv-act em { font-style: normal; font-size: 8.5px; color: rgba(206, 228, 242, .5); white-space: nowrap; }
+.pv-act.on b { color: #5ef0b8; border-color: rgba(94, 240, 184, .55); box-shadow: 0 0 12px -4px rgba(94, 240, 184, .55), inset 0 0 14px -8px rgba(94, 240, 184, .8); }
+.pv-seek { flex: 0 0 auto; display: flex; gap: 6px; }
+.pv-seek span {
+  flex: 1 1 0; display: inline-flex; align-items: center; justify-content: center; gap: 5px; white-space: nowrap;
+  padding: 6px 8px; border-radius: 9px; font-size: 9px; color: rgba(214, 234, 246, .62);
+  background: rgba(255, 255, 255, .035); border: 1px solid rgba(255, 255, 255, .07);
 }
-.pv-selects b { font-size: 9px; color: #dff0fb; font-weight: 600; }
+.pv-seek svg { width: 12px; height: 12px; opacity: .75; }
+.pv-closed, .pv-svc, .pv-loc {
+  flex: 0 0 auto; display: inline-flex; align-items: center; gap: 6px; padding: 5px 9px; border-radius: 9px;
+  font-size: 9px; color: rgba(206, 228, 242, .5); white-space: nowrap;
+  background: rgba(255, 255, 255, .028); border: 1px solid rgba(255, 255, 255, .06);
+}
+.pv-closed, .pv-loc { align-self: flex-start; }
+.pv-svc { justify-content: space-between; }
+.pv-closed svg, .pv-svc svg, .pv-loc svg { width: 12px; height: 12px; opacity: .7; }
+.pv-svc svg:last-child { opacity: .5; }
+.pv-tires {
+  flex: 0 0 auto; margin-top: auto; display: flex; align-items: center; gap: 5px; padding: 7px 8px; border-radius: 9px;
+  background: rgba(255, 255, 255, .03); border: 1px solid rgba(255, 255, 255, .06);
+}
+.pv-tvec { display: inline-flex; align-items: baseline; gap: 1px; font-size: 7.5px; color: rgba(206, 228, 242, .45); flex: 0 0 auto; }
+.pv-tvec svg { width: 11px; height: 11px; opacity: .7; align-self: center; margin-right: 1px; }
+.pv-tvec b { font-size: 10px; color: rgba(226, 240, 250, .8); }
+.pv-tvec.warn b { color: #ffd479; }
+.pv-tvec.warn svg { color: #ffd479; opacity: .9; }
+.pv-sync { display: inline-flex; align-items: center; gap: 3px; flex: 0 0 auto; font-size: 8.5px; color: rgba(206, 228, 242, .45); white-space: nowrap; }
+.pv-sync svg { width: 11px; height: 11px; opacity: .65; }
+.pv-tires .pv-sync { margin-left: auto; }
+/* 超窄格子（<285px）去掉每格的 kPa 后缀，保证底部条一行装下 */
+@container (max-width: 285px) {
+  .pv-tvec em { display: none; }
+  .pv-tvec b { font-size: 9.5px; }
+  .pv-tires { gap: 4px; }
+}
 
 /* 面板模式：1440×900 设计稿居中并按 --fit 等比缩放 */
 ha-card.panel.fit { box-sizing: border-box; position: absolute; left: 50%; top: 50%; width: 1440px; height: 900px;
