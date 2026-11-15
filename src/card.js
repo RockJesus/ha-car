@@ -332,6 +332,7 @@ class HaCarCard extends HTMLElement {
       else this._card.classList.remove("panel");
       this._card.style.removeProperty("--gscale");
       this._card.style.removeProperty("--fit");
+      this._card.style.borderRadius = "";
       this._card.style.width = "";
       this._card.style.height = "";
       this.style.width = "";
@@ -383,6 +384,7 @@ class HaCarCard extends HTMLElement {
       this._card.style.top = "";
       this._card.style.removeProperty("--gscale");
       this._card.style.setProperty("--fit", String(Math.round(k * 1000) / 1000));
+      this._setRadius(k);
       if (wideChanged && this._hass) this._render(true);
       return;
     }
@@ -391,6 +393,7 @@ class HaCarCard extends HTMLElement {
     this._card.style.removeProperty("--fit");
     const k = Math.max(0.12, Math.min(1, w / 390, h / 840));
     this._card.style.setProperty("--gscale", String(Math.round(k * 1000) / 1000));
+    this._setRadius(k);
     // 单栏画布宽度收在 960 内：再宽的话英雄区会被拉得过大、比例失衡
     const cw = Math.min(960, Math.max(390, Math.round(w / k)));
     const ch = Math.max(840, Math.round(h / k));
@@ -448,6 +451,12 @@ class HaCarCard extends HTMLElement {
   }
 
   // 面板里按 1440×900 设计稿等比缩放：整页装下，不出现滚动条
+  // 圆角跟着缩放走：画布被 scale(k) 缩小时半径也会缩，按 24px 的视觉半径反算画布半径
+  _setRadius(k) {
+    if (!this._card || !k) return;
+    this._card.style.borderRadius = `${Math.round(24 / k)}px`;
+  }
+
   _fitPanel() {
     if (!this._panel || !this._card) return;
     const w = this.clientWidth;
@@ -483,11 +492,13 @@ class HaCarCard extends HTMLElement {
       this._card.style.setProperty("--pscale", String(Math.round(k * 1000) / 1000));
       this._card.style.width = `${Math.round(w / k)}px`;
       this._card.style.height = `${Math.round(h / k)}px`;
+      this._setRadius(k);
       return;
     }
     if (!fit) return;
     const k = Math.min(w / 1440, h / 900);
     this._card.style.setProperty("--fit", String(Math.round(k * 1000) / 1000));
+    this._setRadius(k);
     // 画布按等比缩放后的容器尺寸反算：宽/高两侧都补到容器边界，
     // 避免高受限时固定画布只占满高度、左右留下大片空白。
     const designW = Math.max(1440, Math.round(w / k));
