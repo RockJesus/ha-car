@@ -593,29 +593,42 @@ class HaCarCard extends HTMLElement {
     }
     // 用 offset 尺寸而不是 getBoundingClientRect：面板缩放后 rect 是屏幕坐标，会把状态层推歪
     if (!img.offsetWidth) return;
-    ovl.style.left = `${img.offsetLeft}px`;
-    ovl.style.top = `${img.offsetTop}px`;
-    ovl.style.width = `${img.offsetWidth}px`;
-    ovl.style.height = `${img.offsetHeight}px`;
-    // 圆环按 hero 短边定径：宽屏面板里不再被左右裁掉，始终是完整一个圆
     const hero = this._wrap.querySelector(".hero");
     const orb = this._wrap.querySelector(".orbit:not(.o2)");
     const orb2 = this._wrap.querySelector(".orbit.o2");
+    let ratio = 1;
+    let ringBotHero = 0;
     if (hero && orb) {
+      // 圆环按 hero 短边定径：宽屏面板里不再被左右裁掉，始终是完整一个圆
       const d = Math.min(hero.clientWidth, hero.clientHeight) * 0.965;
       if (d > 0) {
         orb.style.width = orb.style.height = `${d}px`;
         if (orb2) orb2.style.width = orb2.style.height = `${d * 1.035}px`;
       }
-      // 引擎盖/尾门小卡居中落在「圆环 — 车身」之间的空隙里，不压环线
-      const ovlR = ovl.getBoundingClientRect();
       const orbR = orb.getBoundingClientRect();
+      const heroR = hero.getBoundingClientRect();
+      ratio = orbR.width ? orb.clientWidth / orbR.width : 1;
+      ringBotHero = (orbR.bottom - heroR.top) * ratio;
+    }
+    // 车图上留白小、下留白大（车身视觉重心偏上），整体下移一点让车身居中在圆环里
+    const ih = img.offsetHeight;
+    const wantShift = Math.round(ih * 0.043);
+    const room = ringBotHero ? ringBotHero - 2 - (img.offsetTop + ih) : wantShift;
+    const shift = Math.max(0, Math.min(wantShift, Math.floor(room)));
+    img.style.transform = shift ? `translateY(${shift}px)` : "";
+    ovl.style.left = `${img.offsetLeft}px`;
+    ovl.style.top = `${img.offsetTop + shift}px`;
+    ovl.style.width = `${img.offsetWidth}px`;
+    ovl.style.height = `${ih}px`;
+    if (hero && orb) {
+      // 引擎盖/尾门小卡贴着车身头/尾外侧，受圆环约束
+      const ovlR = ovl.getBoundingClientRect();
+      const orbR2 = orb.getBoundingClientRect();
       const capH = this._wrap.querySelector(".cap.hood");
       const capT = this._wrap.querySelector(".cap.trunk");
       if (capH && capT) {
         const hH = capH.offsetHeight;
         const tH = capT.offsetHeight;
-        const ih = img.offsetHeight;
         // 车图在 img 里是 object-fit: contain，可能上下留出空白带；先还原实际绘制区域
         const nw = img.naturalWidth, nh = img.naturalHeight;
         let topPad = 0, shownH = ih;
@@ -624,13 +637,12 @@ class HaCarCard extends HTMLElement {
           shownH = nh * sc;
           topPad = (ih - shownH) / 2;
         }
-        // 车身轮廓约占图片内容高的 5.8%–85.5%，小卡贴着车身头/尾外侧摆
+        // 车身轮廓约占图片内容高的 5.8%–85.5%
         const bodyTop = topPad + shownH * 0.058;
         const bodyBot = topPad + shownH * 0.855;
-        // rect 是屏幕坐标（面板可能整体缩放过），换算回布局 px 再和 cap 的 offsetHeight 比较
-        const ratio = ovlR.width ? ovl.clientWidth / ovlR.width : 1;
-        const ringTop = (orbR.top - ovlR.top) * ratio;
-        const ringBot = (orbR.bottom - ovlR.top) * ratio;
+        const ratio2 = ovlR.width ? ovl.clientWidth / ovlR.width : 1;
+        const ringTop = (orbR2.top - ovlR.top) * ratio2;
+        const ringBot = (orbR2.bottom - ovlR.top) * ratio2;
         let hTop = bodyTop - 4 - hH;
         if (hTop < ringTop + 3) hTop = ringTop + 3;
         let tTop = bodyBot + 4;

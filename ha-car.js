@@ -1669,27 +1669,39 @@ var HaCarCard = class extends HTMLElement {
       }
     }
     if (!img.offsetWidth) return;
-    ovl.style.left = `${img.offsetLeft}px`;
-    ovl.style.top = `${img.offsetTop}px`;
-    ovl.style.width = `${img.offsetWidth}px`;
-    ovl.style.height = `${img.offsetHeight}px`;
     const hero = this._wrap.querySelector(".hero");
     const orb = this._wrap.querySelector(".orbit:not(.o2)");
     const orb2 = this._wrap.querySelector(".orbit.o2");
+    let ratio = 1;
+    let ringBotHero = 0;
     if (hero && orb) {
       const d = Math.min(hero.clientWidth, hero.clientHeight) * 0.965;
       if (d > 0) {
         orb.style.width = orb.style.height = `${d}px`;
         if (orb2) orb2.style.width = orb2.style.height = `${d * 1.035}px`;
       }
-      const ovlR = ovl.getBoundingClientRect();
       const orbR = orb.getBoundingClientRect();
+      const heroR = hero.getBoundingClientRect();
+      ratio = orbR.width ? orb.clientWidth / orbR.width : 1;
+      ringBotHero = (orbR.bottom - heroR.top) * ratio;
+    }
+    const ih = img.offsetHeight;
+    const wantShift = Math.round(ih * 0.043);
+    const room = ringBotHero ? ringBotHero - 2 - (img.offsetTop + ih) : wantShift;
+    const shift = Math.max(0, Math.min(wantShift, Math.floor(room)));
+    img.style.transform = shift ? `translateY(${shift}px)` : "";
+    ovl.style.left = `${img.offsetLeft}px`;
+    ovl.style.top = `${img.offsetTop + shift}px`;
+    ovl.style.width = `${img.offsetWidth}px`;
+    ovl.style.height = `${ih}px`;
+    if (hero && orb) {
+      const ovlR = ovl.getBoundingClientRect();
+      const orbR2 = orb.getBoundingClientRect();
       const capH = this._wrap.querySelector(".cap.hood");
       const capT = this._wrap.querySelector(".cap.trunk");
       if (capH && capT) {
         const hH = capH.offsetHeight;
         const tH = capT.offsetHeight;
-        const ih = img.offsetHeight;
         const nw = img.naturalWidth, nh = img.naturalHeight;
         let topPad = 0, shownH = ih;
         if (nw && nh) {
@@ -1699,9 +1711,9 @@ var HaCarCard = class extends HTMLElement {
         }
         const bodyTop = topPad + shownH * 0.058;
         const bodyBot = topPad + shownH * 0.855;
-        const ratio = ovlR.width ? ovl.clientWidth / ovlR.width : 1;
-        const ringTop = (orbR.top - ovlR.top) * ratio;
-        const ringBot = (orbR.bottom - ovlR.top) * ratio;
+        const ratio2 = ovlR.width ? ovl.clientWidth / ovlR.width : 1;
+        const ringTop = (orbR2.top - ovlR.top) * ratio2;
+        const ringBot = (orbR2.bottom - ovlR.top) * ratio2;
         let hTop = bodyTop - 4 - hH;
         if (hTop < ringTop + 3) hTop = ringTop + 3;
         let tTop = bodyBot + 4;
@@ -2712,7 +2724,7 @@ var HaCarEditor = class extends HTMLElement {
 customElements.define("ha-car-editor", HaCarEditor);
 
 // src/main.js
-var VERSION = "1.5.5";
+var VERSION = "1.5.6";
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "ha-car",
