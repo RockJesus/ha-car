@@ -736,14 +736,41 @@ ha-card.panel:not(.fit) .baseline.solo { padding: 3px 8px; font-size: 10px; }
 ha-card.panel { box-sizing: border-box; width: 100%; height: 100%; margin: 0; }
 /* 卡片选择器缩略图：固定高度，绝不把整张面板卡塞进小格子 */
 ha-card.preview { height: 186px; overflow: hidden; }
-ha-card.preview .wrap { padding: 10px 12px 8px; gap: 6px; height: 100%; justify-content: center; box-sizing: border-box; }
-ha-card.preview .hero { height: 62px; --r: 40px; margin: 0; }
-ha-card.preview h1 { font-size: 16px; }
-ha-card.preview .energy { margin-top: 0; }
-ha-card.preview .gauge { max-width: 74px; }
-ha-card.preview .gn b { font-size: 19px; }
+ha-card.preview .wrap {
+  padding: 11px 13px 10px; height: 100%; box-sizing: border-box;
+  display: flex; flex-direction: column; justify-content: space-between; gap: 7px;
+  container-type: inline-size;
+}
+.pv-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 0; }
+.pv-ttl { display: flex; align-items: baseline; gap: 8px; min-width: 0; }
+.pv-head h1 { margin: 0; font-size: 15px; font-weight: 700; letter-spacing: .01em; white-space: nowrap; }
+.pv-code { white-space: nowrap; font-size: 9.5px; letter-spacing: .12em; opacity: .5; font-weight: 600; }
+.pv-head .status { flex: 0 0 auto; padding: 3px 9px; font-size: 10.5px; }
+.pv-main { flex: 1 1 auto; display: flex; align-items: center; gap: 12px; min-height: 0; }
+/* 左半：车身 + 一圈淡轨道，代替之前的空占位 */
+.pv-stage { position: relative; flex: 0 0 38%; display: flex; align-items: center; justify-content: center; min-width: 0; }
+.pv-ring {
+  position: absolute; width: 108px; height: 108px; border-radius: 50%;
+  border: 1px solid rgba(64, 224, 255, .22);
+  box-shadow: inset 0 0 22px -10px rgba(64, 224, 255, .45), 0 0 18px -8px rgba(64, 224, 255, .35);
+}
+.pv-car { position: relative; z-index: 1; max-width: 62px; max-height: 88px; filter: drop-shadow(0 6px 12px rgba(0, 0, 0, .55)); }
+.pv-carph { position: relative; z-index: 1; width: 54px; height: 54px; color: rgba(150, 230, 255, .78); }
+/* 右半：两个仪表环并排 */
+.pv-gauges { flex: 1 1 auto; display: flex; align-items: center; justify-content: space-evenly; gap: 4px; min-width: 0; padding-right: 2px; }
+ha-card.preview .gauge { max-width: 78px; }
+ha-card.preview .gn b { font-size: 18px; }
 ha-card.preview .gl { font-size: 8.5px; }
-ha-card.preview .egmid { transform: scale(.8); }
+/* 底部三个小指标，把缩略图的空隙填满 */
+.pv-chips { display: flex; align-items: center; justify-content: space-between; gap: 6px; }
+.pv-chips span {
+  flex: 1 1 0; display: inline-flex; align-items: baseline; gap: 4px; justify-content: center;
+  padding: 4px 6px; border-radius: 7px; white-space: nowrap;
+  background: rgba(255, 255, 255, .035); border: 1px solid rgba(255, 255, 255, .06);
+  font-size: 9.5px; color: rgba(226, 240, 250, .5);
+}
+.pv-chips span b { font-size: 11.5px; color: #eaf6ff; }
+.pv-chips span em { font-style: normal; font-size: 8.5px; opacity: .7; }
 
 ha-card.panel.fit { box-sizing: border-box; position: absolute; left: 50%; top: 50%; width: 1440px; height: 900px;
   transform: translate(-50%, -50%) scale(var(--fit, 1)); transform-origin: center center; }
@@ -1659,17 +1686,34 @@ var HaCarCard = class extends HTMLElement {
   _empty(msg) {
     return `<div class="empty">${icon("car")}<div>${esc(msg)}</div></div>`;
   }
+  // 选择器缩略卡专用版式：不塞整张面板卡，只保留「标题 + 车身/轨道 + 双仪表 + 三个指标」
   _previewBody() {
     const t = dict(this._hass);
     const en = isEn(this._hass);
-    return `<div class="head"><div class="ttl"><h1>${esc(en ? "My car" : "我的座驾")}</h1>
-        <p class="plate">HA CAR</p></div>
+    let src = "";
+    try {
+      const data = this._hass ? resolve(this._hass, this._config) : null;
+      if (data) {
+        const pair = this._imagePair(data);
+        src = pair && (pair.src || pair.fb) || "";
+      }
+    } catch {
+      src = "";
+    }
+    const stage = src ? `<img class="pv-car" src="${esc(src)}" alt="">` : `<div class="pv-carph">${icon("car")}</div>`;
+    return `<div class="pv-head"><div class="pv-ttl"><h1>${esc(en ? "My car" : "我的座驾")}</h1><span class="pv-code">HA CAR</span></div>
         <span class="status ok"><span class="dot"></span>${esc(t.locked)}</span></div>
-      ${this._hero(null)}
-      <div class="energy">
-        ${this._gauge({ pct: 62, label: t.fuel, value: 62, unit: "%", ic: "fuel" })}
-        <span class="egmid">${icon("fuel")}</span>
-        ${this._gauge({ pct: 81, label: t.range, value: 486, unit: "km", ic: "gauge" })}
+      <div class="pv-main">
+        <div class="pv-stage"><span class="pv-ring"></span>${stage}</div>
+        <div class="pv-gauges">
+          ${this._gauge({ pct: 62, label: t.fuel, value: 62, unit: "%", ic: "fuel" })}
+          ${this._gauge({ pct: 81, label: t.range, value: 486, unit: "km", ic: "gauge" })}
+        </div>
+      </div>
+      <div class="pv-chips">
+        <span><i>${esc(t.odo || "总里程")}</i><b>60,775</b><em>km</em></span>
+        <span><i>${esc(en ? "Battery" : "蓄电池")}</i><b>13</b><em>V</em></span>
+        <span><i>${esc(en ? "Oil" : "机油寿命")}</i><b>25</b><em>%</em></span>
       </div>`;
   }
   // ---------- 卡片主体 ----------
@@ -3049,7 +3093,7 @@ var HaCarEditor = class extends HTMLElement {
 customElements.define("ha-car-editor", HaCarEditor);
 
 // src/main.js
-var VERSION = "1.7.2";
+var VERSION = "1.7.3";
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "ha-car",

@@ -495,17 +495,37 @@ class HaCarCard extends HTMLElement {
     return `<div class="empty">${icon("car")}<div>${esc(msg)}</div></div>`;
   }
 
+  // 选择器缩略卡专用版式：不塞整张面板卡，只保留「标题 + 车身/轨道 + 双仪表 + 三个指标」
   _previewBody() {
     const t = dict(this._hass);
     const en = isEn(this._hass);
-    return `<div class="head"><div class="ttl"><h1>${esc(en ? "My car" : "我的座驾")}</h1>
-        <p class="plate">HA CAR</p></div>
+    let src = "";
+    try {
+      // 用真实实体解析出车辆俯视图；解析不到再退回图标占位
+      const data = this._hass ? resolve(this._hass, this._config) : null;
+      if (data) {
+        const pair = this._imagePair(data);
+        src = (pair && (pair.src || pair.fb)) || "";
+      }
+    } catch {
+      src = "";
+    }
+    const stage = src
+      ? `<img class="pv-car" src="${esc(src)}" alt="">`
+      : `<div class="pv-carph">${icon("car")}</div>`;
+    return `<div class="pv-head"><div class="pv-ttl"><h1>${esc(en ? "My car" : "我的座驾")}</h1><span class="pv-code">HA CAR</span></div>
         <span class="status ok"><span class="dot"></span>${esc(t.locked)}</span></div>
-      ${this._hero(null)}
-      <div class="energy">
-        ${this._gauge({ pct: 62, label: t.fuel, value: 62, unit: "%", ic: "fuel" })}
-        <span class="egmid">${icon("fuel")}</span>
-        ${this._gauge({ pct: 81, label: t.range, value: 486, unit: "km", ic: "gauge" })}
+      <div class="pv-main">
+        <div class="pv-stage"><span class="pv-ring"></span>${stage}</div>
+        <div class="pv-gauges">
+          ${this._gauge({ pct: 62, label: t.fuel, value: 62, unit: "%", ic: "fuel" })}
+          ${this._gauge({ pct: 81, label: t.range, value: 486, unit: "km", ic: "gauge" })}
+        </div>
+      </div>
+      <div class="pv-chips">
+        <span><i>${esc(t.odo || "总里程")}</i><b>60,775</b><em>km</em></span>
+        <span><i>${esc(en ? "Battery" : "蓄电池")}</i><b>13</b><em>V</em></span>
+        <span><i>${esc(en ? "Oil" : "机油寿命")}</i><b>25</b><em>%</em></span>
       </div>`;
   }
 
