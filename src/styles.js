@@ -500,6 +500,14 @@ ha-card.preview .gl { font-size: 9px; }
   .pv-tires { gap: 4px; }
 }
 
+/* sections 视图小卡片：整卡缩进栅格单元，不溢出、不压住编辑按钮 */
+:host(.gridcard) { position: relative; overflow: hidden; max-width: none; margin: 0; }
+ha-card.gfit {
+  position: absolute; left: 0; top: 0; box-sizing: border-box;
+  transform: scale(var(--gscale, 1)); transform-origin: 0 0;
+}
+ha-card.gfit .wrap { height: 100%; box-sizing: border-box; overflow: hidden; }
+
 /* 面板模式：1440×900 设计稿居中并按 --fit 等比缩放 */
 ha-card.panel.fit { box-sizing: border-box; position: absolute; left: 50%; top: 50%; width: 1440px; height: 900px;
   transform: translate(-50%, -50%) scale(var(--fit, 1)); transform-origin: center center; }

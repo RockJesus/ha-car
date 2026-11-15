@@ -814,6 +814,14 @@ ha-card.preview .gl { font-size: 9px; }
   .pv-tires { gap: 4px; }
 }
 
+/* sections 视图小卡片：整卡缩进栅格单元，不溢出、不压住编辑按钮 */
+:host(.gridcard) { position: relative; overflow: hidden; max-width: none; margin: 0; }
+ha-card.gfit {
+  position: absolute; left: 0; top: 0; box-sizing: border-box;
+  transform: scale(var(--gscale, 1)); transform-origin: 0 0;
+}
+ha-card.gfit .wrap { height: 100%; box-sizing: border-box; overflow: hidden; }
+
 /* 面板模式：1440×900 设计稿居中并按 --fit 等比缩放 */
 ha-card.panel.fit { box-sizing: border-box; position: absolute; left: 50%; top: 50%; width: 1440px; height: 900px;
   transform: translate(-50%, -50%) scale(var(--fit, 1)); transform-origin: center center; }
@@ -1337,6 +1345,7 @@ var PREVIEW_TAGS = /* @__PURE__ */ new Set([
   "ha-editor"
 ]);
 var PANEL_TAGS = /* @__PURE__ */ new Set(["hui-panel-view", "hui-grid-view"]);
+var GRID_TAGS = /* @__PURE__ */ new Set(["hui-grid-section", "hui-sections-view", "hui-masonry-view"]);
 var EDIT_WRAP_TAGS = /* @__PURE__ */ new Set([
   "hui-card-options",
   "hui-card-edit-mode",
@@ -1561,6 +1570,59 @@ var HaCarCard = class extends HTMLElement {
   }
   // 面板模式下把宿主钉成「视口减去左侧栏/顶栏」的确切像素尺寸。
   // 不钉死的话，宿主高度会跟着里面的绝对定位画布一起长，量到的容器越来越大 → 画布越来越大（自激）。
+  // sections 视图的卡片格子：宽度固定、高度由栅格行固定，卡片整体缩放到格子内，避免溢出压住「添加卡片」按钮
+  _inGrid() {
+    let node = this.parentElement;
+    for (let d = 0; node && d < 10; d += 1) {
+      if (GRID_TAGS.has((node.localName || "").toLowerCase())) return true;
+      node = node.parentElement || node.parentNode && node.parentNode.host || null;
+    }
+    return false;
+  }
+  _syncGrid() {
+    const grid = !this._panel && this._inGrid() && !this._isPreview();
+    if (grid === this._grid) {
+      if (grid) this._fitGrid();
+      return;
+    }
+    this._grid = grid;
+    this.classList.toggle("gridcard", grid);
+    this._card.classList.toggle("gfit", grid);
+    if (grid) {
+      this._card.classList.remove("preview");
+      this._fitGrid();
+    } else {
+      this._card.classList.remove("gfit");
+      this._card.style.removeProperty("--gscale");
+      this._card.style.width = "";
+      this._card.style.height = "";
+      this.style.width = "";
+      this.style.height = "";
+      this._pinW = null;
+      this._pinH = null;
+    }
+  }
+  _fitGrid() {
+    if (this._panel || !this._grid || !this._card) return;
+    const boxEl = this.parentElement && this.parentElement.parentElement;
+    if (!boxEl) return;
+    const r = boxEl.getBoundingClientRect();
+    if (r.width < 40 || r.height < 40) return;
+    const w = Math.round(r.width);
+    const h = Math.round(r.height);
+    const k = Math.max(0.3, Math.min(1, w / 390, h / 840));
+    if (this.style.width !== `${w}px` || this.style.height !== `${h}px`) {
+      this._pinW = w;
+      this._pinH = h;
+      this.style.width = `${w}px`;
+      this.style.height = `${h}px`;
+    }
+    this._card.style.setProperty("--gscale", String(Math.round(k * 1e3) / 1e3));
+    const cw = Math.max(390, Math.round(w / k));
+    const ch = Math.max(840, Math.round(h / k));
+    this._card.style.width = `${cw}px`;
+    this._card.style.height = `${ch}px`;
+  }
   _pinHostSize() {
     if (!this._panel) return;
     const r = this.getBoundingClientRect();
@@ -1658,6 +1720,11 @@ var HaCarCard = class extends HTMLElement {
   _isPreview() {
     if (this._preview) return true;
     if (this._inEditWrap()) return false;
+    let dn = this.parentElement;
+    for (let d = 0; dn && d < 10; d += 1) {
+      if (GRID_TAGS.has((dn.localName || "").toLowerCase())) return false;
+      dn = dn.parentElement || dn.parentNode && dn.parentNode.host || null;
+    }
     if (this.preview === true || this.preview === "true" || this.hasAttribute("preview")) return true;
     let node = this.parentElement;
     let depth = 0;
@@ -1704,7 +1771,10 @@ var HaCarCard = class extends HTMLElement {
     this._card = root.querySelector("ha-card");
     this._built = true;
     this._bind();
-    this._panelRO = new ResizeObserver(() => this._fitPanel());
+    this._panelRO = new ResizeObserver(() => {
+      this._fitPanel();
+      this._fitGrid();
+    });
     this._panelRO.observe(this);
     this._ro = new ResizeObserver(() => this._placeOverlay());
     this._ro.observe(this._wrap);
@@ -1723,6 +1793,7 @@ var HaCarCard = class extends HTMLElement {
   _paint(data) {
     const cfg = this._config;
     this._syncPanel();
+    this._syncGrid();
     this._card.classList.toggle("compact", cfg.layout === "compact");
     this._wrap.className = "wrap";
     if (cfg.accent) this._card.style.setProperty("--hc-accent", cfg.accent);
@@ -3185,7 +3256,7 @@ var HaCarEditor = class extends HTMLElement {
 customElements.define("ha-car-editor", HaCarEditor);
 
 // src/main.js
-var VERSION = "1.8.1";
+var VERSION = "1.8.2";
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "ha-car",
