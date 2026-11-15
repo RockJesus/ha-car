@@ -33,6 +33,16 @@ const PREVIEW_TAGS = new Set([
 
 const PANEL_TAGS = new Set(["hui-panel-view", "hui-grid-view"]);
 
+// 仪表盘「编辑」态的卡片包装层：HA 会在这里给卡片设 preview=true，
+// 但它不是选择器缩略卡，不能按 186px 缩略版式画
+const EDIT_WRAP_TAGS = new Set([
+  "hui-card-options",
+  "hui-card-edit-mode",
+  "hui-edit-view",
+  "hui-edit-dashboard-view",
+  "hui-dialog-edit-card",
+]);
+
 const DEFAULTS = {
   title: "",
   layout: "full",
@@ -175,7 +185,7 @@ class HaCarCard extends HTMLElement {
   }
 
   _syncPanel() {
-    const panel = this._isPanel() && !this._isPreview();
+    const panel = this._isPanel() && !this._isPreview() && !this._inEditWrap();
     if (!panel && !this._panelTried) {
       this._panelTried = true;
       setTimeout(() => this._syncPanel(), 250);
@@ -196,6 +206,7 @@ class HaCarCard extends HTMLElement {
       return;
     }
     this._panel = panel;
+    this._watchEditContext();
     this.classList.toggle("panel", panel);
     this._card.classList.toggle("panel", panel);
     // :host 的 860px 上限只对普通卡片有意义；面板模式交给容器决定尺寸
@@ -203,6 +214,19 @@ class HaCarCard extends HTMLElement {
     this.style.margin = panel ? "0" : "";
     this.style.height = panel ? "100%" : "";
     this.style.width = panel ? "100%" : "";
+    if (!panel) {
+      // 退出面板/进编辑态要把面板版式残留的类名和画布尺寸清掉，
+      // 否则卡片会带着 1440×900 的画布塞进编辑容器
+      this._fitKey = null;
+      this._fitState = undefined;
+      if (this._card) {
+        this._card.classList.remove("fit", "pfit");
+        this._card.style.width = "";
+        this._card.style.height = "";
+        this._card.style.removeProperty("--fit");
+        this._card.style.removeProperty("--pscale");
+      }
+    }
     // 面板容器尺寸会在 HA 布局完成后才落定（首次 fit 可能量到中间值），
     // 所以面板模式下持续观察宿主尺寸，变化就按新容器重算画布，避免内容只占面板一部分
     if (panel && typeof ResizeObserver !== "undefined" && !this._hostRO) {
@@ -227,6 +251,34 @@ class HaCarCard extends HTMLElement {
   }
 
   // 尺寸变化用一个 rAF 合并，避免连续触发时反复重排
+  // 仪表盘进出编辑态时 HA 会在祖先层插/拔 hui-card-options，且不一定重载页面。
+  // 盯着最近的视图层 shadowRoot，结构一变就重判上下文。
+  _watchEditContext() {
+    if (this._ctxMO) return;
+    let node = this.parentElement;
+    let depth = 0;
+    let view = null;
+    while (node && depth < 10) {
+      const n = (node.localName || "").toLowerCase();
+      if (PANEL_TAGS.has(n) || EDIT_WRAP_TAGS.has(n)) {
+        view = node;
+        break;
+      }
+      node = node.parentElement || (node.parentNode && node.parentNode.host) || null;
+      depth += 1;
+    }
+    if (!view) return;
+    const root = view.shadowRoot || view;
+    this._ctxMO = new MutationObserver(() => {
+      if (this._ctxRaf) return;
+      this._ctxRaf = requestAnimationFrame(() => {
+        this._ctxRaf = 0;
+        this._syncPanel();
+      });
+    });
+    this._ctxMO.observe(root, { childList: true, subtree: true });
+  }
+
   _refitSoon() {
     if (this._rafFit) return;
     this._rafFit = requestAnimationFrame(() => {
@@ -302,8 +354,35 @@ class HaCarCard extends HTMLElement {
     this._card.style.height = `${designH}px`;
   }
 
+  // HA 进入编辑仪表盘时会直接给元素赋 preview=true；用 setter 捕获，立刻重判上下文
+  get preview() {
+    return !!this._previewFlag;
+  }
+
+  set preview(v) {
+    const next = v === true || v === "true";
+    if (next === this._previewFlag) return;
+    this._previewFlag = next;
+    // 进出编辑态会换掉祖先链，必须重判面板/预览上下文
+    if (this._config && this.isConnected) this._syncPanel();
+  }
+
+  // 祖先链里出现编辑态包装层 → 这是仪表盘编辑，不是选择器缩略卡
+  _inEditWrap() {
+    let node = this.parentElement;
+    let depth = 0;
+    while (node && depth < 10) {
+      const n = (node.localName || "").toLowerCase();
+      if (EDIT_WRAP_TAGS.has(n)) return true;
+      node = node.parentElement || (node.parentNode && node.parentNode.host) || null;
+      depth += 1;
+    }
+    return false;
+  }
+
   _isPreview() {
     if (this._preview) return true;
+    if (this._inEditWrap()) return false;
     // HA 的卡选择器给预览卡设的是公开属性 preview（不是私有字段）
     if (this.preview === true || this.preview === "true" || this.hasAttribute("preview")) return true;
     let node = this.parentElement;

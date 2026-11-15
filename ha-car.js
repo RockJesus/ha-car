@@ -1261,6 +1261,13 @@ var PREVIEW_TAGS = /* @__PURE__ */ new Set([
   "ha-editor"
 ]);
 var PANEL_TAGS = /* @__PURE__ */ new Set(["hui-panel-view", "hui-grid-view"]);
+var EDIT_WRAP_TAGS = /* @__PURE__ */ new Set([
+  "hui-card-options",
+  "hui-card-edit-mode",
+  "hui-edit-view",
+  "hui-edit-dashboard-view",
+  "hui-dialog-edit-card"
+]);
 var DEFAULTS = {
   title: "",
   layout: "full",
@@ -1382,7 +1389,7 @@ var HaCarCard = class extends HTMLElement {
     return false;
   }
   _syncPanel() {
-    const panel = this._isPanel() && !this._isPreview();
+    const panel = this._isPanel() && !this._isPreview() && !this._inEditWrap();
     if (!panel && !this._panelTried) {
       this._panelTried = true;
       setTimeout(() => this._syncPanel(), 250);
@@ -1402,12 +1409,24 @@ var HaCarCard = class extends HTMLElement {
       return;
     }
     this._panel = panel;
+    this._watchEditContext();
     this.classList.toggle("panel", panel);
     this._card.classList.toggle("panel", panel);
     this.style.maxWidth = panel ? "none" : "";
     this.style.margin = panel ? "0" : "";
     this.style.height = panel ? "100%" : "";
     this.style.width = panel ? "100%" : "";
+    if (!panel) {
+      this._fitKey = null;
+      this._fitState = void 0;
+      if (this._card) {
+        this._card.classList.remove("fit", "pfit");
+        this._card.style.width = "";
+        this._card.style.height = "";
+        this._card.style.removeProperty("--fit");
+        this._card.style.removeProperty("--pscale");
+      }
+    }
     if (panel && typeof ResizeObserver !== "undefined" && !this._hostRO) {
       this._hostRO = new ResizeObserver(() => this._refitSoon());
       this._hostRO.observe(this);
@@ -1428,6 +1447,33 @@ var HaCarCard = class extends HTMLElement {
     }
   }
   // 尺寸变化用一个 rAF 合并，避免连续触发时反复重排
+  // 仪表盘进出编辑态时 HA 会在祖先层插/拔 hui-card-options，且不一定重载页面。
+  // 盯着最近的视图层 shadowRoot，结构一变就重判上下文。
+  _watchEditContext() {
+    if (this._ctxMO) return;
+    let node = this.parentElement;
+    let depth = 0;
+    let view = null;
+    while (node && depth < 10) {
+      const n = (node.localName || "").toLowerCase();
+      if (PANEL_TAGS.has(n) || EDIT_WRAP_TAGS.has(n)) {
+        view = node;
+        break;
+      }
+      node = node.parentElement || node.parentNode && node.parentNode.host || null;
+      depth += 1;
+    }
+    if (!view) return;
+    const root = view.shadowRoot || view;
+    this._ctxMO = new MutationObserver(() => {
+      if (this._ctxRaf) return;
+      this._ctxRaf = requestAnimationFrame(() => {
+        this._ctxRaf = 0;
+        this._syncPanel();
+      });
+    });
+    this._ctxMO.observe(root, { childList: true, subtree: true });
+  }
   _refitSoon() {
     if (this._rafFit) return;
     this._rafFit = requestAnimationFrame(() => {
@@ -1489,8 +1535,31 @@ var HaCarCard = class extends HTMLElement {
     this._card.style.width = `${designW}px`;
     this._card.style.height = `${designH}px`;
   }
+  // HA 进入编辑仪表盘时会直接给元素赋 preview=true；用 setter 捕获，立刻重判上下文
+  get preview() {
+    return !!this._previewFlag;
+  }
+  set preview(v) {
+    const next = v === true || v === "true";
+    if (next === this._previewFlag) return;
+    this._previewFlag = next;
+    if (this._config && this.isConnected) this._syncPanel();
+  }
+  // 祖先链里出现编辑态包装层 → 这是仪表盘编辑，不是选择器缩略卡
+  _inEditWrap() {
+    let node = this.parentElement;
+    let depth = 0;
+    while (node && depth < 10) {
+      const n = (node.localName || "").toLowerCase();
+      if (EDIT_WRAP_TAGS.has(n)) return true;
+      node = node.parentElement || node.parentNode && node.parentNode.host || null;
+      depth += 1;
+    }
+    return false;
+  }
   _isPreview() {
     if (this._preview) return true;
+    if (this._inEditWrap()) return false;
     if (this.preview === true || this.preview === "true" || this.hasAttribute("preview")) return true;
     let node = this.parentElement;
     let depth = 0;
@@ -2980,7 +3049,7 @@ var HaCarEditor = class extends HTMLElement {
 customElements.define("ha-car-editor", HaCarEditor);
 
 // src/main.js
-var VERSION = "1.7.1";
+var VERSION = "1.7.2";
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "ha-car",
