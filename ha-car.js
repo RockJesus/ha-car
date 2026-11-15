@@ -734,52 +734,51 @@ ha-card.panel:not(.fit) .baseline.solo { padding: 3px 8px; font-size: 10px; }
   background: radial-gradient(90% 60% at 50% 0%, rgba(55,214,232,.10), transparent 62%),
     linear-gradient(170deg, #101b29 0%, #0a1119 60%, #070c13 100%); }
 ha-card.panel { box-sizing: border-box; width: 100%; height: 100%; margin: 0; }
-/* 卡片选择器缩略图：固定高度，绝不把整张面板卡塞进小格子 */
+/* 卡片选择器缩略图：固定高度，绝不把整张面板卡塞进小格子；版式按真机卡等比缩小 */
 ha-card.preview { height: 186px; overflow: hidden; }
 ha-card.preview .wrap {
-  padding: 11px 13px 10px; height: 100%; box-sizing: border-box;
-  display: flex; flex-direction: column; justify-content: space-between; gap: 7px;
-  container-type: inline-size;
+  padding: 10px 11px 9px; height: 100%; box-sizing: border-box;
+  display: flex; flex-direction: column; justify-content: space-between; gap: 6px;
+  container-type: inline-size; pointer-events: none;
 }
 .pv-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 0; }
-.pv-ttl { display: flex; align-items: baseline; gap: 8px; min-width: 0; }
-.pv-head h1 { margin: 0; font-size: 15px; font-weight: 700; letter-spacing: .01em; white-space: nowrap; }
-.pv-code { white-space: nowrap; font-size: 9.5px; letter-spacing: .12em; opacity: .5; font-weight: 600; }
-.pv-head .status { flex: 0 0 auto; padding: 3px 9px; font-size: 10.5px; }
-.pv-main { flex: 1 1 auto; display: flex; align-items: center; gap: 12px; min-height: 0; }
-/* 左半：车身 + 一圈淡轨道，代替之前的空占位 */
-.pv-stage { position: relative; flex: 0 0 38%; display: flex; align-items: center; justify-content: center; min-width: 0; }
+.pv-ttl { display: flex; align-items: baseline; gap: 7px; min-width: 0; }
+.pv-head h1 { margin: 0; font-size: 14px; font-weight: 700; letter-spacing: .01em; white-space: nowrap; }
+.pv-code { white-space: nowrap; font-size: 9px; letter-spacing: .12em; opacity: .5; font-weight: 600; }
+.pv-head .status { flex: 0 0 auto; padding: 3px 8px; font-size: 10px; }
+/* 中段：左侧车身 + 淡轨道（带四个节点，呼应真机卡的四角），右侧两个仪表环 */
+.pv-main { flex: 1 1 auto; display: flex; align-items: center; gap: 10px; min-height: 0; }
+.pv-stage { position: relative; flex: 0 0 36%; display: flex; align-items: center; justify-content: center; min-width: 0; }
 .pv-ring {
-  position: absolute; width: 108px; height: 108px; border-radius: 50%;
-  border: 1px solid rgba(64, 224, 255, .22);
-  box-shadow: inset 0 0 22px -10px rgba(64, 224, 255, .45), 0 0 18px -8px rgba(64, 224, 255, .35);
+  position: absolute; width: 88px; height: 88px; border-radius: 50%;
+  border: 1px solid rgba(64, 224, 255, .20);
+  box-shadow: inset 0 0 22px -10px rgba(64, 224, 255, .45), 0 0 16px -8px rgba(64, 224, 255, .3);
 }
-.pv-car { position: relative; z-index: 1; max-width: 62px; max-height: 88px; filter: drop-shadow(0 6px 12px rgba(0, 0, 0, .55)); }
-.pv-carph { position: relative; z-index: 1; width: 54px; height: 54px; color: rgba(150, 230, 255, .78); }
-/* 右半：两个仪表环并排 */
-.pv-gauges { flex: 1 1 auto; display: flex; align-items: center; justify-content: space-evenly; gap: 4px; min-width: 0; padding-right: 2px; }
-ha-card.preview .gauge { max-width: 78px; }
-ha-card.preview .gn b { font-size: 18px; }
-ha-card.preview .gl { font-size: 8.5px; }
-/* 底部三个小指标，把缩略图的空隙填满 */
-.pv-chips { display: flex; align-items: center; justify-content: space-between; gap: 6px; }
-.pv-chips span {
-  flex: 1 1 0; display: inline-flex; align-items: baseline; gap: 4px; justify-content: center;
-  padding: 4px 6px; border-radius: 7px; white-space: nowrap;
-  background: rgba(255, 255, 255, .035); border: 1px solid rgba(255, 255, 255, .06);
-  font-size: 9.5px; color: rgba(226, 240, 250, .5);
+.pv-nd { position: absolute; width: 4px; height: 4px; border-radius: 50%; background: rgba(96, 236, 255, .85); box-shadow: 0 0 6px rgba(96, 236, 255, .8); }
+.pv-nd.n1 { left: 50%; top: -2px; transform: translateX(-50%); }
+.pv-nd.n2 { left: 50%; bottom: -2px; transform: translateX(-50%); }
+.pv-nd.n3 { left: -2px; top: 50%; transform: translateY(-50%); }
+.pv-nd.n4 { right: -2px; top: 50%; transform: translateY(-50%); }
+/* 缩略图不加载真实车辆图（脱敏），用中性俯视车身轮廓 */
+.pv-carsvg { position: relative; z-index: 1; width: 40px; height: 64px; }
+.pv-carsvg .pc-body { fill: rgba(150, 230, 255, .10); stroke: rgba(170, 236, 255, .72); stroke-width: 3; }
+.pv-carsvg .pc-cab { fill: rgba(6, 14, 22, .55); stroke: rgba(140, 214, 240, .5); stroke-width: 2.4; }
+.pv-carsvg .pc-ln { stroke: rgba(140, 214, 240, .42); stroke-width: 2; }
+.pv-gauges { flex: 1 1 auto; display: flex; align-items: center; justify-content: space-evenly; gap: 3px; min-width: 0; }
+ha-card.preview .gauge { max-width: 72px; }
+ha-card.preview .gn b { font-size: 17px; }
+ha-card.preview .gl { font-size: 8px; }
+/* 底部四个控制按钮（图标 + 文字），只表达结构，不接事件 */
+.pv-acts { display: flex; align-items: center; justify-content: space-between; gap: 4px; margin-top: 3px; }
+.pv-act { flex: 1 1 0; display: flex; flex-direction: column; align-items: center; gap: 2px; min-width: 0; }
+.pv-act b {
+  display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; border-radius: 50%;
+  background: radial-gradient(120% 120% at 50% 0%, rgba(255, 255, 255, .10), rgba(255, 255, 255, .03));
+  border: 1px solid rgba(255, 255, 255, .10); color: rgba(214, 234, 246, .82);
 }
-.pv-chips span b { font-size: 11.5px; color: #eaf6ff; }
-.pv-chips span em { font-style: normal; font-size: 8.5px; opacity: .7; }
-
-ha-card.panel.fit { box-sizing: border-box; position: absolute; left: 50%; top: 50%; width: 1440px; height: 900px;
-  transform: translate(-50%, -50%) scale(var(--fit, 1)); transform-origin: center center; }
-ha-card.panel .wrap { height: 100%; box-sizing: border-box; padding: 26px 30px 20px; overflow: hidden; }
-ha-card.panel .blocks { flex: 1 1 auto; min-height: 0; }
-ha-card.panel .b-hero { justify-content: center; min-height: 0; }
-
-ha-card.panel .hero { flex: 1 1 auto; height: auto; min-height: 300px; }
-ha-card.panel .carimg { max-height: min(62%, 460px); max-width: min(60%, 330px); }
+.pv-act b svg { width: 12px; height: 12px; }
+.pv-act em { font-style: normal; font-size: 8.5px; color: rgba(226, 240, 250, .55); white-space: nowrap; }
+.pv-act.on b { color: #3ff0c4; border-color: rgba(63, 240, 196, .5); box-shadow: 0 0 12px -4px rgba(63, 240, 196, .6); }
 
 /* 宽面板：车图占左栏满高，仪表/操作/告警等叠成右栏，避免中间大片留白 */
 /* 手机面板：固定 390×840 版式，整体等比缩放到容器内，一屏铺满且不出滚动条 */
@@ -1686,34 +1685,36 @@ var HaCarCard = class extends HTMLElement {
   _empty(msg) {
     return `<div class="empty">${icon("car")}<div>${esc(msg)}</div></div>`;
   }
-  // 选择器缩略卡专用版式：不塞整张面板卡，只保留「标题 + 车身/轨道 + 双仪表 + 三个指标」
+  // 选择器缩略卡：按真机卡片版式做等比缩小，但**全部脱敏** ——
+  // 不显示车牌、位置、VIN，也不接任何实体实时值（数值是示意值），只保留结构与按钮语义
   _previewBody() {
     const t = dict(this._hass);
     const en = isEn(this._hass);
-    let src = "";
-    try {
-      const data = this._hass ? resolve(this._hass, this._config) : null;
-      if (data) {
-        const pair = this._imagePair(data);
-        src = pair && (pair.src || pair.fb) || "";
-      }
-    } catch {
-      src = "";
-    }
-    const stage = src ? `<img class="pv-car" src="${esc(src)}" alt="">` : `<div class="pv-carph">${icon("car")}</div>`;
+    const acts = [
+      { ic: "unlock", lb: t.unlock || "开锁" },
+      { ic: "lock", lb: t.lockDown || "关锁", on: true },
+      { ic: "power", lb: t.engine || "远程启动" },
+      { ic: "megaphone", lb: t.honk || "鸣笛寻车" }
+    ];
     return `<div class="pv-head"><div class="pv-ttl"><h1>${esc(en ? "My car" : "我的座驾")}</h1><span class="pv-code">HA CAR</span></div>
         <span class="status ok"><span class="dot"></span>${esc(t.locked)}</span></div>
       <div class="pv-main">
-        <div class="pv-stage"><span class="pv-ring"></span>${stage}</div>
+        <div class="pv-stage"><span class="pv-ring"><i class="pv-nd n1"></i><i class="pv-nd n2"></i><i class="pv-nd n3"></i><i class="pv-nd n4"></i></span>
+          <svg class="pv-carsvg" viewBox="0 0 100 160" aria-hidden="true">
+            <path class="pc-body" d="M50,5 C59,5 67,12 70,25 L77,54 C80,66 81,82 81,98 L81,133 C81,145 72,153 50,153 C28,153 19,145 19,133 L19,98 C19,82 20,66 23,54 L30,25 C33,12 41,5 50,5 Z"/>
+            <path class="pc-cab" d="M50,42 C60,42 66,50 66,66 L66,88 C66,97 60,101 50,101 C40,101 34,97 34,88 L34,66 C34,50 40,42 50,42 Z"/>
+            <path class="pc-ln" d="M36,49 L64,49"/><path class="pc-ln" d="M36,95 L64,95"/>
+            <path class="pc-ln" d="M29,60 L24,66"/><path class="pc-ln" d="M71,60 L76,66"/>
+          </svg></div>
         <div class="pv-gauges">
           ${this._gauge({ pct: 62, label: t.fuel, value: 62, unit: "%", ic: "fuel" })}
           ${this._gauge({ pct: 81, label: t.range, value: 486, unit: "km", ic: "gauge" })}
         </div>
       </div>
-      <div class="pv-chips">
-        <span><i>${esc(t.odo || "总里程")}</i><b>60,775</b><em>km</em></span>
-        <span><i>${esc(en ? "Battery" : "蓄电池")}</i><b>13</b><em>V</em></span>
-        <span><i>${esc(en ? "Oil" : "机油寿命")}</i><b>25</b><em>%</em></span>
+      <div class="pv-acts">
+        ${acts.map(
+      (a) => `<span class="pv-act${a.on ? " on" : ""}"><b>${icon(a.ic)}</b><em>${esc(a.lb)}</em></span>`
+    ).join("")}
       </div>`;
   }
   // ---------- 卡片主体 ----------
@@ -3093,7 +3094,7 @@ var HaCarEditor = class extends HTMLElement {
 customElements.define("ha-car-editor", HaCarEditor);
 
 // src/main.js
-var VERSION = "1.7.3";
+var VERSION = "1.7.4";
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "ha-car",

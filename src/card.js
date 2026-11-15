@@ -495,37 +495,38 @@ class HaCarCard extends HTMLElement {
     return `<div class="empty">${icon("car")}<div>${esc(msg)}</div></div>`;
   }
 
-  // 选择器缩略卡专用版式：不塞整张面板卡，只保留「标题 + 车身/轨道 + 双仪表 + 三个指标」
+  // 选择器缩略卡：按真机卡片版式做等比缩小，但**全部脱敏** ——
+  // 不显示车牌、位置、VIN，也不接任何实体实时值（数值是示意值），只保留结构与按钮语义
   _previewBody() {
     const t = dict(this._hass);
     const en = isEn(this._hass);
-    let src = "";
-    try {
-      // 用真实实体解析出车辆俯视图；解析不到再退回图标占位
-      const data = this._hass ? resolve(this._hass, this._config) : null;
-      if (data) {
-        const pair = this._imagePair(data);
-        src = (pair && (pair.src || pair.fb)) || "";
-      }
-    } catch {
-      src = "";
-    }
-    const stage = src
-      ? `<img class="pv-car" src="${esc(src)}" alt="">`
-      : `<div class="pv-carph">${icon("car")}</div>`;
+    const acts = [
+      { ic: "unlock", lb: t.unlock || "开锁" },
+      { ic: "lock", lb: t.lockDown || "关锁", on: true },
+      { ic: "power", lb: t.engine || "远程启动" },
+      { ic: "megaphone", lb: t.honk || "鸣笛寻车" },
+    ];
     return `<div class="pv-head"><div class="pv-ttl"><h1>${esc(en ? "My car" : "我的座驾")}</h1><span class="pv-code">HA CAR</span></div>
         <span class="status ok"><span class="dot"></span>${esc(t.locked)}</span></div>
       <div class="pv-main">
-        <div class="pv-stage"><span class="pv-ring"></span>${stage}</div>
+        <div class="pv-stage"><span class="pv-ring"><i class="pv-nd n1"></i><i class="pv-nd n2"></i><i class="pv-nd n3"></i><i class="pv-nd n4"></i></span>
+          <svg class="pv-carsvg" viewBox="0 0 100 160" aria-hidden="true">
+            <path class="pc-body" d="M50,5 C59,5 67,12 70,25 L77,54 C80,66 81,82 81,98 L81,133 C81,145 72,153 50,153 C28,153 19,145 19,133 L19,98 C19,82 20,66 23,54 L30,25 C33,12 41,5 50,5 Z"/>
+            <path class="pc-cab" d="M50,42 C60,42 66,50 66,66 L66,88 C66,97 60,101 50,101 C40,101 34,97 34,88 L34,66 C34,50 40,42 50,42 Z"/>
+            <path class="pc-ln" d="M36,49 L64,49"/><path class="pc-ln" d="M36,95 L64,95"/>
+            <path class="pc-ln" d="M29,60 L24,66"/><path class="pc-ln" d="M71,60 L76,66"/>
+          </svg></div>
         <div class="pv-gauges">
           ${this._gauge({ pct: 62, label: t.fuel, value: 62, unit: "%", ic: "fuel" })}
           ${this._gauge({ pct: 81, label: t.range, value: 486, unit: "km", ic: "gauge" })}
         </div>
       </div>
-      <div class="pv-chips">
-        <span><i>${esc(t.odo || "总里程")}</i><b>60,775</b><em>km</em></span>
-        <span><i>${esc(en ? "Battery" : "蓄电池")}</i><b>13</b><em>V</em></span>
-        <span><i>${esc(en ? "Oil" : "机油寿命")}</i><b>25</b><em>%</em></span>
+      <div class="pv-acts">
+        ${acts
+          .map(
+            (a) => `<span class="pv-act${a.on ? " on" : ""}"><b>${icon(a.ic)}</b><em>${esc(a.lb)}</em></span>`,
+          )
+          .join("")}
       </div>`;
   }
 
