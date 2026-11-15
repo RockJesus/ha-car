@@ -792,6 +792,23 @@ ha-card.panel.fit .pills { width: 100%; max-width: none; }
 }
 
 
+/* 引擎启动后的前后车灯：前灯冷白、尾灯红，落点按车图（750×1320）车身轮廓 */
+.lamp { position: absolute; width: 13cqw; height: 6.5cqw; border-radius: 50%; transform: translate(-50%,-50%);
+  pointer-events: none; opacity: 0; mix-blend-mode: screen; transition: opacity .3s ease; }
+.lamp.lf, .lamp.lr { left: 28%; }
+.lamp.rf, .lamp.rr { left: 72%; }
+.lamp.lf, .lamp.rf { top: 8.8%;
+  background: radial-gradient(52% 62% at 50% 50%, rgba(226,248,255,.98), rgba(126,206,255,.60) 46%, transparent 74%);
+  box-shadow: 0 0 5cqw rgba(150,220,255,.62), 0 0 13cqw rgba(90,180,255,.30); }
+.lamp.lr, .lamp.rr { top: 77.4%;
+  background: radial-gradient(52% 62% at 50% 50%, rgba(255,138,116,.96), rgba(255,52,40,.52) 48%, transparent 76%);
+  box-shadow: 0 0 5cqw rgba(255,86,64,.58), 0 0 13cqw rgba(255,44,32,.28); }
+.hero.run .lamp { animation: hc-lamp 2.6s ease-in-out infinite; }
+.hero.run .lamp.rf, .hero.run .lamp.lr { animation-delay: .16s; }
+@keyframes hc-lamp {
+  0%, 100% { opacity: .55; filter: blur(1.2px) brightness(1.05); }
+  45% { opacity: 1; filter: blur(3.4px) brightness(1.45); }
+}
 .hero.run .halo { background: radial-gradient(46% 52% at 50% 50%, rgba(45,255,170,.22), rgba(45,255,170,.07) 46%, transparent 72%); }
 .orbit.run { border-color: rgba(76,255,178,.55); animation: hc-breathe 2.6s ease-in-out infinite; box-shadow: inset 0 0 30px -12px rgba(52,255,168,.45); }
 .orbit.run.o2 { border-color: rgba(76,255,178,.26); animation-delay: .7s; }
@@ -1640,6 +1657,9 @@ var HaCarCard = class extends HTMLElement {
       return { slot, html, warn };
     };
     const out = [];
+    if (running) {
+      out.push(`<i class="lamp lf"></i><i class="lamp rf"></i><i class="lamp lr"></i><i class="lamp rr"></i>`);
+    }
     if (data.get("sw_engine") || data.get("remote_start")) {
       out.push(`<div class="enp${running ? " on" : ""}"><div class="row"><i class="ed"></i><span>${zh ? "引擎" : "ENGINE"}</span></div><b>${running ? zh ? "已启动" : "Running" : zh ? "已熄火" : "Off"}</b></div>`);
     }
@@ -2865,7 +2885,7 @@ var HaCarEditor = class extends HTMLElement {
 customElements.define("ha-car-editor", HaCarEditor);
 
 // src/main.js
-var VERSION = "1.6.1";
+var VERSION = "1.6.2";
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "ha-car",

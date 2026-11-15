@@ -527,6 +527,10 @@ class HaCarCard extends HTMLElement {
       return { slot, html, warn };
     };
     const out = [];
+    // 引擎启动后的前后车灯（纯光效，落在车图坐标系里）
+    if (running) {
+      out.push(`<i class="lamp lf"></i><i class="lamp rf"></i><i class="lamp lr"></i><i class="lamp rr"></i>`);
+    }
     // 引擎状态胶囊（圆环左上角圈外）
     if (data.get("sw_engine") || data.get("remote_start")) {
       out.push(`<div class="enp${running ? " on" : ""}"><div class="row"><i class="ed"></i>` +
