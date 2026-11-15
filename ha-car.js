@@ -1695,32 +1695,92 @@ var HaCarCard = class extends HTMLElement {
     ovl.style.width = `${img.offsetWidth}px`;
     ovl.style.height = `${ih}px`;
     if (hero && orb) {
+      const capH0 = this._wrap.querySelector(".cap.hood");
+      const capT0 = this._wrap.querySelector(".cap.trunk");
+      if (capH0 && capT0 && orb2) {
+        const heroR0 = hero.getBoundingClientRect();
+        const r0 = orb.getBoundingClientRect();
+        const kk0 = r0.width ? orb.clientWidth / r0.width : 1;
+        const ih0 = img.offsetHeight;
+        const nw0 = img.naturalWidth, nh0 = img.naturalHeight;
+        let pad0 = 0, shown0 = ih0;
+        if (nw0 && nh0) {
+          const sc0 = Math.min(img.clientWidth / nw0, ih0 / nh0);
+          shown0 = nh0 * sc0;
+          pad0 = (ih0 - shown0) / 2;
+        }
+        const bT = img.offsetTop + shift + pad0 + shown0 * 0.058;
+        const bB = img.offsetTop + shift + pad0 + shown0 * 0.855;
+        const rT = (r0.top - heroR0.top) * kk0;
+        const rB = (r0.bottom - heroR0.top) * kk0;
+        const need = Math.max(capH0.offsetHeight + 8 - (bT - rT), 0, capT0.offsetHeight + 8 - (rB - bB));
+        if (need > 1) {
+          const d0 = Math.min(hero.clientWidth, hero.clientHeight) * 0.965;
+          const d2 = Math.max(d0 * 0.72, d0 - need * 2);
+          orb.style.width = orb.style.height = `${d2}px`;
+          orb2.style.width = orb2.style.height = `${d2 * 1.035}px`;
+        }
+      }
       const ovlR = ovl.getBoundingClientRect();
-      const orbR2 = orb.getBoundingClientRect();
+      const orbR3 = orb.getBoundingClientRect();
+      const iw = img.offsetWidth;
+      const nw = img.naturalWidth, nh = img.naturalHeight;
+      let topPad = 0, shownH = ih;
+      if (nw && nh) {
+        const sc = Math.min(img.clientWidth / nw, ih / nh);
+        shownH = nh * sc;
+        topPad = (ih - shownH) / 2;
+      }
+      const k3 = ovlR.width ? ovl.clientWidth / ovlR.width : 1;
+      const ringL = (orbR3.left - ovlR.left) * k3;
+      const ringR = (orbR3.right - ovlR.left) * k3;
+      const ringT = (orbR3.top - ovlR.top) * k3;
+      const ringB = (orbR3.bottom - ovlR.top) * k3;
+      const bodyL = iw * 0.1;
+      const bodyR = iw * 0.9;
+      const bodyT = topPad + shownH * 0.058;
+      const bodyB = topPad + shownH * 0.855;
       const capH = this._wrap.querySelector(".cap.hood");
       const capT = this._wrap.querySelector(".cap.trunk");
       if (capH && capT) {
-        const hH = capH.offsetHeight;
-        const tH = capT.offsetHeight;
-        const nw = img.naturalWidth, nh = img.naturalHeight;
-        let topPad = 0, shownH = ih;
-        if (nw && nh) {
-          const sc = Math.min(img.clientWidth / nw, ih / nh);
-          shownH = nh * sc;
-          topPad = (ih - shownH) / 2;
-        }
-        const bodyTop = topPad + shownH * 0.058;
-        const bodyBot = topPad + shownH * 0.855;
-        const ratio2 = ovlR.width ? ovl.clientWidth / ovlR.width : 1;
-        const ringTop = (orbR2.top - ovlR.top) * ratio2;
-        const ringBot = (orbR2.bottom - ovlR.top) * ratio2;
-        let hTop = bodyTop - 4 - hH;
-        if (hTop < ringTop + 3) hTop = ringTop + 3;
-        let tTop = bodyBot + 4;
-        if (tTop + tH > ringBot - 3) tTop = ringBot - 3 - tH;
+        const fit = (el, corridor) => {
+          let h = el.offsetHeight;
+          const kk = Math.max(0.78, Math.min(1, corridor / (h + 6)));
+          if (kk < 0.995) {
+            el.style.transform = `translate(-50%, 0) scale(${kk.toFixed(3)})`;
+            el.style.transformOrigin = "50% 0";
+            h *= kk;
+          } else if (el.style.transform) {
+            el.style.transform = "translate(-50%, 0)";
+          }
+          return h;
+        };
+        const hH = fit(capH, bodyT - ringT);
+        const tH = fit(capT, ringB - bodyB);
+        let hTop = bodyT - 4 - hH;
+        if (hTop < ringT + 3) hTop = ringT + 3;
+        let tTop = bodyB + 4;
+        if (tTop + tH > ringB - 3) tTop = ringB - 3 - tH;
         capH.style.top = `${Math.round(hTop)}px`;
         capT.style.top = `${Math.round(tTop)}px`;
       }
+      this._wrap.querySelectorAll(".loc").forEach((card) => {
+        const leftSide = card.classList.contains("lf") || card.classList.contains("lr");
+        const front = card.classList.contains("lf") || card.classList.contains("rf");
+        let w = card.offsetWidth;
+        const corridor = leftSide ? bodyL - 4 - (ringL + 6) : ringR - 6 - (bodyR + 4);
+        const kk = Math.max(0.6, Math.min(1, corridor / (w + 6)));
+        if (kk < 0.995) {
+          card.style.transform = `translate(-50%, -50%) scale(${kk.toFixed(3)})`;
+          w *= kk;
+        } else if (card.style.transform) {
+          card.style.transform = "translate(-50%, -50%)";
+        }
+        let cx = leftSide ? bodyL - 4 - w / 2 : bodyR + 4 + w / 2;
+        cx = leftSide ? Math.max(ringL + 6 + w / 2, cx) : Math.min(ringR - 6 - w / 2, cx);
+        card.style.left = `${Math.round(cx)}px`;
+        card.style.top = `${Math.round(bodyT + (bodyB - bodyT) * (front ? 0.34 : 0.66))}px`;
+      });
     }
   }
   // 底座条：四轮胎压 + 同步（同步入口就是刷新按钮）
@@ -2724,7 +2784,7 @@ var HaCarEditor = class extends HTMLElement {
 customElements.define("ha-car-editor", HaCarEditor);
 
 // src/main.js
-var VERSION = "1.5.6";
+var VERSION = "1.5.7";
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "ha-car",

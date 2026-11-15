@@ -621,35 +621,98 @@ class HaCarCard extends HTMLElement {
     ovl.style.width = `${img.offsetWidth}px`;
     ovl.style.height = `${ih}px`;
     if (hero && orb) {
-      // 引擎盖/尾门小卡贴着车身头/尾外侧，受圆环约束
+      // 引擎盖/尾门胶囊 + 四张位置卡：统一按「车身轮廓 / 圆环边界」自适应落位
+      // 空间太窄时先把圆环收一点，给前后盖胶囊腾出位置（胶囊优先保持可读尺寸）
+      const capH0 = this._wrap.querySelector(".cap.hood");
+      const capT0 = this._wrap.querySelector(".cap.trunk");
+      if (capH0 && capT0 && orb2) {
+        const heroR0 = hero.getBoundingClientRect();
+        const r0 = orb.getBoundingClientRect();
+        const kk0 = r0.width ? orb.clientWidth / r0.width : 1;
+        const ih0 = img.offsetHeight;
+        const nw0 = img.naturalWidth, nh0 = img.naturalHeight;
+        let pad0 = 0, shown0 = ih0;
+        if (nw0 && nh0) {
+          const sc0 = Math.min(img.clientWidth / nw0, ih0 / nh0);
+          shown0 = nh0 * sc0;
+          pad0 = (ih0 - shown0) / 2;
+        }
+        const bT = img.offsetTop + shift + pad0 + shown0 * 0.058;
+        const bB = img.offsetTop + shift + pad0 + shown0 * 0.855;
+        const rT = (r0.top - heroR0.top) * kk0;
+        const rB = (r0.bottom - heroR0.top) * kk0;
+        const need = Math.max(capH0.offsetHeight + 8 - (bT - rT), 0, capT0.offsetHeight + 8 - (rB - bB));
+        if (need > 1) {
+          const d0 = Math.min(hero.clientWidth, hero.clientHeight) * 0.965;
+          const d2 = Math.max(d0 * 0.72, d0 - need * 2);
+          orb.style.width = orb.style.height = `${d2}px`;
+          orb2.style.width = orb2.style.height = `${d2 * 1.035}px`;
+        }
+      }
       const ovlR = ovl.getBoundingClientRect();
-      const orbR2 = orb.getBoundingClientRect();
+      const orbR3 = orb.getBoundingClientRect();
+      const iw = img.offsetWidth;
+      const nw = img.naturalWidth, nh = img.naturalHeight;
+      let topPad = 0, shownH = ih;
+      if (nw && nh) {
+        const sc = Math.min(img.clientWidth / nw, ih / nh);
+        shownH = nh * sc;
+        topPad = (ih - shownH) / 2;
+      }
+      const k3 = ovlR.width ? ovl.clientWidth / ovlR.width : 1;
+      const ringL = (orbR3.left - ovlR.left) * k3;
+      const ringR = (orbR3.right - ovlR.left) * k3;
+      const ringT = (orbR3.top - ovlR.top) * k3;
+      const ringB = (orbR3.bottom - ovlR.top) * k3;
+      // 车身轮廓：横向约占图宽 10%–90%，纵向约占图片内容高 5.8%–85.5%
+      const bodyL = iw * 0.1;
+      const bodyR = iw * 0.9;
+      const bodyT = topPad + shownH * 0.058;
+      const bodyB = topPad + shownH * 0.855;
+
       const capH = this._wrap.querySelector(".cap.hood");
       const capT = this._wrap.querySelector(".cap.trunk");
       if (capH && capT) {
-        const hH = capH.offsetHeight;
-        const tH = capT.offsetHeight;
-        // 车图在 img 里是 object-fit: contain，可能上下留出空白带；先还原实际绘制区域
-        const nw = img.naturalWidth, nh = img.naturalHeight;
-        let topPad = 0, shownH = ih;
-        if (nw && nh) {
-          const sc = Math.min(img.clientWidth / nw, ih / nh);
-          shownH = nh * sc;
-          topPad = (ih - shownH) / 2;
-        }
-        // 车身轮廓约占图片内容高的 5.8%–85.5%
-        const bodyTop = topPad + shownH * 0.058;
-        const bodyBot = topPad + shownH * 0.855;
-        const ratio2 = ovlR.width ? ovl.clientWidth / ovlR.width : 1;
-        const ringTop = (orbR2.top - ovlR.top) * ratio2;
-        const ringBot = (orbR2.bottom - ovlR.top) * ratio2;
-        let hTop = bodyTop - 4 - hH;
-        if (hTop < ringTop + 3) hTop = ringTop + 3;
-        let tTop = bodyBot + 4;
-        if (tTop + tH > ringBot - 3) tTop = ringBot - 3 - tH;
+        const fit = (el, corridor) => {
+          let h = el.offsetHeight;
+          const kk = Math.max(0.78, Math.min(1, corridor / (h + 6)));
+          if (kk < 0.995) {
+            el.style.transform = `translate(-50%, 0) scale(${kk.toFixed(3)})`;
+            el.style.transformOrigin = "50% 0";
+            h *= kk;
+          } else if (el.style.transform) {
+            el.style.transform = "translate(-50%, 0)";
+          }
+          return h;
+        };
+        const hH = fit(capH, bodyT - ringT);
+        const tH = fit(capT, ringB - bodyB);
+        let hTop = bodyT - 4 - hH;
+        if (hTop < ringT + 3) hTop = ringT + 3;
+        let tTop = bodyB + 4;
+        if (tTop + tH > ringB - 3) tTop = ringB - 3 - tH;
         capH.style.top = `${Math.round(hTop)}px`;
         capT.style.top = `${Math.round(tTop)}px`;
       }
+
+      this._wrap.querySelectorAll(".loc").forEach((card) => {
+        const leftSide = card.classList.contains("lf") || card.classList.contains("lr");
+        const front = card.classList.contains("lf") || card.classList.contains("rf");
+        let w = card.offsetWidth;
+        const corridor = leftSide ? bodyL - 4 - (ringL + 6) : ringR - 6 - (bodyR + 4);
+        const kk = Math.max(0.6, Math.min(1, corridor / (w + 6)));
+        if (kk < 0.995) {
+          card.style.transform = `translate(-50%, -50%) scale(${kk.toFixed(3)})`;
+          w *= kk;
+        } else if (card.style.transform) {
+          card.style.transform = "translate(-50%, -50%)";
+        }
+        let cx = leftSide ? bodyL - 4 - w / 2 : bodyR + 4 + w / 2;
+        cx = leftSide ? Math.max(ringL + 6 + w / 2, cx) : Math.min(ringR - 6 - w / 2, cx);
+        card.style.left = `${Math.round(cx)}px`;
+        // 竖向对齐车门行：前排偏车头、后排偏车尾，随车身高度自适应
+        card.style.top = `${Math.round(bodyT + (bodyB - bodyT) * (front ? 0.34 : 0.66))}px`;
+      });
     }
   }
 
