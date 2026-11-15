@@ -1389,7 +1389,16 @@ var HaCarCard = class extends HTMLElement {
       setTimeout(() => this._syncPanel(), 900);
     }
     if (panel === this._panel) {
-      if (panel) this._fitPanel();
+      if (panel) {
+        this._pinHostSize();
+        this._fitPanel();
+        for (const ms of [260, 700, 1400]) {
+          setTimeout(() => {
+            this._fitKey = null;
+            this._refitSoon();
+          }, ms);
+        }
+      }
       return;
     }
     this._panel = panel;
@@ -1399,15 +1408,64 @@ var HaCarCard = class extends HTMLElement {
     this.style.margin = panel ? "0" : "";
     this.style.height = panel ? "100%" : "";
     this.style.width = panel ? "100%" : "";
-    if (panel) this._fitPanel();
+    if (panel && typeof ResizeObserver !== "undefined" && !this._hostRO) {
+      this._hostRO = new ResizeObserver(() => this._refitSoon());
+      this._hostRO.observe(this);
+    }
+    if (panel && !this._winHook) {
+      this._winHook = true;
+      window.addEventListener("resize", () => this._refitSoon());
+    }
+    if (panel) {
+      this._pinHostSize();
+      this._fitPanel();
+      for (const ms of [260, 700, 1400]) {
+        setTimeout(() => {
+          this._fitKey = null;
+          this._refitSoon();
+        }, ms);
+      }
+    }
+  }
+  // 尺寸变化用一个 rAF 合并，避免连续触发时反复重排
+  _refitSoon() {
+    if (this._rafFit) return;
+    this._rafFit = requestAnimationFrame(() => {
+      this._rafFit = 0;
+      this._pinHostSize();
+      this._fitPanel();
+    });
+  }
+  // 面板模式下把宿主钉成「视口减去左侧栏/顶栏」的确切像素尺寸。
+  // 不钉死的话，宿主高度会跟着里面的绝对定位画布一起长，量到的容器越来越大 → 画布越来越大（自激）。
+  _pinHostSize() {
+    if (!this._panel) return;
+    const r = this.getBoundingClientRect();
+    const vw = document.documentElement && document.documentElement.clientWidth || window.innerWidth || 0;
+    const vh = document.documentElement && document.documentElement.clientHeight || window.innerHeight || 0;
+    if (!vw || !vh) return;
+    const w = Math.max(320, Math.round(vw - r.left));
+    const h = Math.max(320, Math.round(vh - r.top));
+    if (w !== this._pinW) {
+      this.style.width = `${w}px`;
+      this._pinW = w;
+    }
+    if (h !== this._pinH) {
+      this.style.height = `${h}px`;
+      this._pinH = h;
+    }
   }
   // 面板里按 1440×900 设计稿等比缩放：整页装下，不出现滚动条
   _fitPanel() {
     if (!this._panel || !this._card) return;
     const w = this.clientWidth;
-    const h = this.clientHeight;
+    const vh = document.documentElement && document.documentElement.clientHeight || window.innerHeight || 0;
+    const h = vh ? Math.min(this.clientHeight, vh) : this.clientHeight;
     if (!w || !h) return;
-    const fit = w >= 900 && h >= 620;
+    const key = `${w}x${h}`;
+    if (key === this._fitKey) return;
+    this._fitKey = key;
+    const fit = w >= 760 && h >= 460;
     const wasFit = this._fitState;
     this._fitState = fit;
     this._card.classList.toggle("fit", fit);
@@ -1426,8 +1484,9 @@ var HaCarCard = class extends HTMLElement {
     if (!fit) return;
     const k = Math.min(w / 1440, h / 900);
     this._card.style.setProperty("--fit", String(Math.round(k * 1e3) / 1e3));
+    const designW = Math.max(1440, Math.round(w / k));
     const designH = Math.max(900, Math.round(h / k));
-    this._card.style.width = "1440px";
+    this._card.style.width = `${designW}px`;
     this._card.style.height = `${designH}px`;
   }
   _isPreview() {
@@ -2921,7 +2980,7 @@ var HaCarEditor = class extends HTMLElement {
 customElements.define("ha-car-editor", HaCarEditor);
 
 // src/main.js
-var VERSION = "1.6.9";
+var VERSION = "1.7.0";
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "ha-car",

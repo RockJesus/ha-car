@@ -182,7 +182,17 @@ class HaCarCard extends HTMLElement {
       setTimeout(() => this._syncPanel(), 900);
     }
     if (panel === this._panel) {
-      if (panel) this._fitPanel();
+      if (panel) {
+      this._pinHostSize();
+      this._fitPanel();
+      // HA 的容器尺寸常在首帧之后才收敛（面板 padding、工具栏高度…），补几次强制重算
+      for (const ms of [260, 700, 1400]) {
+        setTimeout(() => {
+          this._fitKey = null;
+          this._refitSoon();
+        }, ms);
+      }
+    }
       return;
     }
     this._panel = panel;
@@ -193,16 +203,73 @@ class HaCarCard extends HTMLElement {
     this.style.margin = panel ? "0" : "";
     this.style.height = panel ? "100%" : "";
     this.style.width = panel ? "100%" : "";
-    if (panel) this._fitPanel();
+    // 面板容器尺寸会在 HA 布局完成后才落定（首次 fit 可能量到中间值），
+    // 所以面板模式下持续观察宿主尺寸，变化就按新容器重算画布，避免内容只占面板一部分
+    if (panel && typeof ResizeObserver !== "undefined" && !this._hostRO) {
+      this._hostRO = new ResizeObserver(() => this._refitSoon());
+      this._hostRO.observe(this);
+    }
+    if (panel && !this._winHook) {
+      this._winHook = true;
+      window.addEventListener("resize", () => this._refitSoon());
+    }
+    if (panel) {
+      this._pinHostSize();
+      this._fitPanel();
+      // HA 的容器尺寸常在首帧之后才收敛（面板 padding、工具栏高度…），补几次强制重算
+      for (const ms of [260, 700, 1400]) {
+        setTimeout(() => {
+          this._fitKey = null;
+          this._refitSoon();
+        }, ms);
+      }
+    }
+  }
+
+  // 尺寸变化用一个 rAF 合并，避免连续触发时反复重排
+  _refitSoon() {
+    if (this._rafFit) return;
+    this._rafFit = requestAnimationFrame(() => {
+      this._rafFit = 0;
+      this._pinHostSize();
+      this._fitPanel();
+    });
+  }
+
+  // 面板模式下把宿主钉成「视口减去左侧栏/顶栏」的确切像素尺寸。
+  // 不钉死的话，宿主高度会跟着里面的绝对定位画布一起长，量到的容器越来越大 → 画布越来越大（自激）。
+  _pinHostSize() {
+    if (!this._panel) return;
+    const r = this.getBoundingClientRect();
+    const vw = (document.documentElement && document.documentElement.clientWidth) || window.innerWidth || 0;
+    const vh = (document.documentElement && document.documentElement.clientHeight) || window.innerHeight || 0;
+    if (!vw || !vh) return;
+    const w = Math.max(320, Math.round(vw - r.left));
+    const h = Math.max(320, Math.round(vh - r.top));
+    if (w !== this._pinW) {
+      this.style.width = `${w}px`;
+      this._pinW = w;
+    }
+    if (h !== this._pinH) {
+      this.style.height = `${h}px`;
+      this._pinH = h;
+    }
   }
 
   // 面板里按 1440×900 设计稿等比缩放：整页装下，不出现滚动条
   _fitPanel() {
     if (!this._panel || !this._card) return;
     const w = this.clientWidth;
-    const h = this.clientHeight;
+    // 容器高度偶发大于视口（HA 布局未收敛时会把自己撑大），量视口高度封顶，
+    // 否则「画布随容器长→容器又随画布长」会自激。纵向比视口更高的情况由 overflow 裁掉。
+    const vh = (document.documentElement && document.documentElement.clientHeight) || window.innerHeight || 0;
+    const h = vh ? Math.min(this.clientHeight, vh) : this.clientHeight;
     if (!w || !h) return;
-    const fit = w >= 900 && h >= 620;
+    // 尺寸没变就不重排，避免 ResizeObserver 自触发死循环
+    const key = `${w}x${h}`;
+    if (key === this._fitKey) return;
+    this._fitKey = key;
+    const fit = w >= 760 && h >= 460;
     const wasFit = this._fitState;
     this._fitState = fit;
     this._card.classList.toggle("fit", fit);
@@ -225,9 +292,11 @@ class HaCarCard extends HTMLElement {
     if (!fit) return;
     const k = Math.min(w / 1440, h / 900);
     this._card.style.setProperty("--fit", String(Math.round(k * 1000) / 1000));
-    // 宽先到顶时把画布按比例拉高（不是拉伸像素），让纸面把面板铺满
+    // 画布按等比缩放后的容器尺寸反算：宽/高两侧都补到容器边界，
+    // 避免高受限时固定 1440px 画布只占满高度、左右留下大片空白。
+    const designW = Math.max(1440, Math.round(w / k));
     const designH = Math.max(900, Math.round(h / k));
-    this._card.style.width = "1440px";
+    this._card.style.width = `${designW}px`;
     this._card.style.height = `${designH}px`;
   }
 
