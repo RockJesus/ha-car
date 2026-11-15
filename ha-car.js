@@ -347,7 +347,12 @@ ha-card::after { content: ""; position: absolute; left: 8%; right: 8%; top: 0; h
   opacity: .55; }
 .plate, .gn b, .tc b, .stat b { font-variant-numeric: tabular-nums; }
 .plate { font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace; }
-.wrap { position: relative; padding: 18px 16px 14px; display: flex; flex-direction: column; gap: 14px; }
+.wrap { position: relative; padding: 18px 16px 14px; display: flex; flex-direction: column; gap: 14px;
+  background-image:
+    radial-gradient(120% 80% at 50% -10%, rgba(55,214,232,.14), transparent 58%),
+    radial-gradient(70% 50% at 15% 105%, rgba(40,120,180,.10), transparent 70%),
+    linear-gradient(168deg, #111d2c 0%, #0b1521 52%, #060b12 100%);
+  background-size: auto, auto, auto; background-repeat: no-repeat; }
 .duo { display: flex; flex-direction: column; gap: 14px; }
 .dleft, .dright { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
 /* 模块栈：顺序由配置决定，手机单列、宽屏双栏（车图固定左栏） */
@@ -1635,19 +1640,23 @@ var HaCarCard = class extends HTMLElement {
     if (!boxEl) return;
     const r = boxEl.getBoundingClientRect();
     if (r.width < 40 || r.height < 40) return;
-    const w = Math.round(r.width);
-    const h = Math.round(r.height);
-    const wide = w / h >= 1.15;
-    if (this.style.width !== `${w}px` || this.style.height !== `${h}px`) {
-      this._pinW = w;
-      this._pinH = h;
-      this.style.width = `${w}px`;
-      this.style.height = `${h}px`;
+    const bw = Math.round(r.width);
+    const bh = Math.round(r.height);
+    if (this.style.width !== `${bw}px` || this.style.height !== `${bh}px`) {
+      this._pinW = bw;
+      this._pinH = bh;
+      this.style.width = `${bw}px`;
+      this.style.height = `${bh}px`;
     }
+    const visW = this.clientWidth;
+    const visH = this.clientHeight;
+    const w = visW && visW < bw ? visW : bw;
+    const h = visH && visH < bh ? visH : bh;
+    const wide = w / h >= 1.15;
     const wideChanged = wide !== this._wide;
     this._wide = wide;
     if (wide) {
-      const k2 = Math.max(0.3, Math.min(1, w / 1440, h / 900));
+      const k2 = Math.max(0.12, Math.min(1, w / 1440, h / 900));
       this._card.classList.add("panel", "fit");
       this._card.classList.remove("gfit", "gtwo");
       this._card.style.width = "";
@@ -1662,7 +1671,7 @@ var HaCarCard = class extends HTMLElement {
     this._card.classList.remove("panel", "fit", "gtwo");
     this._card.classList.add("gfit");
     this._card.style.removeProperty("--fit");
-    const k = Math.max(0.3, Math.min(1, w / 390, h / 840));
+    const k = Math.max(0.12, Math.min(1, w / 390, h / 840));
     this._card.style.setProperty("--gscale", String(Math.round(k * 1e3) / 1e3));
     const cw = Math.min(960, Math.max(390, Math.round(w / k)));
     const ch = Math.max(840, Math.round(h / k));
@@ -3308,7 +3317,7 @@ var HaCarEditor = class extends HTMLElement {
 customElements.define("ha-car-editor", HaCarEditor);
 
 // src/main.js
-var VERSION = "1.8.3";
+var VERSION = "1.8.4";
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "ha-car",

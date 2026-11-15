@@ -356,20 +356,25 @@ class HaCarCard extends HTMLElement {
     if (!boxEl) return;
     const r = boxEl.getBoundingClientRect();
     if (r.width < 40 || r.height < 40) return;
-    const w = Math.round(r.width);
-    const h = Math.round(r.height);
+    const bw = Math.round(r.width);
+    const bh = Math.round(r.height);
+    if (this.style.width !== `${bw}px` || this.style.height !== `${bh}px`) {
+      this._pinW = bw;
+      this._pinH = bh;
+      this.style.width = `${bw}px`;
+      this.style.height = `${bh}px`;
+    }
+    // 卡片自身被父级限制得更小时（配置弹窗预览），按实际可见尺寸缩放，避免右侧/底部被 overflow 裁掉
+    const visW = this.clientWidth;
+    const visH = this.clientHeight;
+    const w = visW && visW < bw ? visW : bw;
+    const h = visH && visH < bh ? visH : bh;
     // 宽格子直接复用面板的 1440×900 双栏设计稿（同一套左右分栏与字号），窄格子走单栏缩放
     const wide = w / h >= 1.15;
-    if (this.style.width !== `${w}px` || this.style.height !== `${h}px`) {
-      this._pinW = w;
-      this._pinH = h;
-      this.style.width = `${w}px`;
-      this.style.height = `${h}px`;
-    }
     const wideChanged = wide !== this._wide;
     this._wide = wide;
     if (wide) {
-      const k = Math.max(0.3, Math.min(1, w / 1440, h / 900));
+      const k = Math.max(0.12, Math.min(1, w / 1440, h / 900));
       this._card.classList.add("panel", "fit");
       this._card.classList.remove("gfit", "gtwo");
       this._card.style.width = "";
@@ -384,7 +389,7 @@ class HaCarCard extends HTMLElement {
     this._card.classList.remove("panel", "fit", "gtwo");
     this._card.classList.add("gfit");
     this._card.style.removeProperty("--fit");
-    const k = Math.max(0.3, Math.min(1, w / 390, h / 840));
+    const k = Math.max(0.12, Math.min(1, w / 390, h / 840));
     this._card.style.setProperty("--gscale", String(Math.round(k * 1000) / 1000));
     // 单栏画布宽度收在 960 内：再宽的话英雄区会被拉得过大、比例失衡
     const cw = Math.min(960, Math.max(390, Math.round(w / k)));

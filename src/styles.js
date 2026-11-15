@@ -33,7 +33,12 @@ ha-card::after { content: ""; position: absolute; left: 8%; right: 8%; top: 0; h
   opacity: .55; }
 .plate, .gn b, .tc b, .stat b { font-variant-numeric: tabular-nums; }
 .plate { font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace; }
-.wrap { position: relative; padding: 18px 16px 14px; display: flex; flex-direction: column; gap: 14px; }
+.wrap { position: relative; padding: 18px 16px 14px; display: flex; flex-direction: column; gap: 14px;
+  background-image:
+    radial-gradient(120% 80% at 50% -10%, rgba(55,214,232,.14), transparent 58%),
+    radial-gradient(70% 50% at 15% 105%, rgba(40,120,180,.10), transparent 70%),
+    linear-gradient(168deg, #111d2c 0%, #0b1521 52%, #060b12 100%);
+  background-size: auto, auto, auto; background-repeat: no-repeat; }
 .duo { display: flex; flex-direction: column; gap: 14px; }
 .dleft, .dright { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
 /* 模块栈：顺序由配置决定，手机单列、宽屏双栏（车图固定左栏） */
