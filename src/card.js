@@ -313,6 +313,14 @@ class HaCarCard extends HTMLElement {
     this._wrap.innerHTML = this._body(data, this._card.classList.contains("fit"));
 
     this._placeOverlay();
+    // 面板缩放/字体度量落定后几何还会变一次，补两轮重算，避免首帧用旧尺寸定位
+    cancelAnimationFrame(this._pt1);
+    this._pt1 = requestAnimationFrame(() => {
+      this._placeOverlay();
+      this._pt2 = requestAnimationFrame(() => this._placeOverlay());
+    });
+    clearTimeout(this._pt3);
+    this._pt3 = setTimeout(() => this._placeOverlay(), 420);
     const img = this._wrap.querySelector("img.carimg");
     if (img) img.addEventListener("load", () => this._placeOverlay(), { once: true });
     if (img && img.dataset.fb) {
@@ -607,11 +615,20 @@ class HaCarCard extends HTMLElement {
       if (capH && capT) {
         const hH = capH.offsetHeight;
         const tH = capT.offsetHeight;
-        const topGap = ovlR.top - orbR.top;
-        const botGap = orbR.bottom - ovlR.bottom;
-        // 环与车图之间空间够时，小卡居中落在空隙里；不够时就贴在车头/车尾内侧（绝不压环线）
-        capH.style.top = topGap >= hH + 2 ? `${-Math.round((topGap + hH) / 2)}px` : "2px";
-        capT.style.top = botGap >= tH + 2 ? `${img.offsetHeight + Math.round((botGap - tH) / 2)}px` : `${img.offsetHeight - tH - 2}px`;
+        const ih = img.offsetHeight;
+        // 车图上下各有透明留白：车身轮廓约占图高的 5.6%–98.7%，小卡贴着车身头/尾外侧摆
+        const bodyTop = ih * 0.056;
+        const bodyBot = ih * 0.987;
+        // rect 是屏幕坐标（面板可能整体缩放过），换算回布局 px 再和 cap 的 offsetHeight 比较
+        const ratio = ovlR.width ? ovl.clientWidth / ovlR.width : 1;
+        const ringTop = (orbR.top - ovlR.top) * ratio;
+        const ringBot = (orbR.bottom - ovlR.top) * ratio;
+        let hTop = bodyTop - 4 - hH;
+        if (hTop < ringTop + 3) hTop = ringTop + 3;
+        let tTop = bodyBot + 4;
+        if (tTop + tH > ringBot - 3) tTop = ringBot - 3 - tH;
+        capH.style.top = `${Math.round(hTop)}px`;
+        capT.style.top = `${Math.round(tTop)}px`;
       }
     }
   }

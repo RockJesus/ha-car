@@ -1429,6 +1429,13 @@ var HaCarCard = class extends HTMLElement {
     this._prunePending(data);
     this._wrap.innerHTML = this._body(data, this._card.classList.contains("fit"));
     this._placeOverlay();
+    cancelAnimationFrame(this._pt1);
+    this._pt1 = requestAnimationFrame(() => {
+      this._placeOverlay();
+      this._pt2 = requestAnimationFrame(() => this._placeOverlay());
+    });
+    clearTimeout(this._pt3);
+    this._pt3 = setTimeout(() => this._placeOverlay(), 420);
     const img = this._wrap.querySelector("img.carimg");
     if (img) img.addEventListener("load", () => this._placeOverlay(), { once: true });
     if (img && img.dataset.fb) {
@@ -1682,10 +1689,18 @@ var HaCarCard = class extends HTMLElement {
       if (capH && capT) {
         const hH = capH.offsetHeight;
         const tH = capT.offsetHeight;
-        const topGap = ovlR.top - orbR.top;
-        const botGap = orbR.bottom - ovlR.bottom;
-        capH.style.top = topGap >= hH + 2 ? `${-Math.round((topGap + hH) / 2)}px` : "2px";
-        capT.style.top = botGap >= tH + 2 ? `${img.offsetHeight + Math.round((botGap - tH) / 2)}px` : `${img.offsetHeight - tH - 2}px`;
+        const ih = img.offsetHeight;
+        const bodyTop = ih * 0.056;
+        const bodyBot = ih * 0.987;
+        const ratio = ovlR.width ? ovl.clientWidth / ovlR.width : 1;
+        const ringTop = (orbR.top - ovlR.top) * ratio;
+        const ringBot = (orbR.bottom - ovlR.top) * ratio;
+        let hTop = bodyTop - 4 - hH;
+        if (hTop < ringTop + 3) hTop = ringTop + 3;
+        let tTop = bodyBot + 4;
+        if (tTop + tH > ringBot - 3) tTop = ringBot - 3 - tH;
+        capH.style.top = `${Math.round(hTop)}px`;
+        capT.style.top = `${Math.round(tTop)}px`;
       }
     }
   }
@@ -2690,7 +2705,7 @@ var HaCarEditor = class extends HTMLElement {
 customElements.define("ha-car-editor", HaCarEditor);
 
 // src/main.js
-var VERSION = "1.5.3";
+var VERSION = "1.5.4";
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "ha-car",
