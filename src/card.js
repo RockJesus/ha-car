@@ -596,6 +596,8 @@ class HaCarCard extends HTMLElement {
       if (typeof ResizeObserver !== "undefined") {
         this._ro = new ResizeObserver(() => this._placeOverlay());
         this._ro.observe(img);
+        const hv = this._wrap && this._wrap.querySelector(".hero");
+        if (hv) this._ro.observe(hv);
       }
     }
     // 用 offset 尺寸而不是 getBoundingClientRect：面板缩放后 rect 是屏幕坐标，会把状态层推歪
@@ -606,14 +608,26 @@ class HaCarCard extends HTMLElement {
     let ratio = 1;
     let ringBotHero = 0;
     if (hero && orb) {
-      // 圆环按 hero 短边定径：宽屏面板里不再被左右裁掉，始终是完整一个圆
-      const d = Math.min(hero.clientWidth, hero.clientHeight) * 0.965;
+      // 圆环直径 = 以 hero 中心为圆心、到「hero / wrap / ha-card 三者交集」的最短半径，
+      // 这样无论面板缩放、祖先容器裁切，圆环都不会被切掉弧线
+      const heroR = hero.getBoundingClientRect();
+      const wrapR = this._wrap.getBoundingClientRect();
+      const cardEl = this._wrap.closest && this._wrap.closest("ha-card");
+      const cardR = (cardEl || this._wrap).getBoundingClientRect();
+      const visL = Math.max(heroR.left, wrapR.left, cardR.left);
+      const visR = Math.min(heroR.right, wrapR.right, cardR.right);
+      const visT = Math.max(heroR.top, wrapR.top, cardR.top);
+      const visB = Math.min(heroR.bottom, wrapR.bottom, cardR.bottom);
+      const cx0 = (heroR.left + heroR.right) / 2;
+      const cy0 = (heroR.top + heroR.bottom) / 2;
+      const zk = heroR.width ? hero.clientWidth / heroR.width : 1;
+      const halfScreen = Math.min(cx0 - visL, visR - cx0, cy0 - visT, visB - cy0);
+      const d = Math.max(40, halfScreen * 2 * 0.965 * zk - 2);
       if (d > 0) {
         orb.style.width = orb.style.height = `${d}px`;
         if (orb2) orb2.style.width = orb2.style.height = `${d * 1.035}px`;
       }
       const orbR = orb.getBoundingClientRect();
-      const heroR = hero.getBoundingClientRect();
       ratio = orbR.width ? orb.clientWidth / orbR.width : 1;
       ringBotHero = (orbR.bottom - heroR.top) * ratio;
     }

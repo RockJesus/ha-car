@@ -1698,6 +1698,8 @@ var HaCarCard = class extends HTMLElement {
       if (typeof ResizeObserver !== "undefined") {
         this._ro = new ResizeObserver(() => this._placeOverlay());
         this._ro.observe(img);
+        const hv = this._wrap && this._wrap.querySelector(".hero");
+        if (hv) this._ro.observe(hv);
       }
     }
     if (!img.offsetWidth) return;
@@ -1707,13 +1709,24 @@ var HaCarCard = class extends HTMLElement {
     let ratio = 1;
     let ringBotHero = 0;
     if (hero && orb) {
-      const d = Math.min(hero.clientWidth, hero.clientHeight) * 0.965;
+      const heroR = hero.getBoundingClientRect();
+      const wrapR = this._wrap.getBoundingClientRect();
+      const cardEl = this._wrap.closest && this._wrap.closest("ha-card");
+      const cardR = (cardEl || this._wrap).getBoundingClientRect();
+      const visL = Math.max(heroR.left, wrapR.left, cardR.left);
+      const visR = Math.min(heroR.right, wrapR.right, cardR.right);
+      const visT = Math.max(heroR.top, wrapR.top, cardR.top);
+      const visB = Math.min(heroR.bottom, wrapR.bottom, cardR.bottom);
+      const cx0 = (heroR.left + heroR.right) / 2;
+      const cy0 = (heroR.top + heroR.bottom) / 2;
+      const zk = heroR.width ? hero.clientWidth / heroR.width : 1;
+      const halfScreen = Math.min(cx0 - visL, visR - cx0, cy0 - visT, visB - cy0);
+      const d = Math.max(40, halfScreen * 2 * 0.965 * zk - 2);
       if (d > 0) {
         orb.style.width = orb.style.height = `${d}px`;
         if (orb2) orb2.style.width = orb2.style.height = `${d * 1.035}px`;
       }
       const orbR = orb.getBoundingClientRect();
-      const heroR = hero.getBoundingClientRect();
       ratio = orbR.width ? orb.clientWidth / orbR.width : 1;
       ringBotHero = (orbR.bottom - heroR.top) * ratio;
     }
@@ -2852,7 +2865,7 @@ var HaCarEditor = class extends HTMLElement {
 customElements.define("ha-car-editor", HaCarEditor);
 
 // src/main.js
-var VERSION = "1.6.0";
+var VERSION = "1.6.1";
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "ha-car",
