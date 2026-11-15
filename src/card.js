@@ -188,7 +188,8 @@ class HaCarCard extends HTMLElement {
   }
 
   _syncPanel() {
-    const panel = this._isPanel() && !this._isPreview() && !this._inEditWrap();
+    // 编辑态（hui-card-options 包装层）也要按面板铺满：包装层只是叠了一层编辑 UI，尺寸仍是面板尺寸
+    const panel = this._isPanel() && !this._isPreview();
     if (!panel && !this._panelTried) {
       this._panelTried = true;
       setTimeout(() => this._syncPanel(), 250);
@@ -212,6 +213,7 @@ class HaCarCard extends HTMLElement {
     this._watchEditContext();
     this.classList.toggle("panel", panel);
     this._card.classList.toggle("panel", panel);
+    if (panel) this._card.classList.remove("preview");
     // :host 的 860px 上限只对普通卡片有意义；面板模式交给容器决定尺寸
     this.style.maxWidth = panel ? "none" : "";
     this.style.margin = panel ? "0" : "";
@@ -300,7 +302,24 @@ class HaCarCard extends HTMLElement {
     const vh = (document.documentElement && document.documentElement.clientHeight) || window.innerHeight || 0;
     if (!vw || !vh) return;
     const w = Math.max(320, Math.round(vw - r.left));
-    const h = Math.max(320, Math.round(vh - r.top));
+    // 编辑态：卡片下方还有一条 HA 的卡片操作条（编辑/删除菜单），
+    // 直接量那条工具条的高度并从可用高度里扣掉，避免它把整页顶出一条滚动条。
+    let extra = 0;
+    let opts = this.parentElement;
+    while (opts && (opts.localName || "").toLowerCase() !== "hui-card-options") {
+      opts = opts.parentElement || (opts.parentNode && opts.parentNode.host) || null;
+    }
+    if (opts && opts.shadowRoot) {
+      const top = r.top;
+      for (const ch of opts.shadowRoot.children) {
+        const cr = ch.getBoundingClientRect();
+        if (cr.height > 20 && cr.height < 200 && cr.top >= top + 40) {
+          // 工具条自身高度 + 它与卡片之间的 12px 间距，一起扣掉
+          extra = Math.max(extra, Math.round(cr.height) + 12);
+        }
+      }
+    }
+    const h = Math.max(320, Math.round(vh - r.top - extra));
     if (w !== this._pinW) {
       this.style.width = `${w}px`;
       this._pinW = w;
@@ -308,6 +327,15 @@ class HaCarCard extends HTMLElement {
     if (h !== this._pinH) {
       this.style.height = `${h}px`;
       this._pinH = h;
+    }
+    // HA 编辑态的包装层固定比面板高 6px，会把整页顶出一条细滚动条；
+    // 面板编辑时把它的高度收回到视口余量，退出编辑再还原。
+    if (opts) {
+      const oh = Math.max(320, Math.round(vh - opts.getBoundingClientRect().top));
+      if (opts.style.height !== `${oh}px`) {
+        opts.style.height = `${oh}px`;
+        opts.style.marginBottom = "0px";
+      }
     }
   }
 

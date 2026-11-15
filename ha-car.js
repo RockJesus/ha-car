@@ -1465,7 +1465,7 @@ var HaCarCard = class extends HTMLElement {
     return false;
   }
   _syncPanel() {
-    const panel = this._isPanel() && !this._isPreview() && !this._inEditWrap();
+    const panel = this._isPanel() && !this._isPreview();
     if (!panel && !this._panelTried) {
       this._panelTried = true;
       setTimeout(() => this._syncPanel(), 250);
@@ -1488,6 +1488,7 @@ var HaCarCard = class extends HTMLElement {
     this._watchEditContext();
     this.classList.toggle("panel", panel);
     this._card.classList.toggle("panel", panel);
+    if (panel) this._card.classList.remove("preview");
     this.style.maxWidth = panel ? "none" : "";
     this.style.margin = panel ? "0" : "";
     this.style.height = panel ? "100%" : "";
@@ -1567,7 +1568,21 @@ var HaCarCard = class extends HTMLElement {
     const vh = document.documentElement && document.documentElement.clientHeight || window.innerHeight || 0;
     if (!vw || !vh) return;
     const w = Math.max(320, Math.round(vw - r.left));
-    const h = Math.max(320, Math.round(vh - r.top));
+    let extra = 0;
+    let opts = this.parentElement;
+    while (opts && (opts.localName || "").toLowerCase() !== "hui-card-options") {
+      opts = opts.parentElement || opts.parentNode && opts.parentNode.host || null;
+    }
+    if (opts && opts.shadowRoot) {
+      const top = r.top;
+      for (const ch of opts.shadowRoot.children) {
+        const cr = ch.getBoundingClientRect();
+        if (cr.height > 20 && cr.height < 200 && cr.top >= top + 40) {
+          extra = Math.max(extra, Math.round(cr.height) + 12);
+        }
+      }
+    }
+    const h = Math.max(320, Math.round(vh - r.top - extra));
     if (w !== this._pinW) {
       this.style.width = `${w}px`;
       this._pinW = w;
@@ -1575,6 +1590,13 @@ var HaCarCard = class extends HTMLElement {
     if (h !== this._pinH) {
       this.style.height = `${h}px`;
       this._pinH = h;
+    }
+    if (opts) {
+      const oh = Math.max(320, Math.round(vh - opts.getBoundingClientRect().top));
+      if (opts.style.height !== `${oh}px`) {
+        opts.style.height = `${oh}px`;
+        opts.style.marginBottom = "0px";
+      }
     }
   }
   // 面板里按 1440×900 设计稿等比缩放：整页装下，不出现滚动条
@@ -3163,7 +3185,7 @@ var HaCarEditor = class extends HTMLElement {
 customElements.define("ha-car-editor", HaCarEditor);
 
 // src/main.js
-var VERSION = "1.8.0";
+var VERSION = "1.8.1";
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "ha-car",
