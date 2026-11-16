@@ -23,6 +23,7 @@ var PATHS = {
   fuel: "M241,69.66,221.66,50.34a8,8,0,0,0-11.32,11.32L229.66,81A8,8,0,0,1,232,86.63V168a8,8,0,0,1-16,0V128a24,24,0,0,0-24-24H176V56a24,24,0,0,0-24-24H72A24,24,0,0,0,48,56V208H32a8,8,0,0,0,0,16H192a8,8,0,0,0,0-16H176V120h16a8,8,0,0,1,8,8v40a24,24,0,0,0,48,0V86.63A23.85,23.85,0,0,0,241,69.66ZM64,208V56a8,8,0,0,1,8-8h80a8,8,0,0,1,8,8V208Zm80-96a8,8,0,0,1-8,8H88a8,8,0,0,1,0-16h48A8,8,0,0,1,144,112Z",
   gauge: "M207.06,72.67A111.24,111.24,0,0,0,128,40h-.4C66.07,40.21,16,91,16,153.13V176a16,16,0,0,0,16,16H224a16,16,0,0,0,16-16V152A111.25,111.25,0,0,0,207.06,72.67ZM224,176H119.71l54.76-75.3a8,8,0,0,0-12.94-9.42L99.92,176H32V153.13c0-3.08.15-6.12.43-9.13H56a8,8,0,0,0,0-16H35.27c10.32-38.86,44-68.24,84.73-71.66V80a8,8,0,0,0,16,0V56.33A96.14,96.14,0,0,1,221,128H200a8,8,0,0,0,0,16h23.67c.21,2.65.33,5.31.33,8Z",
   chevron: "M213.66,101.66l-80,80a8,8,0,0,1-11.32,0l-80-80a8,8,0,0,1,11.32-11.32L128,164.69l74.34-74.35a8,8,0,0,1,11.32,11.32Z",
+  nav: "M128,20 L214,232 L128,196 L42,232 Z",
   caretRight: "M181.66,133.66l-80,80A8,8,0,0,1,88,208V48a8,8,0,0,1,13.66-5.66l80,80A8,8,0,0,1,181.66,133.66Z"
 };
 var ICON_NAMES = Object.keys(PATHS);
@@ -1088,6 +1089,46 @@ ha-card.panel.fit .pills { width: 100%; max-width: none; }
 .enp.on b { color: #8affcb; }
 .enp.on .ed { background: #3dffa2; box-shadow: 0 0 8px 2px rgba(61,255,162,.8); animation: hc-engpulse 1.6s ease-in-out infinite; }
 @keyframes hc-engpulse { 0%, 100% { opacity: .55; transform: scale(.9); } 50% { opacity: 1; transform: scale(1.15); } }
+/* 人车距离 / 找车罗盘 */
+.hmeta .door.fchip { flex: 0 0 auto; cursor: pointer; border-color: rgba(55,214,232,.35);
+  background: rgba(55,214,232,.10); }
+.hmeta .door.fchip:hover { background: rgba(55,214,232,.18); }
+.hmeta .door.fchip .addr { flex: 0 0 auto; overflow: visible; }
+.findmodal { position: absolute; inset: 0; z-index: 60; border-radius: inherit; display: flex;
+  flex-direction: column; align-items: center; justify-content: center; gap: 8px; padding: 18px 16px;
+  background: radial-gradient(120% 90% at 50% 0%, rgba(35,58,84,.92), rgba(8,16,26,.96));
+  backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); color: #eaf6ff; }
+.findmodal .fx { position: absolute; top: 10px; right: 10px; width: 30px; height: 30px; border-radius: 50%;
+  border: 1px solid rgba(255,255,255,.18); background: rgba(255,255,255,.06); color: #dceaf5;
+  font-size: 13px; cursor: pointer; }
+.findmodal .fhead { display: flex; align-items: center; gap: 6px; font-size: 13px; color: #9fb3c8;
+  letter-spacing: .12em; text-transform: uppercase; }
+.findmodal .fhead .ic { width: 15px; height: 15px; }
+.findmodal .fdist { display: flex; align-items: baseline; gap: 8px; }
+.findmodal .fdist b { font-size: clamp(30px, 8cqw, 48px); line-height: 1; font-weight: 800; color: #fff;
+  text-shadow: 0 0 24px rgba(55,214,232,.45); }
+.findmodal .fdist span { font-size: 12px; color: #9fb3c8; }
+.findmodal .fcomp { position: relative; width: min(46%, 190px); aspect-ratio: 1; display: flex;
+  align-items: center; justify-content: center; margin: 4px 0 2px; }
+.findmodal .fring { position: absolute; inset: 0; border-radius: 50%;
+  border: 1px dashed rgba(55,214,232,.35); box-shadow: 0 0 0 10px rgba(55,214,232,.04) inset, 0 0 30px rgba(55,214,232,.12); }
+.findmodal .fring::before, .findmodal .fring::after { content: ""; position: absolute; left: 50%; top: -1px;
+  width: 2px; height: 8px; background: rgba(55,214,232,.55); transform: translateX(-50%); }
+.findmodal .fring::after { top: auto; bottom: -1px; }
+.findmodal .farrow { position: relative; display: flex; align-items: center; justify-content: center;
+  width: 62%; height: 62%; transform-origin: 50% 50%; transition: transform .08s linear; color: #37d6e8;
+  filter: drop-shadow(0 0 14px rgba(55,214,232,.55)); }
+.findmodal .farrow .ic { width: 100%; height: 100%; }
+.findmodal .fdot { position: absolute; width: 8px; height: 8px; border-radius: 50%; background: #37d6e8;
+  box-shadow: 0 0 12px rgba(55,214,232,.8); }
+.findmodal .fdir { font-size: 14px; font-weight: 600; color: #dceaf5; }
+.findmodal .ffoot { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: center; }
+.findmodal .fperm { display: inline-flex; align-items: center; gap: 5px; height: 30px; padding: 0 12px;
+  border-radius: 999px; border: 1px solid rgba(55,214,232,.4); background: rgba(55,214,232,.12);
+  color: #cfeff8; font-size: 12px; cursor: pointer; }
+.findmodal .fperm .ic { width: 14px; height: 14px; }
+.findmodal .facc { font-size: 11px; color: #7590a6; }
+.findmodal .fnote { max-width: 300px; text-align: center; font-size: 11px; line-height: 1.5; color: #7e93a8; }
 `;
 var EDITOR_STYLES = `
 :host { display: block; }
@@ -1170,6 +1211,7 @@ select.tf { font-size: 13px; padding: 8px 10px; }
 .addbi { align-self: flex-start; padding: 5px 9px; font-size: 11.5px; margin-top: 2px; }
 .bipickrow { display: flex; align-items: flex-start; gap: 6px; }
 .bipickrow .pick { flex: 1 1 auto; min-width: 0; }
+
 ha-icon.ic { width: 1em; height: 1em; --mdc-icon-size: 1em; display: inline-flex; vertical-align: middle; }
 
 `;
@@ -1631,7 +1673,8 @@ var DEFAULTS = {
   privacy: false,
   image: "auto",
   image_url: "",
-  entities: {}
+  entities: {},
+  find: { phone: "", car: "" }
 };
 function normBlocks(cfg) {
   const raw = Array.isArray(cfg.blocks) ? cfg.blocks : null;
@@ -1695,6 +1738,9 @@ var HaCarCard = class extends HTMLElement {
     cfg.modules = Array.isArray(cfg.modules) ? cfg.modules.filter((m) => MODULES.includes(m)) : DEFAULTS.modules.slice();
     cfg.confirm = Array.isArray(cfg.confirm) ? cfg.confirm.filter((k) => CONFIRMABLE.includes(k)) : DEFAULTS.confirm.slice();
     cfg.entities = cfg.entities && typeof cfg.entities === "object" ? cfg.entities : {};
+    cfg.find = Object.assign({ phone: "", car: "" }, cfg.find && typeof cfg.find === "object" ? cfg.find : {});
+    cfg.find.phone = typeof cfg.find.phone === "string" ? cfg.find.phone : "";
+    cfg.find.car = typeof cfg.find.car === "string" ? cfg.find.car : "";
     cfg.hold_ms = clamp(Number(cfg.hold_ms) || DEFAULTS.hold_ms, 300, 3e3);
     cfg.blocks = normBlocks(cfg);
     this._config = cfg;
@@ -2113,6 +2159,9 @@ var HaCarCard = class extends HTMLElement {
     this._card = root.querySelector("ha-card");
     this._built = true;
     this._bind();
+    this._orientHandler = (ev) => this._onDeviceOrient(ev);
+    window.addEventListener("deviceorientationabsolute", this._orientHandler, true);
+    window.addEventListener("deviceorientation", this._orientHandler, true);
     this._panelRO = new ResizeObserver(() => {
       this._fitPanel();
       this._fitGrid();
@@ -2129,7 +2178,10 @@ var HaCarCard = class extends HTMLElement {
     }
     parts.push(String(this._pending.size));
     parts.push(this._toast ? this._toast.ts + this._toast.msg : "");
-    parts.push(JSON.stringify([this._config.modules, this._config.confirm, this._config.layout, this._config.title]));
+    const fp = this._config.find && this._config.find.phone;
+    const fst = fp && this._hass && this._hass.states[fp];
+    parts.push("find=" + (fst ? fst.state + "@" + (fst.last_changed || "") : "-"));
+    parts.push(JSON.stringify([this._config.modules, this._config.confirm, this._config.layout, this._config.title, this._config.find]));
     return parts.join("|");
   }
   _paint(data) {
@@ -2148,6 +2200,9 @@ var HaCarCard = class extends HTMLElement {
     this._prunePending(data);
     const twoCol = this._card.classList.contains("fit") || this._card.classList.contains("gtwo");
     this._wrap.innerHTML = this._body(data, twoCol);
+    if (this._findOpen) this._wrap.insertAdjacentHTML("beforeend", this._findModal(data));
+    this._findData = data;
+    this._updateFind();
     this._placeOverlay();
     this._placeToast();
     cancelAnimationFrame(this._pt1);
@@ -2359,8 +2414,9 @@ var HaCarCard = class extends HTMLElement {
         case "meta": {
           const locH = compact ? "" : this._metaLocation(b, data, t);
           const syncH = this._baseline(data, t, b);
+          const findH = compact ? "" : this._findChip(data);
           const extra = this._extraChips(b, data, t, ["location", "sync"]);
-          if (locH || syncH || extra) html = `<div class="b-meta"><div class="hmeta">${locH}${syncH}</div>${extra}</div>`;
+          if (locH || syncH || findH || extra) html = `<div class="b-meta"><div class="hmeta">${locH}${syncH}${findH}</div>${extra}</div>`;
           break;
         }
         case "hero": {
@@ -2783,6 +2839,138 @@ var HaCarCard = class extends HTMLElement {
       if (cfg.image === "side") return pic("image_side") || { src: null, fb: null };
     }
     return pic("image_overlook") || pic("image_3d") || pic("image_side") || { src: null, fb: null };
+  }
+  // ---------- 人车距离 / 手机指南针找车 ----------
+  _ll(st) {
+    if (!st || !st.attributes) return null;
+    const lat = Number(st.attributes.latitude);
+    const lon = Number(st.attributes.longitude);
+    if (!Number.isFinite(lat) || !Number.isFinite(lon)) return null;
+    return { lat, lon };
+  }
+  _findPoints(data) {
+    const f = this._config && this._config.find || {};
+    const phoneSt = f.phone && this._hass ? this._hass.states[f.phone] : null;
+    const carEnt = f.car || (data && data.id ? data.id("tracker") : "");
+    const carSt = carEnt && this._hass ? this._hass.states[carEnt] : null;
+    return { phone: this._ll(phoneSt), car: this._ll(carSt), phoneSt, carSt, carEnt };
+  }
+  _distanceM(a, b) {
+    if (!a || !b) return null;
+    const R = 63710088e-1;
+    const rad = (d) => d * Math.PI / 180;
+    const dLat = rad(b.lat - a.lat);
+    const dLon = rad(b.lon - a.lon);
+    const h = Math.sin(dLat / 2) ** 2 + Math.cos(rad(a.lat)) * Math.cos(rad(b.lat)) * Math.sin(dLon / 2) ** 2;
+    return 2 * R * Math.asin(Math.min(1, Math.sqrt(h)));
+  }
+  _bearing(a, b) {
+    if (!a || !b) return null;
+    const rad = (d) => d * Math.PI / 180;
+    const deg = (r) => r * 180 / Math.PI;
+    const y = Math.sin(rad(b.lon - a.lon)) * Math.cos(rad(b.lat));
+    const x = Math.cos(rad(a.lat)) * Math.sin(rad(b.lat)) - Math.sin(rad(a.lat)) * Math.cos(rad(b.lat)) * Math.cos(rad(b.lon - a.lon));
+    return (deg(Math.atan2(y, x)) + 360) % 360;
+  }
+  _distText(m) {
+    if (m == null) return "—";
+    if (m < 1e3) return m < 10 ? "就在附近" : `${Math.round(m)} m`;
+    return `${(m / 1e3).toFixed(m < 1e4 ? 1 : 0)} km`;
+  }
+  _findChip(data) {
+    if (!data) return "";
+    const p = this._findPoints(data);
+    const d = this._distanceM(p.phone, p.car);
+    if (d == null) return "";
+    const label = isEn(this._hass) ? "To car" : "距车";
+    return `<span class="door fchip" data-find role="button" tabindex="0">${icon("pin")}<span class="addr">${label} ${esc(this._distText(d))}</span></span>`;
+  }
+  _findModal(data) {
+    const p = this._findPoints(data);
+    const d = this._distanceM(p.phone, p.car);
+    const bearing = this._bearing(p.phone, p.car);
+    const ok = d != null && bearing != null;
+    const title = isEn(this._hass) ? "Find my car" : "找车";
+    if (!ok) {
+      return `<div class="findmodal" role="dialog" aria-label="${esc(title)}"><button class="fx" data-findclose type="button" aria-label="关闭">✕</button>
+        <div class="fhead">${icon("pin")}${esc(title)}</div>
+        <div class="fnote">未取得手机或车辆的经纬度。请在编辑器里选择手机定位实体，并确认车辆定位实体带 latitude / longitude 属性。</div></div>`;
+    }
+    return `<div class="findmodal" role="dialog" aria-label="${esc(title)}"><button class="fx" data-findclose type="button" aria-label="关闭">✕</button>
+      <div class="fhead">${icon("pin")}${esc(title)}</div>
+      <div class="fdist"><b data-fdist>${esc(this._distText(d))}</b><span>${isEn(this._hass) ? "away" : "距离"}</span></div>
+      <div class="fcomp"><i class="fring"></i><i class="farrow" data-farrow>${icon("nav")}</i><span class="fdot"></span></div>
+      <div class="fdir" data-fdir>${esc(this._dirText(bearing, null))}</div>
+      <div class="ffoot"><button class="fperm" data-findperm type="button">${icon("gauge")}校准指南针</button>
+        <span class="facc">${esc(isEn(this._hass) ? "GPS bearing · compass" : "车辆方位 · 手机指南针")}</span></div>
+      <div class="fnote">${isEn(this._hass) ? "Hold the phone flat and point the top away from you." : "手机尽量水平，顶部朝向正前方；箭头会随手机转向。"}</div></div>`;
+  }
+  _dirText(bearing, heading) {
+    const rel = heading == null ? bearing : (bearing - heading + 360) % 360;
+    const dirs = [
+      ["前方", "Ahead"],
+      ["右前方", "Front right"],
+      ["右侧", "Right"],
+      ["右后方", "Back right"],
+      ["后方", "Behind"],
+      ["左后方", "Back left"],
+      ["左侧", "Left"],
+      ["左前方", "Front left"]
+    ];
+    const idx = Math.round(rel / 45) % 8;
+    const name = dirs[idx][isEn(this._hass) ? 1 : 0];
+    const delta = Math.round((rel + 180) % 360 - 180);
+    return heading == null ? `${name} · 车在 ${Math.round(rel)}°` : `${name} · 偏 ${Math.abs(delta)}°`;
+  }
+  _updateFind() {
+    if (!this._findOpen || !this._findData) return;
+    const p = this._findPoints(this._findData);
+    const d = this._distanceM(p.phone, p.car);
+    const bearing = this._bearing(p.phone, p.car);
+    if (d == null || bearing == null) return;
+    const distEl = this._wrap && this._wrap.querySelector("[data-fdist]");
+    const arrow = this._wrap && this._wrap.querySelector("[data-farrow]");
+    const dir = this._wrap && this._wrap.querySelector("[data-fdir]");
+    if (distEl) distEl.textContent = this._distText(d);
+    const rel = this._heading == null ? bearing : (bearing - this._heading + 360) % 360;
+    if (arrow) arrow.style.transform = `rotate(${rel}deg)`;
+    if (dir) dir.textContent = this._dirText(bearing, this._heading);
+  }
+  _onDeviceOrient(ev) {
+    let h = null;
+    if (typeof ev.webkitCompassHeading === "number" && Number.isFinite(ev.webkitCompassHeading)) h = ev.webkitCompassHeading;
+    else if (Number.isFinite(ev.alpha)) h = (360 - ev.alpha + 360) % 360;
+    if (h == null) return;
+    this._heading = h;
+    if (this._findOpen) this._updateFind();
+  }
+  _openFind() {
+    this._findOpen = true;
+    this._sig = "";
+    if (this._hass) this._paint(resolve(this._hass, this._config));
+    else this._render(true);
+  }
+  _closeFind() {
+    this._findOpen = false;
+    this._sig = "";
+    const m = this._wrap && this._wrap.querySelector(".findmodal");
+    if (m) m.remove();
+    this._render(true);
+  }
+  async _askCompass() {
+    try {
+      if (typeof DeviceOrientationEvent !== "undefined" && typeof DeviceOrientationEvent.requestPermission === "function") {
+        const r = await DeviceOrientationEvent.requestPermission();
+        if (r !== "granted") {
+          this._showToast(isEn(this._hass) ? "Motion permission denied" : "未获得指南针权限", "err");
+          return false;
+        }
+      }
+      return true;
+    } catch {
+      this._showToast(isEn(this._hass) ? "Compass unavailable" : "此设备不支持指南针", "err");
+      return false;
+    }
   }
   _metaLocation(b, data, t) {
     const it = this._items(b).find((x) => {
@@ -3332,6 +3520,21 @@ var HaCarCard = class extends HTMLElement {
       this._exec(act);
       return;
     }
+    const findClose = ev.target.closest && ev.target.closest("[data-findclose]");
+    if (findClose) {
+      this._closeFind();
+      return;
+    }
+    const findPerm = ev.target.closest && ev.target.closest("[data-findperm]");
+    if (findPerm) {
+      this._askCompass();
+      return;
+    }
+    const findBtn = ev.target.closest && ev.target.closest("[data-find]");
+    if (findBtn) {
+      this._openFind();
+      return;
+    }
     const more = ev.target.closest && ev.target.closest("[data-more]");
     if (more && more.dataset.more) this._moreInfo(more.dataset.more);
   }
@@ -3486,6 +3689,7 @@ var HaCarEditor = class extends HTMLElement {
   setConfig(config) {
     this._config = Object.assign({}, DEFAULTS, config || {});
     this._config.entities = Object.assign({}, this._config.entities || {});
+    this._config.find = Object.assign({ phone: "", car: "" }, this._config.find && typeof this._config.find === "object" ? this._config.find : {});
     if (!Array.isArray(this._config.modules)) this._config.modules = DEFAULTS.modules.slice();
     if (!Array.isArray(this._config.confirm)) this._config.confirm = DEFAULTS.confirm.slice();
     this._config.blocks = normBlocks(this._config);
@@ -3519,6 +3723,16 @@ var HaCarEditor = class extends HTMLElement {
           <button class="tg" type="button" data-layout="full">完整（含胎压/门窗/服务）</button>
           <button class="tg" type="button" data-layout="compact">紧凑</button>
         </div>
+      </div>
+
+      <div class="sec">
+        <h3>找车引导</h3>
+        <p class="hint">选择手机与车辆的定位实体。手机定位需带 latitude / longitude，车距与罗盘方向都按实时坐标计算；手机指南针需在找车面板里点一次“校准指南针”授权。</p>
+        <label class="f">手机定位</label>
+        <div class="pick" id="findphone"></div>
+        <label class="f" style="margin-top:6px">车辆定位</label>
+        <div class="pick" id="findcar"></div>
+        <p class="hint" id="findhint"></p>
       </div>
 
       <div class="sec">
@@ -3881,7 +4095,7 @@ var HaCarEditor = class extends HTMLElement {
     this._config.blocks = blocks;
     this._emit();
   }
-  _mountPicker(host, value, onPick, placeholder) {
+  _mountPicker(host, value, onPick, placeholder, domain) {
     let p = host.querySelector("ha-selector");
     if (!customElements.get("ha-selector")) {
       let inp = host.querySelector("input");
@@ -3905,7 +4119,7 @@ var HaCarEditor = class extends HTMLElement {
       host.appendChild(p);
     }
     p.hass = this._hass;
-    p.selector = { entity: {} };
+    p.selector = domain ? { entity: { domain } } : { entity: {} };
     if (placeholder) p.placeholder = placeholder;
     if (p.value !== (value || void 0)) p.value = value || void 0;
   }
@@ -3977,6 +4191,26 @@ var HaCarEditor = class extends HTMLElement {
       s.classList.toggle("sel", s.dataset.color.toLowerCase() === String(this._config.accent || "").toLowerCase());
     });
     this._syncPickers();
+    this._syncFind();
+  }
+  _syncFind() {
+    if (!this._built) return;
+    const f = this._config.find || { phone: "", car: "" };
+    const hp = this.shadowRoot.getElementById("findphone");
+    const hc = this.shadowRoot.getElementById("findcar");
+    if (!hp || !hc) return;
+    this._mountPicker(hp, f.phone || "", (v) => {
+      this._config.find = Object.assign({ phone: "", car: "" }, this._config.find || {}, { phone: v });
+      this._emit();
+      this._syncFind();
+    }, "选择手机定位实体", "device_tracker");
+    this._mountPicker(hc, f.car || "", (v) => {
+      this._config.find = Object.assign({ phone: "", car: "" }, this._config.find || {}, { car: v });
+      this._emit();
+      this._syncFind();
+    }, "留空自动使用车辆定位", "device_tracker");
+    const hint = this.shadowRoot.getElementById("findhint");
+    if (hint) hint.textContent = f.phone ? "已启用：定位行会显示“距车”胶囊，点它打开找车罗盘。" : "未选择手机定位，卡片不会显示人车距离。";
   }
   _emit() {
     const cfg = Object.assign({}, this._config);
@@ -3992,6 +4226,7 @@ var HaCarEditor = class extends HTMLElement {
     if (cfg.accent === DEFAULTS.accent) delete cfg.accent;
     if (cfg.theme === DEFAULTS.theme) delete cfg.theme;
     if (cfg.image === "auto") delete cfg.image;
+    if (cfg.find && !cfg.find.phone && !cfg.find.car) delete cfg.find;
     this.dispatchEvent(
       new CustomEvent("config-changed", {
         detail: { config: cfg },
@@ -4004,7 +4239,7 @@ var HaCarEditor = class extends HTMLElement {
 customElements.define("ha-car-editor", HaCarEditor);
 
 // src/main.js
-var VERSION = "2.1.6";
+var VERSION = "2.1.7";
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "ha-car",

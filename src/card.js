@@ -160,6 +160,7 @@ const DEFAULTS = {
   image: "auto",
   image_url: "",
   entities: {},
+  find: { phone: "", car: "" },
 };
 
 // blocks 归一化：老配置没有 blocks 时按 modules 推导等价顺序
@@ -240,6 +241,9 @@ class HaCarCard extends HTMLElement {
       ? cfg.confirm.filter((k) => CONFIRMABLE.includes(k))
       : DEFAULTS.confirm.slice();
     cfg.entities = cfg.entities && typeof cfg.entities === "object" ? cfg.entities : {};
+    cfg.find = Object.assign({ phone: "", car: "" }, cfg.find && typeof cfg.find === "object" ? cfg.find : {});
+    cfg.find.phone = typeof cfg.find.phone === "string" ? cfg.find.phone : "";
+    cfg.find.car = typeof cfg.find.car === "string" ? cfg.find.car : "";
     cfg.hold_ms = clamp(Number(cfg.hold_ms) || DEFAULTS.hold_ms, 300, 3000);
     cfg.blocks = normBlocks(cfg);
     this._config = cfg;
@@ -722,6 +726,9 @@ class HaCarCard extends HTMLElement {
 
     this._built = true;
     this._bind();
+    this._orientHandler = (ev) => this._onDeviceOrient(ev);
+    window.addEventListener("deviceorientationabsolute", this._orientHandler, true);
+    window.addEventListener("deviceorientation", this._orientHandler, true);
     this._panelRO = new ResizeObserver(() => {
       this._fitPanel();
       this._fitGrid();
@@ -739,7 +746,10 @@ class HaCarCard extends HTMLElement {
     }
     parts.push(String(this._pending.size));
     parts.push(this._toast ? this._toast.ts + this._toast.msg : "");
-    parts.push(JSON.stringify([this._config.modules, this._config.confirm, this._config.layout, this._config.title]));
+    const fp = this._config.find && this._config.find.phone;
+    const fst = fp && this._hass && this._hass.states[fp];
+    parts.push("find=" + (fst ? fst.state + "@" + (fst.last_changed || "") : "-"));
+    parts.push(JSON.stringify([this._config.modules, this._config.confirm, this._config.layout, this._config.title, this._config.find]));
     return parts.join("|");
   }
 
@@ -759,6 +769,9 @@ class HaCarCard extends HTMLElement {
     this._prunePending(data);
     const twoCol = this._card.classList.contains("fit") || this._card.classList.contains("gtwo");
     this._wrap.innerHTML = this._body(data, twoCol);
+    if (this._findOpen) this._wrap.insertAdjacentHTML("beforeend", this._findModal(data));
+    this._findData = data;
+    this._updateFind();
 
     this._placeOverlay();
     this._placeToast();
@@ -1006,8 +1019,9 @@ class HaCarCard extends HTMLElement {
         case "meta": {
           const locH = compact ? "" : this._metaLocation(b, data, t);
           const syncH = this._baseline(data, t, b);
+          const findH = compact ? "" : this._findChip(data);
           const extra = this._extraChips(b, data, t, ["location", "sync"]);
-          if (locH || syncH || extra) html = `<div class="b-meta"><div class="hmeta">${locH}${syncH}</div>${extra}</div>`;
+          if (locH || syncH || findH || extra) html = `<div class="b-meta"><div class="hmeta">${locH}${syncH}${findH}</div>${extra}</div>`;
           break;
         }
         case "hero": {
@@ -1479,6 +1493,145 @@ class HaCarCard extends HTMLElement {
       if (cfg.image === "side") return pic("image_side") || { src: null, fb: null };
     }
     return pic("image_overlook") || pic("image_3d") || pic("image_side") || { src: null, fb: null };
+  }
+
+  // ---------- 人车距离 / 手机指南针找车 ----------
+  _ll(st) {
+    if (!st || !st.attributes) return null;
+    const lat = Number(st.attributes.latitude);
+    const lon = Number(st.attributes.longitude);
+    if (!Number.isFinite(lat) || !Number.isFinite(lon)) return null;
+    return { lat, lon };
+  }
+
+  _findPoints(data) {
+    const f = (this._config && this._config.find) || {};
+    const phoneSt = f.phone && this._hass ? this._hass.states[f.phone] : null;
+    const carEnt = f.car || (data && data.id ? data.id("tracker") : "");
+    const carSt = carEnt && this._hass ? this._hass.states[carEnt] : null;
+    return { phone: this._ll(phoneSt), car: this._ll(carSt), phoneSt, carSt, carEnt };
+  }
+
+  _distanceM(a, b) {
+    if (!a || !b) return null;
+    const R = 6371008.8;
+    const rad = (d) => (d * Math.PI) / 180;
+    const dLat = rad(b.lat - a.lat);
+    const dLon = rad(b.lon - a.lon);
+    const h = Math.sin(dLat / 2) ** 2 + Math.cos(rad(a.lat)) * Math.cos(rad(b.lat)) * Math.sin(dLon / 2) ** 2;
+    return 2 * R * Math.asin(Math.min(1, Math.sqrt(h)));
+  }
+
+  _bearing(a, b) {
+    if (!a || !b) return null;
+    const rad = (d) => (d * Math.PI) / 180;
+    const deg = (r) => (r * 180) / Math.PI;
+    const y = Math.sin(rad(b.lon - a.lon)) * Math.cos(rad(b.lat));
+    const x = Math.cos(rad(a.lat)) * Math.sin(rad(b.lat)) - Math.sin(rad(a.lat)) * Math.cos(rad(b.lat)) * Math.cos(rad(b.lon - a.lon));
+    return (deg(Math.atan2(y, x)) + 360) % 360;
+  }
+
+  _distText(m) {
+    if (m == null) return "—";
+    if (m < 1000) return m < 10 ? "就在附近" : `${Math.round(m)} m`;
+    return `${(m / 1000).toFixed(m < 10000 ? 1 : 0)} km`;
+  }
+
+  _findChip(data) {
+    if (!data) return "";
+    const p = this._findPoints(data);
+    const d = this._distanceM(p.phone, p.car);
+    if (d == null) return "";
+    const label = isEn(this._hass) ? "To car" : "距车";
+    return `<span class="door fchip" data-find role="button" tabindex="0">${icon("pin")}<span class="addr">${label} ${esc(this._distText(d))}</span></span>`;
+  }
+
+  _findModal(data) {
+    const p = this._findPoints(data);
+    const d = this._distanceM(p.phone, p.car);
+    const bearing = this._bearing(p.phone, p.car);
+    const ok = d != null && bearing != null;
+    const title = isEn(this._hass) ? "Find my car" : "找车";
+    if (!ok) {
+      return `<div class="findmodal" role="dialog" aria-label="${esc(title)}"><button class="fx" data-findclose type="button" aria-label="关闭">✕</button>
+        <div class="fhead">${icon("pin")}${esc(title)}</div>
+        <div class="fnote">未取得手机或车辆的经纬度。请在编辑器里选择手机定位实体，并确认车辆定位实体带 latitude / longitude 属性。</div></div>`;
+    }
+    return `<div class="findmodal" role="dialog" aria-label="${esc(title)}"><button class="fx" data-findclose type="button" aria-label="关闭">✕</button>
+      <div class="fhead">${icon("pin")}${esc(title)}</div>
+      <div class="fdist"><b data-fdist>${esc(this._distText(d))}</b><span>${isEn(this._hass) ? "away" : "距离"}</span></div>
+      <div class="fcomp"><i class="fring"></i><i class="farrow" data-farrow>${icon("nav")}</i><span class="fdot"></span></div>
+      <div class="fdir" data-fdir>${esc(this._dirText(bearing, null))}</div>
+      <div class="ffoot"><button class="fperm" data-findperm type="button">${icon("gauge")}校准指南针</button>
+        <span class="facc">${esc(isEn(this._hass) ? "GPS bearing · compass" : "车辆方位 · 手机指南针")}</span></div>
+      <div class="fnote">${isEn(this._hass) ? "Hold the phone flat and point the top away from you." : "手机尽量水平，顶部朝向正前方；箭头会随手机转向。"}</div></div>`;
+  }
+
+  _dirText(bearing, heading) {
+    const rel = heading == null ? bearing : (bearing - heading + 360) % 360;
+    const dirs = [
+      ["前方", "Ahead"], ["右前方", "Front right"], ["右侧", "Right"], ["右后方", "Back right"],
+      ["后方", "Behind"], ["左后方", "Back left"], ["左侧", "Left"], ["左前方", "Front left"],
+    ];
+    const idx = Math.round(rel / 45) % 8;
+    const name = dirs[idx][isEn(this._hass) ? 1 : 0];
+    const delta = Math.round(((rel + 180) % 360) - 180);
+    return heading == null ? `${name} · 车在 ${Math.round(rel)}°` : `${name} · 偏 ${Math.abs(delta)}°`;
+  }
+
+  _updateFind() {
+    if (!this._findOpen || !this._findData) return;
+    const p = this._findPoints(this._findData);
+    const d = this._distanceM(p.phone, p.car);
+    const bearing = this._bearing(p.phone, p.car);
+    if (d == null || bearing == null) return;
+    const distEl = this._wrap && this._wrap.querySelector("[data-fdist]");
+    const arrow = this._wrap && this._wrap.querySelector("[data-farrow]");
+    const dir = this._wrap && this._wrap.querySelector("[data-fdir]");
+    if (distEl) distEl.textContent = this._distText(d);
+    const rel = this._heading == null ? bearing : (bearing - this._heading + 360) % 360;
+    if (arrow) arrow.style.transform = `rotate(${rel}deg)`;
+    if (dir) dir.textContent = this._dirText(bearing, this._heading);
+  }
+
+  _onDeviceOrient(ev) {
+    let h = null;
+    if (typeof ev.webkitCompassHeading === "number" && Number.isFinite(ev.webkitCompassHeading)) h = ev.webkitCompassHeading;
+    else if (Number.isFinite(ev.alpha)) h = (360 - ev.alpha + 360) % 360;
+    if (h == null) return;
+    this._heading = h;
+    if (this._findOpen) this._updateFind();
+  }
+
+  _openFind() {
+    this._findOpen = true;
+    this._sig = "";
+    if (this._hass) this._paint(resolve(this._hass, this._config));
+    else this._render(true);
+  }
+
+  _closeFind() {
+    this._findOpen = false;
+    this._sig = "";
+    const m = this._wrap && this._wrap.querySelector(".findmodal");
+    if (m) m.remove();
+    this._render(true);
+  }
+
+  async _askCompass() {
+    try {
+      if (typeof DeviceOrientationEvent !== "undefined" && typeof DeviceOrientationEvent.requestPermission === "function") {
+        const r = await DeviceOrientationEvent.requestPermission();
+        if (r !== "granted") {
+          this._showToast(isEn(this._hass) ? "Motion permission denied" : "未获得指南针权限", "err");
+          return false;
+        }
+      }
+      return true;
+    } catch {
+      this._showToast(isEn(this._hass) ? "Compass unavailable" : "此设备不支持指南针", "err");
+      return false;
+    }
   }
 
   _metaLocation(b, data, t) {
@@ -2060,6 +2213,21 @@ class HaCarCard extends HTMLElement {
         return;
       }
       this._exec(act);
+      return;
+    }
+    const findClose = ev.target.closest && ev.target.closest("[data-findclose]");
+    if (findClose) {
+      this._closeFind();
+      return;
+    }
+    const findPerm = ev.target.closest && ev.target.closest("[data-findperm]");
+    if (findPerm) {
+      this._askCompass();
+      return;
+    }
+    const findBtn = ev.target.closest && ev.target.closest("[data-find]");
+    if (findBtn) {
+      this._openFind();
       return;
     }
     const more = ev.target.closest && ev.target.closest("[data-more]");

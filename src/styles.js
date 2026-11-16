@@ -771,6 +771,46 @@ ha-card.panel.fit .pills { width: 100%; max-width: none; }
 .enp.on b { color: #8affcb; }
 .enp.on .ed { background: #3dffa2; box-shadow: 0 0 8px 2px rgba(61,255,162,.8); animation: hc-engpulse 1.6s ease-in-out infinite; }
 @keyframes hc-engpulse { 0%, 100% { opacity: .55; transform: scale(.9); } 50% { opacity: 1; transform: scale(1.15); } }
+/* 人车距离 / 找车罗盘 */
+.hmeta .door.fchip { flex: 0 0 auto; cursor: pointer; border-color: rgba(55,214,232,.35);
+  background: rgba(55,214,232,.10); }
+.hmeta .door.fchip:hover { background: rgba(55,214,232,.18); }
+.hmeta .door.fchip .addr { flex: 0 0 auto; overflow: visible; }
+.findmodal { position: absolute; inset: 0; z-index: 60; border-radius: inherit; display: flex;
+  flex-direction: column; align-items: center; justify-content: center; gap: 8px; padding: 18px 16px;
+  background: radial-gradient(120% 90% at 50% 0%, rgba(35,58,84,.92), rgba(8,16,26,.96));
+  backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); color: #eaf6ff; }
+.findmodal .fx { position: absolute; top: 10px; right: 10px; width: 30px; height: 30px; border-radius: 50%;
+  border: 1px solid rgba(255,255,255,.18); background: rgba(255,255,255,.06); color: #dceaf5;
+  font-size: 13px; cursor: pointer; }
+.findmodal .fhead { display: flex; align-items: center; gap: 6px; font-size: 13px; color: #9fb3c8;
+  letter-spacing: .12em; text-transform: uppercase; }
+.findmodal .fhead .ic { width: 15px; height: 15px; }
+.findmodal .fdist { display: flex; align-items: baseline; gap: 8px; }
+.findmodal .fdist b { font-size: clamp(30px, 8cqw, 48px); line-height: 1; font-weight: 800; color: #fff;
+  text-shadow: 0 0 24px rgba(55,214,232,.45); }
+.findmodal .fdist span { font-size: 12px; color: #9fb3c8; }
+.findmodal .fcomp { position: relative; width: min(46%, 190px); aspect-ratio: 1; display: flex;
+  align-items: center; justify-content: center; margin: 4px 0 2px; }
+.findmodal .fring { position: absolute; inset: 0; border-radius: 50%;
+  border: 1px dashed rgba(55,214,232,.35); box-shadow: 0 0 0 10px rgba(55,214,232,.04) inset, 0 0 30px rgba(55,214,232,.12); }
+.findmodal .fring::before, .findmodal .fring::after { content: ""; position: absolute; left: 50%; top: -1px;
+  width: 2px; height: 8px; background: rgba(55,214,232,.55); transform: translateX(-50%); }
+.findmodal .fring::after { top: auto; bottom: -1px; }
+.findmodal .farrow { position: relative; display: flex; align-items: center; justify-content: center;
+  width: 62%; height: 62%; transform-origin: 50% 50%; transition: transform .08s linear; color: #37d6e8;
+  filter: drop-shadow(0 0 14px rgba(55,214,232,.55)); }
+.findmodal .farrow .ic { width: 100%; height: 100%; }
+.findmodal .fdot { position: absolute; width: 8px; height: 8px; border-radius: 50%; background: #37d6e8;
+  box-shadow: 0 0 12px rgba(55,214,232,.8); }
+.findmodal .fdir { font-size: 14px; font-weight: 600; color: #dceaf5; }
+.findmodal .ffoot { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: center; }
+.findmodal .fperm { display: inline-flex; align-items: center; gap: 5px; height: 30px; padding: 0 12px;
+  border-radius: 999px; border: 1px solid rgba(55,214,232,.4); background: rgba(55,214,232,.12);
+  color: #cfeff8; font-size: 12px; cursor: pointer; }
+.findmodal .fperm .ic { width: 14px; height: 14px; }
+.findmodal .facc { font-size: 11px; color: #7590a6; }
+.findmodal .fnote { max-width: 300px; text-align: center; font-size: 11px; line-height: 1.5; color: #7e93a8; }
 `;
 
 export const EDITOR_STYLES = `
@@ -854,6 +894,7 @@ select.tf { font-size: 13px; padding: 8px 10px; }
 .addbi { align-self: flex-start; padding: 5px 9px; font-size: 11.5px; margin-top: 2px; }
 .bipickrow { display: flex; align-items: flex-start; gap: 6px; }
 .bipickrow .pick { flex: 1 1 auto; min-width: 0; }
+
 ha-icon.ic { width: 1em; height: 1em; --mdc-icon-size: 1em; display: inline-flex; vertical-align: middle; }
 
 `;

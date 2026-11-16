@@ -92,6 +92,7 @@ class HaCarEditor extends HTMLElement {
   setConfig(config) {
     this._config = Object.assign({}, DEFAULTS, config || {});
     this._config.entities = Object.assign({}, this._config.entities || {});
+    this._config.find = Object.assign({ phone: "", car: "" }, this._config.find && typeof this._config.find === "object" ? this._config.find : {});
     if (!Array.isArray(this._config.modules)) this._config.modules = DEFAULTS.modules.slice();
     if (!Array.isArray(this._config.confirm)) this._config.confirm = DEFAULTS.confirm.slice();
     this._config.blocks = normBlocks(this._config);
@@ -127,6 +128,16 @@ class HaCarEditor extends HTMLElement {
           <button class="tg" type="button" data-layout="full">完整（含胎压/门窗/服务）</button>
           <button class="tg" type="button" data-layout="compact">紧凑</button>
         </div>
+      </div>
+
+      <div class="sec">
+        <h3>找车引导</h3>
+        <p class="hint">选择手机与车辆的定位实体。手机定位需带 latitude / longitude，车距与罗盘方向都按实时坐标计算；手机指南针需在找车面板里点一次“校准指南针”授权。</p>
+        <label class="f">手机定位</label>
+        <div class="pick" id="findphone"></div>
+        <label class="f" style="margin-top:6px">车辆定位</label>
+        <div class="pick" id="findcar"></div>
+        <p class="hint" id="findhint"></p>
       </div>
 
       <div class="sec">
@@ -519,7 +530,7 @@ class HaCarEditor extends HTMLElement {
     this._emit();
   }
 
-  _mountPicker(host, value, onPick, placeholder) {
+  _mountPicker(host, value, onPick, placeholder, domain) {
     let p = host.querySelector("ha-selector");
     if (!customElements.get("ha-selector")) {
       let inp = host.querySelector("input");
@@ -543,7 +554,7 @@ class HaCarEditor extends HTMLElement {
       host.appendChild(p);
     }
     p.hass = this._hass;
-    p.selector = { entity: {} };
+    p.selector = domain ? { entity: { domain } } : { entity: {} };
     if (placeholder) p.placeholder = placeholder;
     if (p.value !== (value || undefined)) p.value = value || undefined;
   }
@@ -620,6 +631,27 @@ class HaCarEditor extends HTMLElement {
       s.classList.toggle("sel", s.dataset.color.toLowerCase() === String(this._config.accent || "").toLowerCase());
     });
     this._syncPickers();
+    this._syncFind();
+  }
+
+  _syncFind() {
+    if (!this._built) return;
+    const f = this._config.find || { phone: "", car: "" };
+    const hp = this.shadowRoot.getElementById("findphone");
+    const hc = this.shadowRoot.getElementById("findcar");
+    if (!hp || !hc) return;
+    this._mountPicker(hp, f.phone || "", (v) => {
+      this._config.find = Object.assign({ phone: "", car: "" }, this._config.find || {}, { phone: v });
+      this._emit();
+      this._syncFind();
+    }, "选择手机定位实体", "device_tracker");
+    this._mountPicker(hc, f.car || "", (v) => {
+      this._config.find = Object.assign({ phone: "", car: "" }, this._config.find || {}, { car: v });
+      this._emit();
+      this._syncFind();
+    }, "留空自动使用车辆定位", "device_tracker");
+    const hint = this.shadowRoot.getElementById("findhint");
+    if (hint) hint.textContent = f.phone ? "已启用：定位行会显示“距车”胶囊，点它打开找车罗盘。" : "未选择手机定位，卡片不会显示人车距离。";
   }
 
   _emit() {
@@ -636,6 +668,7 @@ class HaCarEditor extends HTMLElement {
     if (cfg.accent === DEFAULTS.accent) delete cfg.accent;
     if (cfg.theme === DEFAULTS.theme) delete cfg.theme;
     if (cfg.image === "auto") delete cfg.image;
+    if (cfg.find && !cfg.find.phone && !cfg.find.car) delete cfg.find;
     this.dispatchEvent(
       new CustomEvent("config-changed", {
         detail: { config: cfg },
