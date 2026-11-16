@@ -57,6 +57,7 @@ export const THEMES = {
   ember: { name: "熔岩橙", accent: "#ffab5e", glow: "255,171,94", top: "#2a170b", mid: "#180d05", low: "#0a0502" },
   graphite: { name: "石墨灰", accent: "#9fb3c8", glow: "159,179,200", top: "#1d2126", mid: "#12161a", low: "#080a0c" },
   rose: { name: "玫瑰", accent: "#ff8fb6", glow: "255,143,182", top: "#2a1020", mid: "#190812", low: "#0b0408" },
+  glass: { name: "液态玻璃（iOS）", accent: "#8cc8ff", glow: "140,200,255", top: "#26304e", mid: "#151b2e", low: "#080b14", glass: true },
 };
 
 function themeBg(t) {
@@ -646,8 +647,9 @@ class HaCarCard extends HTMLElement {
     this._syncPanel();
     this._syncGrid();
     this._card.classList.toggle("compact", cfg.layout === "compact");
-    this._wrap.className = "wrap";
     const th = THEMES[cfg.theme] || THEMES.midnight;
+    this._card.classList.toggle("theme-glass", !!th.glass);
+    this._wrap.className = "wrap";
     const accent = cfg.accent && cfg.accent !== DEFAULTS.accent ? cfg.accent : th.accent;
     this._card.style.setProperty("--hc-accent", accent);
     this._card.style.setProperty("--hc-a", hexRgb(accent));

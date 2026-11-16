@@ -317,6 +317,14 @@ function resolve(hass, config) {
 var STYLES = `
 :host { display: block; --hc-accent: #37d6e8; --hc-ink: #e9eff7; --hc-dim: #8496ad;
   --hc-ok: #6fe0a8; --hc-warn: #ffc46b; --hc-bad: #ff9182; --hc-holdms: 2000ms; }
+ha-card.theme-glass { border-color: rgba(255,255,255,.30);
+  box-shadow: 0 30px 70px -34px rgba(0,0,0,.95), 0 0 60px -28px rgba(140,200,255,.55),
+    inset 0 1px 0 rgba(255,255,255,.28); }
+ha-card.theme-glass .skin { background-image:
+  radial-gradient(90% 62% at 18% 0%, rgba(255,255,255,.16), transparent 58%),
+  radial-gradient(80% 60% at 88% 12%, rgba(255,150,225,.16), transparent 62%),
+  radial-gradient(120% 80% at 50% 118%, rgba(110,190,255,.20), transparent 66%),
+  var(--hc-bg); }
 ha-card { display: block; overflow: hidden; position: relative; padding: 0;
   border: 1px solid rgba(var(--hc-a,120,190,215),.16);
   border-radius: var(--ha-card-border-radius, 28px);
@@ -719,6 +727,30 @@ h1 { margin: 0; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-s
 /* 宽屏（面板视图 / 桌面仪表盘）：手机尺寸的内容居中收窄，避免拉成一条横贯全屏的卡片 */
 
 
+/* 液态玻璃主题：所有承载信息的表面换成高光磨砂玻璃 */
+ha-card.theme-glass .loc, ha-card.theme-glass .cap {
+  background:
+    linear-gradient(118deg, rgba(255,255,255,.34) 0%, rgba(255,255,255,.12) 26%, rgba(255,255,255,0) 46%),
+    linear-gradient(158deg, rgba(255,255,255,.20) 0%, rgba(255,255,255,.07) 46%, rgba(255,255,255,.03) 100%);
+  border-color: rgba(255,255,255,.5);
+  box-shadow: 0 8cqw 20cqw -12cqw rgba(4,10,20,.5), inset 0 1cqw 0 rgba(255,255,255,.8),
+    inset 0 -5cqw 12cqw -9cqw rgba(255,158,222,.22), 0 0 14cqw -9cqw rgba(140,200,255,.55);
+  backdrop-filter: blur(15cqw) saturate(175%); }
+ha-card.theme-glass .loc .lh span, ha-card.theme-glass .loc i, ha-card.theme-glass .cap i { color: rgba(226,240,252,.8); }
+ha-card.theme-glass .loc .lr b, ha-card.theme-glass .cap b { color: #f4fbff; }
+ha-card.theme-glass .status { background: rgba(255,255,255,.16); border-color: rgba(255,255,255,.36);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.5), 0 8px 18px -14px rgba(0,0,0,.8);
+  backdrop-filter: blur(14px) saturate(160%); }
+ha-card.theme-glass .status.ok { background: rgba(120,255,196,.16); border-color: rgba(140,255,206,.5); }
+ha-card.theme-glass .chip, ha-card.theme-glass .stat, ha-card.theme-glass .substats,
+ha-card.theme-glass .pills .pill, ha-card.theme-glass .svc, ha-card.theme-glass .baseline {
+  background: linear-gradient(170deg, rgba(255,255,255,.15), rgba(255,255,255,.06));
+  border-color: rgba(255,255,255,.30);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.45), 0 10px 22px -18px rgba(0,0,0,.7);
+  backdrop-filter: blur(16px) saturate(150%); }
+ha-card.theme-glass .alert { backdrop-filter: blur(16px) saturate(150%);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.3), 0 10px 24px -18px rgba(0,0,0,.7); }
+ha-card.theme-glass .gauge { filter: drop-shadow(0 10px 22px rgba(0,0,0,.35)); }
 /* 俯视图状态层：贴在车图上，位置由 JS 量出车图矩形 */
 .covl { position: absolute; pointer-events: none; }
 .cedge { position: absolute; inset: 0; pointer-events: none; }
@@ -1439,7 +1471,8 @@ var THEMES = {
   cyber: { name: "赛博紫", accent: "#b98bff", glow: "185,139,255", top: "#1b1230", mid: "#110a1e", low: "#07040e" },
   ember: { name: "熔岩橙", accent: "#ffab5e", glow: "255,171,94", top: "#2a170b", mid: "#180d05", low: "#0a0502" },
   graphite: { name: "石墨灰", accent: "#9fb3c8", glow: "159,179,200", top: "#1d2126", mid: "#12161a", low: "#080a0c" },
-  rose: { name: "玫瑰", accent: "#ff8fb6", glow: "255,143,182", top: "#2a1020", mid: "#190812", low: "#0b0408" }
+  rose: { name: "玫瑰", accent: "#ff8fb6", glow: "255,143,182", top: "#2a1020", mid: "#190812", low: "#0b0408" },
+  glass: { name: "液态玻璃（iOS）", accent: "#8cc8ff", glow: "140,200,255", top: "#26304e", mid: "#151b2e", low: "#080b14", glass: true }
 };
 function themeBg(t) {
   const th = THEMES[t] || THEMES.midnight;
@@ -1947,8 +1980,9 @@ var HaCarCard = class extends HTMLElement {
     this._syncPanel();
     this._syncGrid();
     this._card.classList.toggle("compact", cfg.layout === "compact");
-    this._wrap.className = "wrap";
     const th = THEMES[cfg.theme] || THEMES.midnight;
+    this._card.classList.toggle("theme-glass", !!th.glass);
+    this._wrap.className = "wrap";
     const accent = cfg.accent && cfg.accent !== DEFAULTS.accent ? cfg.accent : th.accent;
     this._card.style.setProperty("--hc-accent", accent);
     this._card.style.setProperty("--hc-a", hexRgb(accent));
@@ -3426,7 +3460,7 @@ var HaCarEditor = class extends HTMLElement {
 customElements.define("ha-car-editor", HaCarEditor);
 
 // src/main.js
-var VERSION = "1.9.0";
+var VERSION = "1.9.1";
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "ha-car",
