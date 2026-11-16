@@ -690,7 +690,6 @@ h1 { margin: 0; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-s
 .svc .row .val { text-align: right; color: var(--hc-ink); word-break: break-word; max-width: 66%; }
 
 .b-actions { position: relative; }
-.toast.free { bottom: 64px; }
 /* 长按进度：车底轨道圈顺时针转满一圈（起点 12 点方向） */
 .orbit .hring2 { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
 .orbit .hring2 { transform: rotate(-90deg); }
@@ -699,8 +698,8 @@ h1 { margin: 0; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-s
   filter: drop-shadow(0 0 3px rgba(var(--hc-a,55,214,232),.55)); }
 .orbit.prog .hring2 circle, .orbit.armed .hring2 circle { opacity: 1; }
 .orbit.armed .hring2 circle { stroke: #dffbff; filter: drop-shadow(0 0 7px rgba(var(--hc-a,55,214,232),.85)); }
-.toast { position: absolute; right: 0; left: auto; bottom: calc(100% + 6px); z-index: 6;
-  pointer-events: none; max-width: 100%;
+.toast { position: absolute; left: 0; top: 0; right: auto; bottom: auto; z-index: 9;
+  pointer-events: none; max-width: calc(100% - 8px);
   box-shadow: 0 14px 30px -16px rgba(0,0,0,.95);
   display: flex; align-items: center; gap: 7px; padding: 7px 13px; border-radius: 999px; white-space: nowrap;
   font-size: 11.5px; line-height: 1.4; color: #d5f8ff;
@@ -2000,13 +1999,21 @@ var HaCarCard = class extends HTMLElement {
     const twoCol = this._card.classList.contains("fit") || this._card.classList.contains("gtwo");
     this._wrap.innerHTML = this._body(data, twoCol);
     this._placeOverlay();
+    this._placeToast();
     cancelAnimationFrame(this._pt1);
     this._pt1 = requestAnimationFrame(() => {
       this._placeOverlay();
-      this._pt2 = requestAnimationFrame(() => this._placeOverlay());
+      this._placeToast();
+      this._pt2 = requestAnimationFrame(() => {
+        this._placeOverlay();
+        this._placeToast();
+      });
     });
     clearTimeout(this._pt3);
-    this._pt3 = setTimeout(() => this._placeOverlay(), 420);
+    this._pt3 = setTimeout(() => {
+      this._placeOverlay();
+      this._placeToast();
+    }, 420);
     const img = this._wrap.querySelector("img.carimg");
     if (img) img.addEventListener("load", () => this._placeOverlay(), { once: true });
     if (img && img.dataset.fb) {
@@ -2110,7 +2117,6 @@ var HaCarCard = class extends HTMLElement {
     if (chgNow) chips.push({ cls: "info", label: t.charging });
     if (running) chips.push({ cls: "warn", label: t.running });
     const blocks = [];
-    let toastPlaced = false;
     const plateTxt = cfg.show_plate && plate ? cfg.privacy ? maskPlate(plate) : plate : "";
     const head = `<div class="head"><div class="ttl"><h1>${FORD_LOGO}${esc(title)}</h1>` + (plateTxt ? `<span class="plate">${esc(plateTxt)}</span>` : "") + `</div><span class="status ${status.cls}"><span class="dot"></span>${esc(status.label)}</span></div>`;
     const hero = this._imagePair(data);
@@ -2166,11 +2172,7 @@ var HaCarCard = class extends HTMLElement {
         }
         case "actions": {
           const ac = this._actions(data, t, running, offline, compact);
-          if (ac) {
-            const toast = this._toast ? this._toastHtml() : "";
-            html = `<div class="blk b-actions">${toast}${ac}</div>`;
-            toastPlaced = Boolean(toast);
-          }
+          if (ac) html = `<div class="blk b-actions">${ac}</div>`;
           break;
         }
         case "custom":
@@ -2181,7 +2183,6 @@ var HaCarCard = class extends HTMLElement {
       }
       if (html) blocks.push({ html, hero: b.type === "hero" });
     }
-    if (!toastPlaced && this._toast) blocks.push({ html: this._toastHtml("free"), hero: false });
     let inner;
     if (twoCol) {
       const left = blocks.filter((b) => b.hero).map((b) => b.html).join("");
@@ -2795,10 +2796,37 @@ var HaCarCard = class extends HTMLElement {
     return `<div class="doors"><span class="door" data-more="${esc(tracker || data.id("addr"))}">
       ${icon("pin")}<span class="addr">${esc(label)}</span></span></div>`;
   }
-  _toastHtml(variant) {
+  _toastHtml() {
     const kind = this._toast.kind === "err" ? " err" : "";
-    const free = variant === "free" ? " free" : "";
-    return `<div class="toast${kind}${free}" role="status">${icon(this._toast.kind === "err" ? "warning" : "bolt")}<span>${esc(this._toast.msg)}</span></div>`;
+    return `<div class="toast${kind}" role="status" data-toast-anchor="${esc(this._toast.anchor || "")}">${icon(this._toast.kind === "err" ? "warning" : "bolt")}<span>${esc(this._toast.msg)}</span></div>`;
+  }
+  // 提示气泡跟随来源控件：普通按钮浮在按钮上方，刷新按钮落在按钮下方
+  _placeToast() {
+    const box = this._toastNode();
+    if (!box) return;
+    const wrap = this._wrap;
+    const anchorKey = this._toast && this._toast.anchor;
+    const anchor = anchorKey ? wrap.querySelector(`[data-act="${anchorKey}"]`) : null;
+    const fallback = wrap.querySelector(".b-actions");
+    if (!anchor && !fallback) return;
+    const ar = (anchor || fallback).getBoundingClientRect();
+    const wr = wrap.getBoundingClientRect();
+    const tw = box.offsetWidth;
+    const th = box.offsetHeight;
+    const k = tw ? box.getBoundingClientRect().width / tw : 1;
+    if (!k || !isFinite(k)) return;
+    const wLocal = wr.width / k;
+    const aTop = (ar.top - wr.top) / k;
+    const aBottom = (ar.bottom - wr.top) / k;
+    const center = (ar.left - wr.left) / k + ar.width / k / 2;
+    box.style.left = `${Math.round(clamp(center - tw / 2, 4, Math.max(4, wLocal - tw - 4)))}px`;
+    let top = anchorKey === "btn_refresh" ? aBottom + 8 : aTop - th - 8;
+    if (top < 2) top = aBottom + 8;
+    if (top + th > wr.height / k) top = Math.max(2, aTop - th - 8);
+    box.style.top = `${Math.round(top)}px`;
+  }
+  _toastNode() {
+    return this._wrap && this._wrap.querySelector(".toast");
   }
   // ---------- 交互 ----------
   _bind() {
@@ -2836,6 +2864,7 @@ var HaCarCard = class extends HTMLElement {
     this._cancelHold();
     const ms = this._holdMs();
     const t = dict(this._hass);
+    this._lastAct = el.dataset.act || "";
     el.style.setProperty("--hc-holdms", ms + "ms");
     el.classList.add("pressing");
     const lbl = el.querySelector(".lbl");
@@ -2973,7 +3002,7 @@ var HaCarCard = class extends HTMLElement {
   }
   _hint() {
     const t = dict(this._hass);
-    this._showToast(t.holdHint, "ok");
+    this._showToast(t.holdHint, "ok", this._lastAct);
   }
   _moreInfo(entityId) {
     if (!entityId) return;
@@ -3003,20 +3032,20 @@ var HaCarCard = class extends HTMLElement {
       call = this._hass.callService(dom, svc, { entity_id: ent });
     } catch (err) {
       this._pending.delete(ent);
-      this._showToast(dict(this._hass).failed + "：" + (err && err.message ? err.message : err), "err");
+      this._showToast(dict(this._hass).failed + "：" + (err && err.message ? err.message : err), "err", key);
       return;
     }
     Promise.resolve(call).then(() => {
       const t = dict(this._hass);
-      this._showToast(key === "btn_refresh" ? t.refreshOk : t.sent + (label ? "：" + label : ""), "ok");
+      this._showToast(key === "btn_refresh" ? t.refreshOk : t.sent + (label ? "：" + label : ""), "ok", key);
     }).catch((err) => {
       this._pending.delete(ent);
       const t = dict(this._hass);
-      this._showToast(t.failed + "：" + (err && err.message ? err.message : err), "err");
+      this._showToast(t.failed + "：" + (err && err.message ? err.message : err), "err", key);
     });
   }
-  _showToast(msg, kind) {
-    this._toast = { msg, kind, ts: Date.now() };
+  _showToast(msg, kind, anchor) {
+    this._toast = { msg, kind, anchor: anchor || this._lastAct || "", ts: Date.now() };
     this._sig = "";
     if (this._toastTimer) clearTimeout(this._toastTimer);
     this._toastTimer = setTimeout(() => {
@@ -3025,6 +3054,7 @@ var HaCarCard = class extends HTMLElement {
       this._render(true);
     }, 4e3);
     this._render(true);
+    requestAnimationFrame(() => this._placeToast());
   }
 };
 customElements.define("ha-car", HaCarCard);
@@ -3469,7 +3499,7 @@ var HaCarEditor = class extends HTMLElement {
 customElements.define("ha-car-editor", HaCarEditor);
 
 // src/main.js
-var VERSION = "1.9.3";
+var VERSION = "1.9.4";
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "ha-car",

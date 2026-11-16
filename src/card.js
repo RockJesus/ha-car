@@ -660,14 +660,22 @@ class HaCarCard extends HTMLElement {
     this._wrap.innerHTML = this._body(data, twoCol);
 
     this._placeOverlay();
+    this._placeToast();
     // 面板缩放/字体度量落定后几何还会变一次，补两轮重算，避免首帧用旧尺寸定位
     cancelAnimationFrame(this._pt1);
     this._pt1 = requestAnimationFrame(() => {
       this._placeOverlay();
-      this._pt2 = requestAnimationFrame(() => this._placeOverlay());
+      this._placeToast();
+      this._pt2 = requestAnimationFrame(() => {
+        this._placeOverlay();
+        this._placeToast();
+      });
     });
     clearTimeout(this._pt3);
-    this._pt3 = setTimeout(() => this._placeOverlay(), 420);
+    this._pt3 = setTimeout(() => {
+      this._placeOverlay();
+      this._placeToast();
+    }, 420);
     const img = this._wrap.querySelector("img.carimg");
     if (img) img.addEventListener("load", () => this._placeOverlay(), { once: true });
     if (img && img.dataset.fb) {
@@ -791,7 +799,6 @@ class HaCarCard extends HTMLElement {
     if (running) chips.push({ cls: "warn", label: t.running });
 
     const blocks = [];
-    let toastPlaced = false;
     const plateTxt = cfg.show_plate && plate ? (cfg.privacy ? maskPlate(plate) : plate) : "";
     const head = `<div class="head"><div class="ttl"><h1>${FORD_LOGO}${esc(title)}</h1>` +
       (plateTxt ? `<span class="plate">${esc(plateTxt)}</span>` : "") +
@@ -850,11 +857,7 @@ class HaCarCard extends HTMLElement {
         }
         case "actions": {
           const ac = this._actions(data, t, running, offline, compact);
-          if (ac) {
-            const toast = this._toast ? this._toastHtml() : "";
-            html = `<div class="blk b-actions">${toast}${ac}</div>`;
-            toastPlaced = Boolean(toast);
-          }
+          if (ac) html = `<div class="blk b-actions">${ac}</div>`;
           break;
         }
         case "custom":
@@ -865,8 +868,6 @@ class HaCarCard extends HTMLElement {
       }
       if (html) blocks.push({ html, hero: b.type === "hero" });
     }
-
-    if (!toastPlaced && this._toast) blocks.push({ html: this._toastHtml("free"), hero: false });
 
     let inner;
     if (twoCol) {
@@ -1541,10 +1542,40 @@ class HaCarCard extends HTMLElement {
       ${icon("pin")}<span class="addr">${esc(label)}</span></span></div>`;
   }
 
-  _toastHtml(variant) {
+  _toastHtml() {
     const kind = this._toast.kind === "err" ? " err" : "";
-    const free = variant === "free" ? " free" : "";
-    return `<div class="toast${kind}${free}" role="status">${icon(this._toast.kind === "err" ? "warning" : "bolt")}<span>${esc(this._toast.msg)}</span></div>`;
+    return `<div class="toast${kind}" role="status" data-toast-anchor="${esc(this._toast.anchor || "")}">${icon(this._toast.kind === "err" ? "warning" : "bolt")}<span>${esc(this._toast.msg)}</span></div>`;
+  }
+
+  // 提示气泡跟随来源控件：普通按钮浮在按钮上方，刷新按钮落在按钮下方
+  _placeToast() {
+    const box = this._toastNode();
+    if (!box) return;
+    const wrap = this._wrap;
+    const anchorKey = this._toast && this._toast.anchor;
+    const anchor = anchorKey ? wrap.querySelector(`[data-act="${anchorKey}"]`) : null;
+    const fallback = wrap.querySelector(".b-actions");
+    if (!anchor && !fallback) return;
+    const ar = (anchor || fallback).getBoundingClientRect();
+    const wr = wrap.getBoundingClientRect();
+    const tw = box.offsetWidth;
+    const th = box.offsetHeight;
+    // 卡片在面板/栅格里带 scale(k)，rect 是缩放后的视觉像素，内联 left/top 是布局像素
+    const k = tw ? box.getBoundingClientRect().width / tw : 1;
+    if (!k || !isFinite(k)) return;
+    const wLocal = wr.width / k;
+    const aTop = (ar.top - wr.top) / k;
+    const aBottom = (ar.bottom - wr.top) / k;
+    const center = (ar.left - wr.left) / k + ar.width / k / 2;
+    box.style.left = `${Math.round(clamp(center - tw / 2, 4, Math.max(4, wLocal - tw - 4)))}px`;
+    let top = anchorKey === "btn_refresh" ? aBottom + 8 : aTop - th - 8;
+    if (top < 2) top = aBottom + 8;
+    if (top + th > wr.height / k) top = Math.max(2, aTop - th - 8);
+    box.style.top = `${Math.round(top)}px`;
+  }
+
+  _toastNode() {
+    return this._wrap && this._wrap.querySelector(".toast");
   }
 
   // ---------- 交互 ----------
@@ -1587,6 +1618,7 @@ class HaCarCard extends HTMLElement {
     this._cancelHold();
     const ms = this._holdMs();
     const t = dict(this._hass);
+    this._lastAct = el.dataset.act || "";
     el.style.setProperty("--hc-holdms", ms + "ms");
     el.classList.add("pressing");
     const lbl = el.querySelector(".lbl");
@@ -1740,7 +1772,7 @@ class HaCarCard extends HTMLElement {
 
   _hint() {
     const t = dict(this._hass);
-    this._showToast(t.holdHint, "ok");
+    this._showToast(t.holdHint, "ok", this._lastAct);
   }
 
   _moreInfo(entityId) {
@@ -1773,23 +1805,23 @@ class HaCarCard extends HTMLElement {
       call = this._hass.callService(dom, svc, { entity_id: ent });
     } catch (err) {
       this._pending.delete(ent);
-      this._showToast(dict(this._hass).failed + "：" + (err && err.message ? err.message : err), "err");
+      this._showToast(dict(this._hass).failed + "：" + (err && err.message ? err.message : err), "err", key);
       return;
     }
     Promise.resolve(call)
       .then(() => {
         const t = dict(this._hass);
-        this._showToast(key === "btn_refresh" ? t.refreshOk : t.sent + (label ? "：" + label : ""), "ok");
+        this._showToast(key === "btn_refresh" ? t.refreshOk : t.sent + (label ? "：" + label : ""), "ok", key);
       })
       .catch((err) => {
         this._pending.delete(ent);
         const t = dict(this._hass);
-        this._showToast(t.failed + "：" + (err && err.message ? err.message : err), "err");
+        this._showToast(t.failed + "：" + (err && err.message ? err.message : err), "err", key);
       });
   }
 
-  _showToast(msg, kind) {
-    this._toast = { msg, kind, ts: Date.now() };
+  _showToast(msg, kind, anchor) {
+    this._toast = { msg, kind, anchor: anchor || this._lastAct || "", ts: Date.now() };
     this._sig = "";
     if (this._toastTimer) clearTimeout(this._toastTimer);
     this._toastTimer = setTimeout(() => {
@@ -1798,6 +1830,7 @@ class HaCarCard extends HTMLElement {
       this._render(true);
     }, 4000);
     this._render(true);
+    requestAnimationFrame(() => this._placeToast());
   }
 }
 

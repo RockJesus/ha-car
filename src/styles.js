@@ -376,7 +376,6 @@ h1 { margin: 0; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-s
 .svc .row .val { text-align: right; color: var(--hc-ink); word-break: break-word; max-width: 66%; }
 
 .b-actions { position: relative; }
-.toast.free { bottom: 64px; }
 /* 长按进度：车底轨道圈顺时针转满一圈（起点 12 点方向） */
 .orbit .hring2 { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
 .orbit .hring2 { transform: rotate(-90deg); }
@@ -385,8 +384,8 @@ h1 { margin: 0; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-s
   filter: drop-shadow(0 0 3px rgba(var(--hc-a,55,214,232),.55)); }
 .orbit.prog .hring2 circle, .orbit.armed .hring2 circle { opacity: 1; }
 .orbit.armed .hring2 circle { stroke: #dffbff; filter: drop-shadow(0 0 7px rgba(var(--hc-a,55,214,232),.85)); }
-.toast { position: absolute; right: 0; left: auto; bottom: calc(100% + 6px); z-index: 6;
-  pointer-events: none; max-width: 100%;
+.toast { position: absolute; left: 0; top: 0; right: auto; bottom: auto; z-index: 9;
+  pointer-events: none; max-width: calc(100% - 8px);
   box-shadow: 0 14px 30px -16px rgba(0,0,0,.95);
   display: flex; align-items: center; gap: 7px; padding: 7px 13px; border-radius: 999px; white-space: nowrap;
   font-size: 11.5px; line-height: 1.4; color: #d5f8ff;
