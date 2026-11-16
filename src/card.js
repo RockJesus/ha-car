@@ -614,7 +614,7 @@ class HaCarCard extends HTMLElement {
 
   _build() {
     const root = this.shadowRoot;
-    root.innerHTML = `<style>${STYLES}</style><ha-card><div class="wrap"></div></ha-card>`;
+    root.innerHTML = `<style>${STYLES}</style><ha-card><div class="skin"></div><div class="wrap"></div></ha-card>`;
     this._wrap = root.querySelector(".wrap");
     this._card = root.querySelector("ha-card");
 

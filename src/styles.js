@@ -3,7 +3,7 @@
 export const STYLES = `
 :host { display: block; --hc-accent: #37d6e8; --hc-ink: #e9eff7; --hc-dim: #8496ad;
   --hc-ok: #6fe0a8; --hc-warn: #ffc46b; --hc-bad: #ff9182; --hc-holdms: 2000ms; }
-ha-card { display: block; overflow: hidden; position: relative;
+ha-card { display: block; overflow: hidden; position: relative; padding: 0;
   border: 1px solid rgba(var(--hc-a,120,190,215),.16);
   border-radius: var(--ha-card-border-radius, 28px);
   color: var(--hc-ink);
@@ -19,7 +19,13 @@ ha-card { display: block; overflow: hidden; position: relative;
   -webkit-font-smoothing: antialiased;
   isolation: isolate;
 }
-ha-card::before { content: ""; position: absolute; inset: 0; pointer-events: none; z-index: 0;
+ha-card > .skin { position: absolute; inset: 0; z-index: 0; pointer-events: none; border-radius: inherit;
+  background-image: var(--hc-bg,
+    radial-gradient(120% 80% at 50% -10%, rgba(55,214,232,.14), transparent 58%),
+    radial-gradient(70% 50% at 15% 105%, rgba(40,120,180,.10), transparent 70%),
+    linear-gradient(168deg, #111d2c 0%, #0b1521 52%, #060b12 100%));
+  background-size: auto, auto, auto; background-repeat: no-repeat; }
+ha-card::before { content: ""; position: absolute; inset: 0; pointer-events: none; z-index: 1;
   background-image:
     radial-gradient(60% 34% at 50% 0%, rgba(255,255,255,.06), transparent 72%),
     radial-gradient(rgba(150,205,230,.04) 1px, transparent 1.5px);
@@ -33,7 +39,7 @@ ha-card::after { content: ""; position: absolute; left: 8%; right: 8%; top: 0; h
   opacity: .55; }
 .plate, .gn b, .tc b, .stat b { font-variant-numeric: tabular-nums; }
 .plate { font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace; }
-.wrap { position: relative; padding: 18px 16px 14px; display: flex; flex-direction: column; gap: 14px;
+.wrap { position: relative; z-index: 2; padding: 18px 16px 14px; display: flex; flex-direction: column; gap: 14px;
   background-image: var(--hc-bg,
     radial-gradient(120% 80% at 50% -10%, rgba(var(--hc-a,55,214,232),.14), transparent 58%),
     radial-gradient(70% 50% at 15% 105%, rgba(40,120,180,.10), transparent 70%),
