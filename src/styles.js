@@ -461,23 +461,27 @@ ha-card.theme-glass .gauge { filter: drop-shadow(0 10px 22px rgba(0,0,0,.35)); }
   box-shadow: 0 2cqw 5cqw rgba(2,7,12,.5), inset 0 1cqw 0 rgba(255,255,255,.07);
   backdrop-filter: blur(10cqw); font-variant-numeric: tabular-nums;
   transition: background .25s ease, border-color .25s ease, box-shadow .25s ease; }
-.loc { width: 52cqw; transform: translate(-50%, -50%); padding: 4cqw 4.2cqw 4.2cqw; border-radius: 8.4cqw;
-  gap: 2cqw; }
-.loc.lf, .loc.lr { left: calc(7.5% - 26cqw); }
-.loc.rf, .loc.rr { left: calc(92.5% + 26cqw); }
-.loc.lf, .loc.rf { top: 37%; }
-.loc.lr, .loc.rr { top: 63%; }
+.loc { width: 47cqw; transform: translate(-50%, -50%); padding: 2.8cqw 3cqw 3cqw; border-radius: 7.4cqw;
+  gap: 1.4cqw; }
+.loc.lf, .loc.lr { left: calc(7.5% - 23.5cqw); }
+.loc.rf, .loc.rr { left: calc(92.5% + 23.5cqw); }
+.loc.lf, .loc.rf { top: 27%; }
+.loc.lr, .loc.rr { top: 73%; }
 .loc .lh { display: flex; align-items: center; justify-content: space-between; }
 .loc .lh span { font-size: 4.5cqw; line-height: 1; color: #93a8bd; letter-spacing: .09em; }
 .loc .lh .lk { font-style: normal; width: 5.2cqw; height: 5.2cqw; color: #6d8298; opacity: .85; }
 .loc .lh .lk .ic { width: 100%; height: 100%; display: block; }
 .loc .lh .lk.on { color: #7ee0b3; opacity: 1; }
-.loc .lr { display: flex; align-items: center; justify-content: center; gap: 2.4cqw; line-height: 1; }
-.loc .lr .ri { flex: 0 0 7.4cqw; height: 7.4cqw; display: grid; place-items: center; color: #8fd6ea; }
+.loc .lrs { display: flex; flex-direction: row; align-items: flex-end; justify-content: center; gap: 1.4cqw; }
+.loc .lrs.one { justify-content: center; }
+.loc .lr { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; align-items: center;
+  justify-content: flex-end; gap: .7cqw; line-height: 1; }
+.loc .lrs.one .lr { flex: 0 0 auto; }
+.loc .lr .ri { flex: 0 0 auto; width: 5.6cqw; height: 5.6cqw; display: grid; place-items: center; color: #8fd6ea; }
 .loc .lr .ri .ic { width: 100%; height: 100%; display: block; }
-.loc .lr b { font-size: 5.9cqw; font-weight: 620; color: #dbe7f5; letter-spacing: .01em; white-space: nowrap; }
-.loc .lr.tire b { font-size: 6.6cqw; }
-.loc .lr.tire b s { text-decoration: none; font-size: 4.4cqw; font-weight: 500; color: #7d90a6; margin-left: 1.4cqw; }
+.loc .lr b { font-size: 5.0cqw; font-weight: 620; color: #dbe7f5; letter-spacing: .01em; white-space: nowrap; }
+.loc .lr.tire b { font-size: 5.2cqw; }
+.loc .lr.tire b s { text-decoration: none; font-size: 3.8cqw; font-weight: 500; color: #7d90a6; margin-left: .6cqw; }
 .loc .lr.open b { color: #ffcf90; }
 .loc .lr.open .ri { color: #ffcf90; }
 .loc .lr.warn b, .loc .lr.warn b s { color: var(--hc-warn); }
@@ -490,13 +494,17 @@ ha-card.theme-glass .gauge { filter: drop-shadow(0 10px 22px rgba(0,0,0,.35)); }
 .cap { left: 50%; width: 44cqw; flex-direction: row; align-items: center; justify-content: center;
   gap: 2.2cqw; padding: 2.4cqw 3.4cqw; border-radius: 5.6cqw; }
 .cap.hood, .cap.trunk { transform: translate(-50%, 0); }
-.cap .cx { display: flex; flex-direction: column; align-items: center; gap: 1cqw; min-width: 0; text-align: center; }
+.cap .cx { display: flex; flex-direction: column; align-items: center; gap: 1cqw; min-width: 0; text-align: center;
+  padding: 0 2.4cqw; }
 .cap .ri { flex: 0 0 5.4cqw; height: 5.4cqw; display: grid; place-items: center; color: #86c9de; }
 .cap .ri .ic { width: 100%; height: 100%; display: block; }
-.cap b { font-size: 5.3cqw; font-weight: 620; color: #dbe7f5; line-height: 1; white-space: nowrap; }
-.cap i { font-style: normal; font-size: 4cqw; color: #7d90a6; line-height: 1; letter-spacing: .05em; }
+.cap b { font-size: 4.2cqw; font-weight: 500; color: #8fa5bb; line-height: 1; white-space: nowrap; letter-spacing: .05em; }
+.cap i { font-style: normal; font-size: 5.4cqw; font-weight: 620; color: #dbe7f5; line-height: 1; white-space: nowrap; }
+.cap .lk { position: absolute; right: 2.6cqw; top: 2.4cqw; width: 4.6cqw; height: 4.6cqw; color: #6d8298; opacity: .85; }
+.cap .lk .ic { width: 100%; height: 100%; display: block; }
+.cap .lk.on { color: #7ee0b3; opacity: 1; }
 .cap.open { border-color: rgba(255,196,107,.5); background: linear-gradient(180deg, rgba(56,32,10,.9), rgba(28,17,7,.94)); }
-.cap.open b, .cap.open .ri { color: #ffcf90; }
+.cap.open i, .cap.open .ri { color: #ffcf90; }
 .cap.bad { border-color: rgba(255,145,130,.5); }
 
 /* ---- 面板模式：1440×900 设计稿等比缩放，整页装下不滚动 ---- */

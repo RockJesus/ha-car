@@ -967,12 +967,13 @@ class HaCarCard extends HTMLElement {
         }
       }
       const tire = tireLine(tSlot, tsSlot, "kPa");
-      if (tire) lines.push(tire.html);
-      if (!lines.length) continue;
+      if (!lines.length && !tire) continue;
+      const row1 = lines.length ? `<div class="lrs">${lines.join("")}</div>` : "";
+      const row2 = tire ? `<div class="lrs one">${tire.html}</div>` : "";
       out.push(
-        `<div class="loc ${cls}${bad ? " bad" : ""}" data-more="${esc(data.id(dSlots[0] === "door_fl" ? "door_fl" : dSlots[0]))}">` +
+        `<div class="loc ${cls}${bad ? " bad" : ""}" data-more="${esc(data.id(dSlots[0]))}">` +
           `<div class="lh"><span>${esc(label)}</span><i class="lk${locked ? " on" : ""}">${icon(locked ? "lock" : "unlock")}</i></div>` +
-          lines.join("") +
+          row1 + row2 +
           `</div>`,
       );
     }
@@ -984,8 +985,9 @@ class HaCarCard extends HTMLElement {
       out.push(
         `<div class="cap ${cls}${b ? " bad" : open ? " open" : ""}" data-more="${esc(data.id(slot))}" title="${esc(label)}">` +
           `<span class="ri">${icon(ic)}</span><span class="cx">` +
-          `<b>${b ? (zh ? "不可用" : "N/A") : open ? (zh ? "已打开" : "Open") : zh ? "已关闭" : "Closed"}</b>` +
-          `<i>${esc(label)}</i></span></div>`,
+          `<b>${esc(label)}</b>` +
+          `<i>${b ? (zh ? "不可用" : "N/A") : open ? (zh ? "已打开" : "Open") : zh ? "已关闭" : "Closed"}</i></span>` +
+          `<em class="lk${locked ? " on" : ""}">${icon(locked ? "lock" : "unlock")}</em></div>`,
       );
     };
     if (doors) {
