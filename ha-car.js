@@ -1514,6 +1514,7 @@ var ITEM_DEFS = {
   win_fr: { zh: "副驾车窗", en: "Front window", icon: "carwin", kind: "door" },
   win_rl: { zh: "左后车窗", en: "Rear L window", icon: "carwin", kind: "door" },
   win_rr: { zh: "右后车窗", en: "Rear R window", icon: "carwin", kind: "door" },
+  ignition: { zh: "引擎", en: "Engine", icon: "engine", kind: "stat" },
   hood: { zh: "引擎盖", en: "Hood", icon: "engine", kind: "cap" },
   tailgate: { zh: "尾门", en: "Tailgate", icon: "trunk", kind: "cap" },
   tp_lf: { zh: "左前胎压", en: "LF tire", icon: "tire", kind: "tire" },
@@ -1545,6 +1546,7 @@ var DEFAULT_ITEMS = {
   energy: ["fuel", "battery", "range", "odo", "volt", "oil"],
   alerts: ["alerts"],
   doors: [
+    "ignition",
     "door_fl",
     "door_fr",
     "door_rl",
@@ -2327,7 +2329,6 @@ var HaCarCard = class extends HTMLElement {
     }
     const compact = cfg.layout === "compact";
     const list = cfg.blocks || normBlocks(cfg);
-    const mods = list.filter((b) => b.on !== false).map((b) => b.type);
     const s = (slot) => data.get(slot);
     const lockNorm = normLock(s("lock"));
     const chgNow = chargingNow(s("chg_status"));
@@ -2368,7 +2369,7 @@ var HaCarCard = class extends HTMLElement {
           html = `<div class="blk b-hero">${this._hero(
             this._imgFrom(this._heroImageEnt(b, data), hero.src),
             hero.fb,
-            this._carOverlay(data, t, mods, running),
+            this._carOverlay(data, t, list.find((x) => x.type === "doors" && x.on !== false), running),
             running
           )}${this._extraChips(b, data, t, ["image"])}</div>`;
           break;
@@ -2382,13 +2383,8 @@ var HaCarCard = class extends HTMLElement {
           if (al) html = `<div class="blk b-alerts">${al}</div>`;
           break;
         }
-        case "doors": {
-          if (!compact) {
-            const dr = this._doors(data, t, b);
-            if (dr) html = `<div class="blk b-doors">${dr}</div>`;
-          }
+        case "doors":
           break;
-        }
         case "charging": {
           if (!compact) {
             const ch = this._charging(data, t, chgNow, b);
@@ -2455,32 +2451,46 @@ var HaCarCard = class extends HTMLElement {
       <div class="ground"></div><div class="covl">${inner}</div>${edge ? `<div class="cedge">${edge}</div>` : ""}</div>`;
   }
   // 俯视图状态层：每个车门一张聚合卡（门 + 窗 + 该轮位胎压），前后盖各一张小卡，全部落在圆环内侧
-  _carOverlay(data, t, mods, running) {
+  _carOverlay(data, t, b, running) {
     const zh = !isEn(this._hass);
-    const doors = mods.includes("doors");
+    const doors = !!b;
+    const items = doors ? this._items(b) : [];
+    const itemFor = (slot) => items.find((x) => x.slot === slot) || null;
+    const entFor = (slot) => {
+      const it = itemFor(slot);
+      return it ? this._itemEnt(it, data) : data.id(slot);
+    };
+    const stateFor = (slot) => {
+      const it = itemFor(slot);
+      return it ? this._itemState(it, data) : data.get(slot);
+    };
     const lockedRaw = text(data.get("lock") || {});
     const locked = /锁|lock/i.test(lockedRaw) && !/未|解|unlock/i.test(lockedRaw);
     const tireLine = (slot, sslot, unitFallback) => {
-      if (!this._slotAllowed(slot)) return null;
-      const st = data.get(slot);
+      if (!doors || !itemFor(slot)) return null;
+      const st = stateFor(slot);
       if (!st) return null;
       const v = num(st);
-      const flag = normTire(data.get(sslot)) === "warn";
+      const flag = normTire(stateFor(sslot)) === "warn";
       const outOfRange = v != null && (v < 190 || v > 300);
       const warn = outOfRange || flag && v == null;
       const unit = attrs(st, "unit_of_measurement") || unitFallback;
       const txt = v == null ? "—" : fmtNum(v);
-      const html = `<div class="lr tire${warn ? " warn" : ""}" data-more="${esc(data.id(slot))}"><span class="ri">${icon("tireo")}</span><b>${txt}<s>${esc(unit)}</s></b></div>`;
+      const html = `<div class="lr tire${warn ? " warn" : ""}" data-more="${esc(entFor(slot))}"><span class="ri">${icon("tireo")}</span><b>${txt}<s>${esc(unit)}</s></b></div>`;
       return { slot, html, warn };
     };
     const out = [];
     if (running) {
       out.push(`<i class="beam lb"></i><i class="beam rb"></i><i class="gpool"></i><i class="tailbar"></i><i class="tailglow"></i>`);
     }
-    if (data.get("sw_engine") || data.get("remote_start")) {
-      const engEnt = data.id("sw_engine") || data.id("remote_start") || data.id("ignition");
-      out.push(`<div class="enp${running ? " on" : ""}"${engEnt ? ` data-more="${esc(engEnt)}"` : ""}><div class="row"><i class="ed"></i><span>${zh ? "引擎" : "ENGINE"}</span></div><b>${running ? zh ? "已启动" : "Running" : zh ? "已熄火" : "Off"}</b></div>`);
+    const engItem = itemFor("ignition");
+    const engSt = engItem ? this._itemState(engItem, data) : data.get("sw_engine") || data.get("remote_start");
+    if (engSt) {
+      const engEnt = engItem ? this._itemEnt(engItem, data) : data.id("sw_engine") || data.id("remote_start") || data.id("ignition");
+      const engTxt = engItem ? String(engSt.state) : running ? zh ? "已启动" : "Running" : zh ? "已熄火" : "Off";
+      out.push(`<div class="enp${running ? " on" : ""}"${engEnt ? ` data-more="${esc(engEnt)}"` : ""}><div class="row"><i class="ed"></i><span>${zh ? "引擎" : "ENGINE"}</span></div><b>${esc(engTxt)}</b></div>`);
     }
+    if (!doors) return { inner: out.join(""), edge: "" };
     const quads = [
       ["lf", zh ? "主驾" : "Driver", ["door_fl", "win_fl"], "tp_lf", "tps_lf"],
       ["rf", zh ? "副驾" : "Front", ["door_fr", "win_fr"], "tp_rf", "tps_rf"],
@@ -2490,41 +2500,40 @@ var HaCarCard = class extends HTMLElement {
     for (const [cls, label, dSlots, tSlot, tsSlot] of quads) {
       const lines = [];
       let bad = false;
-      if (doors) {
-        for (const [ic, slot] of [["carwin", dSlots[1]], ["cardoor", dSlots[0]]]) {
-          if (!this._slotAllowed(slot)) continue;
-          const st = data.get(slot);
-          if (!st) continue;
-          const b = isBad(st);
-          if (b) bad = true;
-          const open = !b && normOpen(st) === "open";
-          const dent = data.id(slot);
-          lines.push(
-            `<div class="lr${b ? " bad" : open ? " open" : ""}" data-more="${esc(dent)}" title="${esc(dent)}"><span class="ri">${icon(ic)}</span><b>${b ? zh ? "不可用" : "N/A" : open ? zh ? "已打开" : "Open" : zh ? "已关闭" : "Closed"}</b></div>`
-          );
-        }
+      for (const [ic, slot] of [["carwin", dSlots[1]], ["cardoor", dSlots[0]]]) {
+        const it = itemFor(slot);
+        if (!it) continue;
+        const st = stateFor(slot);
+        if (!st) continue;
+        const bBad = isBad(st);
+        if (bBad) bad = true;
+        const open = !bBad && normOpen(st) === "open";
+        const dent = this._itemEnt(it, data);
+        lines.push(
+          `<div class="lr${bBad ? " bad" : open ? " open" : ""}" data-more="${esc(dent)}" title="${esc(dent)}"><span class="ri">${icon(ic)}</span><b>${bBad ? zh ? "不可用" : "N/A" : open ? zh ? "已打开" : "Open" : zh ? "已关闭" : "Closed"}</b></div>`
+        );
       }
       const tire = tireLine(tSlot, tsSlot, "kPa");
       if (!lines.length && !tire) continue;
-      const items = lines.join("") + (tire ? tire.html : "");
+      const headerEnt = itemFor(dSlots[0]) && entFor(dSlots[0]) || itemFor(dSlots[1]) && entFor(dSlots[1]) || "";
+      const itemsHtml = lines.join("") + (tire ? tire.html : "");
       out.push(
-        `<div class="loc ${cls}${bad ? " bad" : ""}" data-more="${esc(data.id(dSlots[0]))}"><div class="lh"><span>${esc(label)}</span><i class="lk${locked ? " on" : ""}">${icon(locked ? "lock" : "unlock")}</i></div><div class="lrs">${items}</div></div>`
+        `<div class="loc ${cls}${bad ? " bad" : ""}"${headerEnt ? ` data-more="${esc(headerEnt)}"` : ""}><div class="lh"><span>${esc(label)}</span><i class="lk${locked ? " on" : ""}">${icon(locked ? "lock" : "unlock")}</i></div><div class="lrs">${itemsHtml}</div></div>`
       );
     }
     const cap = (cls, label, slot, ic) => {
-      if (!this._slotAllowed(slot)) return;
-      const st = data.get(slot);
+      if (!itemFor(slot)) return;
+      const st = stateFor(slot);
       if (!st) return;
-      const b = isBad(st);
-      const open = !b && normOpen(st) === "open";
+      const bBad = isBad(st);
+      const open = !bBad && normOpen(st) === "open";
+      const ent = entFor(slot);
       out.push(
-        `<div class="cap ${cls}${b ? " bad" : open ? " open" : ""}" data-more="${esc(data.id(slot))}" title="${esc(label)}"><span class="ri">${icon(ic)}</span><span class="cx"><b>${esc(label)}</b><i>${b ? zh ? "不可用" : "N/A" : open ? zh ? "已打开" : "Open" : zh ? "已关闭" : "Closed"}</i></span><em class="lk${locked ? " on" : ""}">${icon(locked ? "lock" : "unlock")}</em></div>`
+        `<div class="cap ${cls}${bBad ? " bad" : open ? " open" : ""}" data-more="${esc(ent)}" title="${esc(label)}"><span class="ri">${icon(ic)}</span><span class="cx"><b>${esc(label)}</b><i>${bBad ? zh ? "不可用" : "N/A" : open ? zh ? "已打开" : "Open" : zh ? "已关闭" : "Closed"}</i></span><em class="lk${locked ? " on" : ""}">${icon(locked ? "lock" : "unlock")}</em></div>`
       );
     };
-    if (doors) {
-      cap("hood", zh ? "引擎盖" : "Hood", "hood", "engine");
-      cap("trunk", zh ? "尾门" : "Tailgate", "tailgate", "trunk");
-    }
+    cap("hood", zh ? "引擎盖" : "Hood", "hood", "engine");
+    cap("trunk", zh ? "尾门" : "Tailgate", "tailgate", "trunk");
     return { inner: out.join(""), edge: "" };
   }
   // 状态层贴合真实车图矩形（图片 contain 后尺寸未知，渲染完再量）
@@ -4036,7 +4045,7 @@ var HaCarEditor = class extends HTMLElement {
 customElements.define("ha-car-editor", HaCarEditor);
 
 // src/main.js
-var VERSION = "2.1.1";
+var VERSION = "2.1.2";
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "ha-car",
