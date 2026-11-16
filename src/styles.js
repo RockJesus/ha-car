@@ -68,6 +68,8 @@ ha-card::after { content: ""; position: absolute; left: 8%; right: 8%; top: 0; h
 .blk + .blk { margin-top: 0; }
 .blk { min-width: 0; }
 .b-hero { display: flex; flex-direction: column; flex: 1 1 auto; min-height: 0; }
+.xchips { padding: 0 8px 6px; }
+.xchips .doors { justify-content: center; }
 .b-hero .hero { flex: 1 1 auto; }
 .b-actions { display: flex; flex-direction: column; gap: 10px; }
 .cblock { display: flex; align-items: center; gap: 8px; padding: 9px 12px; border-radius: 15px;

@@ -385,6 +385,8 @@ ha-card::after { content: ""; position: absolute; left: 8%; right: 8%; top: 0; h
 .blk + .blk { margin-top: 0; }
 .blk { min-width: 0; }
 .b-hero { display: flex; flex-direction: column; flex: 1 1 auto; min-height: 0; }
+.xchips { padding: 0 8px 6px; }
+.xchips .doors { justify-content: center; }
 .b-hero .hero { flex: 1 1 auto; }
 .b-actions { display: flex; flex-direction: column; gap: 10px; }
 .cblock { display: flex; align-items: center; gap: 8px; padding: 9px 12px; border-radius: 15px;
@@ -2361,14 +2363,17 @@ var HaCarCard = class extends HTMLElement {
           if (locH || syncH || extra) html = `<div class="b-meta"><div class="hmeta">${locH}${syncH}</div>${extra}</div>`;
           break;
         }
-        case "hero":
+        case "hero": {
+          const doorsB = list.find((x) => x.type === "doors");
+          const dx = this._extraChips(doorsB, data, t, ["door", "stat", "cap", "tire"]);
           html = `<div class="blk b-hero">${this._hero(
             this._imgFrom(this._heroImageEnt(b, data), hero.src),
             hero.fb,
-            this._carOverlay(data, t, list.find((x) => x.type === "doors"), running),
+            this._carOverlay(data, t, doorsB, running),
             running
-          )}${this._extraChips(b, data, t, ["image"])}</div>`;
+          )}${this._extraChips(b, data, t, ["image"])}${dx ? `<div class="xchips">${dx}</div>` : ""}</div>`;
           break;
+        }
         case "energy": {
           const en = this._energy(data, t, b);
           if (en) html = `<div class="blk b-energy">${en}</div>`;
@@ -3999,7 +4004,7 @@ var HaCarEditor = class extends HTMLElement {
 customElements.define("ha-car-editor", HaCarEditor);
 
 // src/main.js
-var VERSION = "2.1.5";
+var VERSION = "2.1.6";
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "ha-car",
