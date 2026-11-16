@@ -482,6 +482,8 @@ ha-card.theme-glass .gauge { filter: drop-shadow(0 10px 22px rgba(0,0,0,.35)); }
 .loc .lr b { font-size: 4.8cqw; font-weight: 620; color: #dbe7f5; letter-spacing: .01em; white-space: nowrap; }
 .loc .lr.tire b { font-size: 5.0cqw; }
 .loc .lr.tire b s { text-decoration: none; font-size: 3.8cqw; font-weight: 500; color: #7d90a6; margin-left: .6cqw; }
+.loc .lr[data-more] { cursor: pointer; border-radius: .9cqw; transition: background .15s ease; }
+.loc .lr[data-more]:hover { background: rgba(120, 200, 230, .12); }
 .loc .lr.open b { color: #ffcf90; }
 .loc .lr.open .ri { color: #ffcf90; }
 .loc .lr.warn b, .loc .lr.warn b s { color: var(--hc-warn); }

@@ -799,6 +799,8 @@ ha-card.theme-glass .gauge { filter: drop-shadow(0 10px 22px rgba(0,0,0,.35)); }
 .loc .lr b { font-size: 4.8cqw; font-weight: 620; color: #dbe7f5; letter-spacing: .01em; white-space: nowrap; }
 .loc .lr.tire b { font-size: 5.0cqw; }
 .loc .lr.tire b s { text-decoration: none; font-size: 3.8cqw; font-weight: 500; color: #7d90a6; margin-left: .6cqw; }
+.loc .lr[data-more] { cursor: pointer; border-radius: .9cqw; transition: background .15s ease; }
+.loc .lr[data-more]:hover { background: rgba(120, 200, 230, .12); }
 .loc .lr.open b { color: #ffcf90; }
 .loc .lr.open .ri { color: #ffcf90; }
 .loc .lr.warn b, .loc .lr.warn b s { color: var(--hc-warn); }
@@ -2323,7 +2325,8 @@ var HaCarCard = class extends HTMLElement {
       return this._empty(isEn(this._hass) ? "No vehicle entity found. Check that FordPass integration is loaded, or pick a vehicle in the card editor." : "没找到车辆实体。确认福特派互联集成已加载，或在卡片编辑器里选择车辆。");
     }
     const compact = cfg.layout === "compact";
-    const mods = cfg.modules || MODULES;
+    const list = cfg.blocks || normBlocks(cfg);
+    const mods = list.filter((b) => b.on !== false).map((b) => b.type);
     const s = (slot) => data.get(slot);
     const lockNorm = normLock(s("lock"));
     const chgNow = chargingNow(s("chg_status"));
@@ -2349,7 +2352,6 @@ var HaCarCard = class extends HTMLElement {
     const plateTxt = cfg.show_plate && plate ? cfg.privacy ? maskPlate(plate) : plate : "";
     const head = `<div class="head"><div class="ttl"><h1>${FORD_LOGO}${esc(title)}</h1>` + (plateTxt ? `<span class="plate">${esc(plateTxt)}</span>` : "") + `</div><span class="status ${status.cls}"><span class="dot"></span>${esc(status.label)}</span></div>`;
     const hero = this._imagePair(data);
-    const list = cfg.blocks || normBlocks(cfg);
     for (const b of list) {
       if (b.on === false) continue;
       let html = "";
@@ -2494,8 +2496,9 @@ var HaCarCard = class extends HTMLElement {
           const b = isBad(st);
           if (b) bad = true;
           const open = !b && normOpen(st) === "open";
+          const dent = data.id(slot);
           lines.push(
-            `<div class="lr${b ? " bad" : open ? " open" : ""}"><span class="ri">${icon(ic)}</span><b>${b ? zh ? "不可用" : "N/A" : open ? zh ? "已打开" : "Open" : zh ? "已关闭" : "Closed"}</b></div>`
+            `<div class="lr${b ? " bad" : open ? " open" : ""}" data-more="${esc(dent)}" title="${esc(dent)}"><span class="ri">${icon(ic)}</span><b>${b ? zh ? "不可用" : "N/A" : open ? zh ? "已打开" : "Open" : zh ? "已关闭" : "Closed"}</b></div>`
           );
         }
       }
@@ -4031,7 +4034,7 @@ var HaCarEditor = class extends HTMLElement {
 customElements.define("ha-car-editor", HaCarEditor);
 
 // src/main.js
-var VERSION = "2.0.9";
+var VERSION = "2.1.0";
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "ha-car",

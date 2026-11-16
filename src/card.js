@@ -960,7 +960,8 @@ class HaCarCard extends HTMLElement {
         : "没找到车辆实体。确认福特派互联集成已加载，或在卡片编辑器里选择车辆。");
     }
     const compact = cfg.layout === "compact";
-    const mods = cfg.modules || MODULES;
+    const list = cfg.blocks || normBlocks(cfg);
+    const mods = list.filter((b) => b.on !== false).map((b) => b.type);
     const s = (slot) => data.get(slot);
 
     const lockNorm = normLock(s("lock"));
@@ -1000,7 +1001,6 @@ class HaCarCard extends HTMLElement {
       `</div><span class="status ${status.cls}"><span class="dot"></span>${esc(status.label)}</span></div>`;
 
     const hero = this._imagePair(data);
-    const list = cfg.blocks || normBlocks(cfg);
     for (const b of list) {
       if (b.on === false) continue;
       let html = "";
@@ -1160,8 +1160,10 @@ class HaCarCard extends HTMLElement {
           const b = isBad(st);
           if (b) bad = true;
           const open = !b && normOpen(st) === "open";
+          const dent = data.id(slot);
           lines.push(
-            `<div class="lr${b ? " bad" : open ? " open" : ""}"><span class="ri">${icon(ic)}</span>` +
+            `<div class="lr${b ? " bad" : open ? " open" : ""}" data-more="${esc(dent)}" title="${esc(dent)}">` +
+              `<span class="ri">${icon(ic)}</span>` +
               `<b>${b ? (zh ? "不可用" : "N/A") : open ? (zh ? "已打开" : "Open") : zh ? "已关闭" : "Closed"}</b></div>`,
           );
         }
