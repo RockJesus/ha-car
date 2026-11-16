@@ -112,6 +112,10 @@ entities:
 
 ## 与集成的对应关系
 
+本卡片是**纯前端**，不登录福特云、不建后端，所有车况都来自配套的 Home Assistant 集成 [RockJesus/ha-fordpass-cn](https://github.com/RockJesus/ha-fordpass-cn)：集成负责登录福特派、拉取车况并暴露 `sensor` / `button` / `switch` / `image` / `device_tracker` 实体，卡片只把 `hass.states` 里的这些实体渲染成面板。两个仓库各自独立发版、互不依赖：集成更到新实体，卡片不用重装；卡片换样式，集成不受影响。
+
+推荐顺序：先装集成并在「集成」里完成登录（确认实体已出现），再装本卡片资源，最后添加 `custom:ha-car` 卡片。
+
 卡片读取的都是集成现有实体，不新增后端。车辆绑定分三步：
 
 1. **认槽位**：用实体 ID 后缀和友好名后缀双线索。集成把中文实体名转成 pinyin 作为 `entity_id`（`sensor.<设备>_men_suo_zhuang_tai`），英文环境则是 translation key（`..._lock_status`），部分实体还是历史英文名（`button.<设备>_lock_doors`）；三条都给 `lock` 之类的槽位对上号。
