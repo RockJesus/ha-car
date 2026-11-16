@@ -79,6 +79,7 @@ ha-card::after { content: ""; position: absolute; left: 8%; right: 8%; top: 0; h
 .cblock b { font-size: 14px; font-weight: 680; color: #eef5fd; font-variant-numeric: tabular-nums; }
 .cblock i { font-style: normal; font-size: 10px; color: rgba(150,172,196,.8); margin-left: 1px; }
 .ic { width: 20px; height: 20px; fill: currentColor; display: block; flex: none; }
+ha-icon.ic { --mdc-icon-size: 1em; }
 
 /* 头部：大标题 + 右上状态胶囊（参考图同构） */
 .head { display: flex; align-items: flex-start; gap: 12px; }
@@ -846,5 +847,10 @@ select.tf { font-size: 13px; padding: 8px 10px; }
 .birow .btn.sq.clr { color: #ff8a8a; border-color: rgba(255,110,110,.28); }
 .birow .pick { width: 100%; }
 .addbi { align-self: flex-start; padding: 5px 9px; font-size: 11.5px; margin-top: 2px; }
+.bipickrow { display: flex; align-items: flex-start; gap: 6px; }
+.bipickrow .pick { flex: 1 1 auto; min-width: 0; }
+.biic { flex: 0 0 86px; min-width: 0; }
+.biic ha-selector { width: 86px; }
+ha-icon.ic { width: 1em; height: 1em; --mdc-icon-size: 1em; display: inline-flex; vertical-align: middle; }
 
 `;

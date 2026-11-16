@@ -35,6 +35,9 @@ var STROKE_PATHS = {
   tireo: "M128,36 a92,92 0,1,0 0,184 a92,92 0,1,0 0,-184 M128,96 a32,32 0,1,0 0,64 a32,32 0,1,0 0,-64"
 };
 function icon(name, cls) {
+  if (typeof name === "string" && /^mdi:[a-z0-9-]+$/i.test(name)) {
+    return `<ha-icon class="ic${cls ? " " + cls : ""}" icon="${name}"></ha-icon>`;
+  }
   const s = STROKE_PATHS[name];
   if (s) {
     return `<svg class="ic${cls ? " " + cls : ""}" viewBox="0 0 256 256" aria-hidden="true" focusable="false"><path d="${s}" fill="none" stroke="currentColor" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
@@ -393,6 +396,7 @@ ha-card::after { content: ""; position: absolute; left: 8%; right: 8%; top: 0; h
 .cblock b { font-size: 14px; font-weight: 680; color: #eef5fd; font-variant-numeric: tabular-nums; }
 .cblock i { font-style: normal; font-size: 10px; color: rgba(150,172,196,.8); margin-left: 1px; }
 .ic { width: 20px; height: 20px; fill: currentColor; display: block; flex: none; }
+ha-icon.ic { --mdc-icon-size: 1em; }
 
 /* 头部：大标题 + 右上状态胶囊（参考图同构） */
 .head { display: flex; align-items: flex-start; gap: 12px; }
@@ -1159,6 +1163,11 @@ select.tf { font-size: 13px; padding: 8px 10px; }
 .birow .btn.sq.clr { color: #ff8a8a; border-color: rgba(255,110,110,.28); }
 .birow .pick { width: 100%; }
 .addbi { align-self: flex-start; padding: 5px 9px; font-size: 11.5px; margin-top: 2px; }
+.bipickrow { display: flex; align-items: flex-start; gap: 6px; }
+.bipickrow .pick { flex: 1 1 auto; min-width: 0; }
+.biic { flex: 0 0 86px; min-width: 0; }
+.biic ha-selector { width: 86px; }
+ha-icon.ic { width: 1em; height: 1em; --mdc-icon-size: 1em; display: inline-flex; vertical-align: middle; }
 
 `;
 
@@ -2246,13 +2255,17 @@ var HaCarCard = class extends HTMLElement {
     if (it.label) return it.label;
     if (def) return isEn(this._hass) ? def.en : def.zh;
     const ent = it.entity || "";
+    const st = ent && this._hass && this._hass.states[ent];
+    const fn = st && st.attributes && st.attributes.friendly_name;
+    if (fn) return String(fn);
     return ent ? ent.split(".").slice(-1)[0].replace(/_/g, " ") : t.custom || (isEn(this._hass) ? "Entity" : "实体");
   }
-  _itemShowLabel(it) {
-    return Boolean(it.label || it.slot);
+  _itemShowLabel() {
+    return true;
   }
   _itemIcon(it, def) {
-    if (it.icon && ICON_NAMES.includes(it.icon)) return it.icon;
+    const ov = it.icon;
+    if (ov && (/^mdi:[a-z0-9-]+$/i.test(ov) || ICON_NAMES.includes(ov))) return ov;
     return def && ICON_NAMES.includes(def.icon) ? def.icon : "bolt";
   }
   _itemText(it, data, t) {
@@ -3775,6 +3788,10 @@ var HaCarEditor = class extends HTMLElement {
   _itemLabel(it) {
     if (it.label) return it.label;
     if (it.slot && ITEM_DEFS[it.slot]) return ITEM_DEFS[it.slot].zh;
+    const ent = it.entity || "";
+    const st = ent && this._hass && this._hass.states[ent];
+    const fn = st && st.attributes && st.attributes.friendly_name;
+    if (fn) return String(fn);
     return "实体";
   }
   _renderBlocks() {
@@ -3790,12 +3807,15 @@ var HaCarEditor = class extends HTMLElement {
         const free = !it.slot;
         return `<div class="birow">
             <div class="bih">
-              ${free ? `<input class="tf bil" data-bilab="${i}:${j}" value="${esc(it.label || "")}" placeholder="显示名称">` : `<span class="bil">${esc(label)}</span>`}
+              ${free ? `<input class="tf bil" data-bilab="${i}:${j}" value="${esc(it.label || "")}" placeholder="${esc(this._itemLabel(it))}">` : `<span class="bil">${esc(label)}</span>`}
               <button class="btn sq" data-bimv="up" data-bi="${i}" data-bj="${j}" type="button">↑</button>
               <button class="btn sq" data-bimv="dn" data-bi="${i}" data-bj="${j}" type="button">↓</button>
               <button class="btn sq clr" data-bicl="${i}" data-bj="${j}" type="button" title="移除实体" aria-label="移除实体">✕</button>
             </div>
-            <div class="pick" data-bipick="${i}:${j}"></div>
+            <div class="bipickrow">
+              ${free ? `<div class="biic" data-biic="${i}:${j}"></div>` : ""}
+              <div class="pick" data-bipick="${i}:${j}"></div>
+            </div>
           </div>`;
       }).join("");
       return `<div class="blkrow${off}">
@@ -3821,6 +3841,8 @@ var HaCarEditor = class extends HTMLElement {
         if (!h) return;
         const val = it.entity || (it.slot ? (this._config.entities || {})[it.slot] : "") || "";
         this._mountPicker(h, val, (v) => this._setBlockItem(i, j, v), it.slot ? "自动识别" : "");
+        const ih = host.querySelector(`[data-biic="${i}:${j}"]`);
+        if (ih) this._mountIcon(ih, it.icon || "", (v) => this._setBlockItemIcon(i, j, v));
       });
     });
     host.querySelectorAll("details.bk-items").forEach((d) => {
@@ -3830,6 +3852,45 @@ var HaCarEditor = class extends HTMLElement {
         else this._openBk.delete(k);
       });
     });
+  }
+  _mountIcon(host, value, onPick) {
+    let p = host.querySelector("ha-selector");
+    if (!customElements.get("ha-selector")) {
+      let inp = host.querySelector("input");
+      if (!inp) {
+        inp = document.createElement("input");
+        inp.className = "tf";
+        inp.placeholder = "mdi:car";
+        inp.addEventListener("change", () => onPick(inp.value.trim()));
+        host.appendChild(inp);
+      }
+      inp.value = value || "";
+      return;
+    }
+    if (!p) {
+      p = document.createElement("ha-selector");
+      p.style.display = "block";
+      p.addEventListener("value-changed", (e) => {
+        const v = e.detail && e.detail.value;
+        onPick(typeof v === "string" ? v.trim() : "");
+      });
+      host.appendChild(p);
+    }
+    p.hass = this._hass;
+    p.selector = { icon: {} };
+    p.placeholder = "默认图标";
+    if (p.value !== (value || void 0)) p.value = value || void 0;
+  }
+  _setBlockItemIcon(i, j, value) {
+    const blocks = (this._config.blocks || []).slice();
+    const b = blocks[i];
+    if (!b) return;
+    const items = this._blockItems(b).map((x) => Object.assign({}, x));
+    if (!items[j]) return;
+    items[j] = Object.assign({}, items[j], { icon: value });
+    blocks[i] = Object.assign({}, b, { items });
+    this._config.blocks = blocks;
+    this._emit();
   }
   _setBlockItem(i, j, value) {
     const blocks = (this._config.blocks || []).slice();
@@ -3965,7 +4026,7 @@ var HaCarEditor = class extends HTMLElement {
 customElements.define("ha-car-editor", HaCarEditor);
 
 // src/main.js
-var VERSION = "2.0.6";
+var VERSION = "2.0.7";
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "ha-car",

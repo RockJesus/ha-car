@@ -53,6 +53,9 @@ const STROKE_PATHS = {
 };
 
 export function icon(name, cls) {
+  if (typeof name === "string" && /^mdi:[a-z0-9-]+$/i.test(name)) {
+    return `<ha-icon class="ic${cls ? " " + cls : ""}" icon="${name}"></ha-icon>`;
+  }
   const s = STROKE_PATHS[name];
   if (s) {
     return `<svg class="ic${cls ? " " + cls : ""}" viewBox="0 0 256 256" aria-hidden="true" focusable="false">` +

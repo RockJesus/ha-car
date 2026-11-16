@@ -883,15 +883,19 @@ class HaCarCard extends HTMLElement {
     if (it.label) return it.label;
     if (def) return isEn(this._hass) ? def.en : def.zh;
     const ent = it.entity || "";
+    const st = ent && this._hass && this._hass.states[ent];
+    const fn = st && st.attributes && st.attributes.friendly_name;
+    if (fn) return String(fn);
     return ent ? ent.split(".").slice(-1)[0].replace(/_/g, " ") : (t.custom || (isEn(this._hass) ? "Entity" : "实体"));
   }
 
-  _itemShowLabel(it) {
-    return Boolean(it.label || it.slot);
+  _itemShowLabel() {
+    return true;
   }
 
   _itemIcon(it, def) {
-    if (it.icon && ICON_NAMES.includes(it.icon)) return it.icon;
+    const ov = it.icon;
+    if (ov && (/^mdi:[a-z0-9-]+$/i.test(ov) || ICON_NAMES.includes(ov))) return ov;
     return def && ICON_NAMES.includes(def.icon) ? def.icon : "bolt";
   }
 
