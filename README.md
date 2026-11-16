@@ -14,7 +14,11 @@
 </div>
 
 <p align="center">
-  <img src="docs/preview-card.webp" width="360" alt="面板模式（假数据示例）">
+  <img src="docs/preview-card.webp" width="360" alt="竖屏面板（假数据示例）">
+</p>
+
+<p align="center">
+  <img src="docs/preview-wide.webp" width="720" alt="横屏面板 · 默认主题 · 车辆已启动（假数据示例）">
 </p>
 
 ## 这是什么
