@@ -877,6 +877,16 @@ class HaCarCard extends HTMLElement {
       const target = blocks.findIndex((x) => x.type === "energy");
       blocks.splice(target + 1, 0, alerts);
     }
+    // 吸附：把告警块并进能源块内部，紧贴「总里程」三列，不再被右栏 flex 分配推到底部
+    const enIdx = blocks.findIndex((x) => x.type === "energy");
+    if (enIdx > -1 && blocks[enIdx + 1] && blocks[enIdx + 1].type === "alerts") {
+      const eh = blocks[enIdx].html;
+      const ah = blocks[enIdx + 1].html;
+      if (eh.endsWith("</div>")) {
+        blocks[enIdx].html = eh.slice(0, -6) + ah + "</div>";
+        blocks.splice(enIdx + 1, 1);
+      }
+    }
 
     let inner;
     if (twoCol) {

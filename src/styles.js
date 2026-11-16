@@ -381,6 +381,7 @@ h1 { margin: 0; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-s
 .svc .row .val { text-align: right; color: var(--hc-ink); word-break: break-word; max-width: 66%; }
 
 .b-actions { position: relative; }
+.b-energy .b-alerts { margin-top: 10px; }
 /* 长按进度：车底轨道圈顺时针转满一圈（起点 12 点方向） */
 .orbit .hring2 { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
 .orbit .hring2 { transform: rotate(-90deg); }

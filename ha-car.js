@@ -695,6 +695,7 @@ h1 { margin: 0; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-s
 .svc .row .val { text-align: right; color: var(--hc-ink); word-break: break-word; max-width: 66%; }
 
 .b-actions { position: relative; }
+.b-energy .b-alerts { margin-top: 10px; }
 /* 长按进度：车底轨道圈顺时针转满一圈（起点 12 点方向） */
 .orbit .hring2 { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
 .orbit .hring2 { transform: rotate(-90deg); }
@@ -2195,6 +2196,15 @@ var HaCarCard = class extends HTMLElement {
       const target = blocks.findIndex((x) => x.type === "energy");
       blocks.splice(target + 1, 0, alerts);
     }
+    const enIdx = blocks.findIndex((x) => x.type === "energy");
+    if (enIdx > -1 && blocks[enIdx + 1] && blocks[enIdx + 1].type === "alerts") {
+      const eh = blocks[enIdx].html;
+      const ah = blocks[enIdx + 1].html;
+      if (eh.endsWith("</div>")) {
+        blocks[enIdx].html = eh.slice(0, -6) + ah + "</div>";
+        blocks.splice(enIdx + 1, 1);
+      }
+    }
     let inner;
     if (twoCol) {
       const left = blocks.filter((b) => b.hero).map((b) => b.html).join("");
@@ -3517,7 +3527,7 @@ var HaCarEditor = class extends HTMLElement {
 customElements.define("ha-car-editor", HaCarEditor);
 
 // src/main.js
-var VERSION = "1.9.5";
+var VERSION = "1.9.6";
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "ha-car",
