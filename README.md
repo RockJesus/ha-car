@@ -14,6 +14,7 @@
 </div>
 
 <p align="center">
+  <img src="docs/preview-card.webp" width="300" alt="面板模式（390×720 假数据示例）">
   <img src="docs/preview-full.png" width="300" alt="完整布局">
   <img src="docs/preview-hold.png" width="300" alt="长按确认">
   <img src="docs/preview-compact.png" width="300" alt="紧凑布局">
