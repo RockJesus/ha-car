@@ -828,5 +828,23 @@ select.tf { font-size: 13px; padding: 8px 10px; }
 .blkrow .btn.sq.del { color: #ff8a8a; border-color: rgba(255,110,110,.28); }
 .blkrow select.tf, .blkrow input.tf { padding: 5px 7px; font-size: 11.5px; }
 .blkrow .sw { flex: none; }
+/* 模块内实体清单：展开后每个实体一行，可独立增删与排序 */
+.bk-items { margin-top: 2px; border-top: 1px dashed rgba(255,255,255,.10); padding-top: 4px; }
+.bk-items summary { cursor: pointer; font-size: 11.5px; color: var(--secondary-text-color, #98a0a8);
+  padding: 3px 0; list-style: none; }
+.bk-items summary::-webkit-details-marker { display: none; }
+.bk-items summary::before { content: "▸ "; }
+.bk-items[open] summary::before { content: "▾ "; }
+.bitems { display: flex; flex-direction: column; gap: 6px; padding: 4px 0 2px; }
+.birow { display: flex; flex-direction: column; gap: 3px; padding: 5px 6px 6px;
+  border-radius: 8px; background: rgba(255,255,255,.03); border: 1px solid rgba(255,255,255,.05); }
+.bih { display: flex; align-items: center; gap: 5px; }
+.bil { flex: 1 1 auto; min-width: 0; font-size: 11.5px; color: var(--primary-text-color, #e6e6e6);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.bil.tf { flex: 1 1 auto; min-width: 0; padding: 3px 6px; font-size: 11px; }
+.birow .btn.sq { min-width: 24px; padding: 3px 5px; font-size: 11px; line-height: 1; }
+.birow .btn.sq.clr { color: #ff8a8a; border-color: rgba(255,110,110,.28); }
+.birow .pick { width: 100%; }
+.addbi { align-self: flex-start; padding: 5px 9px; font-size: 11.5px; margin-top: 2px; }
 
 `;

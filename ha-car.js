@@ -1141,6 +1141,24 @@ select.tf { font-size: 13px; padding: 8px 10px; }
 .blkrow .btn.sq.del { color: #ff8a8a; border-color: rgba(255,110,110,.28); }
 .blkrow select.tf, .blkrow input.tf { padding: 5px 7px; font-size: 11.5px; }
 .blkrow .sw { flex: none; }
+/* 模块内实体清单：展开后每个实体一行，可独立增删与排序 */
+.bk-items { margin-top: 2px; border-top: 1px dashed rgba(255,255,255,.10); padding-top: 4px; }
+.bk-items summary { cursor: pointer; font-size: 11.5px; color: var(--secondary-text-color, #98a0a8);
+  padding: 3px 0; list-style: none; }
+.bk-items summary::-webkit-details-marker { display: none; }
+.bk-items summary::before { content: "▸ "; }
+.bk-items[open] summary::before { content: "▾ "; }
+.bitems { display: flex; flex-direction: column; gap: 6px; padding: 4px 0 2px; }
+.birow { display: flex; flex-direction: column; gap: 3px; padding: 5px 6px 6px;
+  border-radius: 8px; background: rgba(255,255,255,.03); border: 1px solid rgba(255,255,255,.05); }
+.bih { display: flex; align-items: center; gap: 5px; }
+.bil { flex: 1 1 auto; min-width: 0; font-size: 11.5px; color: var(--primary-text-color, #e6e6e6);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.bil.tf { flex: 1 1 auto; min-width: 0; padding: 3px 6px; font-size: 11px; }
+.birow .btn.sq { min-width: 24px; padding: 3px 5px; font-size: 11px; line-height: 1; }
+.birow .btn.sq.clr { color: #ff8a8a; border-color: rgba(255,110,110,.28); }
+.birow .pick { width: 100%; }
+.addbi { align-self: flex-start; padding: 5px 9px; font-size: 11.5px; margin-top: 2px; }
 
 `;
 
@@ -1464,6 +1482,80 @@ var FORD_LOGO = `<span class="brand" aria-hidden="true"><svg viewBox="0 0 44 20"
  font-weight="700" font-size="9.4" fill="#f4f8ff" letter-spacing=".4">Ford</text></svg></span>`;
 var MODULES = ["status", "actions", "energy", "tires", "doors", "charging", "alerts", "service"];
 var BLOCK_TYPES = ["meta", "hero", "energy", "alerts", "doors", "charging", "service", "actions", "custom"];
+var ITEM_DEFS = {
+  addr: { zh: "定位地址", en: "Location", icon: "pin", kind: "location" },
+  sync: { zh: "云端同步", en: "Cloud sync", icon: "refresh", kind: "sync" },
+  image: { zh: "车辆图片", en: "Vehicle image", icon: "car", kind: "image" },
+  fuel: { zh: "燃油", en: "Fuel", icon: "fuel", kind: "pct", full: 620 },
+  battery: { zh: "电量", en: "Battery", icon: "bolt", kind: "pct", full: 100 },
+  range: { zh: "续航", en: "Range", icon: "gauge", kind: "range", full: 620 },
+  ev_range: { zh: "纯电续航", en: "EV range", icon: "gauge", kind: "range", full: 500 },
+  odo: { zh: "总里程", en: "Odometer", icon: "gauge", kind: "odo" },
+  volt: { zh: "蓄电池", en: "12V battery", icon: "bolt", kind: "stat" },
+  oil: { zh: "机油寿命", en: "Oil life", icon: "wrench", kind: "stat" },
+  alerts: { zh: "车辆告警", en: "Alerts", icon: "warning", kind: "alert" },
+  door_fl: { zh: "主驾门", en: "Driver door", icon: "cardoor", kind: "door" },
+  door_fr: { zh: "副驾门", en: "Front door", icon: "cardoor", kind: "door" },
+  door_rl: { zh: "左后门", en: "Rear L door", icon: "cardoor", kind: "door" },
+  door_rr: { zh: "右后门", en: "Rear R door", icon: "cardoor", kind: "door" },
+  win_fl: { zh: "主驾车窗", en: "Driver window", icon: "carwin", kind: "door" },
+  win_fr: { zh: "副驾车窗", en: "Front window", icon: "carwin", kind: "door" },
+  win_rl: { zh: "左后车窗", en: "Rear L window", icon: "carwin", kind: "door" },
+  win_rr: { zh: "右后车窗", en: "Rear R window", icon: "carwin", kind: "door" },
+  hood: { zh: "引擎盖", en: "Hood", icon: "engine", kind: "cap" },
+  tailgate: { zh: "尾门", en: "Tailgate", icon: "trunk", kind: "cap" },
+  tp_lf: { zh: "左前胎压", en: "LF tire", icon: "tire", kind: "tire" },
+  tp_rf: { zh: "右前胎压", en: "RF tire", icon: "tire", kind: "tire" },
+  tp_lr: { zh: "左后胎压", en: "LR tire", icon: "tire", kind: "tire" },
+  tp_rr: { zh: "右后胎压", en: "RR tire", icon: "tire", kind: "tire" },
+  chg_status: { zh: "充电状态", en: "Charge status", icon: "bolt", kind: "text" },
+  last_soc: { zh: "上次电量", en: "Last SOC", icon: "bolt", kind: "stat" },
+  chg_start: { zh: "开始充电", en: "Start charge", icon: "bolt", kind: "action" },
+  chg_stop: { zh: "停止充电", en: "Stop charge", icon: "bolt", kind: "action" },
+  wallbox: { zh: "家充桩", en: "Wallbox", icon: "bolt", kind: "action" },
+  maint: { zh: "保养计划", en: "Maintenance", icon: "wrench", kind: "service" },
+  recall: { zh: "召回信息", en: "Recall", icon: "bell", kind: "service" },
+  messages: { zh: "未读消息", en: "Messages", icon: "bell", kind: "service" },
+  fw: { zh: "固件升级", en: "Firmware", icon: "refresh", kind: "service" },
+  support: { zh: "客服电话", en: "Support", icon: "bell", kind: "service" },
+  btn_unlock: { zh: "开锁", en: "Unlock", icon: "unlock", kind: "action" },
+  btn_lock: { zh: "上锁", en: "Lock", icon: "lock", kind: "action" },
+  sw_engine: { zh: "远程启动/熄火", en: "Engine", icon: "power", kind: "action" },
+  sw_honk: { zh: "鸣笛寻车", en: "Honk", icon: "megaphone", kind: "action" },
+  sw_va: { zh: "声光寻车", en: "Sound & light", icon: "speaker", kind: "action" },
+  sw_light: { zh: "灯光寻车", en: "Light find", icon: "bulb", kind: "action" },
+  honk_duration: { zh: "寻车时长", en: "Honk duration", icon: "bell", kind: "select" },
+  chirp_type: { zh: "寻车类型", en: "Honk type", icon: "speaker", kind: "select" }
+};
+var DEFAULT_ITEMS = {
+  meta: [{ slot: "addr" }, { slot: "sync" }],
+  hero: [{ slot: "image" }],
+  energy: ["fuel", "battery", "range", "odo", "volt", "oil"],
+  alerts: ["alerts"],
+  doors: [
+    "door_fl",
+    "door_fr",
+    "door_rl",
+    "door_rr",
+    "win_fl",
+    "win_fr",
+    "win_rl",
+    "win_rr",
+    "hood",
+    "tailgate",
+    "tp_lf",
+    "tp_rf",
+    "tp_lr",
+    "tp_rr"
+  ],
+  charging: ["chg_status", "battery", "last_soc", "chg_start", "chg_stop", "wallbox"],
+  service: ["maint", "recall", "messages", "fw", "support"],
+  actions: ["btn_unlock", "btn_lock", "sw_engine", "sw_honk", "honk_duration", "chirp_type"],
+  custom: []
+};
+function defaultItems(type) {
+  return (DEFAULT_ITEMS[type] || []).map((x) => typeof x === "string" ? { slot: x } : Object.assign({}, x));
+}
 var CONFIRMABLE = [
   "btn_unlock",
   "btn_lock",
@@ -1536,7 +1628,16 @@ function normBlocks(cfg) {
       entity: typeof b.entity === "string" ? b.entity : "",
       label: typeof b.label === "string" ? b.label : "",
       unit: typeof b.unit === "string" ? b.unit : "",
-      icon: typeof b.icon === "string" ? b.icon : ""
+      icon: typeof b.icon === "string" ? b.icon : "",
+      ...Array.isArray(b.items) ? {
+        items: b.items.filter((it) => it && typeof it === "object").map((it) => ({
+          slot: typeof it.slot === "string" ? it.slot : "",
+          entity: typeof it.entity === "string" ? it.entity : "",
+          label: typeof it.label === "string" ? it.label : "",
+          unit: typeof it.unit === "string" ? it.unit : "",
+          icon: typeof it.icon === "string" ? it.icon : ""
+        }))
+      } : {}
     }));
     return list2;
   }
@@ -2122,6 +2223,77 @@ var HaCarCard = class extends HTMLElement {
       <div class="pv-tires">${tires}<span class="pv-sync">${icon("refresh")}${esc(fake.sync)}</span></div>`;
   }
   // ---------- 卡片主体 ----------
+  // ---------- 模块内实体项 ----------
+  _items(b) {
+    if (Array.isArray(b.items)) return b.items;
+    if (b.type === "custom" && (b.entity || b.label || b.icon)) {
+      return [{ slot: "", entity: b.entity, label: b.label, unit: b.unit, icon: b.icon }];
+    }
+    return defaultItems(b.type);
+  }
+  _itemEnt(it, data) {
+    if (it.entity) return it.entity;
+    return it.slot ? data.id(it.slot) : "";
+  }
+  _itemState(it, data) {
+    const ent = this._itemEnt(it, data);
+    return ent && this._hass && this._hass.states[ent] ? this._hass.states[ent] : null;
+  }
+  _itemDef(it) {
+    return it.slot ? ITEM_DEFS[it.slot] || null : null;
+  }
+  _itemLabel(it, def, t) {
+    if (it.label) return it.label;
+    if (def) return isEn(this._hass) ? def.en : def.zh;
+    const ent = it.entity || "";
+    return ent ? ent.split(".").slice(-1)[0].replace(/_/g, " ") : t.custom || (isEn(this._hass) ? "Entity" : "实体");
+  }
+  _itemIcon(it, def) {
+    if (it.icon && ICON_NAMES.includes(it.icon)) return it.icon;
+    return def && ICON_NAMES.includes(def.icon) ? def.icon : "bolt";
+  }
+  _itemText(it, data, t) {
+    const def = this._itemDef(it);
+    const st = this._itemState(it, data);
+    const label = this._itemLabel(it, def, t);
+    if (!st) return { label, value: null, unit: "", st: null, def, labelText: label };
+    if (isBad(st)) return { label, value: "—", unit: "", st, def, labelText: label };
+    let raw = String(st.state);
+    const unit = it.unit || attrs(st, "unit_of_measurement") || "";
+    if (def && def.kind === "tire") {
+      const n = num(st);
+      return { label, value: n == null ? "—" : fmtNum(n), unit: unit || "kPa", st, def, labelText: label };
+    }
+    if (/^on|off$/i.test(raw)) {
+      raw = raw.toLowerCase() === "on" ? isEn(this._hass) ? "On" : "开" : isEn(this._hass) ? "Off" : "关";
+    }
+    if (def && def.kind === "pct") {
+      const n = num(st);
+      if (n != null) return { label, value: String(Math.round(n)), unit: unit || "%", st, def, labelText: label };
+    }
+    return { label, value: raw, unit, st, def, labelText: label };
+  }
+  // 用户对「门窗」模块显式增删过实体时，俯视状态层同步隐藏被删的门/窗/盖/胎压
+  _slotAllowed(slot) {
+    const db = (this._config.blocks || []).find((b) => b.type === "doors" && b.on !== false);
+    if (!db || !Array.isArray(db.items)) return true;
+    return db.items.some((it) => it.slot === slot);
+  }
+  _extraChips(b, data, t, skipKinds) {
+    const items = this._items(b).filter((it) => {
+      const def = this._itemDef(it);
+      const kind = def ? def.kind : "custom";
+      return !(skipKinds || []).includes(kind);
+    });
+    const chips = [];
+    for (const it of items) {
+      const v = this._itemText(it, data, t);
+      if (!v.st) continue;
+      const def = v.def;
+      chips.push(`<span class="door" data-more="${esc(this._itemEnt(it, data))}">${icon(this._itemIcon(it, def))}<span class="addr">${esc(v.label)} · ${esc(v.value)}${v.unit ? " " + esc(v.unit) : ""}</span></span>`);
+    }
+    return chips.length ? `<div class="doors">${chips.join("")}</div>` : "";
+  }
   _body(data, twoCol) {
     const cfg = this._config;
     const t = dict(this._hass);
@@ -2161,58 +2333,61 @@ var HaCarCard = class extends HTMLElement {
       let html = "";
       switch (b.type) {
         case "meta": {
-          const locH = compact ? "" : this._location(data, t, b.entity);
-          const syncH = this._baseline(data, t);
-          if (locH || syncH) html = `<div class="b-meta"><div class="hmeta">${locH}${syncH}</div></div>`;
+          const locH = compact ? "" : this._metaLocation(b, data, t);
+          const syncH = this._baseline(data, t, b);
+          const extra = this._extraChips(b, data, t, ["location", "sync"]);
+          if (locH || syncH || extra) html = `<div class="b-meta"><div class="hmeta">${locH}${syncH}</div>${extra}</div>`;
           break;
         }
         case "hero":
           html = `<div class="blk b-hero">${this._hero(
-            this._imgFrom(b.entity, hero.src),
+            this._imgFrom(this._heroImageEnt(b, data), hero.src),
             hero.fb,
             this._carOverlay(data, t, mods, running),
             running
-          )}</div>`;
+          )}${this._extraChips(b, data, t, ["image"])}</div>`;
           break;
         case "energy": {
-          const en = this._energy(data, t);
+          const en = this._energy(data, t, b);
           if (en) html = `<div class="blk b-energy">${en}</div>`;
           break;
         }
         case "alerts": {
-          const al = this._alert(data, t);
+          const al = this._alerts(data, t, b);
           if (al) html = `<div class="blk b-alerts">${al}</div>`;
           break;
         }
         case "doors": {
           if (!compact) {
-            const dr = this._doors(data, t);
+            const dr = this._doors(data, t, b);
             if (dr) html = `<div class="blk b-doors">${dr}</div>`;
           }
           break;
         }
         case "charging": {
           if (!compact) {
-            const ch = this._charging(data, t, chgNow);
+            const ch = this._charging(data, t, chgNow, b);
             if (ch) html = `<div class="blk b-charging">${ch}</div>`;
           }
           break;
         }
         case "service": {
           if (!compact) {
-            const sv = this._service(data, t);
+            const sv = this._service(data, t, b);
             if (sv) html = `<div class="blk b-service">${sv}</div>`;
           }
           break;
         }
         case "actions": {
-          const ac = this._actions(data, t, running, offline, compact);
+          const ac = this._actions(data, t, running, offline, compact, b);
           if (ac) html = `<div class="blk b-actions">${ac}</div>`;
           break;
         }
-        case "custom":
-          html = this._customBlock(b, t);
+        case "custom": {
+          const cu = this._customBlock(b, t, data);
+          if (cu) html = `<div class="blk b-custom">${cu}</div>`;
           break;
+        }
         default:
           break;
       }
@@ -2261,6 +2436,7 @@ var HaCarCard = class extends HTMLElement {
     const lockedRaw = text(data.get("lock") || {});
     const locked = /锁|lock/i.test(lockedRaw) && !/未|解|unlock/i.test(lockedRaw);
     const tireLine = (slot, sslot, unitFallback) => {
+      if (!this._slotAllowed(slot)) return null;
       const st = data.get(slot);
       if (!st) return null;
       const v = num(st);
@@ -2290,6 +2466,7 @@ var HaCarCard = class extends HTMLElement {
       let bad = false;
       if (doors) {
         for (const [ic, slot] of [["carwin", dSlots[1]], ["cardoor", dSlots[0]]]) {
+          if (!this._slotAllowed(slot)) continue;
           const st = data.get(slot);
           if (!st) continue;
           const b = isBad(st);
@@ -2308,6 +2485,7 @@ var HaCarCard = class extends HTMLElement {
       );
     }
     const cap = (cls, label, slot, ic) => {
+      if (!this._slotAllowed(slot)) return;
       const st = data.get(slot);
       if (!st) return;
       const b = isBad(st);
@@ -2514,7 +2692,9 @@ var HaCarCard = class extends HTMLElement {
     }
   }
   // 底座条：四轮胎压 + 同步（同步入口就是刷新按钮）
-  _baseline(data, t) {
+  _baseline(data, t, b) {
+    const show = !b || this._items(b).some((it) => it.slot === "sync");
+    if (!show) return "";
     const sync = this._syncChip(data, t);
     return sync ? `<div class="baseline solo">${sync}</div>` : "";
   }
@@ -2567,38 +2747,55 @@ var HaCarCard = class extends HTMLElement {
     }
     return pic("image_overlook") || pic("image_3d") || pic("image_side") || { src: null, fb: null };
   }
-  _energy(data, t) {
-    const fuel = num(data.get("fuel"));
-    const batt = num(data.get("battery"));
-    const pct = batt != null ? batt : fuel;
-    const pctLabel = batt != null ? t.battery : t.fuel;
-    const pctIc = batt != null ? "bolt" : "fuel";
-    const range = num(data.get("range")) != null ? num(data.get("range")) : num(data.get("ev_range"));
-    const rangeUnit = attrs(data.get("range"), "unit_of_measurement") || "km";
-    const odo = num(data.get("odo"));
-    const odoUnit = attrs(data.get("odo"), "unit_of_measurement") || "km";
-    const volt = num(data.get("volt"));
-    const oil = num(data.get("oil"));
-    if (pct == null && range == null && odo == null) return "";
-    const left = pct == null ? "" : this._gauge({ pct: clamp(pct, 2, 100), label: pctLabel, value: Math.round(pct), unit: "%", ic: pctIc });
-    const right = range != null ? this._gauge({
-      pct: clamp(range / (batt != null ? 500 : 620) * 100, 2, 100),
-      label: t.range,
-      value: fmtNum(range),
-      unit: rangeUnit,
-      ic: "gauge"
-    }) : this._gauge({ pct: 100, label: t.odo, value: fmtNum(odo), unit: odoUnit, ic: "gauge" });
+  _metaLocation(b, data, t) {
+    const it = this._items(b).find((x) => {
+      const def = this._itemDef(x);
+      return def && def.kind === "location";
+    });
+    if (!it) return "";
+    return this._location(data, t, it.entity || "");
+  }
+  _heroImageEnt(b, _data) {
+    const it = this._items(b).find((x) => {
+      const def = this._itemDef(x);
+      return def && def.kind === "image";
+    });
+    return it ? it.entity || "" : "";
+  }
+  _energy(data, t, b) {
+    const items = this._items(b);
+    const gauges = [];
     const stats = [];
-    if (odo != null && range != null) {
-      stats.push(`<span class="sstat"><i>${esc(t.odo)}</i><b>${fmtNum(odo)}</b><span>${esc(odoUnit)}</span></span>`);
+    for (const it of items) {
+      const def = this._itemDef(it);
+      const st = this._itemState(it, data);
+      if (!st) continue;
+      const label = this._itemLabel(it, def, t);
+      const ent = this._itemEnt(it, data);
+      const unit = attrs(st, "unit_of_measurement") || it.unit || "";
+      const numv = num(st);
+      const kind = def ? def.kind : "stat";
+      if ((kind === "pct" || kind === "range" || kind === "odo") && gauges.length < 2 && numv != null) {
+        const full = def && def.full ? def.full : 1e3;
+        const pct = kind === "pct" ? clamp(numv, 2, 100) : clamp(numv / full * 100, 2, 100);
+        gauges.push(
+          this._gauge({
+            pct,
+            label,
+            value: kind === "pct" ? Math.round(numv) : fmtNum(numv),
+            unit: kind === "pct" ? "%" : unit || "km",
+            ic: this._itemIcon(it, def)
+          })
+        );
+        continue;
+      }
+      if (numv == null && kind !== "stat") continue;
+      stats.push(
+        `<span class="sstat" data-more="${esc(ent)}"><i>${esc(label)}</i><b>${numv == null ? esc(String(st.state)) : fmtNum(numv)}</b><span>${esc(unit)}</span></span>`
+      );
     }
-    if (volt != null) {
-      stats.push(`<span class="sstat"><i>${esc(t.volt)}</i><b>${fmtNum(volt, 1)}</b><span>V</span></span>`);
-    }
-    if (oil != null) {
-      stats.push(`<span class="sstat"><i>${esc(t.oil)}</i><b>${Math.round(oil)}</b><span>%</span></span>`);
-    }
-    return `<div class="energy">${left}${left ? `<span class="egdiv"></span>` : ""}${right}</div>
+    if (!gauges.length && !stats.length) return "";
+    return `${gauges.length ? `<div class="energy">${gauges.join(`<span class="egdiv"></span>`)}</div>` : ""}
       ${stats.length ? `<div class="substats">${stats.join("")}</div>` : ""}`;
   }
   // 环形仪表：SVG 描边弧，从 12 点起顺时针
@@ -2616,74 +2813,87 @@ var HaCarCard = class extends HTMLElement {
         <span class="gn"><b>${esc(String(o.value))}</b>${o.unit ? `<i>${esc(o.unit)}</i>` : ""}</span></div>
     </div>`;
   }
-  _actions(data, t, running, offline, compact) {
+  _actions(data, t, running, offline, compact, b) {
     const cfg = this._config;
     const tiles = [];
+    const pills = [];
     const hold = (key) => cfg.confirm.includes(key) ? ' data-hold="1"' : "";
     const lockNorm = normLock(data.get("lock"));
-    if (data.id("btn_unlock")) {
-      tiles.push(this._tile({
-        key: "btn_unlock",
-        ent: data.id("btn_unlock"),
-        ic: "unlock",
-        label: t.unlock,
-        cls: lockNorm === "unlocked" ? "hot" : "",
-        dom: "button",
-        svc: "press",
-        hold,
-        offline
-      }));
-    }
-    if (data.id("btn_lock")) {
-      tiles.push(this._tile({
-        key: "btn_lock",
-        ent: data.id("btn_lock"),
-        ic: "lock",
-        label: t.lockDown,
-        cls: lockNorm === "locked" ? "on" : "",
-        dom: "button",
-        svc: "press",
-        hold,
-        offline
-      }));
-    }
-    if (data.id("sw_engine")) {
-      tiles.push(this._tile({
-        key: "sw_engine",
-        ent: data.id("sw_engine"),
-        ic: "power",
-        cls: running ? "on" : "",
-        label: running ? t.engineStop : t.engine,
-        dom: "homeassistant",
-        svc: "toggle",
-        hold,
-        offline
-      }));
-    }
-    if (data.id("sw_honk")) {
-      tiles.push(this._tile({
-        key: "sw_honk",
-        ent: data.id("sw_honk"),
-        ic: "megaphone",
-        label: t.honk,
-        dom: "homeassistant",
-        svc: "toggle",
-        hold,
-        offline
-      }));
-    }
-    const pills = [];
-    if (!compact) {
-      const durEnt = data.id("honk_duration");
-      const typeEnt = data.id("chirp_type");
-      if (durEnt) pills.push(this._selectPill({ key: "honk_duration", ent: durEnt, label: t.soundDur }));
-      else if (data.id("sw_va")) {
-        pills.push(this._pill({ key: "sw_va", ent: data.id("sw_va"), ic: "speaker", label: t.soundLight, dom: "homeassistant", svc: "toggle", hold, offline }));
+    for (const it of this._items(b)) {
+      const def = this._itemDef(it);
+      const ent = this._itemEnt(it, data);
+      const st = this._itemState(it, data);
+      if (!ent || !st) continue;
+      const kind = def ? def.kind : ent.split(".")[0];
+      if (kind === "select") {
+        if (!compact) pills.push(this._selectPill({ key: it.slot || ent, ent, label: this._itemLabel(it, def, t) }));
+        continue;
       }
-      if (typeEnt) pills.push(this._selectPill({ key: "chirp_type", ent: typeEnt, label: t.soundType }));
-      else if (data.id("sw_light")) {
-        pills.push(this._pill({ key: "sw_light", ent: data.id("sw_light"), ic: "bulb", label: t.light, dom: "homeassistant", svc: "toggle", hold, offline }));
+      const slot = it.slot || "";
+      if (slot === "sw_va" || slot === "sw_light") {
+        if (!compact) {
+          pills.push(this._pill({
+            key: slot,
+            ent,
+            ic: this._itemIcon(it, def),
+            label: this._itemLabel(it, def, t),
+            dom: "homeassistant",
+            svc: "toggle",
+            hold,
+            offline
+          }));
+        }
+        continue;
       }
+      let label = this._itemLabel(it, def, t);
+      let ic = this._itemIcon(it, def);
+      let cls = "";
+      let dom = "homeassistant";
+      let svc = "toggle";
+      if (slot === "btn_unlock") {
+        label = it.label || t.unlock;
+        ic = "unlock";
+        dom = "button";
+        svc = "press";
+        cls = lockNorm === "unlocked" ? "hot" : "";
+      } else if (slot === "btn_lock") {
+        label = it.label || t.lockDown;
+        ic = "lock";
+        dom = "button";
+        svc = "press";
+        cls = lockNorm === "locked" ? "on" : "";
+      } else if (slot === "sw_engine") {
+        label = it.label || (running ? t.engineStop : t.engine);
+        ic = "power";
+        cls = running ? "on" : "";
+      } else if (slot === "sw_honk") {
+        label = it.label || t.honk;
+        ic = "megaphone";
+      } else if (!def) {
+        const dom0 = ent.split(".")[0];
+        if (dom0 === "button" || dom0 === "input_button") {
+          dom = "button";
+          svc = "press";
+        } else if (dom0 === "scene" || dom0 === "script") {
+          dom = dom0;
+          svc = "turn_on";
+        } else if (dom0 === "select") {
+          if (compact) continue;
+          pills.push(this._selectPill({ key: ent, ent, label }));
+          continue;
+        }
+      }
+      tiles.push(this._tile({
+        key: slot || ent,
+        ent,
+        ic,
+        label,
+        cls,
+        dom,
+        svc,
+        hold,
+        offline
+      }));
     }
     if (!tiles.length && !pills.length) return "";
     return `${tiles.length ? `<div class="acts">${tiles.join("")}</div>` : ""}
@@ -2724,22 +2934,20 @@ var HaCarCard = class extends HTMLElement {
     return /^https?:/i.test(st) ? st : fallback;
   }
   // 自定义实体模块：任意实体按顺序排进版式
-  _customBlock(b, t) {
-    const ent = b.entity;
-    if (!ent) return "";
-    const label = b.label || (ent ? ent.split(".").slice(-1)[0].replace(/_/g, " ") : t.custom || "自定义");
-    const st = ent && this._hass && this._hass.states[ent] ? this._hass.states[ent] : null;
-    let value = "—";
-    let unit = b.unit || "";
-    if (st) {
-      const raw = String(st.state);
-      value = isBad(st) ? "—" : raw;
-      if (!unit && st.attributes && st.attributes.unit_of_measurement) unit = st.attributes.unit_of_measurement;
-      if (/^on|off$/i.test(raw)) value = raw.toLowerCase() === "on" ? isEn(this._hass) ? "On" : "开" : isEn(this._hass) ? "Off" : "关";
+  _customBlock(b, t, data) {
+    const rows = [];
+    for (const it of this._items(b)) {
+      const ent = this._itemEnt(it, data);
+      if (!ent) continue;
+      const def = this._itemDef(it);
+      const v = this._itemText(it, data, t);
+      if (!v.st) continue;
+      const label = v.labelText;
+      const ic = this._itemIcon(it, def);
+      rows.push(`<div class="cblock" data-more="${esc(ent)}">${icon(ic)}<span class="cl">${esc(label)}</span>
+        <b>${esc(v.value)}</b>${v.unit ? `<i>${esc(v.unit)}</i>` : ""}</div>`);
     }
-    const ic = ICON_NAMES.includes(b.icon) ? b.icon : "bolt";
-    return `<div class="blk b-custom"><div class="cblock">${icon(ic)}<span class="cl">${esc(label)}</span>
-      <b>${esc(value)}</b>${unit ? `<i>${esc(unit)}</i>` : ""}</div></div>`;
+    return rows.join("");
   }
   _tires(data, _t) {
     const defs = [
@@ -2761,84 +2969,110 @@ var HaCarCard = class extends HTMLElement {
     if (!cells.length) return "";
     return `<div class="tread">${cells.join("")}</div>`;
   }
-  _doors(data, t) {
-    const defs = [
-      { slot: "door_fl", label: isEn(this._hass) ? "Front L" : "主驾门" },
-      { slot: "door_fr", label: isEn(this._hass) ? "Front R" : "副驾门" },
-      { slot: "door_rl", label: isEn(this._hass) ? "Rear L" : "左后门" },
-      { slot: "door_rr", label: isEn(this._hass) ? "Rear R" : "右后门" },
-      { slot: "tailgate", label: isEn(this._hass) ? "Trunk" : "尾门" },
-      { slot: "hood", label: isEn(this._hass) ? "Hood" : "引擎盖" },
-      { slot: "win_fl", label: isEn(this._hass) ? "Win L" : "主驾车窗" },
-      { slot: "win_fr", label: isEn(this._hass) ? "Win R" : "副驾车窗" }
-    ];
-    const open = [];
-    let known = 0;
-    for (const d of defs) {
-      const st = data.get(d.slot);
+  _doors(data, t, b) {
+    const chips = [];
+    for (const it of this._items(b)) {
+      const def = this._itemDef(it);
+      const st = this._itemState(it, data);
       if (!st) continue;
-      known += 1;
-      if (normOpen(st) === "open") open.push(d);
+      const label = this._itemLabel(it, def, t);
+      const kind = def ? def.kind : "custom";
+      if (kind === "door" || kind === "cap") {
+        if (isBad(st)) continue;
+        if (normOpen(st) !== "open") continue;
+        chips.push(`<span class="door open" data-more="${esc(this._itemEnt(it, data))}">${icon(this._itemIcon(it, def))}${esc(label)} · ${esc(t.open)}</span>`);
+      } else if (kind === "tire") {
+        const v = num(st);
+        if (v == null) continue;
+        const warn = v < 190 || v > 300;
+        chips.push(`<span class="door${warn ? " open" : ""}" data-more="${esc(this._itemEnt(it, data))}">${icon(this._itemIcon(it, def))}${esc(label)} · ${fmtNum(v)} ${esc(attrs(st, "unit_of_measurement") || "kPa")}</span>`);
+      } else {
+        const v = this._itemText(it, data, t);
+        if (!v.value) continue;
+        chips.push(`<span class="door" data-more="${esc(this._itemEnt(it, data))}">${icon(this._itemIcon(it, def))}${esc(label)} · ${esc(v.value)}${v.unit ? " " + esc(v.unit) : ""}</span>`);
+      }
     }
-    if (!known) return "";
-    if (!open.length) return "";
-    return `<div class="doors">${open.map((d) => `<span class="door open" data-more="${esc(data.id(d.slot))}">${icon("carProfile")}${esc(d.label)} · ${esc(t.open)}</span>`).join("")}</div>`;
+    return chips.length ? `<div class="doors">${chips.join("")}</div>` : "";
   }
-  _alert(data, t) {
-    const st = data.get("alerts");
-    const raw = text(st);
-    if (!raw) return "";
-    if (String(raw).trim() === "0") return "";
-    const low = raw.toLowerCase();
-    if (low === "none" || low === "no" || low === "无" || low === "正常" || low === "no alerts") return "";
-    return `<div class="alert" data-more="${esc(data.id("alerts"))}">${icon("warning")}
-      <b>${esc(t.alert)}</b><span class="amsg">${esc(raw)}</span></div>`;
+  _alerts(data, t, b) {
+    const rows = [];
+    for (const it of this._items(b)) {
+      const def = this._itemDef(it);
+      const st = this._itemState(it, data);
+      if (!st) continue;
+      const label = this._itemLabel(it, def, t);
+      const raw = String(st.state || "").trim();
+      const empty = !raw || raw === "0" || /^(none|no|无|正常|no alerts)$/i.test(raw);
+      if (empty) continue;
+      if (def && def.kind === "alert") {
+        rows.push(`<div class="alert" data-more="${esc(this._itemEnt(it, data))}">${icon("warning")}
+          <b>${esc(label)}</b><span class="amsg">${esc(raw)}</span></div>`);
+      } else {
+        rows.push(`<div class="alert" data-more="${esc(this._itemEnt(it, data))}">${icon(this._itemIcon(it, def))}
+          <b>${esc(label)}</b><span class="amsg">${esc(raw)}</span></div>`);
+      }
+    }
+    return rows.join("");
   }
-  _charging(data, t, chgNow) {
-    const st = data.get("chg_status");
-    const wallbox = data.get("wallbox");
-    if (!st && !data.id("chg_start")) return "";
-    const statusText = text(st) || (chgNow ? t.charging : t.notCharging);
-    const soc = num(data.get("battery"));
-    const last = num(data.get("last_soc"));
+  _charging(data, t, chgNow, b) {
+    const items = this._items(b);
+    const statusItem = items.find((it) => {
+      const def = this._itemDef(it);
+      return def && def.kind === "text";
+    });
+    const statusText = statusItem ? this._itemState(statusItem, data) ? String(this._itemState(statusItem, data).state) : "" : chgNow ? t.charging : "";
     const meta = [];
-    if (soc != null) meta.push(`${t.battery} ${Math.round(soc)}%`);
-    if (last != null) meta.push(`${t.lastSoc} ${Math.round(last)}%`);
     const btns = [];
-    if (data.id("chg_start")) {
-      btns.push(`<button class="mini" data-act="chg_start" data-ent="${esc(data.id("chg_start"))}"
-        data-dom="homeassistant" data-svc="turn_on" data-label="${esc(t.chargeNow)}">${esc(t.chargeNow)}</button>`);
+    for (const it of items) {
+      const def = this._itemDef(it);
+      const st = this._itemState(it, data);
+      if (!st || it === statusItem) continue;
+      const label = this._itemLabel(it, def, t);
+      const ent = this._itemEnt(it, data);
+      const kind = def ? def.kind : "custom";
+      if (kind === "action") {
+        if (it.slot === "chg_start") {
+          btns.push(`<button class="mini" data-act="chg_start" data-ent="${esc(ent)}"
+            data-dom="homeassistant" data-svc="turn_on" data-label="${esc(label)}">${esc(label)}</button>`);
+        } else if (it.slot === "chg_stop") {
+          btns.push(`<button class="mini dim" data-act="chg_stop" data-ent="${esc(ent)}"
+            data-dom="homeassistant" data-svc="turn_off" data-label="${esc(label)}">${esc(label)}</button>`);
+        } else if (it.slot === "wallbox") {
+          const on = String(st.state).toLowerCase() === "on";
+          btns.push(`<button class="mini${on ? "" : " dim"}" data-act="wallbox" data-ent="${esc(ent)}"
+            data-dom="homeassistant" data-svc="toggle" data-label="${esc(label)}">${esc(label)}</button>`);
+        } else {
+          const dom = ent.split(".")[0];
+          const svc = dom === "button" || dom === "input_button" ? "press" : dom === "scene" || dom === "script" ? "turn_on" : "toggle";
+          btns.push(`<button class="mini" data-act="${esc(ent)}" data-ent="${esc(ent)}"
+            data-dom="${esc(dom === "button" || dom === "input_button" ? "button" : dom === "scene" || dom === "script" ? dom : "homeassistant")}"
+            data-svc="${esc(svc)}" data-label="${esc(label)}">${esc(label)}</button>`);
+        }
+      } else {
+        const v = this._itemText(it, data, t);
+        if (!v.value) continue;
+        meta.push(`${label} ${v.value}${v.unit ? " " + v.unit : ""}`);
+      }
     }
-    if (data.id("chg_stop")) {
-      btns.push(`<button class="mini dim" data-act="chg_stop" data-ent="${esc(data.id("chg_stop"))}"
-        data-dom="homeassistant" data-svc="turn_off" data-label="${esc(t.stopCharge)}">${esc(t.stopCharge)}</button>`);
-    }
-    if (data.id("wallbox")) {
-      const on = String(wallbox.state).toLowerCase() === "on";
-      btns.push(`<button class="mini${on ? "" : " dim"}" data-act="wallbox"
-        data-ent="${esc(data.id("wallbox"))}" data-dom="homeassistant" data-svc="toggle"
-        data-label="${esc(t.chargeNow)}">${esc(on ? t.stopCharge : t.chargeNow)}</button>`);
-    }
+    if (!statusText && !meta.length && !btns.length) return "";
     return `<div class="panel"><div class="ph">${icon("bolt")}${esc(t.chargingTitle)}</div>
-      <div class="chgrow"><div><div class="st">${esc(statusText)}</div>
+      <div class="chgrow"><div><div class="st">${esc(statusText || t.notCharging)}</div>
       ${meta.length ? `<div class="meta">${esc(meta.join(" · "))}</div>` : ""}</div>
-      ${btns.length ? `<div style="display:flex;gap:6px">${btns.join("")}</div>` : ""}</div></div>`;
+      ${btns.length ? `<div style="display:flex;gap:6px;flex-wrap:wrap">${btns.join("")}</div>` : ""}</div></div>`;
   }
-  _service(data, t) {
+  _service(data, t, b) {
     const rows = [];
     const mask = Boolean(this._config.privacy);
-    const push = (label, slot, suffix) => {
-      const st = data.get(slot);
-      const raw = text(st);
-      if (!raw) return;
+    for (const it of this._items(b)) {
+      const def = this._itemDef(it);
+      const st = this._itemState(it, data);
+      if (!st) continue;
+      const label = this._itemLabel(it, def, t);
+      const raw = isBad(st) ? "—" : String(st.state);
       const v = mask ? maskText(raw) : raw;
-      rows.push({ label, value: suffix ? v + suffix : v, ent: data.id(slot) });
-    };
-    push(t.maintenance, "maint");
-    push(t.recallInfo, "recall");
-    push(t.messages, "messages", "");
-    push(t.firmware, "fw");
-    push(t.support, "support");
+      if (!v) continue;
+      rows.push({ label, value: v, ent: this._itemEnt(it, data) });
+    }
     if (!rows.length) return "";
     return `<details class="svc"><summary><span class="sum">${icon("wrench")}${esc(t.service)}</span>${icon("chevron")}</summary>
       ${rows.map((r) => `<div class="row" data-more="${esc(r.ent)}"><span class="k">${esc(r.label)}</span><span class="val">${esc(r.value)}</span></div>`).join("")}</details>`;
@@ -3190,6 +3424,8 @@ var L = {
   accent: "强调色",
   theme: "主题",
   themeHint: "换一套漆面与背光配色，版式不变；下面的强调色会覆盖主题色。",
+  items: "实体",
+  addEntity: "添加实体",
   advanced: "高级：实体绑定",
   advancedHint: "留空即自动识别。只有实体被改名或一台车挂多个集成时才需要填。",
   autofill: "自动适配集成实体",
@@ -3207,6 +3443,7 @@ var HaCarEditor = class extends HTMLElement {
     super();
     this.attachShadow({ mode: "open" });
     this._built = false;
+    this._openBk = /* @__PURE__ */ new Set();
   }
   setConfig(config) {
     this._config = Object.assign({}, DEFAULTS, config || {});
@@ -3248,7 +3485,7 @@ var HaCarEditor = class extends HTMLElement {
 
       <div class="sec">
         <h3>模块布局</h3>
-        <p class="hint">上下箭头调整顺序，开关控制显示，✕ 删除。手机从上到下排列；宽屏时车图固定在左栏，其余模块按此顺序排右栏。所有模块都能增删与排序。</p>
+        <p class="hint">上下箭头调整顺序，开关控制显示，✕ 删除。手机从上到下排列；宽屏时车图固定在左栏，其余模块按此顺序排右栏。所有模块和模块内实体都能增删与排序。</p>
         <div id="blk" class="blklist"></div>
         <label class="f">添加模块</label>
         <div style="display:flex;gap:6px">
@@ -3430,6 +3667,53 @@ var HaCarEditor = class extends HTMLElement {
       this._emit();
     });
     this.shadowRoot.getElementById("blk").addEventListener("click", (e) => {
+      const add = e.target.closest("[data-biadd]");
+      if (add) {
+        const i2 = Number(add.dataset.biadd);
+        const blocks2 = (this._config.blocks || []).slice();
+        const b = blocks2[i2];
+        if (!b) return;
+        const items = this._blockItems(b).map((x) => Object.assign({}, x));
+        items.push({ slot: "", entity: "", label: "", unit: "", icon: "" });
+        blocks2[i2] = Object.assign({}, b, { items });
+        this._config.blocks = blocks2;
+        this._openBk.add(String(i2));
+        this._renderBlocks();
+        this._emit();
+        return;
+      }
+      const mv = e.target.closest("[data-bimv]");
+      if (mv) {
+        const i2 = Number(mv.dataset.bi);
+        const j = Number(mv.dataset.bj);
+        const blocks2 = (this._config.blocks || []).slice();
+        const b = blocks2[i2];
+        if (!b) return;
+        const items = this._blockItems(b).map((x) => Object.assign({}, x));
+        const act2 = mv.dataset.bimv;
+        if (act2 === "up" && j > 0) [items[j - 1], items[j]] = [items[j], items[j - 1]];
+        else if (act2 === "dn" && j < items.length - 1) [items[j + 1], items[j]] = [items[j], items[j + 1]];
+        blocks2[i2] = Object.assign({}, b, { items });
+        this._config.blocks = blocks2;
+        this._renderBlocks();
+        this._emit();
+        return;
+      }
+      const clr = e.target.closest("[data-bicl]");
+      if (clr) {
+        const i2 = Number(clr.dataset.bicl);
+        const j = Number(clr.dataset.bj);
+        const blocks2 = (this._config.blocks || []).slice();
+        const b = blocks2[i2];
+        if (!b) return;
+        const items = this._blockItems(b).map((x) => Object.assign({}, x));
+        items.splice(j, 1);
+        blocks2[i2] = Object.assign({}, b, { items });
+        this._config.blocks = blocks2;
+        this._renderBlocks();
+        this._emit();
+        return;
+      }
       const btn = e.target.closest("[data-bk]");
       if (!btn) return;
       const i = Number(btn.dataset.i);
@@ -3444,7 +3728,21 @@ var HaCarEditor = class extends HTMLElement {
       this._renderBlocks();
       this._emit();
     });
-    this.shadowRoot.getElementById("blk").addEventListener("input", (e) => {
+    this.shadowRoot.getElementById("blk").addEventListener("change", (e) => {
+      const lab = e.target.closest("[data-bilab]");
+      if (lab) {
+        const [i2, j] = lab.dataset.bilab.split(":").map(Number);
+        const blocks2 = (this._config.blocks || []).slice();
+        const b = blocks2[i2];
+        if (!b) return;
+        const items = this._blockItems(b).map((x) => Object.assign({}, x));
+        if (!items[j]) return;
+        items[j] = Object.assign({}, items[j], { label: lab.value.trim() });
+        blocks2[i2] = Object.assign({}, b, { items });
+        this._config.blocks = blocks2;
+        this._emit();
+        return;
+      }
       const tEl = e.target.closest("[data-bf]");
       if (!tEl) return;
       const i = Number(tEl.dataset.i);
@@ -3462,19 +3760,39 @@ var HaCarEditor = class extends HTMLElement {
       (k) => `<button class="tg" type="button" data-confirm="${k}">${ACTION_LABELS[k] || k}</button>`
     ).join("");
   }
+  _blockItems(b) {
+    if (Array.isArray(b.items)) return b.items;
+    if (b.type === "custom" && (b.entity || b.label || b.icon)) {
+      return [{ slot: "", entity: b.entity, label: b.label, unit: b.unit, icon: b.icon }];
+    }
+    return defaultItems(b.type);
+  }
+  _itemLabel(it) {
+    if (it.label) return it.label;
+    if (it.slot && ITEM_DEFS[it.slot]) return ITEM_DEFS[it.slot].zh;
+    return "实体";
+  }
   _renderBlocks() {
     const host = this.shadowRoot.getElementById("blk");
     if (!host) return;
     const blocks = this._config.blocks || [];
     const rows = blocks.map((b, i) => {
-      const nm = `${BLOCK_LABELS[b.type] || b.type}${b.entity ? " · " + b.entity : ""}`;
+      const nm = BLOCK_LABELS[b.type] || b.type;
       const off = b.on === false ? " off" : "";
-      const entSel = b.type === "custom" ? `<div class="bk-sub">
-            <div class="pick" data-bkpick="${i}"></div>
-            <button class="btn sq clr" data-bkclr="${i}" type="button" title="清空实体" aria-label="清空实体">✕</button>
-            <input class="tf" data-bf="label" data-i="${i}" value="${esc(b.label || "")}" placeholder="显示名称" style="flex:1 1 90px">
-            <input class="tf" data-bf="unit" data-i="${i}" value="${esc(b.unit || "")}" placeholder="单位" style="flex:0 0 62px">
-          </div>` : "";
+      const its = this._blockItems(b);
+      const itemRows = its.map((it, j) => {
+        const label = this._itemLabel(it);
+        const free = !it.slot;
+        return `<div class="birow">
+            <div class="bih">
+              ${free ? `<input class="tf bil" data-bilab="${i}:${j}" value="${esc(it.label || "")}" placeholder="显示名称">` : `<span class="bil">${esc(label)}</span>`}
+              <button class="btn sq" data-bimv="up" data-bi="${i}" data-bj="${j}" type="button">↑</button>
+              <button class="btn sq" data-bimv="dn" data-bi="${i}" data-bj="${j}" type="button">↓</button>
+              <button class="btn sq clr" data-bicl="${i}" data-bj="${j}" type="button" title="移除实体" aria-label="移除实体">✕</button>
+            </div>
+            <div class="pick" data-bipick="${i}:${j}"></div>
+          </div>`;
+      }).join("");
       return `<div class="blkrow${off}">
         <div class="bk-top">
           <button class="btn sq" data-bk="up" data-i="${i}" type="button">↑</button>
@@ -3483,24 +3801,50 @@ var HaCarEditor = class extends HTMLElement {
           <button class="sw" data-bk="on" data-i="${i}" role="switch" aria-checked="${b.on !== false}"></button>
           <button class="btn sq del" data-bk="del" data-i="${i}" type="button">✕</button>
         </div>
-        ${entSel}
+        <details class="bk-items" data-bdet="${i}"${this._openBk.has(String(i)) ? " open" : ""}>
+          <summary>${L.items} · ${its.length}</summary>
+          <div class="bitems">${itemRows}
+            <button class="btn addbi" data-biadd="${i}" type="button">+ ${L.addEntity}</button>
+          </div>
+        </details>
       </div>`;
     });
     host.innerHTML = rows.join("") || `<p class="hint">还没有模块，从下面添加。</p>`;
     blocks.forEach((b, i) => {
-      if (b.type !== "custom") return;
-      const h = host.querySelector(`[data-bkpick="${i}"]`);
-      if (h) this._mountPicker(h, b.entity, (v) => this._setBlockField(i, "entity", v));
+      this._blockItems(b).forEach((it, j) => {
+        const h = host.querySelector(`[data-bipick="${i}:${j}"]`);
+        if (!h) return;
+        const val = it.entity || (it.slot ? (this._config.entities || {})[it.slot] : "") || "";
+        this._mountPicker(h, val, (v) => this._setBlockItem(i, j, v), it.slot ? "自动识别" : "");
+      });
+    });
+    host.querySelectorAll("details.bk-items").forEach((d) => {
+      d.addEventListener("toggle", () => {
+        const k = d.dataset.bdet;
+        if (d.open) this._openBk.add(k);
+        else this._openBk.delete(k);
+      });
     });
   }
-  _mountPicker(host, value, onPick) {
+  _setBlockItem(i, j, value) {
+    const blocks = (this._config.blocks || []).slice();
+    const b = blocks[i];
+    if (!b) return;
+    const items = this._blockItems(b).map((x) => Object.assign({}, x));
+    if (!items[j]) return;
+    items[j] = Object.assign({}, items[j], { entity: value });
+    blocks[i] = Object.assign({}, b, { items });
+    this._config.blocks = blocks;
+    this._emit();
+  }
+  _mountPicker(host, value, onPick, placeholder) {
     let p = host.querySelector("ha-selector");
     if (!customElements.get("ha-selector")) {
       let inp = host.querySelector("input");
       if (!inp) {
         inp = document.createElement("input");
         inp.className = "tf";
-        inp.placeholder = "entity_id";
+        inp.placeholder = placeholder || "entity_id";
         inp.addEventListener("input", () => onPick(inp.value.trim()));
         host.appendChild(inp);
       }
@@ -3518,6 +3862,7 @@ var HaCarEditor = class extends HTMLElement {
     }
     p.hass = this._hass;
     p.selector = { entity: {} };
+    if (placeholder) p.placeholder = placeholder;
     if (p.value !== (value || void 0)) p.value = value || void 0;
   }
   _setBlockField(i, field, value) {
@@ -3615,7 +3960,7 @@ var HaCarEditor = class extends HTMLElement {
 customElements.define("ha-car-editor", HaCarEditor);
 
 // src/main.js
-var VERSION = "2.0.4";
+var VERSION = "2.0.5";
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "ha-car",

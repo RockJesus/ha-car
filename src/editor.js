@@ -1,6 +1,6 @@
 import { EDITOR_STYLES } from "./styles.js";
 import { detectVehicles, resolve } from "./resolve.js";
-import { CONFIRMABLE, DEFAULTS, THEMES, normBlocks } from "./card.js";
+import { CONFIRMABLE, DEFAULTS, ITEM_DEFS, THEMES, defaultItems, normBlocks } from "./card.js";
 
 const BLOCK_LABELS = {
   meta: "定位/同步", hero: "车图", energy: "能耗仪表", alerts: "车辆告警",
@@ -66,6 +66,8 @@ const L = {
   accent: "强调色",
   theme: "主题",
   themeHint: "换一套漆面与背光配色，版式不变；下面的强调色会覆盖主题色。",
+  items: "实体",
+  addEntity: "添加实体",
   advanced: "高级：实体绑定",
   advancedHint: "留空即自动识别。只有实体被改名或一台车挂多个集成时才需要填。",
   autofill: "自动适配集成实体",
@@ -84,6 +86,7 @@ class HaCarEditor extends HTMLElement {
     super();
     this.attachShadow({ mode: "open" });
     this._built = false;
+    this._openBk = new Set();
   }
 
   setConfig(config) {
@@ -128,7 +131,7 @@ class HaCarEditor extends HTMLElement {
 
       <div class="sec">
         <h3>模块布局</h3>
-        <p class="hint">上下箭头调整顺序，开关控制显示，✕ 删除。手机从上到下排列；宽屏时车图固定在左栏，其余模块按此顺序排右栏。所有模块都能增删与排序。</p>
+        <p class="hint">上下箭头调整顺序，开关控制显示，✕ 删除。手机从上到下排列；宽屏时车图固定在左栏，其余模块按此顺序排右栏。所有模块和模块内实体都能增删与排序。</p>
         <div id="blk" class="blklist"></div>
         <label class="f">添加模块</label>
         <div style="display:flex;gap:6px">
@@ -328,6 +331,53 @@ class HaCarEditor extends HTMLElement {
     });
 
     this.shadowRoot.getElementById("blk").addEventListener("click", (e) => {
+      const add = e.target.closest("[data-biadd]");
+      if (add) {
+        const i = Number(add.dataset.biadd);
+        const blocks = (this._config.blocks || []).slice();
+        const b = blocks[i];
+        if (!b) return;
+        const items = this._blockItems(b).map((x) => Object.assign({}, x));
+        items.push({ slot: "", entity: "", label: "", unit: "", icon: "" });
+        blocks[i] = Object.assign({}, b, { items });
+        this._config.blocks = blocks;
+        this._openBk.add(String(i));
+        this._renderBlocks();
+        this._emit();
+        return;
+      }
+      const mv = e.target.closest("[data-bimv]");
+      if (mv) {
+        const i = Number(mv.dataset.bi);
+        const j = Number(mv.dataset.bj);
+        const blocks = (this._config.blocks || []).slice();
+        const b = blocks[i];
+        if (!b) return;
+        const items = this._blockItems(b).map((x) => Object.assign({}, x));
+        const act = mv.dataset.bimv;
+        if (act === "up" && j > 0) [items[j - 1], items[j]] = [items[j], items[j - 1]];
+        else if (act === "dn" && j < items.length - 1) [items[j + 1], items[j]] = [items[j], items[j + 1]];
+        blocks[i] = Object.assign({}, b, { items });
+        this._config.blocks = blocks;
+        this._renderBlocks();
+        this._emit();
+        return;
+      }
+      const clr = e.target.closest("[data-bicl]");
+      if (clr) {
+        const i = Number(clr.dataset.bicl);
+        const j = Number(clr.dataset.bj);
+        const blocks = (this._config.blocks || []).slice();
+        const b = blocks[i];
+        if (!b) return;
+        const items = this._blockItems(b).map((x) => Object.assign({}, x));
+        items.splice(j, 1);
+        blocks[i] = Object.assign({}, b, { items });
+        this._config.blocks = blocks;
+        this._renderBlocks();
+        this._emit();
+        return;
+      }
       const btn = e.target.closest("[data-bk]");
       if (!btn) return;
       const i = Number(btn.dataset.i);
@@ -343,7 +393,21 @@ class HaCarEditor extends HTMLElement {
       this._emit();
     });
 
-    this.shadowRoot.getElementById("blk").addEventListener("input", (e) => {
+    this.shadowRoot.getElementById("blk").addEventListener("change", (e) => {
+      const lab = e.target.closest("[data-bilab]");
+      if (lab) {
+        const [i, j] = lab.dataset.bilab.split(":").map(Number);
+        const blocks = (this._config.blocks || []).slice();
+        const b = blocks[i];
+        if (!b) return;
+        const items = this._blockItems(b).map((x) => Object.assign({}, x));
+        if (!items[j]) return;
+        items[j] = Object.assign({}, items[j], { label: lab.value.trim() });
+        blocks[i] = Object.assign({}, b, { items });
+        this._config.blocks = blocks;
+        this._emit();
+        return;
+      }
       const tEl = e.target.closest("[data-bf]");
       if (!tEl) return;
       const i = Number(tEl.dataset.i);
@@ -364,21 +428,45 @@ class HaCarEditor extends HTMLElement {
     ).join("");
   }
 
+  _blockItems(b) {
+    if (Array.isArray(b.items)) return b.items;
+    if (b.type === "custom" && (b.entity || b.label || b.icon)) {
+      return [{ slot: "", entity: b.entity, label: b.label, unit: b.unit, icon: b.icon }];
+    }
+    return defaultItems(b.type);
+  }
+
+  _itemLabel(it) {
+    if (it.label) return it.label;
+    if (it.slot && ITEM_DEFS[it.slot]) return ITEM_DEFS[it.slot].zh;
+    return "实体";
+  }
+
   _renderBlocks() {
     const host = this.shadowRoot.getElementById("blk");
     if (!host) return;
     const blocks = this._config.blocks || [];
     const rows = blocks.map((b, i) => {
-      const nm = `${BLOCK_LABELS[b.type] || b.type}${b.entity ? " · " + b.entity : ""}`;
+      const nm = BLOCK_LABELS[b.type] || b.type;
       const off = b.on === false ? " off" : "";
-      const entSel = b.type === "custom"
-        ? `<div class="bk-sub">
-            <div class="pick" data-bkpick="${i}"></div>
-            <button class="btn sq clr" data-bkclr="${i}" type="button" title="清空实体" aria-label="清空实体">✕</button>
-            <input class="tf" data-bf="label" data-i="${i}" value="${esc(b.label || "")}" placeholder="显示名称" style="flex:1 1 90px">
-            <input class="tf" data-bf="unit" data-i="${i}" value="${esc(b.unit || "")}" placeholder="单位" style="flex:0 0 62px">
-          </div>`
-        : "";
+      const its = this._blockItems(b);
+      const itemRows = its
+        .map((it, j) => {
+          const label = this._itemLabel(it);
+          const free = !it.slot;
+          return `<div class="birow">
+            <div class="bih">
+              ${free
+                ? `<input class="tf bil" data-bilab="${i}:${j}" value="${esc(it.label || "")}" placeholder="显示名称">`
+                : `<span class="bil">${esc(label)}</span>`}
+              <button class="btn sq" data-bimv="up" data-bi="${i}" data-bj="${j}" type="button">↑</button>
+              <button class="btn sq" data-bimv="dn" data-bi="${i}" data-bj="${j}" type="button">↓</button>
+              <button class="btn sq clr" data-bicl="${i}" data-bj="${j}" type="button" title="移除实体" aria-label="移除实体">✕</button>
+            </div>
+            <div class="pick" data-bipick="${i}:${j}"></div>
+          </div>`;
+        })
+        .join("");
       return `<div class="blkrow${off}">
         <div class="bk-top">
           <button class="btn sq" data-bk="up" data-i="${i}" type="button">↑</button>
@@ -387,25 +475,52 @@ class HaCarEditor extends HTMLElement {
           <button class="sw" data-bk="on" data-i="${i}" role="switch" aria-checked="${b.on !== false}"></button>
           <button class="btn sq del" data-bk="del" data-i="${i}" type="button">✕</button>
         </div>
-        ${entSel}
+        <details class="bk-items" data-bdet="${i}"${this._openBk.has(String(i)) ? " open" : ""}>
+          <summary>${L.items} · ${its.length}</summary>
+          <div class="bitems">${itemRows}
+            <button class="btn addbi" data-biadd="${i}" type="button">+ ${L.addEntity}</button>
+          </div>
+        </details>
       </div>`;
     });
     host.innerHTML = rows.join("") || `<p class="hint">还没有模块，从下面添加。</p>`;
     blocks.forEach((b, i) => {
-      if (b.type !== "custom") return;
-      const h = host.querySelector(`[data-bkpick="${i}"]`);
-      if (h) this._mountPicker(h, b.entity, (v) => this._setBlockField(i, "entity", v));
+      this._blockItems(b).forEach((it, j) => {
+        const h = host.querySelector(`[data-bipick="${i}:${j}"]`);
+        if (!h) return;
+        const val = it.entity || (it.slot ? (this._config.entities || {})[it.slot] : "") || "";
+        this._mountPicker(h, val, (v) => this._setBlockItem(i, j, v), it.slot ? "自动识别" : "");
+      });
+    });
+    host.querySelectorAll("details.bk-items").forEach((d) => {
+      d.addEventListener("toggle", () => {
+        const k = d.dataset.bdet;
+        if (d.open) this._openBk.add(k);
+        else this._openBk.delete(k);
+      });
     });
   }
 
-  _mountPicker(host, value, onPick) {
+  _setBlockItem(i, j, value) {
+    const blocks = (this._config.blocks || []).slice();
+    const b = blocks[i];
+    if (!b) return;
+    const items = this._blockItems(b).map((x) => Object.assign({}, x));
+    if (!items[j]) return;
+    items[j] = Object.assign({}, items[j], { entity: value });
+    blocks[i] = Object.assign({}, b, { items });
+    this._config.blocks = blocks;
+    this._emit();
+  }
+
+  _mountPicker(host, value, onPick, placeholder) {
     let p = host.querySelector("ha-selector");
     if (!customElements.get("ha-selector")) {
       let inp = host.querySelector("input");
       if (!inp) {
         inp = document.createElement("input");
         inp.className = "tf";
-        inp.placeholder = "entity_id";
+        inp.placeholder = placeholder || "entity_id";
         inp.addEventListener("input", () => onPick(inp.value.trim()));
         host.appendChild(inp);
       }
@@ -423,6 +538,7 @@ class HaCarEditor extends HTMLElement {
     }
     p.hass = this._hass;
     p.selector = { entity: {} };
+    if (placeholder) p.placeholder = placeholder;
     if (p.value !== (value || undefined)) p.value = value || undefined;
   }
 

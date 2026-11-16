@@ -13,6 +13,75 @@ const FORD_LOGO = `<span class="brand" aria-hidden="true"><svg viewBox="0 0 44 2
 const MODULES = ["status", "actions", "energy", "tires", "doors", "charging", "alerts", "service"];
 // 可自由排序/增删的模块类型（blocks）
 const BLOCK_TYPES = ["meta", "hero", "energy", "alerts", "doors", "charging", "service", "actions", "custom"];
+
+// 模块内实体项：slot 表示内置语义槽位（自动绑定），entity 表示手动指定。
+// 每个模块的 items 可在编辑器里增删与排序，卡片按 items 顺序渲染。
+export const ITEM_DEFS = {
+  addr: { zh: "定位地址", en: "Location", icon: "pin", kind: "location" },
+  sync: { zh: "云端同步", en: "Cloud sync", icon: "refresh", kind: "sync" },
+  image: { zh: "车辆图片", en: "Vehicle image", icon: "car", kind: "image" },
+  fuel: { zh: "燃油", en: "Fuel", icon: "fuel", kind: "pct", full: 620 },
+  battery: { zh: "电量", en: "Battery", icon: "bolt", kind: "pct", full: 100 },
+  range: { zh: "续航", en: "Range", icon: "gauge", kind: "range", full: 620 },
+  ev_range: { zh: "纯电续航", en: "EV range", icon: "gauge", kind: "range", full: 500 },
+  odo: { zh: "总里程", en: "Odometer", icon: "gauge", kind: "odo" },
+  volt: { zh: "蓄电池", en: "12V battery", icon: "bolt", kind: "stat" },
+  oil: { zh: "机油寿命", en: "Oil life", icon: "wrench", kind: "stat" },
+  alerts: { zh: "车辆告警", en: "Alerts", icon: "warning", kind: "alert" },
+  door_fl: { zh: "主驾门", en: "Driver door", icon: "cardoor", kind: "door" },
+  door_fr: { zh: "副驾门", en: "Front door", icon: "cardoor", kind: "door" },
+  door_rl: { zh: "左后门", en: "Rear L door", icon: "cardoor", kind: "door" },
+  door_rr: { zh: "右后门", en: "Rear R door", icon: "cardoor", kind: "door" },
+  win_fl: { zh: "主驾车窗", en: "Driver window", icon: "carwin", kind: "door" },
+  win_fr: { zh: "副驾车窗", en: "Front window", icon: "carwin", kind: "door" },
+  win_rl: { zh: "左后车窗", en: "Rear L window", icon: "carwin", kind: "door" },
+  win_rr: { zh: "右后车窗", en: "Rear R window", icon: "carwin", kind: "door" },
+  hood: { zh: "引擎盖", en: "Hood", icon: "engine", kind: "cap" },
+  tailgate: { zh: "尾门", en: "Tailgate", icon: "trunk", kind: "cap" },
+  tp_lf: { zh: "左前胎压", en: "LF tire", icon: "tire", kind: "tire" },
+  tp_rf: { zh: "右前胎压", en: "RF tire", icon: "tire", kind: "tire" },
+  tp_lr: { zh: "左后胎压", en: "LR tire", icon: "tire", kind: "tire" },
+  tp_rr: { zh: "右后胎压", en: "RR tire", icon: "tire", kind: "tire" },
+  chg_status: { zh: "充电状态", en: "Charge status", icon: "bolt", kind: "text" },
+  last_soc: { zh: "上次电量", en: "Last SOC", icon: "bolt", kind: "stat" },
+  chg_start: { zh: "开始充电", en: "Start charge", icon: "bolt", kind: "action" },
+  chg_stop: { zh: "停止充电", en: "Stop charge", icon: "bolt", kind: "action" },
+  wallbox: { zh: "家充桩", en: "Wallbox", icon: "bolt", kind: "action" },
+  maint: { zh: "保养计划", en: "Maintenance", icon: "wrench", kind: "service" },
+  recall: { zh: "召回信息", en: "Recall", icon: "bell", kind: "service" },
+  messages: { zh: "未读消息", en: "Messages", icon: "bell", kind: "service" },
+  fw: { zh: "固件升级", en: "Firmware", icon: "refresh", kind: "service" },
+  support: { zh: "客服电话", en: "Support", icon: "bell", kind: "service" },
+  btn_unlock: { zh: "开锁", en: "Unlock", icon: "unlock", kind: "action" },
+  btn_lock: { zh: "上锁", en: "Lock", icon: "lock", kind: "action" },
+  sw_engine: { zh: "远程启动/熄火", en: "Engine", icon: "power", kind: "action" },
+  sw_honk: { zh: "鸣笛寻车", en: "Honk", icon: "megaphone", kind: "action" },
+  sw_va: { zh: "声光寻车", en: "Sound & light", icon: "speaker", kind: "action" },
+  sw_light: { zh: "灯光寻车", en: "Light find", icon: "bulb", kind: "action" },
+  honk_duration: { zh: "寻车时长", en: "Honk duration", icon: "bell", kind: "select" },
+  chirp_type: { zh: "寻车类型", en: "Honk type", icon: "speaker", kind: "select" },
+};
+
+export const DEFAULT_ITEMS = {
+  meta: [{ slot: "addr" }, { slot: "sync" }],
+  hero: [{ slot: "image" }],
+  energy: ["fuel", "battery", "range", "odo", "volt", "oil"],
+  alerts: ["alerts"],
+  doors: [
+    "door_fl", "door_fr", "door_rl", "door_rr",
+    "win_fl", "win_fr", "win_rl", "win_rr",
+    "hood", "tailgate", "tp_lf", "tp_rf", "tp_lr", "tp_rr",
+  ],
+  charging: ["chg_status", "battery", "last_soc", "chg_start", "chg_stop", "wallbox"],
+  service: ["maint", "recall", "messages", "fw", "support"],
+  actions: ["btn_unlock", "btn_lock", "sw_engine", "sw_honk", "honk_duration", "chirp_type"],
+  custom: [],
+};
+
+// 静态默认项（编辑器用）：energy 同时列出燃油/电量，实际渲染时缺失的会自动跳过
+export function defaultItems(type) {
+  return (DEFAULT_ITEMS[type] || []).map((x) => (typeof x === "string" ? { slot: x } : Object.assign({}, x)));
+}
 const CONFIRMABLE = [
   "btn_unlock",
   "btn_lock",
@@ -105,6 +174,19 @@ export function normBlocks(cfg) {
         label: typeof b.label === "string" ? b.label : "",
         unit: typeof b.unit === "string" ? b.unit : "",
         icon: typeof b.icon === "string" ? b.icon : "",
+        ...(Array.isArray(b.items)
+          ? {
+              items: b.items
+                .filter((it) => it && typeof it === "object")
+                .map((it) => ({
+                  slot: typeof it.slot === "string" ? it.slot : "",
+                  entity: typeof it.entity === "string" ? it.entity : "",
+                  label: typeof it.label === "string" ? it.label : "",
+                  unit: typeof it.unit === "string" ? it.unit : "",
+                  icon: typeof it.icon === "string" ? it.icon : "",
+                })),
+            }
+          : {}),
       }));
     return list;
   }
@@ -774,6 +856,87 @@ class HaCarCard extends HTMLElement {
 
   // ---------- 卡片主体 ----------
 
+  // ---------- 模块内实体项 ----------
+  _items(b) {
+    if (Array.isArray(b.items)) return b.items;
+    if (b.type === "custom" && (b.entity || b.label || b.icon)) {
+      return [{ slot: "", entity: b.entity, label: b.label, unit: b.unit, icon: b.icon }];
+    }
+    return defaultItems(b.type);
+  }
+
+  _itemEnt(it, data) {
+    if (it.entity) return it.entity;
+    return it.slot ? data.id(it.slot) : "";
+  }
+
+  _itemState(it, data) {
+    const ent = this._itemEnt(it, data);
+    return ent && this._hass && this._hass.states[ent] ? this._hass.states[ent] : null;
+  }
+
+  _itemDef(it) {
+    return it.slot ? ITEM_DEFS[it.slot] || null : null;
+  }
+
+  _itemLabel(it, def, t) {
+    if (it.label) return it.label;
+    if (def) return isEn(this._hass) ? def.en : def.zh;
+    const ent = it.entity || "";
+    return ent ? ent.split(".").slice(-1)[0].replace(/_/g, " ") : (t.custom || (isEn(this._hass) ? "Entity" : "实体"));
+  }
+
+  _itemIcon(it, def) {
+    if (it.icon && ICON_NAMES.includes(it.icon)) return it.icon;
+    return def && ICON_NAMES.includes(def.icon) ? def.icon : "bolt";
+  }
+
+  _itemText(it, data, t) {
+    const def = this._itemDef(it);
+    const st = this._itemState(it, data);
+    const label = this._itemLabel(it, def, t);
+    if (!st) return { label, value: null, unit: "", st: null, def, labelText: label };
+    if (isBad(st)) return { label, value: "—", unit: "", st, def, labelText: label };
+    let raw = String(st.state);
+    const unit = it.unit || attrs(st, "unit_of_measurement") || "";
+    if (def && def.kind === "tire") {
+      const n = num(st);
+      return { label, value: n == null ? "—" : fmtNum(n), unit: unit || "kPa", st, def, labelText: label };
+    }
+    if (/^on|off$/i.test(raw)) {
+      raw = raw.toLowerCase() === "on" ? (isEn(this._hass) ? "On" : "开") : (isEn(this._hass) ? "Off" : "关");
+    }
+    if (def && def.kind === "pct") {
+      const n = num(st);
+      if (n != null) return { label, value: String(Math.round(n)), unit: unit || "%", st, def, labelText: label };
+    }
+    return { label, value: raw, unit, st, def, labelText: label };
+  }
+
+  // 用户对「门窗」模块显式增删过实体时，俯视状态层同步隐藏被删的门/窗/盖/胎压
+  _slotAllowed(slot) {
+    const db = (this._config.blocks || []).find((b) => b.type === "doors" && b.on !== false);
+    if (!db || !Array.isArray(db.items)) return true;
+    return db.items.some((it) => it.slot === slot);
+  }
+
+  _extraChips(b, data, t, skipKinds) {
+    const items = this._items(b).filter((it) => {
+      const def = this._itemDef(it);
+      const kind = def ? def.kind : "custom";
+      return !(skipKinds || []).includes(kind);
+    });
+    const chips = [];
+    for (const it of items) {
+      const v = this._itemText(it, data, t);
+      if (!v.st) continue;
+      const def = v.def;
+      chips.push(`<span class="door" data-more="${esc(this._itemEnt(it, data))}">${icon(this._itemIcon(it, def))}` +
+        `<span class="addr">${esc(v.label)} · ${esc(v.value)}${v.unit ? " " + esc(v.unit) : ""}</span></span>`);
+    }
+    return chips.length ? `<div class="doors">${chips.join("")}</div>` : "";
+  }
+
   _body(data, twoCol) {
     const cfg = this._config;
     const t = dict(this._hass);
@@ -829,58 +992,61 @@ class HaCarCard extends HTMLElement {
       let html = "";
       switch (b.type) {
         case "meta": {
-          const locH = compact ? "" : this._location(data, t, b.entity);
-          const syncH = this._baseline(data, t);
-          if (locH || syncH) html = `<div class="b-meta"><div class="hmeta">${locH}${syncH}</div></div>`;
+          const locH = compact ? "" : this._metaLocation(b, data, t);
+          const syncH = this._baseline(data, t, b);
+          const extra = this._extraChips(b, data, t, ["location", "sync"]);
+          if (locH || syncH || extra) html = `<div class="b-meta"><div class="hmeta">${locH}${syncH}</div>${extra}</div>`;
           break;
         }
         case "hero":
           html = `<div class="blk b-hero">${this._hero(
-            this._imgFrom(b.entity, hero.src),
+            this._imgFrom(this._heroImageEnt(b, data), hero.src),
             hero.fb,
             this._carOverlay(data, t, mods, running),
             running,
-          )}</div>`;
+          )}${this._extraChips(b, data, t, ["image"])}</div>`;
           break;
         case "energy": {
-          const en = this._energy(data, t);
+          const en = this._energy(data, t, b);
           if (en) html = `<div class="blk b-energy">${en}</div>`;
           break;
         }
         case "alerts": {
-          const al = this._alert(data, t);
+          const al = this._alerts(data, t, b);
           if (al) html = `<div class="blk b-alerts">${al}</div>`;
           break;
         }
         case "doors": {
           if (!compact) {
-            const dr = this._doors(data, t);
+            const dr = this._doors(data, t, b);
             if (dr) html = `<div class="blk b-doors">${dr}</div>`;
           }
           break;
         }
         case "charging": {
           if (!compact) {
-            const ch = this._charging(data, t, chgNow);
+            const ch = this._charging(data, t, chgNow, b);
             if (ch) html = `<div class="blk b-charging">${ch}</div>`;
           }
           break;
         }
         case "service": {
           if (!compact) {
-            const sv = this._service(data, t);
+            const sv = this._service(data, t, b);
             if (sv) html = `<div class="blk b-service">${sv}</div>`;
           }
           break;
         }
         case "actions": {
-          const ac = this._actions(data, t, running, offline, compact);
+          const ac = this._actions(data, t, running, offline, compact, b);
           if (ac) html = `<div class="blk b-actions">${ac}</div>`;
           break;
         }
-        case "custom":
-          html = this._customBlock(b, t);
+        case "custom": {
+          const cu = this._customBlock(b, t, data);
+          if (cu) html = `<div class="blk b-custom">${cu}</div>`;
           break;
+        }
         default:
           break;
       }
@@ -939,6 +1105,7 @@ class HaCarCard extends HTMLElement {
     const lockedRaw = text(data.get("lock") || {});
     const locked = /锁|lock/i.test(lockedRaw) && !/未|解|unlock/i.test(lockedRaw);
     const tireLine = (slot, sslot, unitFallback) => {
+      if (!this._slotAllowed(slot)) return null;
       const st = data.get(slot);
       if (!st) return null;
       const v = num(st);
@@ -973,6 +1140,7 @@ class HaCarCard extends HTMLElement {
       let bad = false;
       if (doors) {
         for (const [ic, slot] of [["carwin", dSlots[1]], ["cardoor", dSlots[0]]]) {
+          if (!this._slotAllowed(slot)) continue;
           const st = data.get(slot);
           if (!st) continue;
           const b = isBad(st);
@@ -995,6 +1163,7 @@ class HaCarCard extends HTMLElement {
       );
     }
     const cap = (cls, label, slot, ic) => {
+      if (!this._slotAllowed(slot)) return;
       const st = data.get(slot);
       if (!st) return;
       const b = isBad(st);
@@ -1225,7 +1394,9 @@ class HaCarCard extends HTMLElement {
   }
 
   // 底座条：四轮胎压 + 同步（同步入口就是刷新按钮）
-  _baseline(data, t) {
+  _baseline(data, t, b) {
+    const show = !b || this._items(b).some((it) => it.slot === "sync");
+    if (!show) return "";
     const sync = this._syncChip(data, t);
     return sync ? `<div class="baseline solo">${sync}</div>` : "";
   }
@@ -1285,49 +1456,58 @@ class HaCarCard extends HTMLElement {
     return pic("image_overlook") || pic("image_3d") || pic("image_side") || { src: null, fb: null };
   }
 
-  _energy(data, t) {
-    const fuel = num(data.get("fuel"));
-    const batt = num(data.get("battery"));
-    const pct = batt != null ? batt : fuel;
-    const pctLabel = batt != null ? t.battery : t.fuel;
-    const pctIc = batt != null ? "bolt" : "fuel";
-    const range = num(data.get("range")) != null ? num(data.get("range")) : num(data.get("ev_range"));
-    const rangeUnit = attrs(data.get("range"), "unit_of_measurement") || "km";
-    const odo = num(data.get("odo"));
-    const odoUnit = attrs(data.get("odo"), "unit_of_measurement") || "km";
-    const volt = num(data.get("volt"));
-    const oil = num(data.get("oil"));
+  _metaLocation(b, data, t) {
+    const it = this._items(b).find((x) => {
+      const def = this._itemDef(x);
+      return def && def.kind === "location";
+    });
+    if (!it) return "";
+    return this._location(data, t, it.entity || "");
+  }
 
-    if (pct == null && range == null && odo == null) return "";
+  _heroImageEnt(b, _data) {
+    const it = this._items(b).find((x) => {
+      const def = this._itemDef(x);
+      return def && def.kind === "image";
+    });
+    return it ? it.entity || "" : "";
+  }
 
-    // 续航环的满量程只是视觉参考（汽油 ~620km / 纯电 ~500km），不做任何数据推断
-    const left =
-      pct == null
-        ? ""
-        : this._gauge({ pct: clamp(pct, 2, 100), label: pctLabel, value: Math.round(pct), unit: "%", ic: pctIc });
-    const right =
-      range != null
-        ? this._gauge({
-            pct: clamp((range / (batt != null ? 500 : 620)) * 100, 2, 100),
-            label: t.range,
-            value: fmtNum(range),
-            unit: rangeUnit,
-            ic: "gauge",
-          })
-        : this._gauge({ pct: 100, label: t.odo, value: fmtNum(odo), unit: odoUnit, ic: "gauge" });
-
+  _energy(data, t, b) {
+    const items = this._items(b);
+    const gauges = [];
     const stats = [];
-    if (odo != null && range != null) {
-      stats.push(`<span class="sstat"><i>${esc(t.odo)}</i><b>${fmtNum(odo)}</b><span>${esc(odoUnit)}</span></span>`);
+    for (const it of items) {
+      const def = this._itemDef(it);
+      const st = this._itemState(it, data);
+      if (!st) continue;
+      const label = this._itemLabel(it, def, t);
+      const ent = this._itemEnt(it, data);
+      const unit = attrs(st, "unit_of_measurement") || it.unit || "";
+      const numv = num(st);
+      const kind = def ? def.kind : "stat";
+      if ((kind === "pct" || kind === "range" || kind === "odo") && gauges.length < 2 && numv != null) {
+        const full = def && def.full ? def.full : 1000;
+        const pct = kind === "pct" ? clamp(numv, 2, 100) : clamp((numv / full) * 100, 2, 100);
+        gauges.push(
+          this._gauge({
+            pct,
+            label,
+            value: kind === "pct" ? Math.round(numv) : fmtNum(numv),
+            unit: kind === "pct" ? "%" : unit || "km",
+            ic: this._itemIcon(it, def),
+          }),
+        );
+        continue;
+      }
+      if (numv == null && kind !== "stat") continue;
+      stats.push(
+        `<span class="sstat" data-more="${esc(ent)}"><i>${esc(label)}</i>` +
+          `<b>${numv == null ? esc(String(st.state)) : fmtNum(numv)}</b><span>${esc(unit)}</span></span>`,
+      );
     }
-    if (volt != null) {
-      stats.push(`<span class="sstat"><i>${esc(t.volt)}</i><b>${fmtNum(volt, 1)}</b><span>V</span></span>`);
-    }
-    if (oil != null) {
-      stats.push(`<span class="sstat"><i>${esc(t.oil)}</i><b>${Math.round(oil)}</b><span>%</span></span>`);
-    }
-
-    return `<div class="energy">${left}${left ? `<span class="egdiv"></span>` : ""}${right}</div>
+    if (!gauges.length && !stats.length) return "";
+    return `${gauges.length ? `<div class="energy">${gauges.join(`<span class="egdiv"></span>`)}</div>` : ""}
       ${stats.length ? `<div class="substats">${stats.join("")}</div>` : ""}`;
   }
 
@@ -1347,56 +1527,74 @@ class HaCarCard extends HTMLElement {
     </div>`;
   }
 
-  _actions(data, t, running, offline, compact) {
+  _actions(data, t, running, offline, compact, b) {
     const cfg = this._config;
     const tiles = [];
+    const pills = [];
     const hold = (key) => (cfg.confirm.includes(key) ? ' data-hold="1"' : "");
-
     const lockNorm = normLock(data.get("lock"));
 
-    // 开锁 / 关锁固定并列（不再按当前锁态切换，也不占用后备箱位）
-    if (data.id("btn_unlock")) {
-      tiles.push(this._tile({
-        key: "btn_unlock", ent: data.id("btn_unlock"), ic: "unlock", label: t.unlock,
-        cls: lockNorm === "unlocked" ? "hot" : "",
-        dom: "button", svc: "press", hold, offline,
-      }));
-    }
-    if (data.id("btn_lock")) {
-      tiles.push(this._tile({
-        key: "btn_lock", ent: data.id("btn_lock"), ic: "lock", label: t.lockDown,
-        cls: lockNorm === "locked" ? "on" : "",
-        dom: "button", svc: "press", hold, offline,
-      }));
-    }
-    if (data.id("sw_engine")) {
-      tiles.push(this._tile({
-        key: "sw_engine", ent: data.id("sw_engine"), ic: "power",
-        cls: running ? "on" : "",
-        label: running ? t.engineStop : t.engine,
-        dom: "homeassistant", svc: "toggle", hold, offline,
-      }));
-    }
-    if (data.id("sw_honk")) {
-      tiles.push(this._tile({
-        key: "sw_honk", ent: data.id("sw_honk"), ic: "megaphone", label: t.honk,
-        dom: "homeassistant", svc: "toggle", hold, offline,
-      }));
-    }
-
-    const pills = [];
-    if (!compact) {
-      // 寻车时长 / 寻车类型：直接绑定集成的 select 实体，点了选值即生效
-      const durEnt = data.id("honk_duration");
-      const typeEnt = data.id("chirp_type");
-      if (durEnt) pills.push(this._selectPill({ key: "honk_duration", ent: durEnt, label: t.soundDur }));
-      else if (data.id("sw_va")) {
-        pills.push(this._pill({ key: "sw_va", ent: data.id("sw_va"), ic: "speaker", label: t.soundLight, dom: "homeassistant", svc: "toggle", hold, offline }));
+    for (const it of this._items(b)) {
+      const def = this._itemDef(it);
+      const ent = this._itemEnt(it, data);
+      const st = this._itemState(it, data);
+      if (!ent || !st) continue;
+      const kind = def ? def.kind : ent.split(".")[0];
+      if (kind === "select") {
+        if (!compact) pills.push(this._selectPill({ key: it.slot || ent, ent, label: this._itemLabel(it, def, t) }));
+        continue;
       }
-      if (typeEnt) pills.push(this._selectPill({ key: "chirp_type", ent: typeEnt, label: t.soundType }));
-      else if (data.id("sw_light")) {
-        pills.push(this._pill({ key: "sw_light", ent: data.id("sw_light"), ic: "bulb", label: t.light, dom: "homeassistant", svc: "toggle", hold, offline }));
+      const slot = it.slot || "";
+      if (slot === "sw_va" || slot === "sw_light") {
+        if (!compact) {
+          pills.push(this._pill({
+            key: slot, ent, ic: this._itemIcon(it, def), label: this._itemLabel(it, def, t),
+            dom: "homeassistant", svc: "toggle", hold, offline,
+          }));
+        }
+        continue;
       }
+      let label = this._itemLabel(it, def, t);
+      let ic = this._itemIcon(it, def);
+      let cls = "";
+      let dom = "homeassistant";
+      let svc = "toggle";
+      if (slot === "btn_unlock") {
+        label = it.label || t.unlock;
+        ic = "unlock";
+        dom = "button";
+        svc = "press";
+        cls = lockNorm === "unlocked" ? "hot" : "";
+      } else if (slot === "btn_lock") {
+        label = it.label || t.lockDown;
+        ic = "lock";
+        dom = "button";
+        svc = "press";
+        cls = lockNorm === "locked" ? "on" : "";
+      } else if (slot === "sw_engine") {
+        label = it.label || (running ? t.engineStop : t.engine);
+        ic = "power";
+        cls = running ? "on" : "";
+      } else if (slot === "sw_honk") {
+        label = it.label || t.honk;
+        ic = "megaphone";
+      } else if (!def) {
+        const dom0 = ent.split(".")[0];
+        if (dom0 === "button" || dom0 === "input_button") {
+          dom = "button";
+          svc = "press";
+        } else if (dom0 === "scene" || dom0 === "script") {
+          dom = dom0;
+          svc = "turn_on";
+        } else if (dom0 === "select") {
+          if (compact) continue;
+          pills.push(this._selectPill({ key: ent, ent, label }));
+          continue;
+        }
+      }
+      tiles.push(this._tile({
+        key: slot || ent, ent, ic, label, cls, dom, svc, hold, offline,
+      }));
     }
 
     if (!tiles.length && !pills.length) return "";
@@ -1443,22 +1641,20 @@ class HaCarCard extends HTMLElement {
   }
 
   // 自定义实体模块：任意实体按顺序排进版式
-  _customBlock(b, t) {
-    const ent = b.entity;
-    if (!ent) return "";
-    const label = b.label || (ent ? ent.split(".").slice(-1)[0].replace(/_/g, " ") : t.custom || "自定义");
-    const st = ent && this._hass && this._hass.states[ent] ? this._hass.states[ent] : null;
-    let value = "—";
-    let unit = b.unit || "";
-    if (st) {
-      const raw = String(st.state);
-      value = isBad(st) ? "—" : raw;
-      if (!unit && st.attributes && st.attributes.unit_of_measurement) unit = st.attributes.unit_of_measurement;
-      if (/^on|off$/i.test(raw)) value = raw.toLowerCase() === "on" ? (isEn(this._hass) ? "On" : "开") : (isEn(this._hass) ? "Off" : "关");
+  _customBlock(b, t, data) {
+    const rows = [];
+    for (const it of this._items(b)) {
+      const ent = this._itemEnt(it, data);
+      if (!ent) continue;
+      const def = this._itemDef(it);
+      const v = this._itemText(it, data, t);
+      if (!v.st) continue;
+      const label = v.labelText;
+      const ic = this._itemIcon(it, def);
+      rows.push(`<div class="cblock" data-more="${esc(ent)}">${icon(ic)}<span class="cl">${esc(label)}</span>
+        <b>${esc(v.value)}</b>${v.unit ? `<i>${esc(v.unit)}</i>` : ""}</div>`);
     }
-    const ic = ICON_NAMES.includes(b.icon) ? b.icon : "bolt";
-    return `<div class="blk b-custom"><div class="cblock">${icon(ic)}<span class="cl">${esc(label)}</span>
-      <b>${esc(value)}</b>${unit ? `<i>${esc(unit)}</i>` : ""}</div></div>`;
+    return rows.join("");
   }
 
   _tires(data, _t) {
@@ -1482,92 +1678,116 @@ class HaCarCard extends HTMLElement {
     return `<div class="tread">${cells.join("")}</div>`;
   }
 
-  _doors(data, t) {
-    const defs = [
-      { slot: "door_fl", label: isEn(this._hass) ? "Front L" : "主驾门" },
-      { slot: "door_fr", label: isEn(this._hass) ? "Front R" : "副驾门" },
-      { slot: "door_rl", label: isEn(this._hass) ? "Rear L" : "左后门" },
-      { slot: "door_rr", label: isEn(this._hass) ? "Rear R" : "右后门" },
-      { slot: "tailgate", label: isEn(this._hass) ? "Trunk" : "尾门" },
-      { slot: "hood", label: isEn(this._hass) ? "Hood" : "引擎盖" },
-      { slot: "win_fl", label: isEn(this._hass) ? "Win L" : "主驾车窗" },
-      { slot: "win_fr", label: isEn(this._hass) ? "Win R" : "副驾车窗" },
-    ];
-    const open = [];
-    let known = 0;
-    for (const d of defs) {
-      const st = data.get(d.slot);
+  _doors(data, t, b) {
+    const chips = [];
+    for (const it of this._items(b)) {
+      const def = this._itemDef(it);
+      const st = this._itemState(it, data);
       if (!st) continue;
-      known += 1;
-      if (normOpen(st) === "open") open.push(d);
+      const label = this._itemLabel(it, def, t);
+      const kind = def ? def.kind : "custom";
+      if (kind === "door" || kind === "cap") {
+        if (isBad(st)) continue;
+        if (normOpen(st) !== "open") continue;
+        chips.push(`<span class="door open" data-more="${esc(this._itemEnt(it, data))}">${icon(this._itemIcon(it, def))}${esc(label)} · ${esc(t.open)}</span>`);
+      } else if (kind === "tire") {
+        const v = num(st);
+        if (v == null) continue;
+        const warn = v < 190 || v > 300;
+        chips.push(`<span class="door${warn ? " open" : ""}" data-more="${esc(this._itemEnt(it, data))}">${icon(this._itemIcon(it, def))}${esc(label)} · ${fmtNum(v)} ${esc(attrs(st, "unit_of_measurement") || "kPa")}</span>`);
+      } else {
+        const v = this._itemText(it, data, t);
+        if (!v.value) continue;
+        chips.push(`<span class="door" data-more="${esc(this._itemEnt(it, data))}">${icon(this._itemIcon(it, def))}${esc(label)} · ${esc(v.value)}${v.unit ? " " + esc(v.unit) : ""}</span>`);
+      }
     }
-    if (!known) return "";
-    if (!open.length) return "";
-    return `<div class="doors">${open
-      .map((d) => `<span class="door open" data-more="${esc(data.id(d.slot))}">${icon("carProfile")}${esc(d.label)} · ${esc(t.open)}</span>`)
-      .join("")}</div>`;
+    return chips.length ? `<div class="doors">${chips.join("")}</div>` : "";
   }
 
-  _alert(data, t) {
-    const st = data.get("alerts");
-    const raw = text(st);
-    if (!raw) return "";
-    if (String(raw).trim() === "0") return "";
-    const low = raw.toLowerCase();
-    if (low === "none" || low === "no" || low === "无" || low === "正常" || low === "no alerts") return "";
-    return `<div class="alert" data-more="${esc(data.id("alerts"))}">${icon("warning")}
-      <b>${esc(t.alert)}</b><span class="amsg">${esc(raw)}</span></div>`;
+  _alerts(data, t, b) {
+    const rows = [];
+    for (const it of this._items(b)) {
+      const def = this._itemDef(it);
+      const st = this._itemState(it, data);
+      if (!st) continue;
+      const label = this._itemLabel(it, def, t);
+      const raw = String(st.state || "").trim();
+      const empty =
+        !raw || raw === "0" || /^(none|no|无|正常|no alerts)$/i.test(raw);
+      if (empty) continue;
+      if (def && def.kind === "alert") {
+        rows.push(`<div class="alert" data-more="${esc(this._itemEnt(it, data))}">${icon("warning")}
+          <b>${esc(label)}</b><span class="amsg">${esc(raw)}</span></div>`);
+      } else {
+        rows.push(`<div class="alert" data-more="${esc(this._itemEnt(it, data))}">${icon(this._itemIcon(it, def))}
+          <b>${esc(label)}</b><span class="amsg">${esc(raw)}</span></div>`);
+      }
+    }
+    return rows.join("");
   }
 
-  _charging(data, t, chgNow) {
-    const st = data.get("chg_status");
-    const wallbox = data.get("wallbox");
-    if (!st && !data.id("chg_start")) return "";
-    const statusText = text(st) || (chgNow ? t.charging : t.notCharging);
-    const soc = num(data.get("battery"));
-    const last = num(data.get("last_soc"));
+  _charging(data, t, chgNow, b) {
+    const items = this._items(b);
+    const statusItem = items.find((it) => {
+      const def = this._itemDef(it);
+      return def && def.kind === "text";
+    });
+    const statusText = statusItem
+      ? (this._itemState(statusItem, data) ? String(this._itemState(statusItem, data).state) : "")
+      : (chgNow ? t.charging : "");
     const meta = [];
-    if (soc != null) meta.push(`${t.battery} ${Math.round(soc)}%`);
-    if (last != null) meta.push(`${t.lastSoc} ${Math.round(last)}%`);
-
     const btns = [];
-    if (data.id("chg_start")) {
-      btns.push(`<button class="mini" data-act="chg_start" data-ent="${esc(data.id("chg_start"))}"
-        data-dom="homeassistant" data-svc="turn_on" data-label="${esc(t.chargeNow)}">${esc(t.chargeNow)}</button>`);
+    for (const it of items) {
+      const def = this._itemDef(it);
+      const st = this._itemState(it, data);
+      if (!st || it === statusItem) continue;
+      const label = this._itemLabel(it, def, t);
+      const ent = this._itemEnt(it, data);
+      const kind = def ? def.kind : "custom";
+      if (kind === "action") {
+        if (it.slot === "chg_start") {
+          btns.push(`<button class="mini" data-act="chg_start" data-ent="${esc(ent)}"
+            data-dom="homeassistant" data-svc="turn_on" data-label="${esc(label)}">${esc(label)}</button>`);
+        } else if (it.slot === "chg_stop") {
+          btns.push(`<button class="mini dim" data-act="chg_stop" data-ent="${esc(ent)}"
+            data-dom="homeassistant" data-svc="turn_off" data-label="${esc(label)}">${esc(label)}</button>`);
+        } else if (it.slot === "wallbox") {
+          const on = String(st.state).toLowerCase() === "on";
+          btns.push(`<button class="mini${on ? "" : " dim"}" data-act="wallbox" data-ent="${esc(ent)}"
+            data-dom="homeassistant" data-svc="toggle" data-label="${esc(label)}">${esc(label)}</button>`);
+        } else {
+          const dom = ent.split(".")[0];
+          const svc = dom === "button" || dom === "input_button" ? "press" : dom === "scene" || dom === "script" ? "turn_on" : "toggle";
+          btns.push(`<button class="mini" data-act="${esc(ent)}" data-ent="${esc(ent)}"
+            data-dom="${esc(dom === "button" || dom === "input_button" ? "button" : dom === "scene" || dom === "script" ? dom : "homeassistant")}"
+            data-svc="${esc(svc)}" data-label="${esc(label)}">${esc(label)}</button>`);
+        }
+      } else {
+        const v = this._itemText(it, data, t);
+        if (!v.value) continue;
+        meta.push(`${label} ${v.value}${v.unit ? " " + v.unit : ""}`);
+      }
     }
-    if (data.id("chg_stop")) {
-      btns.push(`<button class="mini dim" data-act="chg_stop" data-ent="${esc(data.id("chg_stop"))}"
-        data-dom="homeassistant" data-svc="turn_off" data-label="${esc(t.stopCharge)}">${esc(t.stopCharge)}</button>`);
-    }
-    if (data.id("wallbox")) {
-      const on = String(wallbox.state).toLowerCase() === "on";
-      btns.push(`<button class="mini${on ? "" : " dim"}" data-act="wallbox"
-        data-ent="${esc(data.id("wallbox"))}" data-dom="homeassistant" data-svc="toggle"
-        data-label="${esc(t.chargeNow)}">${esc(on ? t.stopCharge : t.chargeNow)}</button>`);
-    }
-
+    if (!statusText && !meta.length && !btns.length) return "";
     return `<div class="panel"><div class="ph">${icon("bolt")}${esc(t.chargingTitle)}</div>
-      <div class="chgrow"><div><div class="st">${esc(statusText)}</div>
+      <div class="chgrow"><div><div class="st">${esc(statusText || t.notCharging)}</div>
       ${meta.length ? `<div class="meta">${esc(meta.join(" · "))}</div>` : ""}</div>
-      ${btns.length ? `<div style="display:flex;gap:6px">${btns.join("")}</div>` : ""}</div></div>`;
+      ${btns.length ? `<div style="display:flex;gap:6px;flex-wrap:wrap">${btns.join("")}</div>` : ""}</div></div>`;
   }
 
-  _service(data, t) {
+  _service(data, t, b) {
     const rows = [];
     const mask = Boolean(this._config.privacy);
-    const push = (label, slot, suffix) => {
-      const st = data.get(slot);
-      const raw = text(st);
-      if (!raw) return;
+    for (const it of this._items(b)) {
+      const def = this._itemDef(it);
+      const st = this._itemState(it, data);
+      if (!st) continue;
+      const label = this._itemLabel(it, def, t);
+      const raw = isBad(st) ? "—" : String(st.state);
       const v = mask ? maskText(raw) : raw;
-      rows.push({ label, value: suffix ? v + suffix : v, ent: data.id(slot) });
-    };
-    push(t.maintenance, "maint");
-    push(t.recallInfo, "recall");
-    push(t.messages, "messages", "");
-    push(t.firmware, "fw");
-    push(t.support, "support");
-
+      if (!v) continue;
+      rows.push({ label, value: v, ent: this._itemEnt(it, data) });
+    }
     if (!rows.length) return "";
     return `<details class="svc"><summary><span class="sum">${icon("wrench")}${esc(t.service)}</span>${icon("chevron")}</summary>
       ${rows
