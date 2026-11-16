@@ -193,7 +193,7 @@ export function normBlocks(cfg) {
   const mods = Array.isArray(cfg.modules) ? cfg.modules : MODULES;
   const list = [{ type: "meta", on: true }, { type: "hero", on: true }];
   if (mods.includes("energy")) list.push({ type: "energy", on: true });
-  if (mods.includes("doors")) list.push({ type: "doors", on: true });
+  if (mods.includes("doors")) list.push({ type: "doors", on: false });
   if (mods.includes("charging")) list.push({ type: "charging", on: true });
   if (mods.includes("alerts")) list.push({ type: "alerts", on: true });
   if (mods.includes("service")) list.push({ type: "service", on: true });
