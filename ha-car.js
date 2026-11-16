@@ -2179,8 +2179,11 @@ var HaCarCard = class extends HTMLElement {
     parts.push(String(this._pending.size));
     parts.push(this._toast ? this._toast.ts + this._toast.msg : "");
     const fp = this._config.find && this._config.find.phone;
+    const fcar = this._config.find && this._config.find.car || (data && data.id ? data.id("tracker") : "");
     const fst = fp && this._hass && this._hass.states[fp];
+    const cst = fcar && this._hass && this._hass.states[fcar];
     parts.push("find=" + (fst ? fst.state + "@" + (fst.last_changed || "") : "-"));
+    parts.push("findcar=" + (cst ? cst.state + "@" + (cst.last_changed || "") : "-"));
     parts.push(JSON.stringify([this._config.modules, this._config.confirm, this._config.layout, this._config.title, this._config.find]));
     return parts.join("|");
   }
@@ -2906,7 +2909,22 @@ var HaCarCard = class extends HTMLElement {
       <div class="fnote">${isEn(this._hass) ? "Hold the phone flat and point the top away from you." : "手机尽量水平，顶部朝向正前方；箭头会随手机转向。"}</div></div>`;
   }
   _dirText(bearing, heading) {
-    const rel = heading == null ? bearing : (bearing - heading + 360) % 360;
+    const en = isEn(this._hass);
+    if (heading == null) {
+      const abs = [
+        ["正北", "North"],
+        ["东北", "North-east"],
+        ["正东", "East"],
+        ["东南", "South-east"],
+        ["正南", "South"],
+        ["西南", "South-west"],
+        ["正西", "West"],
+        ["西北", "North-west"]
+      ];
+      const ai = Math.round(bearing / 45) % 8;
+      return `${abs[ai][en ? 1 : 0]} · ${en ? "car at " : "车在 "}${Math.round(bearing)}°`;
+    }
+    const rel = (bearing - heading + 360) % 360;
     const dirs = [
       ["前方", "Ahead"],
       ["右前方", "Front right"],
@@ -2918,9 +2936,9 @@ var HaCarCard = class extends HTMLElement {
       ["左前方", "Front left"]
     ];
     const idx = Math.round(rel / 45) % 8;
-    const name = dirs[idx][isEn(this._hass) ? 1 : 0];
+    const name = dirs[idx][en ? 1 : 0];
     const delta = Math.round((rel + 180) % 360 - 180);
-    return heading == null ? `${name} · 车在 ${Math.round(rel)}°` : `${name} · 偏 ${Math.abs(delta)}°`;
+    return `${name} · ${en ? "offset " : "偏 "}${Math.abs(delta)}°`;
   }
   _updateFind() {
     if (!this._findOpen || !this._findData) return;
@@ -4239,7 +4257,7 @@ var HaCarEditor = class extends HTMLElement {
 customElements.define("ha-car-editor", HaCarEditor);
 
 // src/main.js
-var VERSION = "2.1.7";
+var VERSION = "2.1.8";
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "ha-car",
