@@ -317,21 +317,21 @@ function resolve(hass, config) {
 var STYLES = `
 :host { display: block; --hc-accent: #37d6e8; --hc-ink: #e9eff7; --hc-dim: #8496ad;
   --hc-ok: #6fe0a8; --hc-warn: #ffc46b; --hc-bad: #ff9182; --hc-holdms: 2000ms; }
-ha-card.theme-glass { border-color: rgba(255,255,255,.30); border-radius: 28px;
-  box-shadow: 0 30px 70px -34px rgba(0,0,0,.95), 0 0 60px -28px rgba(140,200,255,.55),
-    inset 0 1px 0 rgba(255,255,255,.28); }
+ha-card.theme-glass { border-color: rgba(255,255,255,.26); border-radius: 28px;
+  box-shadow: 0 30px 70px -34px rgba(0,0,0,.95), 0 0 58px -30px rgba(190,198,208,.42),
+    inset 0 1px 0 rgba(255,255,255,.22); }
 /* 液态玻璃：不铺实心底色，靠半透明玻璃层 + backdrop 模糊透出仪表盘背景 */
 ha-card.theme-glass .wrap { background-image: none; }
 ha-card.theme-glass .skin {
   border-radius: inherit;
   background:
-    linear-gradient(138deg, rgba(255,255,255,.30) 0%, rgba(255,255,255,.10) 24%, rgba(255,255,255,.02) 46%, transparent 62%),
-    radial-gradient(72% 52% at 14% 0%, rgba(180,214,255,.26), transparent 62%),
-    radial-gradient(66% 52% at 92% 14%, rgba(255,158,226,.22), transparent 64%),
-    radial-gradient(110% 78% at 50% 116%, rgba(120,196,255,.24), transparent 68%),
-    linear-gradient(168deg, rgba(48,62,98,.30) 0%, rgba(26,34,58,.24) 52%, rgba(10,14,26,.34) 100%);
-  backdrop-filter: blur(34px) saturate(175%);
-  -webkit-backdrop-filter: blur(30px) saturate(165%); }
+    linear-gradient(138deg, rgba(255,255,255,.18) 0%, rgba(255,255,255,.06) 26%, transparent 52%),
+    radial-gradient(70% 50% at 12% 0%, rgba(210,218,228,.14), transparent 62%),
+    radial-gradient(64% 48% at 90% 12%, rgba(190,200,212,.10), transparent 64%),
+    radial-gradient(110% 78% at 50% 116%, rgba(160,170,182,.12), transparent 68%),
+    linear-gradient(168deg, rgba(72,74,80,.34) 0%, rgba(44,46,50,.30) 52%, rgba(20,21,24,.40) 100%);
+  backdrop-filter: blur(34px) saturate(112%);
+  -webkit-backdrop-filter: blur(30px) saturate(112%); }
 ha-card { display: block; overflow: hidden; position: relative; padding: 0;
   border: 1px solid rgba(var(--hc-a,120,190,215),.16);
   border-radius: var(--ha-card-border-radius, 28px);
@@ -737,12 +737,12 @@ h1 { margin: 0; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-s
 /* 液态玻璃主题：所有承载信息的表面换成高光磨砂玻璃 */
 ha-card.theme-glass .loc, ha-card.theme-glass .cap {
   background:
-    linear-gradient(118deg, rgba(255,255,255,.34) 0%, rgba(255,255,255,.12) 26%, rgba(255,255,255,0) 46%),
-    linear-gradient(158deg, rgba(255,255,255,.20) 0%, rgba(255,255,255,.07) 46%, rgba(255,255,255,.03) 100%);
-  border-color: rgba(255,255,255,.5);
-  box-shadow: 0 8cqw 20cqw -12cqw rgba(4,10,20,.5), inset 0 1cqw 0 rgba(255,255,255,.8),
-    inset 0 -5cqw 12cqw -9cqw rgba(255,158,222,.22), 0 0 14cqw -9cqw rgba(140,200,255,.55);
-  backdrop-filter: blur(15cqw) saturate(175%); }
+    linear-gradient(118deg, rgba(255,255,255,.26) 0%, rgba(255,255,255,.09) 26%, rgba(255,255,255,0) 46%),
+    linear-gradient(158deg, rgba(255,255,255,.12) 0%, rgba(255,255,255,.04) 46%, rgba(255,255,255,.02) 100%);
+  border-color: rgba(255,255,255,.42);
+  box-shadow: 0 8cqw 20cqw -12cqw rgba(4,8,14,.5), inset 0 1cqw 0 rgba(255,255,255,.7),
+    inset 0 -5cqw 12cqw -9cqw rgba(255,255,255,.10), 0 0 14cqw -9cqw rgba(190,200,212,.35);
+  backdrop-filter: blur(15cqw) saturate(120%); }
 ha-card.theme-glass .loc .lh span, ha-card.theme-glass .loc i, ha-card.theme-glass .cap i { color: rgba(226,240,252,.8); }
 ha-card.theme-glass .loc .lr b, ha-card.theme-glass .cap b { color: #f4fbff; }
 ha-card.theme-glass .status { background: rgba(255,255,255,.16); border-color: rgba(255,255,255,.36);
@@ -1480,7 +1480,7 @@ var THEMES = {
   ember: { name: "熔岩橙", accent: "#ffab5e", glow: "255,171,94", top: "#2a170b", mid: "#180d05", low: "#0a0502" },
   graphite: { name: "石墨灰", accent: "#9fb3c8", glow: "159,179,200", top: "#1d2126", mid: "#12161a", low: "#080a0c" },
   rose: { name: "玫瑰", accent: "#ff8fb6", glow: "255,143,182", top: "#2a1020", mid: "#190812", low: "#0b0408" },
-  glass: { name: "液态玻璃（iOS）", accent: "#8cc8ff", glow: "140,200,255", top: "#26304e", mid: "#151b2e", low: "#080b14", glass: true }
+  glass: { name: "液态玻璃（iOS）", accent: "#b8c2ce", glow: "188,198,210", top: "#26304e", mid: "#151b2e", low: "#080b14", glass: true }
 };
 function themeBg(t) {
   const th = THEMES[t] || THEMES.midnight;
@@ -3469,7 +3469,7 @@ var HaCarEditor = class extends HTMLElement {
 customElements.define("ha-car-editor", HaCarEditor);
 
 // src/main.js
-var VERSION = "1.9.2";
+var VERSION = "1.9.3";
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "ha-car",

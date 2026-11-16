@@ -57,7 +57,7 @@ export const THEMES = {
   ember: { name: "熔岩橙", accent: "#ffab5e", glow: "255,171,94", top: "#2a170b", mid: "#180d05", low: "#0a0502" },
   graphite: { name: "石墨灰", accent: "#9fb3c8", glow: "159,179,200", top: "#1d2126", mid: "#12161a", low: "#080a0c" },
   rose: { name: "玫瑰", accent: "#ff8fb6", glow: "255,143,182", top: "#2a1020", mid: "#190812", low: "#0b0408" },
-  glass: { name: "液态玻璃（iOS）", accent: "#8cc8ff", glow: "140,200,255", top: "#26304e", mid: "#151b2e", low: "#080b14", glass: true },
+  glass: { name: "液态玻璃（iOS）", accent: "#b8c2ce", glow: "188,198,210", top: "#26304e", mid: "#151b2e", low: "#080b14", glass: true },
 };
 
 function themeBg(t) {
