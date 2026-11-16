@@ -82,8 +82,6 @@ ha-card::after { content: ""; position: absolute; left: 8%; right: 8%; top: 0; h
 
 /* 头部：大标题 + 右上状态胶囊（参考图同构） */
 .head { display: flex; align-items: flex-start; gap: 12px; }
-.hright { flex: none; display: flex; align-items: center; gap: 10px; }
-.hright .brand { margin-right: 0; }
 .ttl { flex: 1; min-width: 0; display: flex; align-items: baseline; gap: 10px; }
 h1 { margin: 0; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 26px; line-height: 1.1;
   font-weight: 720; letter-spacing: .005em;

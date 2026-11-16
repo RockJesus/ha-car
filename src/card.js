@@ -800,10 +800,9 @@ class HaCarCard extends HTMLElement {
 
     const blocks = [];
     const plateTxt = cfg.show_plate && plate ? (cfg.privacy ? maskPlate(plate) : plate) : "";
-    const head = `<div class="head"><div class="ttl"><h1>${esc(title)}</h1>` +
+    const head = `<div class="head"><div class="ttl"><h1>${FORD_LOGO}${esc(title)}</h1>` +
       (plateTxt ? `<span class="plate">${esc(plateTxt)}</span>` : "") +
-      `</div><div class="hright">${FORD_LOGO}` +
-      `<span class="status ${status.cls}"><span class="dot"></span>${esc(status.label)}</span></div></div>`;
+      `</div><span class="status ${status.cls}"><span class="dot"></span>${esc(status.label)}</span></div>`;
 
     const hero = this._imagePair(data);
     const list = cfg.blocks || normBlocks(cfg);
