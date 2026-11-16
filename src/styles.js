@@ -145,70 +145,77 @@ h1 { margin: 0; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-s
 /* 操作：圆形玻璃钮 + 标签，长按沿圆环走一圈（参考图同构） */
 .acts { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 2px; }
 .acts { gap: 4px; }
+/* 按钮自成一套赛博配色：青 / 电紫 / 洋红，不跟主题强调色走，任何主题下都能从底色里跳出来 */
 .tile { position: relative; display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 0;
   background: none; border: none; cursor: pointer; color: var(--hc-ink); font: inherit; text-align: center;
   -webkit-tap-highlight-color: transparent; -webkit-touch-callout: none; user-select: none;
-  touch-action: manipulation; }
+  touch-action: manipulation;
+  --cy-a: 34,232,255; --cy-b: 168,86,255; --cy-c: 255,52,196; --cy-ok: 48,255,168; }
 .orb { position: relative; width: 62px; height: 62px; display: grid; place-items: center; border-radius: 50%;
-  border: 1px solid rgba(255,255,255,.13);
+  border: 1px solid rgba(34,232,255,.22);
   background:
     radial-gradient(120% 92% at 34% 16%, rgba(255,255,255,.52) 0%, rgba(255,255,255,.10) 32%, rgba(255,255,255,0) 54%),
-    radial-gradient(132% 130% at 50% 122%, rgba(var(--hc-a,55,214,232),.30), rgba(var(--hc-a,55,214,232),.06) 48%, transparent 70%),
-    linear-gradient(168deg, #1a2531 0%, #0a1119 58%, #05090e 100%);
+    radial-gradient(132% 130% at 50% 122%, rgba(var(--cy-a),.32), rgba(var(--cy-b),.10) 48%, transparent 70%),
+    linear-gradient(168deg, #122634 0%, #0a1119 58%, #05090e 100%);
   box-shadow: inset 0 1px 2px rgba(255,255,255,.34), inset 0 -9px 18px -8px rgba(0,0,0,.95),
-    0 14px 24px -16px rgba(0,0,0,.98), 0 0 28px -18px rgba(var(--hc-a,55,214,232),.95);
+    0 14px 24px -16px rgba(0,0,0,.98), 0 0 30px -16px rgba(var(--cy-a),1);
   transition: transform .16s ease, border-color .2s, box-shadow .2s; }
-/* 赛博朋克霓虹圈：青→紫→青的锥形渐变描边，只保留 1.8px 环 */
+/* 霓虹圈：青 → 白 → 洋红 → 电紫 → 青，1.8px */
 .orb::before { content: ""; position: absolute; inset: -3px; border-radius: 50%; padding: 2px; pointer-events: none;
-  background: conic-gradient(from 205deg, rgba(var(--hc-a,55,214,232),.95), rgba(226,244,255,.22) 16%,
-    rgba(186,110,255,.75) 52%, rgba(var(--hc-a,55,214,232),1) 76%, rgba(226,244,255,.18) 92%);
+  background: conic-gradient(from 205deg, rgba(var(--cy-a),1), rgba(226,244,255,.26) 14%,
+    rgba(var(--cy-c),.9) 44%, rgba(var(--cy-b),.95) 62%, rgba(var(--cy-a),1) 82%, rgba(226,244,255,.2) 94%);
   -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
   -webkit-mask-composite: xor; mask-composite: exclude;
-  opacity: .62; transition: opacity .2s, filter .2s; }
-/* 顶部高光：让圆钮看起来是凸起的玻璃球 */
+  opacity: .7; transition: opacity .2s, filter .2s; }
 .orb::after { content: ""; position: absolute; left: 17%; top: 9%; width: 46%; height: 32%; border-radius: 50%;
   background: radial-gradient(60% 60% at 50% 50%, rgba(255,255,255,.6), rgba(255,255,255,.08) 68%, transparent 78%);
   filter: blur(1px); pointer-events: none; opacity: .7; }
-.tile .ic { width: 24px; height: 24px; color: #eaf9ff; filter: drop-shadow(0 1px 2px rgba(0,0,0,.7)); }
+.tile .ic { width: 24px; height: 24px; color: #ddf8ff; filter: drop-shadow(0 1px 2px rgba(0,0,0,.7)); }
 .tile .lbl { max-width: 100%; font-size: 12.5px; font-weight: 620; letter-spacing: .06em;
-  color: rgba(208,229,243,.86); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  color: rgba(206,229,244,.88); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .tile:hover { transform: translateY(-2px); }
-.tile:hover .orb::before { opacity: 1; filter: drop-shadow(0 0 6px rgba(var(--hc-a,55,214,232),.85)); }
-.tile:hover .orb { box-shadow: inset 0 1px 2px rgba(255,255,255,.4), inset 0 -9px 18px -8px rgba(0,0,0,.95),
-  0 18px 26px -16px rgba(0,0,0,.98), 0 0 34px -12px rgba(var(--hc-a,55,214,232),.95); }
+.tile:hover .orb::before { opacity: 1; filter: drop-shadow(0 0 7px rgba(var(--cy-c),.8)); }
+.tile:hover .orb { border-color: rgba(var(--cy-c),.4);
+  box-shadow: inset 0 1px 2px rgba(255,255,255,.4), inset 0 -9px 18px -8px rgba(0,0,0,.95),
+    0 18px 26px -16px rgba(0,0,0,.98), 0 0 34px -12px rgba(var(--cy-c),.9); }
 .tile:active, .tile.pressing { transform: scale(.94); }
-.tile:active .orb, .tile.pressing .orb { box-shadow: inset 0 2px 8px rgba(0,0,0,.7), 0 0 26px -8px rgba(var(--hc-a,55,214,232),1); }
-.tile:focus-visible { outline: 1px solid rgba(var(--hc-a,55,214,232),.8); outline-offset: 4px; border-radius: 10px; }
-/* 可执行/当前状态：整颗球点亮，霓虹圈全亮并缓慢呼吸 */
-.tile.hot .orb { border-color: rgba(var(--hc-a,55,214,232),.55);
+.tile:active .orb, .tile.pressing .orb { box-shadow: inset 0 2px 8px rgba(0,0,0,.7), 0 0 28px -8px rgba(var(--cy-c),1); }
+.tile:focus-visible { outline: 1px solid rgba(var(--cy-a),.9); outline-offset: 4px; border-radius: 10px; }
+/* 当前状态/可执行：整颗球转洋红，霓虹圈全亮并呼吸 */
+.tile.hot .orb { border-color: rgba(var(--cy-c),.55);
   background:
     radial-gradient(120% 92% at 34% 16%, rgba(255,255,255,.6) 0%, rgba(255,255,255,.12) 32%, rgba(255,255,255,0) 54%),
-    radial-gradient(132% 130% at 50% 118%, rgba(var(--hc-a,55,214,232),.55), rgba(var(--hc-a,55,214,232),.14) 52%, transparent 72%),
-    linear-gradient(168deg, #223142 0%, #0c1622 60%, #070b12 100%);
+    radial-gradient(132% 130% at 50% 118%, rgba(var(--cy-c),.50), rgba(var(--cy-b),.18) 50%, transparent 72%),
+    linear-gradient(168deg, #2a1230 0%, #140a1b 58%, #07040c 100%);
   box-shadow: inset 0 1px 3px rgba(255,255,255,.42), inset 0 -10px 20px -8px rgba(0,0,0,.9),
-    0 0 34px -10px rgba(var(--hc-a,55,214,232),1), 0 14px 24px -16px rgba(0,0,0,.98);
+    0 0 36px -10px rgba(var(--cy-c),1), 0 14px 24px -16px rgba(0,0,0,.98);
   animation: hc-orb-breathe 3.4s ease-in-out infinite; }
-.tile.hot .orb::before { opacity: 1; filter: drop-shadow(0 0 7px rgba(var(--hc-a,55,214,232),.95)); }
-.tile.hot .orb::after { opacity: .8; }
-.tile.hot .lbl { color: #e6faff; text-shadow: 0 0 10px rgba(var(--hc-a,55,214,232),.45); }
+.tile.hot .orb::before { opacity: 1;
+  background: conic-gradient(from 205deg, rgba(var(--cy-c),1), rgba(255,214,244,.3) 14%,
+    rgba(var(--cy-b),.95) 46%, rgba(var(--cy-c),1) 72%, rgba(var(--cy-a),.85) 88%, rgba(255,214,244,.24) 96%);
+  filter: drop-shadow(0 0 8px rgba(var(--cy-c),.95)); }
+.tile.hot .ic { color: #ffe6fa; }
+.tile.hot .lbl { color: #ffd9f3; text-shadow: 0 0 10px rgba(var(--cy-c),.55); }
 @keyframes hc-orb-breathe {
   0%, 100% { box-shadow: inset 0 1px 3px rgba(255,255,255,.4), inset 0 -10px 20px -8px rgba(0,0,0,.9),
-    0 0 24px -12px rgba(var(--hc-a,55,214,232),.85), 0 14px 24px -16px rgba(0,0,0,.98); }
+    0 0 26px -12px rgba(var(--cy-c),.9), 0 14px 24px -16px rgba(0,0,0,.98); }
   50% { box-shadow: inset 0 1px 3px rgba(255,255,255,.46), inset 0 -10px 20px -8px rgba(0,0,0,.9),
-    0 0 40px -8px rgba(var(--hc-a,55,214,232),1), 0 14px 24px -16px rgba(0,0,0,.98); }
+    0 0 42px -8px rgba(var(--cy-c),1), 0 14px 24px -16px rgba(0,0,0,.98); }
 }
-.tile.on .orb { border-color: rgba(111,224,168,.55);
+/* 已锁定/已启动：霓虹绿（赛博三色里的第三色），和洋红区分开 */
+.tile.on .orb { border-color: rgba(var(--cy-ok),.5);
   background:
     radial-gradient(120% 92% at 34% 16%, rgba(255,255,255,.55) 0%, rgba(255,255,255,.10) 32%, rgba(255,255,255,0) 54%),
-    radial-gradient(132% 130% at 50% 118%, rgba(72,214,156,.40), rgba(72,214,156,.08) 52%, transparent 72%),
-    linear-gradient(168deg, #1a2d28 0%, #0a1612 60%, #050b08 100%);
+    radial-gradient(132% 130% at 50% 118%, rgba(var(--cy-ok),.36), rgba(38,190,255,.10) 52%, transparent 72%),
+    linear-gradient(168deg, #102a24 0%, #081712 58%, #040a07 100%);
   box-shadow: inset 0 1px 3px rgba(255,255,255,.4), inset 0 -10px 20px -8px rgba(0,0,0,.9),
-    0 0 30px -12px rgba(90,231,168,.95), 0 14px 24px -16px rgba(0,0,0,.98); }
+    0 0 32px -12px rgba(var(--cy-ok),.95), 0 14px 24px -16px rgba(0,0,0,.98); }
 .tile.on .orb::before { opacity: 1;
-  background: conic-gradient(from 205deg, rgba(111,224,168,.95), rgba(226,255,240,.25) 18%, rgba(90,231,168,.8) 52%, rgba(111,224,168,1) 80%, rgba(226,255,240,.2) 94%);
-  filter: drop-shadow(0 0 6px rgba(90,231,168,.8)); }
-.tile.on .ic { color: #e7fff2; }
-.tile.on .lbl { color: #cff6e0; }
+  background: conic-gradient(from 205deg, rgba(var(--cy-ok),1), rgba(226,255,244,.25) 16%,
+    rgba(var(--cy-a),.8) 50%, rgba(var(--cy-ok),1) 78%, rgba(226,255,244,.2) 94%);
+  filter: drop-shadow(0 0 6px rgba(var(--cy-ok),.8)); }
+.tile.on .ic { color: #e9fff4; }
+.tile.on .lbl { color: #c8ffe2; }
 .tile.off { opacity: .42; }
 .hring { position: absolute; inset: -8%; width: 116%; height: 116%; opacity: 0; pointer-events: none; }
 .hring circle { fill: none; stroke: var(--hc-accent); stroke-width: 3.2; stroke-linecap: round;
