@@ -193,7 +193,7 @@ export function normBlocks(cfg) {
   const mods = Array.isArray(cfg.modules) ? cfg.modules : MODULES;
   const list = [{ type: "meta", on: true }, { type: "hero", on: true }];
   if (mods.includes("energy")) list.push({ type: "energy", on: true });
-  if (mods.includes("doors")) list.push({ type: "doors", on: false });
+  if (mods.includes("doors")) list.push({ type: "doors", on: true });
   if (mods.includes("charging")) list.push({ type: "charging", on: true });
   if (mods.includes("alerts")) list.push({ type: "alerts", on: true });
   if (mods.includes("service")) list.push({ type: "service", on: true });
@@ -1128,8 +1128,8 @@ class HaCarCard extends HTMLElement {
       const warn = outOfRange || (flag && v == null);
       const unit = attrs(st, "unit_of_measurement") || unitFallback;
       const txt = v == null ? "—" : fmtNum(v);
-      const html = `<div class="lr tire${warn ? " warn" : ""}"><span class="ri">${icon("tireo")}</span>` +
-        `<b>${txt}<s>${esc(unit)}</s></b></div>`;
+      const html = `<div class="lr tire${warn ? " warn" : ""}" data-more="${esc(data.id(slot))}">` +
+        `<span class="ri">${icon("tireo")}</span><b>${txt}<s>${esc(unit)}</s></b></div>`;
       return { slot, html, warn };
     };
     const out = [];
@@ -1139,7 +1139,8 @@ class HaCarCard extends HTMLElement {
     }
     // 引擎状态胶囊（圆环左上角圈外）
     if (data.get("sw_engine") || data.get("remote_start")) {
-      out.push(`<div class="enp${running ? " on" : ""}"><div class="row"><i class="ed"></i>` +
+      const engEnt = data.id("sw_engine") || data.id("remote_start") || data.id("ignition");
+      out.push(`<div class="enp${running ? " on" : ""}"${engEnt ? ` data-more="${esc(engEnt)}"` : ""}><div class="row"><i class="ed"></i>` +
         `<span>${zh ? "引擎" : "ENGINE"}</span></div>` +
         `<b>${running ? (zh ? "已启动" : "Running") : (zh ? "已熄火" : "Off")}</b></div>`);
     }

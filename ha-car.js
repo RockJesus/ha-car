@@ -799,6 +799,7 @@ ha-card.theme-glass .gauge { filter: drop-shadow(0 10px 22px rgba(0,0,0,.35)); }
 .loc .lr b { font-size: 4.8cqw; font-weight: 620; color: #dbe7f5; letter-spacing: .01em; white-space: nowrap; }
 .loc .lr.tire b { font-size: 5.0cqw; }
 .loc .lr.tire b s { text-decoration: none; font-size: 3.8cqw; font-weight: 500; color: #7d90a6; margin-left: .6cqw; }
+.covl .enp[data-more] { cursor: pointer; }
 .loc .lr[data-more] { cursor: pointer; border-radius: .9cqw; transition: background .15s ease; }
 .loc .lr[data-more]:hover { background: rgba(120, 200, 230, .12); }
 .loc .lr.open b { color: #ffcf90; }
@@ -1655,7 +1656,7 @@ function normBlocks(cfg) {
   const mods = Array.isArray(cfg.modules) ? cfg.modules : MODULES;
   const list = [{ type: "meta", on: true }, { type: "hero", on: true }];
   if (mods.includes("energy")) list.push({ type: "energy", on: true });
-  if (mods.includes("doors")) list.push({ type: "doors", on: false });
+  if (mods.includes("doors")) list.push({ type: "doors", on: true });
   if (mods.includes("charging")) list.push({ type: "charging", on: true });
   if (mods.includes("alerts")) list.push({ type: "alerts", on: true });
   if (mods.includes("service")) list.push({ type: "service", on: true });
@@ -2469,7 +2470,7 @@ var HaCarCard = class extends HTMLElement {
       const warn = outOfRange || flag && v == null;
       const unit = attrs(st, "unit_of_measurement") || unitFallback;
       const txt = v == null ? "—" : fmtNum(v);
-      const html = `<div class="lr tire${warn ? " warn" : ""}"><span class="ri">${icon("tireo")}</span><b>${txt}<s>${esc(unit)}</s></b></div>`;
+      const html = `<div class="lr tire${warn ? " warn" : ""}" data-more="${esc(data.id(slot))}"><span class="ri">${icon("tireo")}</span><b>${txt}<s>${esc(unit)}</s></b></div>`;
       return { slot, html, warn };
     };
     const out = [];
@@ -2477,7 +2478,8 @@ var HaCarCard = class extends HTMLElement {
       out.push(`<i class="beam lb"></i><i class="beam rb"></i><i class="gpool"></i><i class="tailbar"></i><i class="tailglow"></i>`);
     }
     if (data.get("sw_engine") || data.get("remote_start")) {
-      out.push(`<div class="enp${running ? " on" : ""}"><div class="row"><i class="ed"></i><span>${zh ? "引擎" : "ENGINE"}</span></div><b>${running ? zh ? "已启动" : "Running" : zh ? "已熄火" : "Off"}</b></div>`);
+      const engEnt = data.id("sw_engine") || data.id("remote_start") || data.id("ignition");
+      out.push(`<div class="enp${running ? " on" : ""}"${engEnt ? ` data-more="${esc(engEnt)}"` : ""}><div class="row"><i class="ed"></i><span>${zh ? "引擎" : "ENGINE"}</span></div><b>${running ? zh ? "已启动" : "Running" : zh ? "已熄火" : "Off"}</b></div>`);
     }
     const quads = [
       ["lf", zh ? "主驾" : "Driver", ["door_fl", "win_fl"], "tp_lf", "tps_lf"],
@@ -4034,7 +4036,7 @@ var HaCarEditor = class extends HTMLElement {
 customElements.define("ha-car-editor", HaCarEditor);
 
 // src/main.js
-var VERSION = "2.1.0";
+var VERSION = "2.1.1";
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "ha-car",
