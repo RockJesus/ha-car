@@ -954,7 +954,7 @@ class HaCarCard extends HTMLElement {
       const lines = [];
       let bad = false;
       if (doors) {
-        for (const [ic, slot] of [["cardoor", dSlots[0]], ["carwin", dSlots[1]]]) {
+        for (const [ic, slot] of [["carwin", dSlots[1]], ["cardoor", dSlots[0]]]) {
           const st = data.get(slot);
           if (!st) continue;
           const b = isBad(st);
@@ -968,12 +968,11 @@ class HaCarCard extends HTMLElement {
       }
       const tire = tireLine(tSlot, tsSlot, "kPa");
       if (!lines.length && !tire) continue;
-      const row1 = lines.length ? `<div class="lrs">${lines.join("")}</div>` : "";
-      const row2 = tire ? `<div class="lrs one">${tire.html}</div>` : "";
+      const items = lines.join("") + (tire ? tire.html : "");
       out.push(
         `<div class="loc ${cls}${bad ? " bad" : ""}" data-more="${esc(data.id(dSlots[0]))}">` +
           `<div class="lh"><span>${esc(label)}</span><i class="lk${locked ? " on" : ""}">${icon(locked ? "lock" : "unlock")}</i></div>` +
-          row1 + row2 +
+          `<div class="lrs">${items}</div>` +
           `</div>`,
       );
     }
@@ -1140,6 +1139,8 @@ class HaCarCard extends HTMLElement {
         capT.style.top = `${Math.round(tTop)}px`;
       }
 
+      const midY = (bodyT + bodyB) / 2;
+      const vGap = Math.max(6, Math.round(shownH * 0.012));
       this._wrap.querySelectorAll(".loc").forEach((card) => {
         const leftSide = card.classList.contains("lf") || card.classList.contains("lr");
         const front = card.classList.contains("lf") || card.classList.contains("rf");
@@ -1155,8 +1156,12 @@ class HaCarCard extends HTMLElement {
         let cx = leftSide ? bodyL - 4 - w / 2 : bodyR + 4 + w / 2;
         cx = leftSide ? Math.max(ringL + 6 + w / 2, cx) : Math.min(ringR - 6 - w / 2, cx);
         card.style.left = `${Math.round(cx)}px`;
-        // 竖向对齐车门行：前排偏车头、后排偏车尾，随车身高度自适应
-        card.style.top = `${Math.round(bodyT + (bodyB - bodyT) * (front ? 0.34 : 0.66))}px`;
+        // 竖向对齐车门行：前排偏车头、后排偏车尾；卡片变高时自动让位，避免前后两张压在一起
+        const h = card.offsetHeight * kk;
+        let cy = bodyT + (bodyB - bodyT) * (front ? 0.34 : 0.66);
+        if (front) cy = Math.min(cy, midY - vGap / 2 - h / 2);
+        else cy = Math.max(cy, midY + vGap / 2 + h / 2);
+        card.style.top = `${Math.round(cy)}px`;
       });
 
       // 引擎状态胶囊：贴在圆环左上角的圈外，跟着圆圈一起自适应

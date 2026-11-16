@@ -786,15 +786,13 @@ ha-card.theme-glass .gauge { filter: drop-shadow(0 10px 22px rgba(0,0,0,.35)); }
 .loc .lh .lk { font-style: normal; width: 5.2cqw; height: 5.2cqw; color: #6d8298; opacity: .85; }
 .loc .lh .lk .ic { width: 100%; height: 100%; display: block; }
 .loc .lh .lk.on { color: #7ee0b3; opacity: 1; }
-.loc .lrs { display: flex; flex-direction: row; align-items: flex-end; justify-content: center; gap: 1.4cqw; }
-.loc .lrs.one { justify-content: center; }
-.loc .lr { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; align-items: center;
-  justify-content: flex-end; gap: .7cqw; line-height: 1; }
-.loc .lrs.one .lr { flex: 0 0 auto; }
-.loc .lr .ri { flex: 0 0 auto; width: 5.6cqw; height: 5.6cqw; display: grid; place-items: center; color: #8fd6ea; }
+.loc .lrs { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .9cqw; }
+.loc .lr { flex: 0 0 auto; display: flex; flex-direction: column; align-items: center;
+  justify-content: center; gap: .5cqw; line-height: 1; }
+.loc .lr .ri { flex: 0 0 auto; width: 5.2cqw; height: 5.2cqw; display: grid; place-items: center; color: #8fd6ea; }
 .loc .lr .ri .ic { width: 100%; height: 100%; display: block; }
-.loc .lr b { font-size: 5.0cqw; font-weight: 620; color: #dbe7f5; letter-spacing: .01em; white-space: nowrap; }
-.loc .lr.tire b { font-size: 5.2cqw; }
+.loc .lr b { font-size: 4.8cqw; font-weight: 620; color: #dbe7f5; letter-spacing: .01em; white-space: nowrap; }
+.loc .lr.tire b { font-size: 5.0cqw; }
 .loc .lr.tire b s { text-decoration: none; font-size: 3.8cqw; font-weight: 500; color: #7d90a6; margin-left: .6cqw; }
 .loc .lr.open b { color: #ffcf90; }
 .loc .lr.open .ri { color: #ffcf90; }
@@ -2268,7 +2266,7 @@ var HaCarCard = class extends HTMLElement {
       const lines = [];
       let bad = false;
       if (doors) {
-        for (const [ic, slot] of [["cardoor", dSlots[0]], ["carwin", dSlots[1]]]) {
+        for (const [ic, slot] of [["carwin", dSlots[1]], ["cardoor", dSlots[0]]]) {
           const st = data.get(slot);
           if (!st) continue;
           const b = isBad(st);
@@ -2281,10 +2279,9 @@ var HaCarCard = class extends HTMLElement {
       }
       const tire = tireLine(tSlot, tsSlot, "kPa");
       if (!lines.length && !tire) continue;
-      const row1 = lines.length ? `<div class="lrs">${lines.join("")}</div>` : "";
-      const row2 = tire ? `<div class="lrs one">${tire.html}</div>` : "";
+      const items = lines.join("") + (tire ? tire.html : "");
       out.push(
-        `<div class="loc ${cls}${bad ? " bad" : ""}" data-more="${esc(data.id(dSlots[0]))}"><div class="lh"><span>${esc(label)}</span><i class="lk${locked ? " on" : ""}">${icon(locked ? "lock" : "unlock")}</i></div>` + row1 + row2 + `</div>`
+        `<div class="loc ${cls}${bad ? " bad" : ""}" data-more="${esc(data.id(dSlots[0]))}"><div class="lh"><span>${esc(label)}</span><i class="lk${locked ? " on" : ""}">${icon(locked ? "lock" : "unlock")}</i></div><div class="lrs">${items}</div></div>`
       );
     }
     const cap = (cls, label, slot, ic) => {
@@ -2434,6 +2431,8 @@ var HaCarCard = class extends HTMLElement {
         capH.style.top = `${Math.round(hTop)}px`;
         capT.style.top = `${Math.round(tTop)}px`;
       }
+      const midY = (bodyT + bodyB) / 2;
+      const vGap = Math.max(6, Math.round(shownH * 0.012));
       this._wrap.querySelectorAll(".loc").forEach((card) => {
         const leftSide = card.classList.contains("lf") || card.classList.contains("lr");
         const front = card.classList.contains("lf") || card.classList.contains("rf");
@@ -2449,7 +2448,11 @@ var HaCarCard = class extends HTMLElement {
         let cx = leftSide ? bodyL - 4 - w / 2 : bodyR + 4 + w / 2;
         cx = leftSide ? Math.max(ringL + 6 + w / 2, cx) : Math.min(ringR - 6 - w / 2, cx);
         card.style.left = `${Math.round(cx)}px`;
-        card.style.top = `${Math.round(bodyT + (bodyB - bodyT) * (front ? 0.34 : 0.66))}px`;
+        const h = card.offsetHeight * kk;
+        let cy = bodyT + (bodyB - bodyT) * (front ? 0.34 : 0.66);
+        if (front) cy = Math.min(cy, midY - vGap / 2 - h / 2);
+        else cy = Math.max(cy, midY + vGap / 2 + h / 2);
+        card.style.top = `${Math.round(cy)}px`;
       });
       const enp = this._wrap.querySelector(".enp");
       if (enp) {
@@ -3536,7 +3539,7 @@ var HaCarEditor = class extends HTMLElement {
 customElements.define("ha-car-editor", HaCarEditor);
 
 // src/main.js
-var VERSION = "1.9.7";
+var VERSION = "1.9.8";
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "ha-car",
