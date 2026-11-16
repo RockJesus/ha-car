@@ -852,8 +852,6 @@ select.tf { font-size: 13px; padding: 8px 10px; }
 .addbi { align-self: flex-start; padding: 5px 9px; font-size: 11.5px; margin-top: 2px; }
 .bipickrow { display: flex; align-items: flex-start; gap: 6px; }
 .bipickrow .pick { flex: 1 1 auto; min-width: 0; }
-.biic { flex: 0 0 86px; min-width: 0; }
-.biic ha-selector { width: 86px; }
 ha-icon.ic { width: 1em; height: 1em; --mdc-icon-size: 1em; display: inline-flex; vertical-align: middle; }
 
 `;

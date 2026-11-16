@@ -1168,8 +1168,6 @@ select.tf { font-size: 13px; padding: 8px 10px; }
 .addbi { align-self: flex-start; padding: 5px 9px; font-size: 11.5px; margin-top: 2px; }
 .bipickrow { display: flex; align-items: flex-start; gap: 6px; }
 .bipickrow .pick { flex: 1 1 auto; min-width: 0; }
-.biic { flex: 0 0 86px; min-width: 0; }
-.biic ha-selector { width: 86px; }
 ha-icon.ic { width: 1em; height: 1em; --mdc-icon-size: 1em; display: inline-flex; vertical-align: middle; }
 
 `;
@@ -2269,8 +2267,6 @@ var HaCarCard = class extends HTMLElement {
     return true;
   }
   _itemIcon(it, def) {
-    const ov = it.icon;
-    if (ov && (/^mdi:[a-z0-9-]+$/i.test(ov) || ICON_NAMES.includes(ov))) return ov;
     if (def && ICON_NAMES.includes(def.icon)) return def.icon;
     const ent = it.entity || "";
     const st = ent && this._hass && this._hass.states[ent];
@@ -3399,7 +3395,7 @@ var BLOCK_LABELS = {
   hero: "车图",
   energy: "能耗仪表",
   alerts: "车辆告警",
-  doors: "门窗",
+  doors: "门窗胎压引擎",
   charging: "充电",
   service: "服务信息",
   actions: "控制按钮",
@@ -3532,7 +3528,7 @@ var HaCarEditor = class extends HTMLElement {
             <option value="hero">车图</option>
             <option value="energy">能耗仪表</option>
             <option value="alerts">车辆告警</option>
-            <option value="doors">门窗</option>
+            <option value="doors">门窗胎压引擎</option>
             <option value="charging">充电</option>
             <option value="service">服务信息</option>
             <option value="actions">控制按钮</option>
@@ -3832,7 +3828,6 @@ var HaCarEditor = class extends HTMLElement {
               <button class="btn sq clr" data-bicl="${i}" data-bj="${j}" type="button" title="移除实体" aria-label="移除实体">✕</button>
             </div>
             <div class="bipickrow">
-              ${free ? `<div class="biic" data-biic="${i}:${j}"></div>` : ""}
               <div class="pick" data-bipick="${i}:${j}"></div>
             </div>
           </div>`;
@@ -3860,8 +3855,6 @@ var HaCarEditor = class extends HTMLElement {
         if (!h) return;
         const val = it.entity || (it.slot ? (this._config.entities || {})[it.slot] : "") || "";
         this._mountPicker(h, val, (v) => this._setBlockItem(i, j, v), it.slot ? "自动识别" : "");
-        const ih = host.querySelector(`[data-biic="${i}:${j}"]`);
-        if (ih) this._mountIcon(ih, it.icon || "", (v) => this._setBlockItemIcon(i, j, v));
       });
     });
     host.querySelectorAll("details.bk-items").forEach((d) => {
@@ -3871,45 +3864,6 @@ var HaCarEditor = class extends HTMLElement {
         else this._openBk.delete(k);
       });
     });
-  }
-  _mountIcon(host, value, onPick) {
-    let p = host.querySelector("ha-selector");
-    if (!customElements.get("ha-selector")) {
-      let inp = host.querySelector("input");
-      if (!inp) {
-        inp = document.createElement("input");
-        inp.className = "tf";
-        inp.placeholder = "mdi:car";
-        inp.addEventListener("change", () => onPick(inp.value.trim()));
-        host.appendChild(inp);
-      }
-      inp.value = value || "";
-      return;
-    }
-    if (!p) {
-      p = document.createElement("ha-selector");
-      p.style.display = "block";
-      p.addEventListener("value-changed", (e) => {
-        const v = e.detail && e.detail.value;
-        onPick(typeof v === "string" ? v.trim() : "");
-      });
-      host.appendChild(p);
-    }
-    p.hass = this._hass;
-    p.selector = { icon: {} };
-    p.placeholder = "默认图标";
-    if (p.value !== (value || void 0)) p.value = value || void 0;
-  }
-  _setBlockItemIcon(i, j, value) {
-    const blocks = (this._config.blocks || []).slice();
-    const b = blocks[i];
-    if (!b) return;
-    const items = this._blockItems(b).map((x) => Object.assign({}, x));
-    if (!items[j]) return;
-    items[j] = Object.assign({}, items[j], { icon: value });
-    blocks[i] = Object.assign({}, b, { items });
-    this._config.blocks = blocks;
-    this._emit();
   }
   _setBlockItem(i, j, value) {
     const blocks = (this._config.blocks || []).slice();
@@ -4045,7 +3999,7 @@ var HaCarEditor = class extends HTMLElement {
 customElements.define("ha-car-editor", HaCarEditor);
 
 // src/main.js
-var VERSION = "2.1.4";
+var VERSION = "2.1.5";
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "ha-car",

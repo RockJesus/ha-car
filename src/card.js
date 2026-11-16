@@ -895,8 +895,6 @@ class HaCarCard extends HTMLElement {
   }
 
   _itemIcon(it, def) {
-    const ov = it.icon;
-    if (ov && (/^mdi:[a-z0-9-]+$/i.test(ov) || ICON_NAMES.includes(ov))) return ov;
     if (def && ICON_NAMES.includes(def.icon)) return def.icon;
     const ent = it.entity || "";
     const st = ent && this._hass && this._hass.states[ent];
