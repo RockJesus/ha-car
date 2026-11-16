@@ -1024,7 +1024,7 @@ class HaCarCard extends HTMLElement {
           const syncH = this._baseline(data, t, b);
           const findH = compact ? "" : this._findChip(data);
           const extra = this._extraChips(b, data, t, ["location", "sync"]);
-          if (locH || syncH || findH || extra) html = `<div class="b-meta"><div class="hmeta">${locH}${syncH}${findH}</div>${extra}</div>`;
+          if (locH || syncH || findH || extra) html = `<div class="b-meta"><div class="hmeta">${locH}${findH}${syncH}</div>${extra}</div>`;
           break;
         }
         case "hero": {

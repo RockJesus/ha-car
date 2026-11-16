@@ -2419,7 +2419,7 @@ var HaCarCard = class extends HTMLElement {
           const syncH = this._baseline(data, t, b);
           const findH = compact ? "" : this._findChip(data);
           const extra = this._extraChips(b, data, t, ["location", "sync"]);
-          if (locH || syncH || findH || extra) html = `<div class="b-meta"><div class="hmeta">${locH}${syncH}${findH}</div>${extra}</div>`;
+          if (locH || syncH || findH || extra) html = `<div class="b-meta"><div class="hmeta">${locH}${findH}${syncH}</div>${extra}</div>`;
           break;
         }
         case "hero": {
@@ -4257,7 +4257,7 @@ var HaCarEditor = class extends HTMLElement {
 customElements.define("ha-car-editor", HaCarEditor);
 
 // src/main.js
-var VERSION = "2.1.8";
+var VERSION = "2.1.9";
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "ha-car",
