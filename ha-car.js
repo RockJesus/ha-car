@@ -2248,6 +2248,9 @@ var HaCarCard = class extends HTMLElement {
     const ent = it.entity || "";
     return ent ? ent.split(".").slice(-1)[0].replace(/_/g, " ") : t.custom || (isEn(this._hass) ? "Entity" : "实体");
   }
+  _itemShowLabel(it) {
+    return Boolean(it.label || it.slot);
+  }
   _itemIcon(it, def) {
     if (it.icon && ICON_NAMES.includes(it.icon)) return it.icon;
     return def && ICON_NAMES.includes(def.icon) ? def.icon : "bolt";
@@ -2290,7 +2293,8 @@ var HaCarCard = class extends HTMLElement {
       const v = this._itemText(it, data, t);
       if (!v.st) continue;
       const def = v.def;
-      chips.push(`<span class="door" data-more="${esc(this._itemEnt(it, data))}">${icon(this._itemIcon(it, def))}<span class="addr">${esc(v.label)} · ${esc(v.value)}${v.unit ? " " + esc(v.unit) : ""}</span></span>`);
+      const lab = this._itemShowLabel(it) ? `${esc(v.label)} · ` : "";
+      chips.push(`<span class="door" data-more="${esc(this._itemEnt(it, data))}">${icon(this._itemIcon(it, def))}<span class="addr">${lab}${esc(v.value)}${v.unit ? " " + esc(v.unit) : ""}</span></span>`);
     }
     return chips.length ? `<div class="doors">${chips.join("")}</div>` : "";
   }
@@ -2781,7 +2785,7 @@ var HaCarCard = class extends HTMLElement {
         gauges.push(
           this._gauge({
             pct,
-            label,
+            label: this._itemShowLabel(it) ? label : "",
             value: kind === "pct" ? Math.round(numv) : fmtNum(numv),
             unit: kind === "pct" ? "%" : unit || "km",
             ic: this._itemIcon(it, def)
@@ -2791,7 +2795,7 @@ var HaCarCard = class extends HTMLElement {
       }
       if (numv == null && kind !== "stat") continue;
       stats.push(
-        `<span class="sstat" data-more="${esc(ent)}"><i>${esc(label)}</i><b>${numv == null ? esc(String(st.state)) : fmtNum(numv)}</b><span>${esc(unit)}</span></span>`
+        `<span class="sstat" data-more="${esc(ent)}">${this._itemShowLabel(it) ? `<i>${esc(label)}</i>` : ""}<b>${numv == null ? esc(String(st.state)) : fmtNum(numv)}</b><span>${esc(unit)}</span></span>`
       );
     }
     if (!gauges.length && !stats.length) return "";
@@ -2942,9 +2946,9 @@ var HaCarCard = class extends HTMLElement {
       const def = this._itemDef(it);
       const v = this._itemText(it, data, t);
       if (!v.st) continue;
-      const label = v.labelText;
+      const label = this._itemShowLabel(it) ? v.labelText : "";
       const ic = this._itemIcon(it, def);
-      rows.push(`<div class="cblock" data-more="${esc(ent)}">${icon(ic)}<span class="cl">${esc(label)}</span>
+      rows.push(`<div class="cblock" data-more="${esc(ent)}">${icon(ic)}${label ? `<span class="cl">${esc(label)}</span>` : ""}
         <b>${esc(v.value)}</b>${v.unit ? `<i>${esc(v.unit)}</i>` : ""}</div>`);
     }
     return rows.join("");
@@ -2989,7 +2993,8 @@ var HaCarCard = class extends HTMLElement {
       } else {
         const v = this._itemText(it, data, t);
         if (!v.value) continue;
-        chips.push(`<span class="door" data-more="${esc(this._itemEnt(it, data))}">${icon(this._itemIcon(it, def))}${esc(label)} · ${esc(v.value)}${v.unit ? " " + esc(v.unit) : ""}</span>`);
+        const lab = this._itemShowLabel(it) ? `${esc(label)} · ` : "";
+        chips.push(`<span class="door" data-more="${esc(this._itemEnt(it, data))}">${icon(this._itemIcon(it, def))}${lab}${esc(v.value)}${v.unit ? " " + esc(v.unit) : ""}</span>`);
       }
     }
     return chips.length ? `<div class="doors">${chips.join("")}</div>` : "";
@@ -3071,11 +3076,11 @@ var HaCarCard = class extends HTMLElement {
       const raw = isBad(st) ? "—" : String(st.state);
       const v = mask ? maskText(raw) : raw;
       if (!v) continue;
-      rows.push({ label, value: v, ent: this._itemEnt(it, data) });
+      rows.push({ label: this._itemShowLabel(it) ? label : "", value: v, ent: this._itemEnt(it, data) });
     }
     if (!rows.length) return "";
     return `<details class="svc"><summary><span class="sum">${icon("wrench")}${esc(t.service)}</span>${icon("chevron")}</summary>
-      ${rows.map((r) => `<div class="row" data-more="${esc(r.ent)}"><span class="k">${esc(r.label)}</span><span class="val">${esc(r.value)}</span></div>`).join("")}</details>`;
+      ${rows.map((r) => `<div class="row" data-more="${esc(r.ent)}">${r.label ? `<span class="k">${esc(r.label)}</span>` : ""}<span class="val">${esc(r.value)}</span></div>`).join("")}</details>`;
   }
   _location(data, _t, override) {
     const ovr = override && this._hass && this._hass.states[override] ? this._hass.states[override] : null;
@@ -3960,7 +3965,7 @@ var HaCarEditor = class extends HTMLElement {
 customElements.define("ha-car-editor", HaCarEditor);
 
 // src/main.js
-var VERSION = "2.0.5";
+var VERSION = "2.0.6";
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "ha-car",
