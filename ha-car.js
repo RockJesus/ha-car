@@ -2484,7 +2484,7 @@ var HaCarCard = class extends HTMLElement {
       out.push(`<i class="beam lb"></i><i class="beam rb"></i><i class="gpool"></i><i class="tailbar"></i><i class="tailglow"></i>`);
     }
     const engItem = itemFor("ignition");
-    const engSt = engItem ? this._itemState(engItem, data) : data.get("sw_engine") || data.get("remote_start");
+    const engSt = doors ? engItem ? this._itemState(engItem, data) : data.get("sw_engine") || data.get("remote_start") : null;
     if (engSt) {
       const engEnt = engItem ? this._itemEnt(engItem, data) : data.id("sw_engine") || data.id("remote_start") || data.id("ignition");
       const engTxt = engItem ? String(engSt.state) : running ? zh ? "已启动" : "Running" : zh ? "已熄火" : "Off";
@@ -4045,7 +4045,7 @@ var HaCarEditor = class extends HTMLElement {
 customElements.define("ha-car-editor", HaCarEditor);
 
 // src/main.js
-var VERSION = "2.1.3";
+var VERSION = "2.1.4";
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "ha-car",
