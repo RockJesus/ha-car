@@ -649,6 +649,7 @@ class HaCarCard extends HTMLElement {
     this._card.classList.toggle("compact", cfg.layout === "compact");
     const th = THEMES[cfg.theme] || THEMES.midnight;
     this._card.classList.toggle("theme-glass", !!th.glass);
+    this.classList.toggle("gskin", !!th.glass);
     this._wrap.className = "wrap";
     const accent = cfg.accent && cfg.accent !== DEFAULTS.accent ? cfg.accent : th.accent;
     this._card.style.setProperty("--hc-accent", accent);

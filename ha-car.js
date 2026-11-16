@@ -317,14 +317,21 @@ function resolve(hass, config) {
 var STYLES = `
 :host { display: block; --hc-accent: #37d6e8; --hc-ink: #e9eff7; --hc-dim: #8496ad;
   --hc-ok: #6fe0a8; --hc-warn: #ffc46b; --hc-bad: #ff9182; --hc-holdms: 2000ms; }
-ha-card.theme-glass { border-color: rgba(255,255,255,.30);
+ha-card.theme-glass { border-color: rgba(255,255,255,.30); border-radius: 28px;
   box-shadow: 0 30px 70px -34px rgba(0,0,0,.95), 0 0 60px -28px rgba(140,200,255,.55),
     inset 0 1px 0 rgba(255,255,255,.28); }
-ha-card.theme-glass .skin { background-image:
-  radial-gradient(90% 62% at 18% 0%, rgba(255,255,255,.16), transparent 58%),
-  radial-gradient(80% 60% at 88% 12%, rgba(255,150,225,.16), transparent 62%),
-  radial-gradient(120% 80% at 50% 118%, rgba(110,190,255,.20), transparent 66%),
-  var(--hc-bg); }
+/* 液态玻璃：不铺实心底色，靠半透明玻璃层 + backdrop 模糊透出仪表盘背景 */
+ha-card.theme-glass .wrap { background-image: none; }
+ha-card.theme-glass .skin {
+  border-radius: inherit;
+  background:
+    linear-gradient(138deg, rgba(255,255,255,.30) 0%, rgba(255,255,255,.10) 24%, rgba(255,255,255,.02) 46%, transparent 62%),
+    radial-gradient(72% 52% at 14% 0%, rgba(180,214,255,.26), transparent 62%),
+    radial-gradient(66% 52% at 92% 14%, rgba(255,158,226,.22), transparent 64%),
+    radial-gradient(110% 78% at 50% 116%, rgba(120,196,255,.24), transparent 68%),
+    linear-gradient(168deg, rgba(48,62,98,.30) 0%, rgba(26,34,58,.24) 52%, rgba(10,14,26,.34) 100%);
+  backdrop-filter: blur(34px) saturate(175%);
+  -webkit-backdrop-filter: blur(30px) saturate(165%); }
 ha-card { display: block; overflow: hidden; position: relative; padding: 0;
   border: 1px solid rgba(var(--hc-a,120,190,215),.16);
   border-radius: var(--ha-card-border-radius, 28px);
@@ -830,6 +837,7 @@ ha-card.panel:not(.fit) .svc, ha-card.panel:not(.fit) .loc { font-size: 11px; }
 ha-card.panel:not(.fit) .svc summary { padding: 7px 9px; }
 ha-card.panel:not(.fit) .baseline.solo { padding: 3px 8px; font-size: 10px; }
 
+:host(.panel.gskin) { background: transparent; }
 :host(.panel) { position: relative; overflow: hidden;
   background: radial-gradient(90% 60% at 50% 0%, rgba(var(--hc-a,55,214,232),.10), transparent 62%),
     linear-gradient(170deg, #101b29 0%, #0a1119 60%, #070c13 100%); }
@@ -1982,6 +1990,7 @@ var HaCarCard = class extends HTMLElement {
     this._card.classList.toggle("compact", cfg.layout === "compact");
     const th = THEMES[cfg.theme] || THEMES.midnight;
     this._card.classList.toggle("theme-glass", !!th.glass);
+    this.classList.toggle("gskin", !!th.glass);
     this._wrap.className = "wrap";
     const accent = cfg.accent && cfg.accent !== DEFAULTS.accent ? cfg.accent : th.accent;
     this._card.style.setProperty("--hc-accent", accent);
@@ -3460,7 +3469,7 @@ var HaCarEditor = class extends HTMLElement {
 customElements.define("ha-car-editor", HaCarEditor);
 
 // src/main.js
-var VERSION = "1.9.1";
+var VERSION = "1.9.2";
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "ha-car",
