@@ -2266,7 +2266,12 @@ var HaCarCard = class extends HTMLElement {
   _itemIcon(it, def) {
     const ov = it.icon;
     if (ov && (/^mdi:[a-z0-9-]+$/i.test(ov) || ICON_NAMES.includes(ov))) return ov;
-    return def && ICON_NAMES.includes(def.icon) ? def.icon : "bolt";
+    if (def && ICON_NAMES.includes(def.icon)) return def.icon;
+    const ent = it.entity || "";
+    const st = ent && this._hass && this._hass.states[ent];
+    const ic = st && st.attributes && st.attributes.icon;
+    if (ic && /^mdi:[a-z0-9-]+$/i.test(ic)) return ic;
+    return "bolt";
   }
   _itemText(it, data, t) {
     const def = this._itemDef(it);
@@ -4026,7 +4031,7 @@ var HaCarEditor = class extends HTMLElement {
 customElements.define("ha-car-editor", HaCarEditor);
 
 // src/main.js
-var VERSION = "2.0.7";
+var VERSION = "2.0.8";
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "ha-car",
