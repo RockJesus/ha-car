@@ -1016,7 +1016,7 @@ class HaCarCard extends HTMLElement {
           html = `<div class="blk b-hero">${this._hero(
             this._imgFrom(this._heroImageEnt(b, data), hero.src),
             hero.fb,
-            this._carOverlay(data, t, list.find((x) => x.type === "doors" && x.on !== false), running),
+            this._carOverlay(data, t, list.find((x) => x.type === "doors"), running),
             running,
           )}${this._extraChips(b, data, t, ["image"])}</div>`;
           break;
@@ -1111,8 +1111,8 @@ class HaCarCard extends HTMLElement {
   // 俯视图状态层：每个车门一张聚合卡（门 + 窗 + 该轮位胎压），前后盖各一张小卡，全部落在圆环内侧
   _carOverlay(data, t, b, running) {
     const zh = !isEn(this._hass);
-    const doors = !!b;
-    const items = doors ? this._items(b) : [];
+    const doors = !!b && b.on !== false;
+    const items = b ? this._items(b) : [];
     const itemFor = (slot) => items.find((x) => x.slot === slot) || null;
     const entFor = (slot) => {
       const it = itemFor(slot);
