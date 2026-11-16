@@ -475,12 +475,12 @@ h1 { margin: 0; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-s
 .acts { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 2px; }
 .acts { gap: 4px; }
 /* 按钮自成一套赛博配色：青 / 电紫 / 洋红，不跟主题强调色走，任何主题下都能从底色里跳出来 */
-.tile { position: relative; display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 0;
+.tile { position: relative; display: flex; flex-direction: column; align-items: center; gap: 11px; padding: 0;
   background: none; border: none; cursor: pointer; color: var(--hc-ink); font: inherit; text-align: center;
   -webkit-tap-highlight-color: transparent; -webkit-touch-callout: none; user-select: none;
   touch-action: manipulation;
   --cy-a: 34,232,255; --cy-b: 168,86,255; --cy-c: 255,52,196; --cy-ok: 48,255,168; }
-.orb { position: relative; width: 62px; height: 62px; display: grid; place-items: center; border-radius: 50%;
+.orb { position: relative; width: 72px; height: 72px; display: grid; place-items: center; border-radius: 50%;
   border: 1px solid rgba(34,232,255,.22);
   background:
     radial-gradient(120% 92% at 34% 16%, rgba(255,255,255,.52) 0%, rgba(255,255,255,.10) 32%, rgba(255,255,255,0) 54%),
@@ -499,9 +499,14 @@ h1 { margin: 0; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-s
 .orb::after { content: ""; position: absolute; left: 17%; top: 9%; width: 46%; height: 32%; border-radius: 50%;
   background: radial-gradient(60% 60% at 50% 50%, rgba(255,255,255,.6), rgba(255,255,255,.08) 68%, transparent 78%);
   filter: blur(1px); pointer-events: none; opacity: .7; }
-.tile .ic { width: 24px; height: 24px; color: #ddf8ff; filter: drop-shadow(0 1px 2px rgba(0,0,0,.7)); }
-.tile .lbl { max-width: 100%; font-size: 12.5px; font-weight: 620; letter-spacing: .06em;
+.tile .ic { width: 27px; height: 27px; color: #ddf8ff; filter: drop-shadow(0 1px 2px rgba(0,0,0,.7)); }
+.tile .lbl { max-width: 100%; font-size: 13.5px; font-weight: 620; letter-spacing: .06em;
   color: rgba(206,229,244,.88); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+@keyframes hc-ring-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+.tile.spin .orb::before, .tile:active .orb::before {
+  animation: hc-ring-spin .8s linear infinite;
+  opacity: 1;
+  filter: drop-shadow(0 0 9px rgba(var(--cy-a),.9)) drop-shadow(0 0 16px rgba(var(--cy-c),.55)); }
 .tile:hover { transform: translateY(-2px); }
 .tile:hover .orb::before { opacity: 1; filter: drop-shadow(0 0 7px rgba(var(--cy-c),.8)); }
 .tile:hover .orb { border-color: rgba(var(--cy-c),.4);
@@ -719,8 +724,8 @@ h1 { margin: 0; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-s
 .compact .hero { height: 152px; --r: 60px; }
 .compact .carimg { max-height: 70%; max-width: 58%; }
 .compact .orbit.o2 { display: none; }
-.compact .orb { width: 48px; height: 48px; }
-.compact .tile .ic { width: 19px; height: 19px; }
+.compact .orb { width: 58px; height: 58px; }
+.compact .tile .ic { width: 22px; height: 22px; }
 .compact .tile { gap: 7px; }
 .compact .gauge { max-width: 96px; }
 .compact .gn b { font-size: 25px; }
@@ -822,10 +827,10 @@ ha-card.panel:not(.fit) .gauge { max-width: 86px; }
 /* 窄面板：车图略收窄，保证左右两列聚合卡与圆环之间留白 */
 ha-card.panel:not(.fit) .hero { --r: 72px; }
 ha-card.panel:not(.fit) .energy { column-gap: 6px; }
-ha-card.panel:not(.fit) .orb { width: 48px; height: 48px; }
-ha-card.panel:not(.fit) .tile .ic { width: 19px; height: 19px; }
+ha-card.panel:not(.fit) .orb { width: 58px; height: 58px; }
+ha-card.panel:not(.fit) .tile .ic { width: 22px; height: 22px; }
 ha-card.panel:not(.fit) .tile { gap: 7px; }
-ha-card.panel:not(.fit) .tile .lbl { font-size: 10px; letter-spacing: .04em; }
+ha-card.panel:not(.fit) .tile .lbl { font-size: 11px; letter-spacing: .04em; }
 ha-card.panel:not(.fit) .pills { margin-top: 2px; gap: 6px; }
 ha-card.panel:not(.fit) .pill { height: 26px; font-size: 10.5px; }
 ha-card.panel:not(.fit) .substats { margin-top: 4px; gap: 6px; }
@@ -2181,7 +2186,14 @@ var HaCarCard = class extends HTMLElement {
         default:
           break;
       }
-      if (html) blocks.push({ html, hero: b.type === "hero" });
+      if (html) blocks.push({ html, hero: b.type === "hero", type: b.type });
+    }
+    const ai = blocks.findIndex((x) => x.type === "alerts");
+    const ei = blocks.findIndex((x) => x.type === "energy");
+    if (ai > -1 && ei > -1 && ai !== ei + 1) {
+      const [alerts] = blocks.splice(ai, 1);
+      const target = blocks.findIndex((x) => x.type === "energy");
+      blocks.splice(target + 1, 0, alerts);
     }
     let inner;
     if (twoCol) {
@@ -2987,6 +2999,12 @@ var HaCarCard = class extends HTMLElement {
     this._finishHold();
   }
   _onClick(ev) {
+    const tile = ev.target.closest && ev.target.closest(".tile");
+    if (tile) {
+      tile.classList.add("spin");
+      clearTimeout(this._spinTimer);
+      this._spinTimer = setTimeout(() => tile.classList.remove("spin"), 800);
+    }
     if (ev.target.closest && ev.target.closest("select[data-sel]")) return;
     const act = ev.target.closest && ev.target.closest("[data-act]");
     if (act) {
@@ -3499,7 +3517,7 @@ var HaCarEditor = class extends HTMLElement {
 customElements.define("ha-car-editor", HaCarEditor);
 
 // src/main.js
-var VERSION = "1.9.4";
+var VERSION = "1.9.5";
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "ha-car",

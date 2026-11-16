@@ -866,7 +866,16 @@ class HaCarCard extends HTMLElement {
         default:
           break;
       }
-      if (html) blocks.push({ html, hero: b.type === "hero" });
+      if (html) blocks.push({ html, hero: b.type === "hero", type: b.type });
+    }
+
+    // 「车辆告警」固定排在「总里程」所在的能源块之后（不受旧配置里的块顺序影响）
+    const ai = blocks.findIndex((x) => x.type === "alerts");
+    const ei = blocks.findIndex((x) => x.type === "energy");
+    if (ai > -1 && ei > -1 && ai !== ei + 1) {
+      const [alerts] = blocks.splice(ai, 1);
+      const target = blocks.findIndex((x) => x.type === "energy");
+      blocks.splice(target + 1, 0, alerts);
     }
 
     let inner;
@@ -1755,6 +1764,12 @@ class HaCarCard extends HTMLElement {
   }
 
   _onClick(ev) {
+    const tile = ev.target.closest && ev.target.closest(".tile");
+    if (tile) {
+      tile.classList.add("spin");
+      clearTimeout(this._spinTimer);
+      this._spinTimer = setTimeout(() => tile.classList.remove("spin"), 800);
+    }
     // 下拉胶囊里的原生 select：点开只走 change，不触发卡片动作
     if (ev.target.closest && ev.target.closest("select[data-sel]")) return;
     const act = ev.target.closest && ev.target.closest("[data-act]");
