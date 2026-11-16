@@ -48,6 +48,31 @@ const EDIT_WRAP_TAGS = new Set([
   "hui-dialog-edit-card",
 ]);
 
+
+// 主题：只换强调色、漆面渐变与光晕色，版式完全一致，用户可在编辑器里直接选
+export const THEMES = {
+  midnight: { name: "深海（默认）", accent: "#37d6e8", glow: "55,214,232", top: "#111d2c", mid: "#0b1521", low: "#060b12" },
+  aurora: { name: "极光", accent: "#5cf2c0", glow: "92,242,192", top: "#0d2420", mid: "#081713", low: "#040b08" },
+  cyber: { name: "赛博紫", accent: "#b98bff", glow: "185,139,255", top: "#1b1230", mid: "#110a1e", low: "#07040e" },
+  ember: { name: "熔岩橙", accent: "#ffab5e", glow: "255,171,94", top: "#2a170b", mid: "#180d05", low: "#0a0502" },
+  graphite: { name: "石墨灰", accent: "#9fb3c8", glow: "159,179,200", top: "#1d2126", mid: "#12161a", low: "#080a0c" },
+  rose: { name: "玫瑰", accent: "#ff8fb6", glow: "255,143,182", top: "#2a1020", mid: "#190812", low: "#0b0408" },
+};
+
+function themeBg(t) {
+  const th = THEMES[t] || THEMES.midnight;
+  return `radial-gradient(120% 80% at 50% -10%, rgba(${th.glow},.14), transparent 58%),` +
+    `radial-gradient(70% 50% at 15% 105%, rgba(${th.glow},.10), transparent 70%),` +
+    `linear-gradient(168deg, ${th.top} 0%, ${th.mid} 52%, ${th.low} 100%)`;
+}
+
+function hexRgb(hex) {
+  const m = /^#?([0-9a-f]{6})$/i.exec(String(hex || "").trim());
+  if (!m) return "55,214,232";
+  const n = parseInt(m[1], 16);
+  return `${(n >> 16) & 255},${(n >> 8) & 255},${n & 255}`;
+}
+
 const DEFAULTS = {
   title: "",
   layout: "full",
@@ -58,6 +83,7 @@ const DEFAULTS = {
   confirm: ["btn_unlock", "btn_lock", "sw_engine", "sw_honk"],
   hold_ms: 2000,
   accent: "#37d6e8",
+  theme: "midnight",
   show_plate: true,
   privacy: false,
   image: "auto",
@@ -621,7 +647,11 @@ class HaCarCard extends HTMLElement {
     this._syncGrid();
     this._card.classList.toggle("compact", cfg.layout === "compact");
     this._wrap.className = "wrap";
-    if (cfg.accent) this._card.style.setProperty("--hc-accent", cfg.accent);
+    const th = THEMES[cfg.theme] || THEMES.midnight;
+    const accent = cfg.accent && cfg.accent !== DEFAULTS.accent ? cfg.accent : th.accent;
+    this._card.style.setProperty("--hc-accent", accent);
+    this._card.style.setProperty("--hc-a", hexRgb(accent));
+    this._card.style.setProperty("--hc-bg", themeBg(cfg.theme));
     this._prunePending(data);
     const twoCol = this._card.classList.contains("fit") || this._card.classList.contains("gtwo");
     this._wrap.innerHTML = this._body(data, twoCol);

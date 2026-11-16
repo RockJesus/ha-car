@@ -1,6 +1,6 @@
 import { EDITOR_STYLES } from "./styles.js";
 import { detectVehicles, resolve } from "./resolve.js";
-import { CONFIRMABLE, DEFAULTS, normBlocks } from "./card.js";
+import { CONFIRMABLE, DEFAULTS, THEMES, normBlocks } from "./card.js";
 
 const BLOCK_LABELS = {
   meta: "定位/同步", hero: "车图", energy: "能耗仪表", alerts: "车辆告警",
@@ -64,6 +64,8 @@ const L = {
   imageMode: "车辆图片",
   imageUrl: "图片地址",
   accent: "强调色",
+  theme: "主题",
+  themeHint: "换一套漆面与背光配色，版式不变；下面的强调色会覆盖主题色。",
   advanced: "高级：实体绑定",
   advancedHint: "留空即自动识别。只有实体被改名或一台车挂多个集成时才需要填。",
   autofill: "自动适配集成实体",
@@ -162,6 +164,11 @@ class HaCarEditor extends HTMLElement {
           ${IMG_MODES.map(([v, n]) => `<option value="${v}">${n}</option>`).join("")}
         </select>
         <input class="tf" id="imgurl" type="text" placeholder="https://…" style="margin-top:6px;display:none">
+        <label class="f" for="theme">${L.theme}</label>
+        <select class="tf" id="theme">
+          ${Object.entries(THEMES).map(([v, t]) => `<option value="${v}">${t.name}</option>`).join("")}
+        </select>
+        <p class="hint" style="margin-top:4px">${L.themeHint}</p>
         <label class="f">${L.accent}</label>
         <div class="swatches" id="swatches">
           ${ACCENTS.map((c) => `<span class="swatch" data-color="${c}" style="background:${c}"></span>`).join("")}
@@ -270,6 +277,11 @@ class HaCarEditor extends HTMLElement {
 
     q("imgurl").addEventListener("input", (e) => {
       this._config.image_url = e.target.value.trim();
+      this._emit();
+    });
+
+    q("theme").addEventListener("change", (e) => {
+      this._config.theme = e.target.value;
       this._emit();
     });
 
@@ -419,7 +431,8 @@ class HaCarEditor extends HTMLElement {
     q("imgmode").value = this._config.image || "auto";
     q("imgurl").style.display = this._config.image === "custom" ? "block" : "none";
     q("imgurl").value = this._config.image_url || "";
-    q("color").value = /^#[0-9a-f]{6}$/i.test(this._config.accent || "") ? this._config.accent : "#37d6e8";
+    q("theme").value = this._config.theme || DEFAULTS.theme;
+    q("color").value = /^#[0-9a-f]{6}$/i.test(this._config.accent || "") ? this._config.accent : (THEMES[this._config.theme] || THEMES.midnight).accent;
     this.shadowRoot.querySelectorAll(".swatch").forEach((s) => {
       s.classList.toggle("sel", s.dataset.color.toLowerCase() === String(this._config.accent || "").toLowerCase());
     });
@@ -440,6 +453,7 @@ class HaCarEditor extends HTMLElement {
     if (cfg.image === "custom" && !cfg.image_url) delete cfg.image;
     if (cfg.hold_ms === DEFAULTS.hold_ms) delete cfg.hold_ms;
     if (cfg.accent === DEFAULTS.accent) delete cfg.accent;
+    if (cfg.theme === DEFAULTS.theme) delete cfg.theme;
     if (cfg.image === "auto") delete cfg.image;
     this.dispatchEvent(
       new CustomEvent("config-changed", {

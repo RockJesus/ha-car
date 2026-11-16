@@ -318,16 +318,16 @@ var STYLES = `
 :host { display: block; --hc-accent: #37d6e8; --hc-ink: #e9eff7; --hc-dim: #8496ad;
   --hc-ok: #6fe0a8; --hc-warn: #ffc46b; --hc-bad: #ff9182; --hc-holdms: 2000ms; }
 ha-card { display: block; overflow: hidden; position: relative;
-  border: 1px solid rgba(120,190,215,.16);
+  border: 1px solid rgba(var(--hc-a,120,190,215),.16);
   border-radius: var(--ha-card-border-radius, 28px);
   color: var(--hc-ink);
-  background-image:
-    radial-gradient(120% 80% at 50% -10%, rgba(55,214,232,.14), transparent 58%),
+  background-image: var(--hc-bg,
+    radial-gradient(120% 80% at 50% -10%, rgba(var(--hc-a,55,214,232),.14), transparent 58%),
     radial-gradient(70% 50% at 15% 105%, rgba(40,120,180,.10), transparent 70%),
-    linear-gradient(168deg, #111d2c 0%, #0b1521 52%, #060b12 100%);
+    linear-gradient(168deg, #111d2c 0%, #0b1521 52%, #060b12 100%));
   background-size: auto, auto, auto;
   background-repeat: no-repeat;
-  box-shadow: 0 30px 60px -30px rgba(2,6,12,.98), 0 0 56px -26px rgba(55,214,232,.45),
+  box-shadow: 0 30px 60px -30px rgba(2,6,12,.98), 0 0 56px -26px rgba(var(--hc-a,55,214,232),.45),
     inset 0 1px 0 rgba(255,255,255,.08), inset 0 -1px 0 rgba(0,0,0,.5);
   font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "PingFang SC", "Microsoft YaHei", "Segoe UI", Roboto, sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -348,10 +348,10 @@ ha-card::after { content: ""; position: absolute; left: 8%; right: 8%; top: 0; h
 .plate, .gn b, .tc b, .stat b { font-variant-numeric: tabular-nums; }
 .plate { font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace; }
 .wrap { position: relative; padding: 18px 16px 14px; display: flex; flex-direction: column; gap: 14px;
-  background-image:
-    radial-gradient(120% 80% at 50% -10%, rgba(55,214,232,.14), transparent 58%),
+  background-image: var(--hc-bg,
+    radial-gradient(120% 80% at 50% -10%, rgba(var(--hc-a,55,214,232),.14), transparent 58%),
     radial-gradient(70% 50% at 15% 105%, rgba(40,120,180,.10), transparent 70%),
-    linear-gradient(168deg, #111d2c 0%, #0b1521 52%, #060b12 100%);
+    linear-gradient(168deg, #111d2c 0%, #0b1521 52%, #060b12 100%));
   background-size: auto, auto, auto; background-repeat: no-repeat; }
 .duo { display: flex; flex-direction: column; gap: 14px; }
 .dleft, .dright { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
@@ -407,25 +407,25 @@ h1 { margin: 0; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-s
 .hero { position: relative; height: 224px; display: flex; align-items: center; justify-content: center;
   overflow: hidden; --r: 92px; }
 .halo { position: absolute; inset: -20% -12% -10%; pointer-events: none;
-  background: radial-gradient(46% 52% at 50% 50%, rgba(55,214,232,.20), rgba(55,214,232,.06) 46%, transparent 72%);
+  background: radial-gradient(46% 52% at 50% 50%, rgba(var(--hc-a,55,214,232),.20), rgba(var(--hc-a,55,214,232),.06) 46%, transparent 72%);
   filter: blur(2px); }
 .orbit, .orbit.o2 { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
   border-radius: 50%; pointer-events: none; height: 94%; aspect-ratio: 1; width: auto; }
 .orbit { border: 1px solid rgba(70,220,240,.22);
-  box-shadow: inset 0 0 34px -14px rgba(55,214,232,.55), 0 0 24px -16px rgba(55,214,232,.5); }
+  box-shadow: inset 0 0 34px -14px rgba(var(--hc-a,55,214,232),.55), 0 0 24px -16px rgba(var(--hc-a,55,214,232),.5); }
 .orbit.o2 { height: 97%;
-  border: 1px solid rgba(55,214,232,.08); }
+  border: 1px solid rgba(var(--hc-a,55,214,232),.08); }
 .node { position: absolute; left: 50%; top: 50%; width: 7px; height: 7px; margin: -3.5px 0 0 -3.5px;
   transform: translate(-50%, -50%);
   border-radius: 50%; background: #9ef4ff;
-  box-shadow: 0 0 6px 1px rgba(55,214,232,.9), 0 0 16px 5px rgba(55,214,232,.35);
+  box-shadow: 0 0 6px 1px rgba(var(--hc-a,55,214,232),.9), 0 0 16px 5px rgba(var(--hc-a,55,214,232),.35);
   animation: hc-node 3.2s ease-in-out infinite; }
 .node.n1 { top: 0; animation-delay: 0s; }
 .node.n2 { top: 50%; left: 100%; animation-delay: .8s; }
 .node.n3 { top: 100%; animation-delay: 1.6s; }
 .node.n4 { top: 50%; left: 0; animation-delay: 2.4s; }
 .carimg { position: relative; max-width: 64%; max-height: 78%; object-fit: contain;
-  filter: brightness(1.06) saturate(1.04) drop-shadow(0 30px 30px rgba(2,6,12,.8)) drop-shadow(0 0 18px rgba(55,214,232,.08)); }
+  filter: brightness(1.06) saturate(1.04) drop-shadow(0 30px 30px rgba(2,6,12,.8)) drop-shadow(0 0 18px rgba(var(--hc-a,55,214,232),.08)); }
 .carph { position: relative; width: 96px; height: 96px; display: grid; place-items: center; border-radius: 999px;
   border: 1px solid rgba(255,255,255,.1); color: var(--hc-dim); background: rgba(255,255,255,.03); }
 .carph .ic { width: 44px; height: 44px; opacity: .55; }
@@ -441,7 +441,7 @@ h1 { margin: 0; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-s
 .chip.ok { color: var(--hc-ok); background: rgba(111,224,168,.1); border-color: rgba(111,224,168,.26); }
 .chip.warn { color: var(--hc-warn); background: rgba(255,196,107,.1); border-color: rgba(255,196,107,.26); }
 .chip.bad { color: var(--hc-bad); background: rgba(255,145,130,.1); border-color: rgba(255,145,130,.26); }
-.chip.info { color: var(--hc-accent); background: rgba(55,214,232,.09); border-color: rgba(55,214,232,.24); }
+.chip.info { color: var(--hc-accent); background: rgba(var(--hc-a,55,214,232),.09); border-color: rgba(var(--hc-a,55,214,232),.24); }
 
 /* 操作：圆形玻璃钮 + 标签，长按沿圆环走一圈（参考图同构） */
 .acts { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 2px; }
@@ -453,16 +453,16 @@ h1 { margin: 0; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-s
   border: 1px solid rgba(190,225,245,.14);
   background: radial-gradient(120% 120% at 50% 0%, rgba(255,255,255,.14), rgba(255,255,255,.02) 58%), #0c1622;
   box-shadow: inset 0 1px 0 rgba(255,255,255,.12), inset 0 -8px 16px -10px rgba(0,0,0,.9),
-    0 12px 24px -16px rgba(0,0,0,.95), 0 0 20px -14px rgba(55,214,232,.4);
+    0 12px 24px -16px rgba(0,0,0,.95), 0 0 20px -14px rgba(var(--hc-a,55,214,232),.4);
   transition: transform .16s, border-color .18s, box-shadow .18s, background .18s; }
 .tile .ic { width: 21px; height: 21px; }
 .tile .lbl { max-width: 100%; font-size: 11.5px; font-weight: 600; letter-spacing: .04em; color: rgba(150,172,196,.9);
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .tile:hover .orb { border-color: rgba(190,240,255,.3);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.16), 0 0 26px -10px rgba(55,214,232,.55); }
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.16), 0 0 26px -10px rgba(var(--hc-a,55,214,232),.55); }
 .tile:active .orb, .tile.pressing .orb { transform: scale(.94); }
-.tile.hot .orb { color: #eafdff; border-color: rgba(55,214,232,.45);
-  box-shadow: 0 0 0 1px rgba(55,214,232,.16) inset, 0 0 24px -6px rgba(55,214,232,.6); }
+.tile.hot .orb { color: #eafdff; border-color: rgba(var(--hc-a,55,214,232),.45);
+  box-shadow: 0 0 0 1px rgba(var(--hc-a,55,214,232),.16) inset, 0 0 24px -6px rgba(var(--hc-a,55,214,232),.6); }
 .tile.hot .lbl { color: #cdf6ff; }
 .tile.on .orb { color: var(--hc-ok); border-color: rgba(111,224,168,.42);
   box-shadow: 0 0 22px -8px rgba(111,224,168,.6); }
@@ -474,8 +474,8 @@ h1 { margin: 0; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-s
 .tile.pressing .hring, .tile.armed .hring { opacity: 1; }
 .tile.pressing .hring circle { stroke-dashoffset: 0; transition: stroke-dashoffset var(--hc-holdms) linear; }
 .tile.armed .hring circle { stroke-dashoffset: 0; }
-.tile.armed .orb { border-color: rgba(55,214,232,.7);
-  box-shadow: 0 0 26px -4px rgba(55,214,232,.85), inset 0 0 18px -6px rgba(55,214,232,.6); }
+.tile.armed .orb { border-color: rgba(var(--hc-a,55,214,232),.7);
+  box-shadow: 0 0 26px -4px rgba(var(--hc-a,55,214,232),.85), inset 0 0 18px -6px rgba(var(--hc-a,55,214,232),.6); }
 .tile.armed .lbl { color: var(--hc-accent); }
 .tile.pending .orb::after { content: ""; position: absolute; top: 1px; right: 4px; width: 6px; height: 6px;
   border-radius: 50%; background: var(--hc-accent); animation: hc-pulse 1.4s ease-in-out infinite; }
@@ -496,8 +496,8 @@ h1 { margin: 0; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-s
 .pill:hover { color: var(--hc-ink); background: rgba(255,255,255,.06); }
 .pill.on { color: var(--hc-ok); border-color: rgba(111,224,168,.26); }
 .pill.off { opacity: .45; }
-.pill.pressing { color: var(--hc-accent); border-color: rgba(55,214,232,.5); }
-.pill.armed { color: var(--hc-accent); border-color: rgba(55,214,232,.7); background: rgba(55,214,232,.14); }
+.pill.pressing { color: var(--hc-accent); border-color: rgba(var(--hc-a,55,214,232),.5); }
+.pill.armed { color: var(--hc-accent); border-color: rgba(var(--hc-a,55,214,232),.7); background: rgba(var(--hc-a,55,214,232),.14); }
 .pill .holdbar { position: absolute; left: 0; bottom: 0; height: 2px; width: 100%; background: var(--hc-accent);
   transform: scaleX(0); transform-origin: left; opacity: 0; }
 .pill.pressing .holdbar { opacity: 1; transform: scaleX(1); transition: opacity .12s, transform var(--hc-holdms) linear; }
@@ -511,7 +511,7 @@ h1 { margin: 0; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-s
 .gauge > svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
 .gt { fill: none; stroke: rgba(255,255,255,.07); stroke-width: 6; }
 .gp { fill: none; stroke: var(--hc-accent); stroke-width: 6; stroke-linecap: round;
-  filter: drop-shadow(0 0 8px rgba(55,214,232,.65)); }
+  filter: drop-shadow(0 0 8px rgba(var(--hc-a,55,214,232),.65)); }
 .gv { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;
   gap: 2.4cqw; padding: 0 6cqw; box-sizing: border-box; }
 .gl { display: inline-flex; align-items: center; gap: 3.6cqw; font-size: clamp(9px, 8.4cqw, 15px); font-weight: 650; letter-spacing: .1em;
@@ -519,7 +519,7 @@ h1 { margin: 0; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-s
 .gl .ic { width: clamp(11px, 9.6cqw, 17px); height: clamp(11px, 9.6cqw, 17px); opacity: .85; }
 .gn { display: flex; flex-direction: column; align-items: center; gap: .8cqw; line-height: 1; max-width: 100%; }
 .gn b { font-size: clamp(18px, 26cqw, 44px); font-weight: 680; letter-spacing: -.02em; color: #f3f8ff; white-space: nowrap;
-  text-shadow: 0 0 22px rgba(55,214,232,.16); }
+  text-shadow: 0 0 22px rgba(var(--hc-a,55,214,232),.16); }
 .gn i { font-size: clamp(9px, 8cqw, 14px); font-style: normal; font-weight: 600; color: rgba(150,172,196,.9); letter-spacing: .06em; }
 .egdiv { width: 1px; height: 62%; align-self: center;
   background: linear-gradient(180deg, transparent, rgba(120,190,215,.28) 26%, rgba(120,190,215,.28) 74%, transparent); }
@@ -578,8 +578,8 @@ h1 { margin: 0; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-s
 .chgrow .st { font-size: 13px; font-weight: 650; }
 .chgrow .meta { font-size: 10px; color: var(--hc-dim); letter-spacing: .06em; margin-top: 3px; }
 .mini { display: inline-flex; align-items: center; gap: 5px; height: 28px; padding: 0 11px; border-radius: 999px;
-  font: 650 11px/1 inherit; cursor: pointer; border: 1px solid rgba(55,214,232,.3);
-  background: rgba(55,214,232,.1); color: var(--hc-accent); }
+  font: 650 11px/1 inherit; cursor: pointer; border: 1px solid rgba(var(--hc-a,55,214,232),.3);
+  background: rgba(var(--hc-a,55,214,232),.1); color: var(--hc-accent); }
 .mini.dim { border-color: rgba(255,255,255,.1); background: rgba(255,255,255,.04); color: var(--hc-dim); }
 .mini:active { transform: scale(.97); }
 
@@ -618,16 +618,16 @@ h1 { margin: 0; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-s
 .orbit .hring2 { transform: rotate(-90deg); }
 .orbit .hring2 circle { fill: none; stroke: var(--hc-accent); stroke-width: .6; stroke-linecap: round;
   opacity: 0; transition: opacity .18s ease;
-  filter: drop-shadow(0 0 3px rgba(55,214,232,.55)); }
+  filter: drop-shadow(0 0 3px rgba(var(--hc-a,55,214,232),.55)); }
 .orbit.prog .hring2 circle, .orbit.armed .hring2 circle { opacity: 1; }
-.orbit.armed .hring2 circle { stroke: #dffbff; filter: drop-shadow(0 0 7px rgba(55,214,232,.85)); }
+.orbit.armed .hring2 circle { stroke: #dffbff; filter: drop-shadow(0 0 7px rgba(var(--hc-a,55,214,232),.85)); }
 .toast { position: absolute; right: 0; left: auto; bottom: calc(100% + 6px); z-index: 6;
   pointer-events: none; max-width: 100%;
   box-shadow: 0 14px 30px -16px rgba(0,0,0,.95);
   display: flex; align-items: center; gap: 7px; padding: 7px 13px; border-radius: 999px; white-space: nowrap;
   font-size: 11.5px; line-height: 1.4; color: #d5f8ff;
   background: linear-gradient(180deg, rgba(16,32,48,.97), rgba(9,20,32,.97));
-  border: 1px solid rgba(55,214,232,.28);
+  border: 1px solid rgba(var(--hc-a,55,214,232),.28);
   backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
 .toast.err { border-color: rgba(255,145,130,.34); color: #ffd3c9;
   background: linear-gradient(180deg, rgba(40,18,20,.97), rgba(24,12,14,.97)); }
@@ -736,7 +736,7 @@ ha-card.panel:not(.fit) .svc summary { padding: 7px 9px; }
 ha-card.panel:not(.fit) .baseline.solo { padding: 3px 8px; font-size: 10px; }
 
 :host(.panel) { position: relative; overflow: hidden;
-  background: radial-gradient(90% 60% at 50% 0%, rgba(55,214,232,.10), transparent 62%),
+  background: radial-gradient(90% 60% at 50% 0%, rgba(var(--hc-a,55,214,232),.10), transparent 62%),
     linear-gradient(170deg, #101b29 0%, #0a1119 60%, #070c13 100%); }
 ha-card.panel { box-sizing: border-box; width: 100%; height: 100%; margin: 0; }
 /* 选择器缩略卡：照真机卡整体版式缩小（竖版小卡），车牌/位置/数值全是假数据 */
@@ -1370,6 +1370,24 @@ var EDIT_WRAP_TAGS = /* @__PURE__ */ new Set([
   "hui-edit-dashboard-view",
   "hui-dialog-edit-card"
 ]);
+var THEMES = {
+  midnight: { name: "深海（默认）", accent: "#37d6e8", glow: "55,214,232", top: "#111d2c", mid: "#0b1521", low: "#060b12" },
+  aurora: { name: "极光", accent: "#5cf2c0", glow: "92,242,192", top: "#0d2420", mid: "#081713", low: "#040b08" },
+  cyber: { name: "赛博紫", accent: "#b98bff", glow: "185,139,255", top: "#1b1230", mid: "#110a1e", low: "#07040e" },
+  ember: { name: "熔岩橙", accent: "#ffab5e", glow: "255,171,94", top: "#2a170b", mid: "#180d05", low: "#0a0502" },
+  graphite: { name: "石墨灰", accent: "#9fb3c8", glow: "159,179,200", top: "#1d2126", mid: "#12161a", low: "#080a0c" },
+  rose: { name: "玫瑰", accent: "#ff8fb6", glow: "255,143,182", top: "#2a1020", mid: "#190812", low: "#0b0408" }
+};
+function themeBg(t) {
+  const th = THEMES[t] || THEMES.midnight;
+  return `radial-gradient(120% 80% at 50% -10%, rgba(${th.glow},.14), transparent 58%),radial-gradient(70% 50% at 15% 105%, rgba(${th.glow},.10), transparent 70%),linear-gradient(168deg, ${th.top} 0%, ${th.mid} 52%, ${th.low} 100%)`;
+}
+function hexRgb(hex) {
+  const m = /^#?([0-9a-f]{6})$/i.exec(String(hex || "").trim());
+  if (!m) return "55,214,232";
+  const n = parseInt(m[1], 16);
+  return `${n >> 16 & 255},${n >> 8 & 255},${n & 255}`;
+}
 var DEFAULTS = {
   title: "",
   layout: "full",
@@ -1380,6 +1398,7 @@ var DEFAULTS = {
   confirm: ["btn_unlock", "btn_lock", "sw_engine", "sw_honk"],
   hold_ms: 2e3,
   accent: "#37d6e8",
+  theme: "midnight",
   show_plate: true,
   privacy: false,
   image: "auto",
@@ -1866,7 +1885,11 @@ var HaCarCard = class extends HTMLElement {
     this._syncGrid();
     this._card.classList.toggle("compact", cfg.layout === "compact");
     this._wrap.className = "wrap";
-    if (cfg.accent) this._card.style.setProperty("--hc-accent", cfg.accent);
+    const th = THEMES[cfg.theme] || THEMES.midnight;
+    const accent = cfg.accent && cfg.accent !== DEFAULTS.accent ? cfg.accent : th.accent;
+    this._card.style.setProperty("--hc-accent", accent);
+    this._card.style.setProperty("--hc-a", hexRgb(accent));
+    this._card.style.setProperty("--hc-bg", themeBg(cfg.theme));
     this._prunePending(data);
     const twoCol = this._card.classList.contains("fit") || this._card.classList.contains("gtwo");
     this._wrap.innerHTML = this._body(data, twoCol);
@@ -2966,6 +2989,8 @@ var L = {
   imageMode: "车辆图片",
   imageUrl: "图片地址",
   accent: "强调色",
+  theme: "主题",
+  themeHint: "换一套漆面与背光配色，版式不变；下面的强调色会覆盖主题色。",
   advanced: "高级：实体绑定",
   advancedHint: "留空即自动识别。只有实体被改名或一台车挂多个集成时才需要填。",
   autofill: "自动适配集成实体",
@@ -3060,6 +3085,11 @@ var HaCarEditor = class extends HTMLElement {
           ${IMG_MODES.map(([v, n]) => `<option value="${v}">${n}</option>`).join("")}
         </select>
         <input class="tf" id="imgurl" type="text" placeholder="https://…" style="margin-top:6px;display:none">
+        <label class="f" for="theme">${L.theme}</label>
+        <select class="tf" id="theme">
+          ${Object.entries(THEMES).map(([v, t]) => `<option value="${v}">${t.name}</option>`).join("")}
+        </select>
+        <p class="hint" style="margin-top:4px">${L.themeHint}</p>
         <label class="f">${L.accent}</label>
         <div class="swatches" id="swatches">
           ${ACCENTS.map((c) => `<span class="swatch" data-color="${c}" style="background:${c}"></span>`).join("")}
@@ -3158,6 +3188,10 @@ var HaCarEditor = class extends HTMLElement {
     });
     q("imgurl").addEventListener("input", (e) => {
       this._config.image_url = e.target.value.trim();
+      this._emit();
+    });
+    q("theme").addEventListener("change", (e) => {
+      this._config.theme = e.target.value;
       this._emit();
     });
     this.shadowRoot.getElementById("swatches").addEventListener("click", (e) => {
@@ -3294,7 +3328,8 @@ var HaCarEditor = class extends HTMLElement {
     q("imgmode").value = this._config.image || "auto";
     q("imgurl").style.display = this._config.image === "custom" ? "block" : "none";
     q("imgurl").value = this._config.image_url || "";
-    q("color").value = /^#[0-9a-f]{6}$/i.test(this._config.accent || "") ? this._config.accent : "#37d6e8";
+    q("theme").value = this._config.theme || DEFAULTS.theme;
+    q("color").value = /^#[0-9a-f]{6}$/i.test(this._config.accent || "") ? this._config.accent : (THEMES[this._config.theme] || THEMES.midnight).accent;
     this.shadowRoot.querySelectorAll(".swatch").forEach((s) => {
       s.classList.toggle("sel", s.dataset.color.toLowerCase() === String(this._config.accent || "").toLowerCase());
     });
@@ -3314,6 +3349,7 @@ var HaCarEditor = class extends HTMLElement {
     if (cfg.image === "custom" && !cfg.image_url) delete cfg.image;
     if (cfg.hold_ms === DEFAULTS.hold_ms) delete cfg.hold_ms;
     if (cfg.accent === DEFAULTS.accent) delete cfg.accent;
+    if (cfg.theme === DEFAULTS.theme) delete cfg.theme;
     if (cfg.image === "auto") delete cfg.image;
     this.dispatchEvent(
       new CustomEvent("config-changed", {
@@ -3327,7 +3363,7 @@ var HaCarEditor = class extends HTMLElement {
 customElements.define("ha-car-editor", HaCarEditor);
 
 // src/main.js
-var VERSION = "1.8.5";
+var VERSION = "1.8.6";
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "ha-car",
