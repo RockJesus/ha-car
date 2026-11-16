@@ -398,7 +398,11 @@ class HaCarCard extends HTMLElement {
     const w = visW && visW < bw ? visW : bw;
     const h = visH && visH < bh ? visH : bh;
     // 宽格子直接复用面板的 1440×900 双栏设计稿（同一套左右分栏与字号），窄格子走单栏缩放
-    const wide = w / h >= 1.15;
+    // 配置弹窗里的预览：横屏编辑给横版预览、竖屏编辑给竖版预览（按屏幕方向而不是预览小框比例）
+    const editorPv = this._inCardEditor();
+    const sw = window.innerWidth || 0;
+    const sh = window.innerHeight || 0;
+    const wide = editorPv ? sw >= sh * 1.02 : w / h >= 1.15;
     const wideChanged = wide !== this._wide;
     this._wide = wide;
     if (wide) {
@@ -548,6 +552,20 @@ class HaCarCard extends HTMLElement {
   }
 
   // 祖先链里出现编辑态包装层 → 这是仪表盘编辑，不是选择器缩略卡
+  // 卡片配置弹窗里的预览卡也挂在模拟的 hui-grid-section 下；
+  // 这里要按「屏幕方向」而不是预览框比例决定横版/竖版，保证横屏编辑看到横版卡。
+  _inCardEditor() {
+    let node = this.parentElement;
+    let depth = 0;
+    while (node && depth < 14) {
+      const n = (node.localName || "").toLowerCase();
+      if (n === "hui-dialog-edit-card" || n === "hui-card-editor" || n === "hui-dialog-add-card" || n === "hui-card-preview") return true;
+      node = node.parentElement || (node.parentNode && node.parentNode.host) || null;
+      depth += 1;
+    }
+    return false;
+  }
+
   _inEditWrap() {
     let node = this.parentElement;
     let depth = 0;

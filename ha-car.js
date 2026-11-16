@@ -1788,7 +1788,10 @@ var HaCarCard = class extends HTMLElement {
     const visH = this.clientHeight;
     const w = visW && visW < bw ? visW : bw;
     const h = visH && visH < bh ? visH : bh;
-    const wide = w / h >= 1.15;
+    const editorPv = this._inCardEditor();
+    const sw = window.innerWidth || 0;
+    const sh = window.innerHeight || 0;
+    const wide = editorPv ? sw >= sh * 1.02 : w / h >= 1.15;
     const wideChanged = wide !== this._wide;
     this._wide = wide;
     if (wide) {
@@ -1911,6 +1914,19 @@ var HaCarCard = class extends HTMLElement {
     if (this._config && this.isConnected) this._syncPanel();
   }
   // 祖先链里出现编辑态包装层 → 这是仪表盘编辑，不是选择器缩略卡
+  // 卡片配置弹窗里的预览卡也挂在模拟的 hui-grid-section 下；
+  // 这里要按「屏幕方向」而不是预览框比例决定横版/竖版，保证横屏编辑看到横版卡。
+  _inCardEditor() {
+    let node = this.parentElement;
+    let depth = 0;
+    while (node && depth < 14) {
+      const n = (node.localName || "").toLowerCase();
+      if (n === "hui-dialog-edit-card" || n === "hui-card-editor" || n === "hui-dialog-add-card" || n === "hui-card-preview") return true;
+      node = node.parentElement || node.parentNode && node.parentNode.host || null;
+      depth += 1;
+    }
+    return false;
+  }
   _inEditWrap() {
     let node = this.parentElement;
     let depth = 0;
@@ -3540,7 +3556,7 @@ var HaCarEditor = class extends HTMLElement {
 customElements.define("ha-car-editor", HaCarEditor);
 
 // src/main.js
-var VERSION = "2.0.2";
+var VERSION = "2.0.3";
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "ha-car",
