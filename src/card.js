@@ -106,7 +106,7 @@ export function normBlocks(cfg) {
         unit: typeof b.unit === "string" ? b.unit : "",
         icon: typeof b.icon === "string" ? b.icon : "",
       }));
-    if (list.length) return list;
+    return list;
   }
   const mods = Array.isArray(cfg.modules) ? cfg.modules : MODULES;
   const list = [{ type: "meta", on: true }, { type: "hero", on: true }];

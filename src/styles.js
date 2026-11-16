@@ -799,6 +799,11 @@ label.f { display: block; font-size: 11px; font-weight: 600; letter-spacing: .04
 .swatch.sel { border-color: var(--primary-text-color); }
 .adv { border-top: 1px solid var(--divider-color, rgba(255,255,255,.14)); margin-top: 6px; padding-top: 4px; }
 .adv .grid2 { display: grid; grid-template-columns: 1fr; gap: 2px; }
+.pickrow { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
+.pickrow .pick { flex: 1 1 auto; min-width: 0; }
+.pickrow .btn.sq.clr { flex: 0 0 28px; padding: 4px 0; font-size: 11px; }
+.bk-sub .pick { flex: 1 1 160px; min-width: 0; }
+ha-selector { display: block; width: 100%; }
 .ranged { display: flex; align-items: center; gap: 10px; }
 input[type="range"] { flex: 1; accent-color: var(--primary-color, #03a9f4); }
 
@@ -816,6 +821,7 @@ select.tf { font-size: 13px; padding: 8px 10px; }
 .bk-top { display: flex; align-items: center; gap: 6px; }
 .bk-sub { display: flex; align-items: center; gap: 6px; }
 .bk-sub .ent { flex: 1 1 auto; min-width: 0; }
+.bk-sub .btn.sq.clr { flex: 0 0 26px; padding: 4px 0; font-size: 11px; }
 .blkrow.off { opacity: .55; }
 .blkrow .nm { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .blkrow .btn.sq { min-width: 26px; padding: 4px 6px; font-size: 12px; line-height: 1; }

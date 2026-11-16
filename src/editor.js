@@ -98,7 +98,9 @@ class HaCarEditor extends HTMLElement {
 
   set hass(hass) {
     this._hass = hass;
-    if (this._built) this._syncVehicles();
+    if (!this._built) return;
+    this._syncVehicles();
+    this._syncPickerHass();
   }
 
   _build() {
@@ -126,7 +128,7 @@ class HaCarEditor extends HTMLElement {
 
       <div class="sec">
         <h3>模块布局</h3>
-        <p class="hint">上下箭头调整顺序，开关控制显示，✕ 删除。车图是固定锚点（首个模块 / 宽屏左栏），其余模块严格按此顺序排列：手机从上到下，宽屏排右栏。</p>
+        <p class="hint">上下箭头调整顺序，开关控制显示，✕ 删除。手机从上到下排列；宽屏时车图固定在左栏，其余模块按此顺序排右栏。所有模块都能增删与排序。</p>
         <div id="blk" class="blklist"></div>
         <label class="f">添加模块</label>
         <div style="display:flex;gap:6px">
@@ -184,7 +186,8 @@ class HaCarEditor extends HTMLElement {
         <div class="grid2">
           ${OVERRIDES.map(
             ([slot, label]) => `<label class="f">${label}</label>
-            <input class="tf" data-ov="${slot}" type="text" placeholder="sensor.xxx_${slot}">`,
+            <div class="pickrow"><div class="pick" data-ov="${slot}"></div>
+              <button class="btn sq clr" data-clr="${slot}" type="button" title="清空" aria-label="清空">✕</button></div>`,
           ).join("")}
         </div>
       </details>
@@ -299,15 +302,20 @@ class HaCarEditor extends HTMLElement {
       this._emit();
     });
 
-    this.shadowRoot.querySelectorAll("[data-ov]").forEach((input) => {
-      input.addEventListener("input", (e) => {
-        const slot = e.target.dataset.ov;
-        const val = e.target.value.trim();
-        this._config.entities = this._config.entities || {};
-        if (val) this._config.entities[slot] = val;
-        else delete this._config.entities[slot];
-        this._emit();
-      });
+
+
+    this.shadowRoot.getElementById("blk").addEventListener("click", (e) => {
+      const c = e.target.closest("[data-bkclr]");
+      if (!c) return;
+      this._setBlockField(Number(c.dataset.bkclr), "entity", "");
+    });
+    this.shadowRoot.querySelector(".adv").addEventListener("click", (e) => {
+      const c = e.target.closest("[data-clr]");
+      if (!c) return;
+      this._config.entities = this._config.entities || {};
+      delete this._config.entities[c.dataset.clr];
+      this._syncPickers();
+      this._emit();
     });
 
     q("blkaddbtn").addEventListener("click", () => {
@@ -360,37 +368,90 @@ class HaCarEditor extends HTMLElement {
     const host = this.shadowRoot.getElementById("blk");
     if (!host) return;
     const blocks = this._config.blocks || [];
-    const ents = [];
-    if (this._hass && this._hass.states) {
-      for (const id of Object.keys(this._hass.states)) {
-        if (/^(sensor|binary_sensor|switch|number|input_|device_tracker|image|light|update)\./.test(id)) ents.push(id);
-      }
-      ents.sort();
-    }
     const rows = blocks.map((b, i) => {
       const nm = `${BLOCK_LABELS[b.type] || b.type}${b.entity ? " · " + b.entity : ""}`;
       const off = b.on === false ? " off" : "";
-      const pinned = b.type === "hero";
       const entSel = b.type === "custom"
-        ? `<select class="tf ent" data-bf="entity" data-i="${i}">
-            <option value="">选择实体…</option>
-            ${ents.map((id) => `<option value="${esc(id)}"${id === b.entity ? " selected" : ""}>${esc(id)}</option>`).join("")}
-          </select>
-          <input class="tf" data-bf="label" data-i="${i}" value="${esc(b.label || "")}" placeholder="显示名称" style="flex:1 1 90px">
-          <input class="tf" data-bf="unit" data-i="${i}" value="${esc(b.unit || "")}" placeholder="单位" style="flex:0 0 62px">`
+        ? `<div class="bk-sub">
+            <div class="pick" data-bkpick="${i}"></div>
+            <button class="btn sq clr" data-bkclr="${i}" type="button" title="清空实体" aria-label="清空实体">✕</button>
+            <input class="tf" data-bf="label" data-i="${i}" value="${esc(b.label || "")}" placeholder="显示名称" style="flex:1 1 90px">
+            <input class="tf" data-bf="unit" data-i="${i}" value="${esc(b.unit || "")}" placeholder="单位" style="flex:0 0 62px">
+          </div>`
         : "";
       return `<div class="blkrow${off}">
         <div class="bk-top">
-          <button class="btn sq" data-bk="up" data-i="${i}" type="button"${pinned ? " disabled" : ""}>↑</button>
-          <button class="btn sq" data-bk="dn" data-i="${i}" type="button"${pinned ? " disabled" : ""}>↓</button>
+          <button class="btn sq" data-bk="up" data-i="${i}" type="button">↑</button>
+          <button class="btn sq" data-bk="dn" data-i="${i}" type="button">↓</button>
           <span class="nm">${esc(nm)}</span>
           <button class="sw" data-bk="on" data-i="${i}" role="switch" aria-checked="${b.on !== false}"></button>
           <button class="btn sq del" data-bk="del" data-i="${i}" type="button">✕</button>
         </div>
-        ${entSel ? `<div class="bk-sub">${entSel}</div>` : ""}
+        ${entSel}
       </div>`;
     });
     host.innerHTML = rows.join("") || `<p class="hint">还没有模块，从下面添加。</p>`;
+    blocks.forEach((b, i) => {
+      if (b.type !== "custom") return;
+      const h = host.querySelector(`[data-bkpick="${i}"]`);
+      if (h) this._mountPicker(h, b.entity, (v) => this._setBlockField(i, "entity", v));
+    });
+  }
+
+  _mountPicker(host, value, onPick) {
+    let p = host.querySelector("ha-selector");
+    if (!customElements.get("ha-selector")) {
+      let inp = host.querySelector("input");
+      if (!inp) {
+        inp = document.createElement("input");
+        inp.className = "tf";
+        inp.placeholder = "entity_id";
+        inp.addEventListener("input", () => onPick(inp.value.trim()));
+        host.appendChild(inp);
+      }
+      inp.value = value || "";
+      return;
+    }
+    if (!p) {
+      p = document.createElement("ha-selector");
+      p.style.display = "block";
+      p.addEventListener("value-changed", (e) => {
+        const v = e.detail && e.detail.value;
+        onPick(typeof v === "string" ? v.trim() : "");
+      });
+      host.appendChild(p);
+    }
+    p.hass = this._hass;
+    p.selector = { entity: {} };
+    if (p.value !== (value || undefined)) p.value = value || undefined;
+  }
+
+  _setBlockField(i, field, value) {
+    const blocks = (this._config.blocks || []).slice();
+    if (!blocks[i]) return;
+    blocks[i] = Object.assign({}, blocks[i], { [field]: value });
+    this._config.blocks = blocks;
+    this._renderBlocks();
+    this._emit();
+  }
+
+  _syncPickerHass() {
+    this.shadowRoot.querySelectorAll("ha-selector").forEach((p) => {
+      p.hass = this._hass;
+    });
+  }
+
+  _syncPickers() {
+    this.shadowRoot.querySelectorAll(".pick[data-ov]").forEach((h) => {
+      const slot = h.dataset.ov;
+      const val = (this._config.entities && this._config.entities[slot]) || "";
+      this._mountPicker(h, val, (v) => {
+        this._config.entities = this._config.entities || {};
+        if (v) this._config.entities[slot] = v;
+        else delete this._config.entities[slot];
+        this._emit();
+      });
+    });
   }
 
   _syncVehicles() {
@@ -436,9 +497,7 @@ class HaCarEditor extends HTMLElement {
     this.shadowRoot.querySelectorAll(".swatch").forEach((s) => {
       s.classList.toggle("sel", s.dataset.color.toLowerCase() === String(this._config.accent || "").toLowerCase());
     });
-    this.shadowRoot.querySelectorAll("[data-ov]").forEach((input) => {
-      input.value = (this._config.entities && this._config.entities[input.dataset.ov]) || "";
-    });
+    this._syncPickers();
   }
 
   _emit() {
