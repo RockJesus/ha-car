@@ -472,9 +472,10 @@ ha-card.theme-glass .gauge { filter: drop-shadow(0 10px 22px rgba(0,0,0,.35)); }
 .loc .lh .lk { font-style: normal; width: 5.2cqw; height: 5.2cqw; color: #6d8298; opacity: .85; }
 .loc .lh .lk .ic { width: 100%; height: 100%; display: block; }
 .loc .lh .lk.on { color: #7ee0b3; opacity: 1; }
-.loc .lrs { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .9cqw; }
-.loc .lr { flex: 0 0 auto; display: flex; flex-direction: column; align-items: center;
-  justify-content: center; gap: .5cqw; line-height: 1; }
+.loc .lrs { display: flex; flex-direction: column; align-items: flex-start; justify-content: center; gap: .9cqw;
+  width: fit-content; max-width: 100%; margin: 0 auto; }
+.loc .lr { flex: 0 0 auto; display: flex; flex-direction: row; align-items: center;
+  justify-content: flex-start; gap: 1.3cqw; line-height: 1; }
 .loc .lr .ri { flex: 0 0 auto; width: 5.2cqw; height: 5.2cqw; display: grid; place-items: center; color: #8fd6ea; }
 .loc .lr .ri .ic { width: 100%; height: 100%; display: block; }
 .loc .lr b { font-size: 4.8cqw; font-weight: 620; color: #dbe7f5; letter-spacing: .01em; white-space: nowrap; }
