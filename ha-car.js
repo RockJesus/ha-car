@@ -1548,6 +1548,10 @@ function maskText(s) {
 
 // src/card.js
 var BG_RE = /^(?:https?:\/\/|\/\/|\/|data:image\/)/i;
+var MEDIA_RE = /^media-source:\/\//i;
+function isMediaSource(v) {
+  return MEDIA_RE.test(String(v || "").trim());
+}
 function bgUrl(v) {
   const s = String(v || "").trim();
   if (!BG_RE.test(s)) return "";
@@ -1789,7 +1793,7 @@ var HaCarCard = class extends HTMLElement {
     cfg.find.phone = typeof cfg.find.phone === "string" ? cfg.find.phone : "";
     cfg.find.car = typeof cfg.find.car === "string" ? cfg.find.car : "";
     cfg.bg_image = typeof cfg.bg_image === "string" ? cfg.bg_image.trim() : "";
-    if (cfg.bg_image && !bgUrl(cfg.bg_image)) cfg.bg_image = "";
+    if (cfg.bg_image && !bgUrl(cfg.bg_image) && !isMediaSource(cfg.bg_image)) cfg.bg_image = "";
     cfg.hold_ms = clamp(Number(cfg.hold_ms) || DEFAULTS.hold_ms, 300, 3e3);
     cfg.blocks = normBlocks(cfg);
     cfg.confirm = normalizeConfirm(config, cfg);
@@ -2238,11 +2242,58 @@ var HaCarCard = class extends HTMLElement {
   _applyBg() {
     const card = this._card;
     if (!card) return;
-    const url = bgUrl(this._config && this._config.bg_image);
+    const raw = String(this._config && this._config.bg_image || "").trim();
+    if (!raw) {
+      this._bgToken = (this._bgToken || 0) + 1;
+      this._bgSrc = "";
+      this._bgResolved = "";
+      this._clearBg();
+      return;
+    }
+    if (raw === this._bgSrc) {
+      if (isMediaSource(raw)) {
+        if (this._bgResolved) this._setBgUrl(this._bgResolved, raw);
+      } else {
+        this._setBgUrl(bgUrl(raw), raw);
+      }
+      return;
+    }
+    this._bgToken = (this._bgToken || 0) + 1;
+    this._bgSrc = raw;
+    this._bgResolved = "";
+    if (isMediaSource(raw)) this._resolveBg(raw, this._bgToken);
+    else this._setBgUrl(bgUrl(raw), raw);
+  }
+  _resolveBg(raw, token) {
+    const hass = this._hass;
+    if (!hass || !hass.callWS) return;
+    hass.callWS({ type: "media_source/resolve_media", media_content_id: raw }).then((res) => {
+      if (token !== this._bgToken || this._bgSrc !== raw) return;
+      this._bgResolved = res && res.url || "";
+      if (this._bgResolved) this._setBgUrl(this._bgResolved, raw);
+      else {
+        this._bgSrc = "";
+        this._clearBg();
+      }
+    }).catch(() => {
+      if (token === this._bgToken && this._bgSrc === raw) {
+        this._bgSrc = "";
+        this._clearBg();
+      }
+    });
+  }
+  _clearBg() {
+    const card = this._card;
+    if (!card) return;
+    card.classList.remove("has-photo");
+    card.style.removeProperty("--hc-photo");
+    this._bgLoaded = "";
+  }
+  _setBgUrl(url, raw) {
+    const card = this._card;
+    if (!card) return;
     if (!url) {
-      card.classList.remove("has-photo");
-      card.style.removeProperty("--hc-photo");
-      this._bgLoaded = "";
+      this._clearBg();
       return;
     }
     card.style.setProperty("--hc-photo", `url("${url}")`);
@@ -2251,10 +2302,14 @@ var HaCarCard = class extends HTMLElement {
     this._bgLoaded = url;
     const probe = new Image();
     probe.onload = () => {
-      if (bgUrl(this._config && this._config.bg_image) === url) card.classList.add("has-photo");
+      if (this._bgSrc === raw) card.classList.add("has-photo");
     };
     probe.onerror = () => {
-      if (bgUrl(this._config && this._config.bg_image) === url) card.classList.remove("has-photo");
+      if (this._bgSrc === raw) {
+        this._bgResolved = "";
+        this._bgSrc = "";
+        card.classList.remove("has-photo");
+      }
     };
     probe.src = url;
   }
@@ -3886,7 +3941,7 @@ var L = {
   imageUrl: "图片地址",
   accent: "强调色",
   bgLabel: "卡片背景图",
-  bgHint: "支持 https://、/local/… 或 data:image/…；留空使用主题背景。",
+  bgHint: "从 HA 媒体库选择或上传图片；留空使用主题背景。已有 https://、/local/… 或 data:image/… 地址会继续生效。",
   bgPlaceholder: "https://… 或 /local/…",
   theme: "主题",
   themeHint: "换一套漆面与背光配色，版式不变；下面的强调色会覆盖主题色。",
@@ -3910,11 +3965,14 @@ var HaCarEditor = class extends HTMLElement {
     this.attachShadow({ mode: "open" });
     this._built = false;
     this._openBk = /* @__PURE__ */ new Set();
+    this._bgMeta = /* @__PURE__ */ new Map();
+    this._bgMetaLoading = /* @__PURE__ */ new Set();
   }
   setConfig(config) {
     this._config = Object.assign({}, DEFAULTS, config || {});
     this._config.entities = Object.assign({}, this._config.entities || {});
     this._config.find = Object.assign({ phone: "", car: "" }, this._config.find && typeof this._config.find === "object" ? this._config.find : {});
+    this._config.bg_image = typeof this._config.bg_image === "string" ? this._config.bg_image.trim() : "";
     if (!Array.isArray(this._config.modules)) this._config.modules = DEFAULTS.modules.slice();
     this._config.blocks = normBlocks(this._config);
     this._config.confirm = normalizeConfirm(config, this._config);
@@ -3926,6 +3984,7 @@ var HaCarEditor = class extends HTMLElement {
     if (!this._built) return;
     this._syncVehicles();
     this._syncPickerHass();
+    this._syncBackground();
   }
   _build() {
     const root = this.shadowRoot;
@@ -4011,8 +4070,9 @@ var HaCarEditor = class extends HTMLElement {
             <span class="cface" aria-hidden="true"></span><span class="cdot" aria-hidden="true"></span>
           </label>
         </div>
-        <label class="f" for="bgimage">${L.bgLabel}</label>
-        <input class="tf" id="bgimage" type="text" placeholder="${L.bgPlaceholder}">
+        <div class="row"><span class="rl">${L.bgLabel}</span>
+          <button class="btn sq clr" id="bgclr" type="button" title="清除背景图" aria-label="清除背景图">✕</button></div>
+        <div class="pick" id="bgimage"></div>
         <p class="hint" style="margin-top:4px">${L.bgHint}</p>
       </div>
 
@@ -4032,6 +4092,7 @@ var HaCarEditor = class extends HTMLElement {
     </div>`;
     this._built = true;
     this._wire();
+    this._mountBgPicker();
   }
   _wire() {
     const q = (id) => this.shadowRoot.getElementById(id);
@@ -4116,8 +4177,9 @@ var HaCarEditor = class extends HTMLElement {
       this._sync();
       this._emit();
     });
-    q("bgimage").addEventListener("input", (e) => {
-      this._config.bg_image = e.target.value.trim();
+    q("bgclr").addEventListener("click", () => {
+      this._config.bg_image = "";
+      this._syncBackground();
       this._emit();
     });
     this.shadowRoot.getElementById("blk").addEventListener("click", (e) => {
@@ -4248,6 +4310,65 @@ var HaCarEditor = class extends HTMLElement {
     const fn = st && st.attributes && st.attributes.friendly_name;
     if (fn) return String(fn);
     return "实体";
+  }
+  _mountBgPicker() {
+    const host = this.shadowRoot.getElementById("bgimage");
+    if (!host) return;
+    if (!customElements.get("ha-selector")) {
+      const inp = document.createElement("input");
+      inp.className = "tf";
+      inp.id = "bgimageinput";
+      inp.placeholder = this._config.bg_image || "https://… 或 /local/…";
+      inp.addEventListener("input", () => {
+        this._config.bg_image = inp.value.trim();
+        this._emit();
+      });
+      host.appendChild(inp);
+      return;
+    }
+    const p = document.createElement("ha-selector");
+    p.selector = { media: { accept: ["image/jpeg", "image/png", "image/gif"], image_upload: true, multiple: false } };
+    p.required = false;
+    p.hass = this._hass;
+    p.addEventListener("value-changed", (e) => {
+      const v = e.detail && e.detail.value;
+      const id = typeof v === "string" ? v : v && v.media_content_id || "";
+      this._config.bg_image = String(id || "").trim();
+      if (id && v && v.metadata) this._bgMeta.set(id, v.metadata);
+      this._emit();
+      this._syncBackground();
+    });
+    host.appendChild(p);
+    this._syncBackground();
+  }
+  _syncBackground() {
+    const host = this.shadowRoot.getElementById("bgimage");
+    if (!host) return;
+    const raw = this._config.bg_image || "";
+    const p = host.querySelector("ha-selector");
+    if (p) {
+      p.hass = this._hass;
+      const meta = this._bgMeta.get(raw);
+      const next = isMediaSource(raw) ? { media_content_id: raw, media_content_type: "image", ...meta ? { metadata: meta } : {} } : void 0;
+      const cur = p.value && p.value.media_content_id;
+      const needsMeta = isMediaSource(raw) && !(p.value && p.value.metadata && p.value.metadata.thumbnail);
+      if ((cur || "") !== (next ? next.media_content_id : "") || next && needsMeta) p.value = next;
+      if (isMediaSource(raw) && !meta) this._hydrateBgMeta(raw);
+      return;
+    }
+    const inp = host.querySelector("input");
+    if (inp) inp.value = raw;
+  }
+  _hydrateBgMeta(raw) {
+    if (this._bgMeta.has(raw) || this._bgMetaLoading.has(raw) || !this._hass || !this._hass.callWS) return;
+    this._bgMetaLoading.add(raw);
+    this._hass.callWS({ type: "media_source/resolve_media", media_content_id: raw }).then((res) => {
+      if (!res || !res.url) return;
+      const name = raw.split("/").filter(Boolean).pop() || raw;
+      this._bgMeta.set(raw, { title: name, thumbnail: res.url, media_class: "image" });
+      if (this._config.bg_image === raw) this._syncBackground();
+    }).catch(() => {
+    }).finally(() => this._bgMetaLoading.delete(raw));
   }
   _renderBlocks() {
     const host = this.shadowRoot.getElementById("blk");
@@ -4410,7 +4531,7 @@ var HaCarEditor = class extends HTMLElement {
     q("imgurl").style.display = this._config.image === "custom" ? "block" : "none";
     q("imgurl").value = this._config.image_url || "";
     q("theme").value = this._config.theme || DEFAULTS.theme;
-    q("bgimage").value = this._config.bg_image || "";
+    this._syncBackground();
     const picked = /^#[0-9a-f]{6}$/i.test(this._config.accent || "") ? this._config.accent : (THEMES[this._config.theme] || THEMES.midnight).accent;
     q("color").value = picked;
     const wheel = this.shadowRoot.getElementById("colorwheel");
@@ -4468,7 +4589,7 @@ var HaCarEditor = class extends HTMLElement {
 customElements.define("ha-car-editor", HaCarEditor);
 
 // src/main.js
-var VERSION = "2.3.7";
+var VERSION = "2.3.8";
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "ha-car",

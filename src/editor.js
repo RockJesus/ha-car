@@ -1,6 +1,6 @@
 import { EDITOR_STYLES } from "./styles.js";
 import { detectVehicles, resolve } from "./resolve.js";
-import { actionKeys, DEFAULTS, ITEM_DEFS, THEMES, defaultItems, normBlocks, normalizeConfirm } from "./card.js";
+import { actionKeys, DEFAULTS, ITEM_DEFS, THEMES, defaultItems, isMediaSource, normBlocks, normalizeConfirm } from "./card.js";
 
 const BLOCK_LABELS = {
   meta: "定位/同步", hero: "车图", energy: "能耗仪表", alerts: "车辆告警",
@@ -56,7 +56,7 @@ const L = {
   imageUrl: "图片地址",
   accent: "强调色",
   bgLabel: "卡片背景图",
-  bgHint: "支持 https://、/local/… 或 data:image/…；留空使用主题背景。",
+  bgHint: "从 HA 媒体库选择或上传图片；留空使用主题背景。已有 https://、/local/… 或 data:image/… 地址会继续生效。",
   bgPlaceholder: "https://… 或 /local/…",
   theme: "主题",
   themeHint: "换一套漆面与背光配色，版式不变；下面的强调色会覆盖主题色。",
@@ -81,12 +81,15 @@ class HaCarEditor extends HTMLElement {
     this.attachShadow({ mode: "open" });
     this._built = false;
     this._openBk = new Set();
+    this._bgMeta = new Map();
+    this._bgMetaLoading = new Set();
   }
 
   setConfig(config) {
     this._config = Object.assign({}, DEFAULTS, config || {});
     this._config.entities = Object.assign({}, this._config.entities || {});
     this._config.find = Object.assign({ phone: "", car: "" }, this._config.find && typeof this._config.find === "object" ? this._config.find : {});
+    this._config.bg_image = typeof this._config.bg_image === "string" ? this._config.bg_image.trim() : "";
     if (!Array.isArray(this._config.modules)) this._config.modules = DEFAULTS.modules.slice();
     this._config.blocks = normBlocks(this._config);
     this._config.confirm = normalizeConfirm(config, this._config);
@@ -99,6 +102,7 @@ class HaCarEditor extends HTMLElement {
     if (!this._built) return;
     this._syncVehicles();
     this._syncPickerHass();
+    this._syncBackground();
   }
 
   _build() {
@@ -185,8 +189,9 @@ class HaCarEditor extends HTMLElement {
             <span class="cface" aria-hidden="true"></span><span class="cdot" aria-hidden="true"></span>
           </label>
         </div>
-        <label class="f" for="bgimage">${L.bgLabel}</label>
-        <input class="tf" id="bgimage" type="text" placeholder="${L.bgPlaceholder}">
+        <div class="row"><span class="rl">${L.bgLabel}</span>
+          <button class="btn sq clr" id="bgclr" type="button" title="清除背景图" aria-label="清除背景图">✕</button></div>
+        <div class="pick" id="bgimage"></div>
         <p class="hint" style="margin-top:4px">${L.bgHint}</p>
       </div>
 
@@ -207,6 +212,7 @@ class HaCarEditor extends HTMLElement {
 
     this._built = true;
     this._wire();
+    this._mountBgPicker();
   }
 
   _wire() {
@@ -303,8 +309,9 @@ class HaCarEditor extends HTMLElement {
       this._emit();
     });
 
-    q("bgimage").addEventListener("input", (e) => {
-      this._config.bg_image = e.target.value.trim();
+    q("bgclr").addEventListener("click", () => {
+      this._config.bg_image = "";
+      this._syncBackground();
       this._emit();
     });
 
@@ -444,6 +451,72 @@ class HaCarEditor extends HTMLElement {
     const fn = st && st.attributes && st.attributes.friendly_name;
     if (fn) return String(fn);
     return "实体";
+  }
+
+  _mountBgPicker() {
+    const host = this.shadowRoot.getElementById("bgimage");
+    if (!host) return;
+    if (!customElements.get("ha-selector")) {
+      const inp = document.createElement("input");
+      inp.className = "tf";
+      inp.id = "bgimageinput";
+      inp.placeholder = this._config.bg_image || "https://… 或 /local/…";
+      inp.addEventListener("input", () => {
+        this._config.bg_image = inp.value.trim();
+        this._emit();
+      });
+      host.appendChild(inp);
+      return;
+    }
+    const p = document.createElement("ha-selector");
+    p.selector = { media: { accept: ["image/jpeg", "image/png", "image/gif"], image_upload: true, multiple: false } };
+    p.required = false;
+    p.hass = this._hass;
+    p.addEventListener("value-changed", (e) => {
+      const v = e.detail && e.detail.value;
+      const id = typeof v === "string" ? v : (v && v.media_content_id) || "";
+      this._config.bg_image = String(id || "").trim();
+      if (id && v && v.metadata) this._bgMeta.set(id, v.metadata);
+      this._emit();
+      this._syncBackground();
+    });
+    host.appendChild(p);
+    this._syncBackground();
+  }
+
+  _syncBackground() {
+    const host = this.shadowRoot.getElementById("bgimage");
+    if (!host) return;
+    const raw = this._config.bg_image || "";
+    const p = host.querySelector("ha-selector");
+    if (p) {
+      p.hass = this._hass;
+      const meta = this._bgMeta.get(raw);
+      const next = isMediaSource(raw)
+        ? { media_content_id: raw, media_content_type: "image", ...(meta ? { metadata: meta } : {}) }
+        : undefined;
+      const cur = p.value && p.value.media_content_id;
+      const needsMeta = isMediaSource(raw) && !(p.value && p.value.metadata && p.value.metadata.thumbnail);
+      if ((cur || "") !== (next ? next.media_content_id : "") || (next && needsMeta)) p.value = next;
+      if (isMediaSource(raw) && !meta) this._hydrateBgMeta(raw);
+      return;
+    }
+    const inp = host.querySelector("input");
+    if (inp) inp.value = raw;
+  }
+
+  _hydrateBgMeta(raw) {
+    if (this._bgMeta.has(raw) || this._bgMetaLoading.has(raw) || !this._hass || !this._hass.callWS) return;
+    this._bgMetaLoading.add(raw);
+    this._hass.callWS({ type: "media_source/resolve_media", media_content_id: raw })
+      .then((res) => {
+        if (!res || !res.url) return;
+        const name = raw.split("/").filter(Boolean).pop() || raw;
+        this._bgMeta.set(raw, { title: name, thumbnail: res.url, media_class: "image" });
+        if (this._config.bg_image === raw) this._syncBackground();
+      })
+      .catch(() => {})
+      .finally(() => this._bgMetaLoading.delete(raw));
   }
 
   _renderBlocks() {
@@ -619,7 +692,7 @@ class HaCarEditor extends HTMLElement {
     q("imgurl").style.display = this._config.image === "custom" ? "block" : "none";
     q("imgurl").value = this._config.image_url || "";
     q("theme").value = this._config.theme || DEFAULTS.theme;
-    q("bgimage").value = this._config.bg_image || "";
+    this._syncBackground();
     const picked = /^#[0-9a-f]{6}$/i.test(this._config.accent || "") ? this._config.accent : (THEMES[this._config.theme] || THEMES.midnight).accent;
     q("color").value = picked;
     const wheel = this.shadowRoot.getElementById("colorwheel");

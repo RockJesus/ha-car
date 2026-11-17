@@ -5,6 +5,10 @@ import { dict, isEn } from "./strings.js";
 import { attrs, chargingNow, clamp, esc, fmtNum, isBad, maskAddr, maskPlate, maskText, normLock, normOpen, normTire, num, relTime, text } from "./util.js";
 
 const BG_RE = /^(?:https?:\/\/|\/\/|\/|data:image\/)/i;
+const MEDIA_RE = /^media-source:\/\//i;
+export function isMediaSource(v) {
+  return MEDIA_RE.test(String(v || "").trim());
+}
 function bgUrl(v) {
   const s = String(v || "").trim();
   if (!BG_RE.test(s)) return "";
@@ -278,7 +282,7 @@ class HaCarCard extends HTMLElement {
     cfg.find.phone = typeof cfg.find.phone === "string" ? cfg.find.phone : "";
     cfg.find.car = typeof cfg.find.car === "string" ? cfg.find.car : "";
     cfg.bg_image = typeof cfg.bg_image === "string" ? cfg.bg_image.trim() : "";
-    if (cfg.bg_image && !bgUrl(cfg.bg_image)) cfg.bg_image = "";
+    if (cfg.bg_image && !bgUrl(cfg.bg_image) && !isMediaSource(cfg.bg_image)) cfg.bg_image = "";
     cfg.hold_ms = clamp(Number(cfg.hold_ms) || DEFAULTS.hold_ms, 300, 3000);
     cfg.blocks = normBlocks(cfg);
     cfg.confirm = normalizeConfirm(config, cfg);
@@ -793,11 +797,63 @@ class HaCarCard extends HTMLElement {
   _applyBg() {
     const card = this._card;
     if (!card) return;
-    const url = bgUrl(this._config && this._config.bg_image);
+    const raw = String((this._config && this._config.bg_image) || "").trim();
+    if (!raw) {
+      this._bgToken = (this._bgToken || 0) + 1;
+      this._bgSrc = "";
+      this._bgResolved = "";
+      this._clearBg();
+      return;
+    }
+    if (raw === this._bgSrc) {
+      if (isMediaSource(raw)) {
+        if (this._bgResolved) this._setBgUrl(this._bgResolved, raw);
+      } else {
+        this._setBgUrl(bgUrl(raw), raw);
+      }
+      return;
+    }
+    this._bgToken = (this._bgToken || 0) + 1;
+    this._bgSrc = raw;
+    this._bgResolved = "";
+    if (isMediaSource(raw)) this._resolveBg(raw, this._bgToken);
+    else this._setBgUrl(bgUrl(raw), raw);
+  }
+
+  _resolveBg(raw, token) {
+    const hass = this._hass;
+    if (!hass || !hass.callWS) return;
+    hass.callWS({ type: "media_source/resolve_media", media_content_id: raw })
+      .then((res) => {
+        if (token !== this._bgToken || this._bgSrc !== raw) return;
+        this._bgResolved = (res && res.url) || "";
+        if (this._bgResolved) this._setBgUrl(this._bgResolved, raw);
+        else {
+          this._bgSrc = "";
+          this._clearBg();
+        }
+      })
+      .catch(() => {
+        if (token === this._bgToken && this._bgSrc === raw) {
+          this._bgSrc = "";
+          this._clearBg();
+        }
+      });
+  }
+
+  _clearBg() {
+    const card = this._card;
+    if (!card) return;
+    card.classList.remove("has-photo");
+    card.style.removeProperty("--hc-photo");
+    this._bgLoaded = "";
+  }
+
+  _setBgUrl(url, raw) {
+    const card = this._card;
+    if (!card) return;
     if (!url) {
-      card.classList.remove("has-photo");
-      card.style.removeProperty("--hc-photo");
-      this._bgLoaded = "";
+      this._clearBg();
       return;
     }
     card.style.setProperty("--hc-photo", `url("${url}")`);
@@ -806,10 +862,14 @@ class HaCarCard extends HTMLElement {
     this._bgLoaded = url;
     const probe = new Image();
     probe.onload = () => {
-      if (bgUrl(this._config && this._config.bg_image) === url) card.classList.add("has-photo");
+      if (this._bgSrc === raw) card.classList.add("has-photo");
     };
     probe.onerror = () => {
-      if (bgUrl(this._config && this._config.bg_image) === url) card.classList.remove("has-photo");
+      if (this._bgSrc === raw) {
+        this._bgResolved = "";
+        this._bgSrc = "";
+        card.classList.remove("has-photo");
+      }
     };
     probe.src = url;
   }
