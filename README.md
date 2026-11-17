@@ -78,6 +78,7 @@ type: custom:ha-car
 | `accent` | string | `#37d6e8` | 强调色（仪表背光青） |
 | `image` | string | `auto` | `auto` / `overlook` / `3d` / `side` / `custom` / 实体 ID / URL |
 | `image_url` | string | — | `image: custom` 时使用的图片地址 |
+| `bg_image` | string | — | 整卡背景图地址：`https://…`、`/local/…` 或 `data:image/…`；留空使用主题背景，图片上会自动叠一层暗色遮罩保证可读性 |
 | `entities` | object | `{}` | 逐槽位覆盖实体，键名见下表 |
 | `find` | object | — | 找车引导：`phone` 手机定位实体（必填）、`car` 车辆定位实体（留空则用车辆位置）；两者都需带 `latitude` / `longitude` |
 

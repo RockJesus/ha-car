@@ -372,6 +372,9 @@ ha-card::after { content: ""; position: absolute; left: 8%; right: 8%; top: 0; h
   opacity: .55; }
 .plate, .gn b, .tc b, .stat b { font-variant-numeric: tabular-nums; }
 .plate { font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace; }
+ha-card.has-photo .wrap { background-image:
+  linear-gradient(180deg, rgba(5,10,18,.58) 0%, rgba(5,10,18,.78) 48%, rgba(4,8,14,.9) 100%),
+  var(--hc-photo); background-size: cover; background-position: center; background-repeat: no-repeat; }
 .wrap { position: relative; z-index: 2; padding: 18px 16px 14px; display: flex; flex-direction: column; gap: 14px;
   background-image: var(--hc-bg,
     radial-gradient(120% 80% at 50% -10%, rgba(var(--hc-a,55,214,232),.14), transparent 58%),
@@ -1295,6 +1298,9 @@ var ZH = {
   holdMs: "长按时长",
   modules: "显示模块",
   accent: "强调色",
+  bgLabel: "卡片背景图",
+  bgHint: "支持 https://、/local/… 或 data:image/…；留空使用主题背景。",
+  bgPlaceholder: "https://… 或 /local/…",
   vehicle: "车辆",
   titleLabel: "卡片标题",
   showPlate: "显示车牌",
@@ -1391,6 +1397,9 @@ var EN = {
   holdMs: "Hold duration",
   modules: "Modules",
   accent: "Accent",
+  bgLabel: "Card background",
+  bgHint: "Supports https://, /local/… or data:image/…; leave empty for the theme background.",
+  bgPlaceholder: "https://… or /local/…",
   vehicle: "Vehicle",
   titleLabel: "Title",
   showPlate: "Show plate",
@@ -1537,6 +1546,12 @@ function maskText(s) {
 }
 
 // src/card.js
+var BG_RE = /^(?:https?:\/\/|\/\/|\/|data:image\/)/i;
+function bgUrl(v) {
+  const s = String(v || "").trim();
+  if (!BG_RE.test(s)) return "";
+  return s.replace(/["\\\r\n]/g, "");
+}
 var FORD_LOGO = `<span class="brand" aria-hidden="true"><svg viewBox="0 0 44 20" xmlns="http://www.w3.org/2000/svg">
 <ellipse cx="22" cy="10" rx="21" ry="9" fill="#0b3f92" stroke="#eef4ff" stroke-width="1.6"/>
 <ellipse cx="22" cy="10" rx="17.6" ry="6.6" fill="none" stroke="#eef4ff" stroke-width=".9" opacity=".85"/>
@@ -1681,6 +1696,7 @@ var DEFAULTS = {
   privacy: false,
   image: "auto",
   image_url: "",
+  bg_image: "",
   entities: {},
   find: { phone: "", car: "" }
 };
@@ -1749,6 +1765,8 @@ var HaCarCard = class extends HTMLElement {
     cfg.find = Object.assign({ phone: "", car: "" }, cfg.find && typeof cfg.find === "object" ? cfg.find : {});
     cfg.find.phone = typeof cfg.find.phone === "string" ? cfg.find.phone : "";
     cfg.find.car = typeof cfg.find.car === "string" ? cfg.find.car : "";
+    cfg.bg_image = typeof cfg.bg_image === "string" ? cfg.bg_image.trim() : "";
+    if (cfg.bg_image && !bgUrl(cfg.bg_image)) cfg.bg_image = "";
     cfg.hold_ms = clamp(Number(cfg.hold_ms) || DEFAULTS.hold_ms, 300, 3e3);
     cfg.blocks = normBlocks(cfg);
     this._config = cfg;
@@ -2192,8 +2210,31 @@ var HaCarCard = class extends HTMLElement {
     const cst = fcar && this._hass && this._hass.states[fcar];
     parts.push("find=" + (fst ? fst.state + "@" + (fst.last_changed || "") : "-"));
     parts.push("findcar=" + (cst ? cst.state + "@" + (cst.last_changed || "") : "-"));
-    parts.push(JSON.stringify([this._config.modules, this._config.confirm, this._config.layout, this._config.title, this._config.find]));
+    parts.push(JSON.stringify([this._config.modules, this._config.confirm, this._config.layout, this._config.title, this._config.find, this._config.bg_image]));
     return parts.join("|");
+  }
+  _applyBg() {
+    const card = this._card;
+    if (!card) return;
+    const url = bgUrl(this._config && this._config.bg_image);
+    if (!url) {
+      card.classList.remove("has-photo");
+      card.style.removeProperty("--hc-photo");
+      this._bgLoaded = "";
+      return;
+    }
+    card.style.setProperty("--hc-photo", `url("${url}")`);
+    card.classList.add("has-photo");
+    if (this._bgLoaded === url) return;
+    this._bgLoaded = url;
+    const probe = new Image();
+    probe.onload = () => {
+      if (bgUrl(this._config && this._config.bg_image) === url) card.classList.add("has-photo");
+    };
+    probe.onerror = () => {
+      if (bgUrl(this._config && this._config.bg_image) === url) card.classList.remove("has-photo");
+    };
+    probe.src = url;
   }
   _paint(data) {
     const cfg = this._config;
@@ -2208,6 +2249,7 @@ var HaCarCard = class extends HTMLElement {
     this._card.style.setProperty("--hc-accent", accent);
     this._card.style.setProperty("--hc-a", hexRgb(accent));
     this._card.style.setProperty("--hc-bg", themeBg(cfg.theme));
+    this._applyBg();
     this._prunePending(data);
     const twoCol = this._card.classList.contains("fit") || this._card.classList.contains("gtwo");
     this._wrap.innerHTML = this._body(data, twoCol);
@@ -3690,6 +3732,9 @@ var L = {
   imageMode: "车辆图片",
   imageUrl: "图片地址",
   accent: "强调色",
+  bgLabel: "卡片背景图",
+  bgHint: "支持 https://、/local/… 或 data:image/…；留空使用主题背景。",
+  bgPlaceholder: "https://… 或 /local/…",
   theme: "主题",
   themeHint: "换一套漆面与背光配色，版式不变；下面的强调色会覆盖主题色。",
   items: "实体",
@@ -3812,6 +3857,9 @@ var HaCarEditor = class extends HTMLElement {
           ${ACCENTS.map((c) => `<span class="swatch" data-color="${c}" style="background:${c}"></span>`).join("")}
           <input type="color" id="color" title="自定义强调色">
         </div>
+        <label class="f" for="bgimage">${L.bgLabel}</label>
+        <input class="tf" id="bgimage" type="text" placeholder="${L.bgPlaceholder}">
+        <p class="hint" style="margin-top:4px">${L.bgHint}</p>
       </div>
 
       <details class="sec adv">
@@ -3922,6 +3970,10 @@ var HaCarEditor = class extends HTMLElement {
     q("color").addEventListener("input", (e) => {
       this._config.accent = e.target.value;
       this._sync();
+      this._emit();
+    });
+    q("bgimage").addEventListener("input", (e) => {
+      this._config.bg_image = e.target.value.trim();
       this._emit();
     });
     this.shadowRoot.getElementById("blk").addEventListener("click", (e) => {
@@ -4213,6 +4265,7 @@ var HaCarEditor = class extends HTMLElement {
     q("imgurl").style.display = this._config.image === "custom" ? "block" : "none";
     q("imgurl").value = this._config.image_url || "";
     q("theme").value = this._config.theme || DEFAULTS.theme;
+    q("bgimage").value = this._config.bg_image || "";
     q("color").value = /^#[0-9a-f]{6}$/i.test(this._config.accent || "") ? this._config.accent : (THEMES[this._config.theme] || THEMES.midnight).accent;
     this.shadowRoot.querySelectorAll(".swatch").forEach((s) => {
       s.classList.toggle("sel", s.dataset.color.toLowerCase() === String(this._config.accent || "").toLowerCase());
@@ -4248,6 +4301,7 @@ var HaCarEditor = class extends HTMLElement {
     if (!Object.keys(cfg.entities).length) delete cfg.entities;
     if (!cfg.title) delete cfg.title;
     if (!cfg.image_url) delete cfg.image_url;
+    if (!cfg.bg_image) delete cfg.bg_image;
     if (cfg.image === "custom" && !cfg.image_url) delete cfg.image;
     if (cfg.hold_ms === DEFAULTS.hold_ms) delete cfg.hold_ms;
     if (cfg.accent === DEFAULTS.accent) delete cfg.accent;
@@ -4266,7 +4320,7 @@ var HaCarEditor = class extends HTMLElement {
 customElements.define("ha-car-editor", HaCarEditor);
 
 // src/main.js
-var VERSION = "2.2.4";
+var VERSION = "2.3.0";
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "ha-car",

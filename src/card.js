@@ -4,6 +4,13 @@ import { STYLES } from "./styles.js";
 import { dict, isEn } from "./strings.js";
 import { attrs, chargingNow, clamp, esc, fmtNum, isBad, maskAddr, maskPlate, maskText, normLock, normOpen, normTire, num, relTime, text } from "./util.js";
 
+const BG_RE = /^(?:https?:\/\/|\/\/|\/|data:image\/)/i;
+function bgUrl(v) {
+  const s = String(v || "").trim();
+  if (!BG_RE.test(s)) return "";
+  return s.replace(/["\\\r\n]/g, "");
+}
+
 const FORD_LOGO = `<span class="brand" aria-hidden="true"><svg viewBox="0 0 44 20" xmlns="http://www.w3.org/2000/svg">
 <ellipse cx="22" cy="10" rx="21" ry="9" fill="#0b3f92" stroke="#eef4ff" stroke-width="1.6"/>
 <ellipse cx="22" cy="10" rx="17.6" ry="6.6" fill="none" stroke="#eef4ff" stroke-width=".9" opacity=".85"/>
@@ -159,6 +166,7 @@ const DEFAULTS = {
   privacy: false,
   image: "auto",
   image_url: "",
+  bg_image: "",
   entities: {},
   find: { phone: "", car: "" },
 };
@@ -244,6 +252,8 @@ class HaCarCard extends HTMLElement {
     cfg.find = Object.assign({ phone: "", car: "" }, cfg.find && typeof cfg.find === "object" ? cfg.find : {});
     cfg.find.phone = typeof cfg.find.phone === "string" ? cfg.find.phone : "";
     cfg.find.car = typeof cfg.find.car === "string" ? cfg.find.car : "";
+    cfg.bg_image = typeof cfg.bg_image === "string" ? cfg.bg_image.trim() : "";
+    if (cfg.bg_image && !bgUrl(cfg.bg_image)) cfg.bg_image = "";
     cfg.hold_ms = clamp(Number(cfg.hold_ms) || DEFAULTS.hold_ms, 300, 3000);
     cfg.blocks = normBlocks(cfg);
     this._config = cfg;
@@ -752,8 +762,32 @@ class HaCarCard extends HTMLElement {
     const cst = fcar && this._hass && this._hass.states[fcar];
     parts.push("find=" + (fst ? fst.state + "@" + (fst.last_changed || "") : "-"));
     parts.push("findcar=" + (cst ? cst.state + "@" + (cst.last_changed || "") : "-"));
-    parts.push(JSON.stringify([this._config.modules, this._config.confirm, this._config.layout, this._config.title, this._config.find]));
+    parts.push(JSON.stringify([this._config.modules, this._config.confirm, this._config.layout, this._config.title, this._config.find, this._config.bg_image]));
     return parts.join("|");
+  }
+
+  _applyBg() {
+    const card = this._card;
+    if (!card) return;
+    const url = bgUrl(this._config && this._config.bg_image);
+    if (!url) {
+      card.classList.remove("has-photo");
+      card.style.removeProperty("--hc-photo");
+      this._bgLoaded = "";
+      return;
+    }
+    card.style.setProperty("--hc-photo", `url("${url}")`);
+    card.classList.add("has-photo");
+    if (this._bgLoaded === url) return;
+    this._bgLoaded = url;
+    const probe = new Image();
+    probe.onload = () => {
+      if (bgUrl(this._config && this._config.bg_image) === url) card.classList.add("has-photo");
+    };
+    probe.onerror = () => {
+      if (bgUrl(this._config && this._config.bg_image) === url) card.classList.remove("has-photo");
+    };
+    probe.src = url;
   }
 
   _paint(data) {
@@ -769,6 +803,7 @@ class HaCarCard extends HTMLElement {
     this._card.style.setProperty("--hc-accent", accent);
     this._card.style.setProperty("--hc-a", hexRgb(accent));
     this._card.style.setProperty("--hc-bg", themeBg(cfg.theme));
+    this._applyBg();
     this._prunePending(data);
     const twoCol = this._card.classList.contains("fit") || this._card.classList.contains("gtwo");
     this._wrap.innerHTML = this._body(data, twoCol);

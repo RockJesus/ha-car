@@ -54,6 +54,9 @@ ha-card::after { content: ""; position: absolute; left: 8%; right: 8%; top: 0; h
   opacity: .55; }
 .plate, .gn b, .tc b, .stat b { font-variant-numeric: tabular-nums; }
 .plate { font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace; }
+ha-card.has-photo .wrap { background-image:
+  linear-gradient(180deg, rgba(5,10,18,.58) 0%, rgba(5,10,18,.78) 48%, rgba(4,8,14,.9) 100%),
+  var(--hc-photo); background-size: cover; background-position: center; background-repeat: no-repeat; }
 .wrap { position: relative; z-index: 2; padding: 18px 16px 14px; display: flex; flex-direction: column; gap: 14px;
   background-image: var(--hc-bg,
     radial-gradient(120% 80% at 50% -10%, rgba(var(--hc-a,55,214,232),.14), transparent 58%),

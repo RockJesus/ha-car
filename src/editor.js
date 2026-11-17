@@ -64,6 +64,9 @@ const L = {
   imageMode: "车辆图片",
   imageUrl: "图片地址",
   accent: "强调色",
+  bgLabel: "卡片背景图",
+  bgHint: "支持 https://、/local/… 或 data:image/…；留空使用主题背景。",
+  bgPlaceholder: "https://… 或 /local/…",
   theme: "主题",
   themeHint: "换一套漆面与背光配色，版式不变；下面的强调色会覆盖主题色。",
   items: "实体",
@@ -190,6 +193,9 @@ class HaCarEditor extends HTMLElement {
           ${ACCENTS.map((c) => `<span class="swatch" data-color="${c}" style="background:${c}"></span>`).join("")}
           <input type="color" id="color" title="自定义强调色">
         </div>
+        <label class="f" for="bgimage">${L.bgLabel}</label>
+        <input class="tf" id="bgimage" type="text" placeholder="${L.bgPlaceholder}">
+        <p class="hint" style="margin-top:4px">${L.bgHint}</p>
       </div>
 
       <details class="sec adv">
@@ -313,6 +319,11 @@ class HaCarEditor extends HTMLElement {
     q("color").addEventListener("input", (e) => {
       this._config.accent = e.target.value;
       this._sync();
+      this._emit();
+    });
+
+    q("bgimage").addEventListener("input", (e) => {
+      this._config.bg_image = e.target.value.trim();
       this._emit();
     });
 
@@ -626,6 +637,7 @@ class HaCarEditor extends HTMLElement {
     q("imgurl").style.display = this._config.image === "custom" ? "block" : "none";
     q("imgurl").value = this._config.image_url || "";
     q("theme").value = this._config.theme || DEFAULTS.theme;
+    q("bgimage").value = this._config.bg_image || "";
     q("color").value = /^#[0-9a-f]{6}$/i.test(this._config.accent || "") ? this._config.accent : (THEMES[this._config.theme] || THEMES.midnight).accent;
     this.shadowRoot.querySelectorAll(".swatch").forEach((s) => {
       s.classList.toggle("sel", s.dataset.color.toLowerCase() === String(this._config.accent || "").toLowerCase());
@@ -663,6 +675,7 @@ class HaCarEditor extends HTMLElement {
     if (!Object.keys(cfg.entities).length) delete cfg.entities;
     if (!cfg.title) delete cfg.title;
     if (!cfg.image_url) delete cfg.image_url;
+    if (!cfg.bg_image) delete cfg.bg_image;
     if (cfg.image === "custom" && !cfg.image_url) delete cfg.image;
     if (cfg.hold_ms === DEFAULTS.hold_ms) delete cfg.hold_ms;
     if (cfg.accent === DEFAULTS.accent) delete cfg.accent;
