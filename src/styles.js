@@ -777,20 +777,22 @@ ha-card.panel.fit .pills { width: 100%; max-width: none; }
 .hmeta .door.fchip:hover { background: rgba(55,214,232,.18); }
 .hmeta .door.fchip .addr { flex: 0 0 auto; overflow: visible; }
 .findmodal { position: absolute; inset: 0; z-index: 60; border-radius: inherit; display: flex;
-  flex-direction: column; align-items: center; justify-content: center; gap: 8px; padding: 18px 16px;
+  flex-direction: column; align-items: center; justify-content: center; gap: clamp(8px, 1.8cqmin, 20px);
+  padding: clamp(16px, 2.4cqmin, 30px); container-type: size;
   background: radial-gradient(120% 90% at 50% 0%, rgba(35,58,84,.92), rgba(8,16,26,.96));
   backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); color: #eaf6ff; }
-.findmodal .fx { position: absolute; top: 10px; right: 10px; width: 30px; height: 30px; border-radius: 50%;
+.findmodal .fx { position: absolute; top: clamp(10px, 1.8cqmin, 22px); right: clamp(10px, 1.8cqmin, 22px);
+  width: clamp(30px, 4cqmin, 48px); height: clamp(30px, 4cqmin, 48px); border-radius: 50%;
   border: 1px solid rgba(255,255,255,.18); background: rgba(255,255,255,.06); color: #dceaf5;
-  font-size: 13px; cursor: pointer; }
-.findmodal .fhead { display: flex; align-items: center; gap: 6px; font-size: 13px; color: #9fb3c8;
-  letter-spacing: .12em; text-transform: uppercase; }
-.findmodal .fhead .ic { width: 15px; height: 15px; }
+  font-size: clamp(13px, 1.6cqmin, 18px); cursor: pointer; }
+.findmodal .fhead { display: flex; align-items: center; gap: 6px; font-size: clamp(13px, 1.5cqmin, 19px);
+  color: #9fb3c8; letter-spacing: .12em; text-transform: uppercase; }
+.findmodal .fhead .ic { width: 1.15em; height: 1.15em; }
 .findmodal .fdist { display: flex; align-items: baseline; gap: 8px; }
-.findmodal .fdist b { font-size: clamp(30px, 8cqw, 48px); line-height: 1; font-weight: 800; color: #fff;
+.findmodal .fdist b { font-size: clamp(32px, 7.2cqmin, 84px); line-height: 1; font-weight: 800; color: #fff;
   text-shadow: 0 0 24px rgba(55,214,232,.45); }
-.findmodal .fdist span { font-size: 12px; color: #9fb3c8; }
-.findmodal .fcomp { position: relative; width: min(46%, 190px); aspect-ratio: 1; display: flex;
+.findmodal .fdist span { font-size: clamp(12px, 1.35cqmin, 17px); color: #9fb3c8; }
+.findmodal .fcomp { position: relative; width: min(56cqmin, 460px); aspect-ratio: 1; display: flex;
   align-items: center; justify-content: center; margin: 4px 0 2px; }
 .findmodal .fring { position: absolute; inset: 0; border-radius: 50%;
   border: 1px dashed rgba(55,214,232,.35); box-shadow: 0 0 0 10px rgba(55,214,232,.04) inset, 0 0 30px rgba(55,214,232,.12); }
@@ -803,14 +805,15 @@ ha-card.panel.fit .pills { width: 100%; max-width: none; }
 .findmodal .farrow .ic { width: 100%; height: 100%; }
 .findmodal .fdot { position: absolute; width: 8px; height: 8px; border-radius: 50%; background: #37d6e8;
   box-shadow: 0 0 12px rgba(55,214,232,.8); }
-.findmodal .fdir { font-size: 14px; font-weight: 600; color: #dceaf5; }
+.findmodal .fdir { font-size: clamp(14px, 1.9cqmin, 24px); font-weight: 600; color: #dceaf5; }
 .findmodal .ffoot { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: center; }
-.findmodal .fperm { display: inline-flex; align-items: center; gap: 5px; height: 30px; padding: 0 12px;
-  border-radius: 999px; border: 1px solid rgba(55,214,232,.4); background: rgba(55,214,232,.12);
-  color: #cfeff8; font-size: 12px; cursor: pointer; }
-.findmodal .fperm .ic { width: 14px; height: 14px; }
-.findmodal .facc { font-size: 11px; color: #7590a6; }
-.findmodal .fnote { max-width: 300px; text-align: center; font-size: 11px; line-height: 1.5; color: #7e93a8; }
+.findmodal .fperm { display: inline-flex; align-items: center; gap: 6px; height: clamp(30px, 3.8cqmin, 48px);
+  padding: 0 clamp(12px, 2cqmin, 22px); border-radius: 999px; border: 1px solid rgba(55,214,232,.4);
+  background: rgba(55,214,232,.12); color: #cfeff8; font-size: clamp(12px, 1.45cqmin, 18px); cursor: pointer; }
+.findmodal .fperm .ic { width: 1.15em; height: 1.15em; }
+.findmodal .facc { font-size: clamp(11px, 1.3cqmin, 16px); color: #7590a6; }
+.findmodal .fnote { max-width: min(76%, 560px); text-align: center; font-size: clamp(11px, 1.35cqmin, 16px);
+  line-height: 1.5; color: #7e93a8; }
 `;
 
 export const EDITOR_STYLES = `
