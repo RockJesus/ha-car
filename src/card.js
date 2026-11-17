@@ -1691,6 +1691,45 @@ class HaCarCard extends HTMLElement {
     }
   }
 
+  _smoothCompass(raw) {
+    const norm = (v) => ((v % 360) + 360) % 360;
+    const shortest = (v) => ((v + 540) % 360) - 180;
+    raw = norm(raw);
+    if (this._heading == null || this._headingSrc !== "compass") {
+      this._heading = raw;
+      this._headingSrc = "compass";
+      this._headingSamples = [raw];
+      this._headingSpike = 0;
+      return this._heading;
+    }
+    const ref = this._heading;
+    const deltaRaw = shortest(raw - ref);
+    // 单帧超过 40° 的大跳先当噪点，连续两帧才认作真实转向
+    if (Math.abs(deltaRaw) > 40) {
+      this._headingSpike = (this._headingSpike || 0) + 1;
+      if (this._headingSpike < 2) return ref;
+    } else {
+      this._headingSpike = 0;
+    }
+    const buf = (this._headingSamples || []).concat(raw);
+    while (buf.length > 5) buf.shift();
+    this._headingSamples = buf;
+    // 按时间顺序解缠，再取中位数，过滤 ±20° 级别的指南针噪声
+    let prev = ref;
+    const vals = buf.map((a) => {
+      prev += shortest(a - prev);
+      return prev;
+    });
+    vals.sort((a, b) => a - b);
+    const med = vals[Math.floor(vals.length / 2)];
+    const delta = med - ref;
+    if (Math.abs(delta) < 0.5) return ref;
+    // 小抖动慢跟、大转向快跟
+    const k = Math.abs(delta) > 18 ? 0.38 : 0.05;
+    this._heading = norm(ref + delta * k);
+    return this._heading;
+  }
+
   _onDeviceOrient(ev) {
     if (!ev || ev === this._lastOrientEv) return;
     this._lastOrientEv = ev;
@@ -1719,11 +1758,10 @@ class HaCarCard extends HTMLElement {
     }
     h = (h + screenAngle + 360) % 360;
     h = ((h % 360) + 360) % 360;
-    this._heading = h;
-    this._headingSrc = "compass";
     this._compassGot = true;
     clearTimeout(this._compassTimer);
     this._stopGpsHeading();
+    this._smoothCompass(h);
     // iOS WKWebView 的 rAF 在个别场景会被节流，方向事件里直接刷新
     if (this._findOpen) this._updateFind();
   }
@@ -1732,6 +1770,8 @@ class HaCarCard extends HTMLElement {
     this._findOpen = true;
     this._heading = null;
     this._headingSrc = null;
+    this._headingSamples = [];
+    this._headingSpike = 0;
     this._compassGot = false;
     this._lastOrientEv = null;
     this._sig = "";
@@ -1763,6 +1803,8 @@ class HaCarCard extends HTMLElement {
       this._compassGot = false;
       this._heading = null;
       this._headingSrc = null;
+      this._headingSamples = [];
+      this._headingSpike = 0;
       this._lastOrientEv = null;
       if (this._findOpen) this._updateFind();
       this._showToast(isEn(this._hass) ? "Compass on — turn your phone" : "指南针已开启，缓慢转动手机", "ok");

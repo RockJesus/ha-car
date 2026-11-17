@@ -803,7 +803,7 @@ ha-card.panel.fit .pills { width: 100%; max-width: none; }
   width: 2px; height: 8px; background: rgba(55,214,232,.55); transform: translateX(-50%); }
 .findmodal .fring::after { top: auto; bottom: -1px; }
 .findmodal .farrow { position: relative; display: flex; align-items: center; justify-content: center;
-  width: 62%; height: 62%; transform-origin: 50% 50%; transition: transform .08s linear; color: #37d6e8;
+  width: 62%; height: 62%; transform-origin: 50% 50%; transition: none; color: #37d6e8; will-change: transform;
   filter: drop-shadow(0 0 14px rgba(55,214,232,.55)); }
 .findmodal .farrow .ic { width: 100%; height: 100%; }
 .findmodal .fdot { position: absolute; width: 8px; height: 8px; border-radius: 50%; background: #37d6e8;

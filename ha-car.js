@@ -1121,7 +1121,7 @@ ha-card.panel.fit .pills { width: 100%; max-width: none; }
   width: 2px; height: 8px; background: rgba(55,214,232,.55); transform: translateX(-50%); }
 .findmodal .fring::after { top: auto; bottom: -1px; }
 .findmodal .farrow { position: relative; display: flex; align-items: center; justify-content: center;
-  width: 62%; height: 62%; transform-origin: 50% 50%; transition: transform .08s linear; color: #37d6e8;
+  width: 62%; height: 62%; transform-origin: 50% 50%; transition: none; color: #37d6e8; will-change: transform;
   filter: drop-shadow(0 0 14px rgba(55,214,232,.55)); }
 .findmodal .farrow .ic { width: 100%; height: 100%; }
 .findmodal .fdot { position: absolute; width: 8px; height: 8px; border-radius: 50%; background: #37d6e8;
@@ -3058,6 +3058,41 @@ var HaCarCard = class extends HTMLElement {
       else stat.textContent = en ? `Compass ${Math.round(this._heading)}°` : `指南针 ${Math.round(this._heading)}°`;
     }
   }
+  _smoothCompass(raw) {
+    const norm = (v) => (v % 360 + 360) % 360;
+    const shortest = (v) => (v + 540) % 360 - 180;
+    raw = norm(raw);
+    if (this._heading == null || this._headingSrc !== "compass") {
+      this._heading = raw;
+      this._headingSrc = "compass";
+      this._headingSamples = [raw];
+      this._headingSpike = 0;
+      return this._heading;
+    }
+    const ref = this._heading;
+    const deltaRaw = shortest(raw - ref);
+    if (Math.abs(deltaRaw) > 40) {
+      this._headingSpike = (this._headingSpike || 0) + 1;
+      if (this._headingSpike < 2) return ref;
+    } else {
+      this._headingSpike = 0;
+    }
+    const buf = (this._headingSamples || []).concat(raw);
+    while (buf.length > 5) buf.shift();
+    this._headingSamples = buf;
+    let prev = ref;
+    const vals = buf.map((a) => {
+      prev += shortest(a - prev);
+      return prev;
+    });
+    vals.sort((a, b) => a - b);
+    const med = vals[Math.floor(vals.length / 2)];
+    const delta = med - ref;
+    if (Math.abs(delta) < 0.5) return ref;
+    const k = Math.abs(delta) > 18 ? 0.38 : 0.05;
+    this._heading = norm(ref + delta * k);
+    return this._heading;
+  }
   _onDeviceOrient(ev) {
     if (!ev || ev === this._lastOrientEv) return;
     this._lastOrientEv = ev;
@@ -3084,17 +3119,18 @@ var HaCarCard = class extends HTMLElement {
     }
     h = (h + screenAngle + 360) % 360;
     h = (h % 360 + 360) % 360;
-    this._heading = h;
-    this._headingSrc = "compass";
     this._compassGot = true;
     clearTimeout(this._compassTimer);
     this._stopGpsHeading();
+    this._smoothCompass(h);
     if (this._findOpen) this._updateFind();
   }
   _openFind() {
     this._findOpen = true;
     this._heading = null;
     this._headingSrc = null;
+    this._headingSamples = [];
+    this._headingSpike = 0;
     this._compassGot = false;
     this._lastOrientEv = null;
     this._sig = "";
@@ -3123,6 +3159,8 @@ var HaCarCard = class extends HTMLElement {
       this._compassGot = false;
       this._heading = null;
       this._headingSrc = null;
+      this._headingSamples = [];
+      this._headingSpike = 0;
       this._lastOrientEv = null;
       if (this._findOpen) this._updateFind();
       this._showToast(isEn(this._hass) ? "Compass on — turn your phone" : "指南针已开启，缓慢转动手机", "ok");
@@ -4425,7 +4463,7 @@ var HaCarEditor = class extends HTMLElement {
 customElements.define("ha-car-editor", HaCarEditor);
 
 // src/main.js
-var VERSION = "2.3.3";
+var VERSION = "2.3.4";
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "ha-car",
