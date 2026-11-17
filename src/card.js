@@ -736,9 +736,7 @@ class HaCarCard extends HTMLElement {
 
     this._built = true;
     this._bind();
-    this._orientHandler = (ev) => this._onDeviceOrient(ev);
-    window.addEventListener("deviceorientationabsolute", this._orientHandler, true);
-    window.addEventListener("deviceorientation", this._orientHandler, true);
+    this._bindOrientation();
     this._panelRO = new ResizeObserver(() => {
       this._fitPanel();
       this._fitGrid();
@@ -1626,6 +1624,18 @@ class HaCarCard extends HTMLElement {
     return `${name} · ${en ? "offset " : "偏 "}${Math.abs(delta)}°`;
   }
 
+  _bindOrientation(force) {
+    if (this._orientBound && !force) return;
+    if (this._orientHandler) {
+      window.removeEventListener("deviceorientationabsolute", this._orientHandler, true);
+      window.removeEventListener("deviceorientation", this._orientHandler, true);
+    }
+    this._orientHandler = this._orientHandler || ((ev) => this._onDeviceOrient(ev));
+    window.addEventListener("deviceorientationabsolute", this._orientHandler, true);
+    window.addEventListener("deviceorientation", this._orientHandler, true);
+    this._orientBound = true;
+  }
+
   _updateFind() {
     if (!this._findOpen || !this._findData) return;
     const p = this._findPoints(this._findData);
@@ -1643,12 +1653,36 @@ class HaCarCard extends HTMLElement {
   }
 
   _onDeviceOrient(ev) {
+    const fin = (v) => {
+      if (v === null || v === undefined || v === "") return null;
+      const n = typeof v === "number" ? v : Number(v);
+      return Number.isFinite(n) ? n : null;
+    };
     let h = null;
-    if (typeof ev.webkitCompassHeading === "number" && Number.isFinite(ev.webkitCompassHeading)) h = ev.webkitCompassHeading;
-    else if (Number.isFinite(ev.alpha)) h = (360 - ev.alpha + 360) % 360;
-    if (h == null) return;
+    const compass = fin(ev.webkitCompassHeading);
+    if (compass != null) {
+      h = compass;
+    } else {
+      const alpha = fin(ev.alpha);
+      if (alpha == null) return;
+      // alpha 是设备绕 z 轴的绝对/相对转角，屏幕顶部朝向 = 360 - alpha
+      h = (360 - alpha + 360) % 360;
+    }
+    // 横屏时把「设备顶部」换算成「屏幕顶部」
+    let screenAngle = 0;
+    try {
+      if (screen.orientation && Number.isFinite(screen.orientation.angle)) screenAngle = screen.orientation.angle;
+      else if (Number.isFinite(window.orientation)) screenAngle = window.orientation;
+    } catch {
+      screenAngle = 0;
+    }
+    h = (h + screenAngle + 360) % 360;
+    h = ((h % 360) + 360) % 360;
     this._heading = h;
-    if (this._findOpen) this._updateFind();
+    this._compassGot = true;
+    if (!this._findOpen) return;
+    cancelAnimationFrame(this._headingRaf);
+    this._headingRaf = requestAnimationFrame(() => this._updateFind());
   }
 
   _openFind() {
@@ -1660,6 +1694,7 @@ class HaCarCard extends HTMLElement {
 
   _closeFind() {
     this._findOpen = false;
+    cancelAnimationFrame(this._headingRaf);
     this._sig = "";
     const m = this._card && this._card.querySelector(".findmodal");
     if (m) m.remove();
@@ -1675,6 +1710,16 @@ class HaCarCard extends HTMLElement {
           return false;
         }
       }
+      // iOS 授权后再绑定一次，旧监听在授权前注册时可能收不到事件
+      this._bindOrientation(true);
+      this._compassGot = false;
+      this._showToast(isEn(this._hass) ? "Compass on — turn your phone" : "指南针已开启，缓慢转动手机", "ok");
+      clearTimeout(this._compassTimer);
+      this._compassTimer = setTimeout(() => {
+        if (this._findOpen && !this._compassGot) {
+          this._showToast(isEn(this._hass) ? "No compass data — check Motion access" : "未收到指南针数据，请检查系统「运动与方向」权限", "err");
+        }
+      }, 1800);
       return true;
     } catch {
       this._showToast(isEn(this._hass) ? "Compass unavailable" : "此设备不支持指南针", "err");

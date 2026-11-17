@@ -2188,9 +2188,7 @@ var HaCarCard = class extends HTMLElement {
     this._card = root.querySelector("ha-card");
     this._built = true;
     this._bind();
-    this._orientHandler = (ev) => this._onDeviceOrient(ev);
-    window.addEventListener("deviceorientationabsolute", this._orientHandler, true);
-    window.addEventListener("deviceorientation", this._orientHandler, true);
+    this._bindOrientation();
     this._panelRO = new ResizeObserver(() => {
       this._fitPanel();
       this._fitGrid();
@@ -2993,6 +2991,17 @@ var HaCarCard = class extends HTMLElement {
     const delta = Math.round((rel + 180) % 360 - 180);
     return `${name} · ${en ? "offset " : "偏 "}${Math.abs(delta)}°`;
   }
+  _bindOrientation(force) {
+    if (this._orientBound && !force) return;
+    if (this._orientHandler) {
+      window.removeEventListener("deviceorientationabsolute", this._orientHandler, true);
+      window.removeEventListener("deviceorientation", this._orientHandler, true);
+    }
+    this._orientHandler = this._orientHandler || ((ev) => this._onDeviceOrient(ev));
+    window.addEventListener("deviceorientationabsolute", this._orientHandler, true);
+    window.addEventListener("deviceorientation", this._orientHandler, true);
+    this._orientBound = true;
+  }
   _updateFind() {
     if (!this._findOpen || !this._findData) return;
     const p = this._findPoints(this._findData);
@@ -3009,12 +3018,34 @@ var HaCarCard = class extends HTMLElement {
     if (dir) dir.textContent = this._dirText(bearing, this._heading);
   }
   _onDeviceOrient(ev) {
+    const fin = (v) => {
+      if (v === null || v === void 0 || v === "") return null;
+      const n = typeof v === "number" ? v : Number(v);
+      return Number.isFinite(n) ? n : null;
+    };
     let h = null;
-    if (typeof ev.webkitCompassHeading === "number" && Number.isFinite(ev.webkitCompassHeading)) h = ev.webkitCompassHeading;
-    else if (Number.isFinite(ev.alpha)) h = (360 - ev.alpha + 360) % 360;
-    if (h == null) return;
+    const compass = fin(ev.webkitCompassHeading);
+    if (compass != null) {
+      h = compass;
+    } else {
+      const alpha = fin(ev.alpha);
+      if (alpha == null) return;
+      h = (360 - alpha + 360) % 360;
+    }
+    let screenAngle = 0;
+    try {
+      if (screen.orientation && Number.isFinite(screen.orientation.angle)) screenAngle = screen.orientation.angle;
+      else if (Number.isFinite(window.orientation)) screenAngle = window.orientation;
+    } catch {
+      screenAngle = 0;
+    }
+    h = (h + screenAngle + 360) % 360;
+    h = (h % 360 + 360) % 360;
     this._heading = h;
-    if (this._findOpen) this._updateFind();
+    this._compassGot = true;
+    if (!this._findOpen) return;
+    cancelAnimationFrame(this._headingRaf);
+    this._headingRaf = requestAnimationFrame(() => this._updateFind());
   }
   _openFind() {
     this._findOpen = true;
@@ -3024,6 +3055,7 @@ var HaCarCard = class extends HTMLElement {
   }
   _closeFind() {
     this._findOpen = false;
+    cancelAnimationFrame(this._headingRaf);
     this._sig = "";
     const m = this._card && this._card.querySelector(".findmodal");
     if (m) m.remove();
@@ -3038,6 +3070,15 @@ var HaCarCard = class extends HTMLElement {
           return false;
         }
       }
+      this._bindOrientation(true);
+      this._compassGot = false;
+      this._showToast(isEn(this._hass) ? "Compass on — turn your phone" : "指南针已开启，缓慢转动手机", "ok");
+      clearTimeout(this._compassTimer);
+      this._compassTimer = setTimeout(() => {
+        if (this._findOpen && !this._compassGot) {
+          this._showToast(isEn(this._hass) ? "No compass data — check Motion access" : "未收到指南针数据，请检查系统「运动与方向」权限", "err");
+        }
+      }, 1800);
       return true;
     } catch {
       this._showToast(isEn(this._hass) ? "Compass unavailable" : "此设备不支持指南针", "err");
@@ -4329,7 +4370,7 @@ var HaCarEditor = class extends HTMLElement {
 customElements.define("ha-car-editor", HaCarEditor);
 
 // src/main.js
-var VERSION = "2.3.1";
+var VERSION = "2.3.2";
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "ha-car",
