@@ -1097,8 +1097,8 @@ ha-card.panel.fit .pills { width: 100%; max-width: none; }
 .findmodal { position: absolute; inset: 0; z-index: 60; border-radius: var(--ha-card-border-radius, 28px); overflow: hidden; display: flex;
   flex-direction: column; align-items: center; justify-content: center; gap: clamp(8px, 1.8cqmin, 20px);
   padding: clamp(16px, 2.4cqmin, 30px); container-type: size;
-  background: radial-gradient(120% 90% at 50% 0%, rgba(35,58,84,.92), rgba(8,16,26,.96));
-  backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); color: #eaf6ff; }
+  background: radial-gradient(120% 90% at 50% 0%, #233a54 0%, #0b1624 58%, #070e17 100%);
+  color: #eaf6ff; }
 .findmodal .fx { position: absolute; top: clamp(10px, 1.8cqmin, 22px); right: clamp(10px, 1.8cqmin, 22px);
   width: clamp(30px, 4cqmin, 48px); height: clamp(30px, 4cqmin, 48px); border-radius: 50%;
   border: 1px solid rgba(255,255,255,.18); background: rgba(255,255,255,.06); color: #dceaf5;
@@ -4261,7 +4261,7 @@ var HaCarEditor = class extends HTMLElement {
 customElements.define("ha-car-editor", HaCarEditor);
 
 // src/main.js
-var VERSION = "2.2.1";
+var VERSION = "2.2.2";
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "ha-car",
