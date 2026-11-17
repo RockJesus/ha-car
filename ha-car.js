@@ -3742,7 +3742,7 @@ var HaCarEditor = class extends HTMLElement {
         <p class="hint">${L.privacyHint}</p>
         <label class="f">${L.layout}</label>
         <div class="chips2" id="layouts">
-          <button class="tg" type="button" data-layout="full">完整（含胎压/门窗/服务）</button>
+          <button class="tg" type="button" data-layout="full">完整</button>
           <button class="tg" type="button" data-layout="compact">紧凑</button>
         </div>
       </div>
@@ -4261,7 +4261,7 @@ var HaCarEditor = class extends HTMLElement {
 customElements.define("ha-car-editor", HaCarEditor);
 
 // src/main.js
-var VERSION = "2.2.2";
+var VERSION = "2.2.3";
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "ha-car",
