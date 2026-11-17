@@ -721,7 +721,7 @@ class HaCarEditor extends HTMLElement {
       this._syncFind();
     }, "留空自动使用车辆定位", "device_tracker");
     const hint = this.shadowRoot.getElementById("findhint");
-    if (hint) hint.textContent = f.phone ? "已启用：定位行会显示“距车”胶囊，点它打开找车罗盘。" : "未选择手机定位，卡片不会显示人车距离。";
+    if (hint) hint.textContent = f.phone ? "已启用：定位行会显示“找车”胶囊，点它打开找车罗盘。" : "未选择手机定位，卡片不会显示人车距离。";
   }
 
   _emit() {

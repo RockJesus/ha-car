@@ -1696,7 +1696,7 @@ class HaCarCard extends HTMLElement {
     const p = this._findPoints(data);
     const d = this._distanceM(p.phone, p.car);
     if (d == null) return "";
-    const label = isEn(this._hass) ? "To car" : "距车";
+    const label = isEn(this._hass) ? "Find car" : "找车";
     return `<span class="door fchip" data-find role="button" tabindex="0">${icon("pin")}<span class="addr">${label} ${esc(this._distText(d))}</span></span>`;
   }
 

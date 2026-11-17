@@ -3046,7 +3046,7 @@ var HaCarCard = class extends HTMLElement {
     const p = this._findPoints(data);
     const d = this._distanceM(p.phone, p.car);
     if (d == null) return "";
-    const label = isEn(this._hass) ? "To car" : "距车";
+    const label = isEn(this._hass) ? "Find car" : "找车";
     return `<span class="door fchip" data-find role="button" tabindex="0">${icon("pin")}<span class="addr">${label} ${esc(this._distText(d))}</span></span>`;
   }
   _findModal(data) {
@@ -4588,7 +4588,7 @@ var HaCarEditor = class extends HTMLElement {
       this._syncFind();
     }, "留空自动使用车辆定位", "device_tracker");
     const hint = this.shadowRoot.getElementById("findhint");
-    if (hint) hint.textContent = f.phone ? "已启用：定位行会显示“距车”胶囊，点它打开找车罗盘。" : "未选择手机定位，卡片不会显示人车距离。";
+    if (hint) hint.textContent = f.phone ? "已启用：定位行会显示“找车”胶囊，点它打开找车罗盘。" : "未选择手机定位，卡片不会显示人车距离。";
   }
   _emit() {
     const cfg = Object.assign({}, this._config);
@@ -4618,7 +4618,7 @@ var HaCarEditor = class extends HTMLElement {
 customElements.define("ha-car-editor", HaCarEditor);
 
 // src/main.js
-var VERSION = "2.3.9";
+var VERSION = "2.4.0";
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "ha-car",
