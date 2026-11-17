@@ -1689,7 +1689,7 @@ var DEFAULTS = {
   modules: MODULES.filter((m) => m !== "service"),
   // 模块顺序：null 时按 modules 兼容推导（老配置无需迁移）
   blocks: null,
-  confirm: ["btn_unlock", "btn_lock", "sw_engine", "sw_honk"],
+  confirm: CONFIRMABLE.slice(),
   hold_ms: 2e3,
   accent: "#37d6e8",
   theme: "midnight",
@@ -1733,6 +1733,27 @@ function normBlocks(cfg) {
   if (mods.includes("actions")) list.push({ type: "actions", on: true });
   return list;
 }
+var LEGACY_CONFIRM = ["btn_unlock", "btn_lock", "sw_engine", "sw_honk"];
+function actionKeys(cfg) {
+  const keys = CONFIRMABLE.slice();
+  for (const b of normBlocks(cfg || {})) {
+    if (b.type !== "actions") continue;
+    const items = Array.isArray(b.items) ? b.items : defaultItems("actions");
+    for (const it of items) {
+      const key = String(it.slot || it.entity || "").trim();
+      if (key) keys.push(key);
+    }
+  }
+  return Array.from(new Set(keys));
+}
+function normalizeConfirm(config, cfg) {
+  const has = config && Object.prototype.hasOwnProperty.call(config, "confirm");
+  const raw = has ? config.confirm : null;
+  if (!Array.isArray(raw)) return actionKeys(cfg);
+  const list = raw.filter((k) => typeof k === "string" && k.trim()).map((k) => k.trim());
+  const legacy = list.length === LEGACY_CONFIRM.length && LEGACY_CONFIRM.every((k) => list.includes(k));
+  return legacy ? actionKeys(cfg) : Array.from(new Set(list));
+}
 var SLOT_KEYS = Object.keys(SLOTS);
 var HaCarCard = class extends HTMLElement {
   constructor() {
@@ -1761,7 +1782,6 @@ var HaCarCard = class extends HTMLElement {
     }
     const cfg = Object.assign({}, DEFAULTS, config || {});
     cfg.modules = Array.isArray(cfg.modules) ? cfg.modules.filter((m) => MODULES.includes(m)) : DEFAULTS.modules.slice();
-    cfg.confirm = Array.isArray(cfg.confirm) ? cfg.confirm.filter((k) => CONFIRMABLE.includes(k)) : DEFAULTS.confirm.slice();
     cfg.entities = cfg.entities && typeof cfg.entities === "object" ? cfg.entities : {};
     cfg.find = Object.assign({ phone: "", car: "" }, cfg.find && typeof cfg.find === "object" ? cfg.find : {});
     cfg.find.phone = typeof cfg.find.phone === "string" ? cfg.find.phone : "";
@@ -1770,6 +1790,7 @@ var HaCarCard = class extends HTMLElement {
     if (cfg.bg_image && !bgUrl(cfg.bg_image)) cfg.bg_image = "";
     cfg.hold_ms = clamp(Number(cfg.hold_ms) || DEFAULTS.hold_ms, 300, 3e3);
     cfg.blocks = normBlocks(cfg);
+    cfg.confirm = normalizeConfirm(config, cfg);
     this._config = cfg;
     this._sig = "";
     this._toast = null;
@@ -2349,6 +2370,7 @@ var HaCarCard = class extends HTMLElement {
   // ---------- 卡片主体 ----------
   // ---------- 模块内实体项 ----------
   _items(b) {
+    if (!b) return [];
     if (Array.isArray(b.items)) return b.items;
     if (b.type === "custom" && (b.entity || b.label || b.icon)) {
       return [{ slot: "", entity: b.entity, label: b.label, unit: b.unit, icon: b.icon }];
@@ -2414,6 +2436,7 @@ var HaCarCard = class extends HTMLElement {
     return db.items.some((it) => it.slot === slot);
   }
   _extraChips(b, data, t, skipKinds) {
+    if (!b) return "";
     const items = this._items(b).filter((it) => {
       const def = this._itemDef(it);
       const kind = def ? def.kind : "custom";
@@ -3900,9 +3923,10 @@ var HaCarEditor = class extends HTMLElement {
     this._config.entities = Object.assign({}, this._config.entities || {});
     this._config.find = Object.assign({ phone: "", car: "" }, this._config.find && typeof this._config.find === "object" ? this._config.find : {});
     if (!Array.isArray(this._config.modules)) this._config.modules = DEFAULTS.modules.slice();
-    if (!Array.isArray(this._config.confirm)) this._config.confirm = DEFAULTS.confirm.slice();
     this._config.blocks = normBlocks(this._config);
+    this._config.confirm = normalizeConfirm(config, this._config);
     if (!this._built) this._build();
+    else this._renderChips();
     this._sync();
   }
   set hass(hass) {
@@ -4069,8 +4093,9 @@ var HaCarEditor = class extends HTMLElement {
       this._emit();
     });
     q("guard").addEventListener("click", () => {
-      this._config.confirm = this._config.confirm.length ? [] : DEFAULTS.confirm.slice();
-      this._sync();
+      this._config.confirm = this._config.confirm.length ? [] : actionKeys(this._config);
+      this._renderChips();
+      this._syncConfirms();
       this._emit();
     });
     q("hold").addEventListener("input", (e) => {
@@ -4227,9 +4252,34 @@ var HaCarEditor = class extends HTMLElement {
   }
   _renderChips() {
     const confirms = this.shadowRoot.getElementById("confirms");
-    confirms.innerHTML = CONFIRMABLE.map(
-      (k) => `<button class="tg" type="button" data-confirm="${k}">${ACTION_LABELS[k] || k}</button>`
+    if (!confirms) return;
+    confirms.innerHTML = actionKeys(this._config).map(
+      (k) => `<button class="tg" type="button" data-confirm="${esc(k)}">${esc(this._confirmLabel(k))}</button>`
     ).join("");
+  }
+  _confirmLabel(key) {
+    if (ACTION_LABELS[key]) return ACTION_LABELS[key];
+    for (const b of this._config.blocks || []) {
+      if (b.type !== "actions") continue;
+      for (const it of this._blockItems(b)) {
+        if ((it.slot || it.entity) !== key) continue;
+        if (it.label) return it.label;
+        if (it.slot && ITEM_DEFS[it.slot]) return ITEM_DEFS[it.slot].zh;
+        const st = it.entity && this._hass && this._hass.states[it.entity];
+        const fn = st && st.attributes && st.attributes.friendly_name;
+        if (fn) return String(fn);
+        return it.entity || key;
+      }
+    }
+    return key;
+  }
+  _syncConfirms() {
+    const list = this._config.confirm || [];
+    const guard = this.shadowRoot.getElementById("guard");
+    if (guard) guard.setAttribute("aria-checked", String(list.length > 0));
+    this.shadowRoot.querySelectorAll("[data-confirm]").forEach((b) => {
+      b.setAttribute("aria-pressed", String(list.includes(b.dataset.confirm)));
+    });
   }
   _blockItems(b) {
     if (Array.isArray(b.items)) return b.items;
@@ -4312,6 +4362,14 @@ var HaCarEditor = class extends HTMLElement {
     items[j] = Object.assign({}, items[j], { entity: value });
     blocks[i] = Object.assign({}, b, { items });
     this._config.blocks = blocks;
+    if (b.type === "actions" && value) {
+      const key = items[j].slot || value;
+      if ((this._config.confirm || []).length && !this._config.confirm.includes(key)) {
+        this._config.confirm = [...this._config.confirm, key];
+      }
+      this._renderChips();
+      this._syncConfirms();
+    }
     this._emit();
   }
   _mountPicker(host, value, onPick, placeholder, domain) {
@@ -4394,13 +4452,10 @@ var HaCarEditor = class extends HTMLElement {
       b.setAttribute("aria-pressed", String(b.dataset.layout === (this._config.layout || "full")));
     });
     this._renderBlocks();
-    q("guard").setAttribute("aria-checked", String((this._config.confirm || []).length > 0));
+    this._syncConfirms();
     const hold = Number(this._config.hold_ms) || 2e3;
     q("hold").value = String(hold);
     q("holdv").textContent = `${hold} ms`;
-    this.shadowRoot.querySelectorAll("[data-confirm]").forEach((b) => {
-      b.setAttribute("aria-pressed", String((this._config.confirm || []).includes(b.dataset.confirm)));
-    });
     q("imgmode").value = this._config.image || "auto";
     q("imgurl").style.display = this._config.image === "custom" ? "block" : "none";
     q("imgurl").value = this._config.image_url || "";
@@ -4463,7 +4518,7 @@ var HaCarEditor = class extends HTMLElement {
 customElements.define("ha-car-editor", HaCarEditor);
 
 // src/main.js
-var VERSION = "2.3.4";
+var VERSION = "2.3.5";
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "ha-car",

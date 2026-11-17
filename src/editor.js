@@ -1,6 +1,6 @@
 import { EDITOR_STYLES } from "./styles.js";
 import { detectVehicles, resolve } from "./resolve.js";
-import { CONFIRMABLE, DEFAULTS, ITEM_DEFS, THEMES, defaultItems, normBlocks } from "./card.js";
+import { actionKeys, DEFAULTS, ITEM_DEFS, THEMES, defaultItems, normBlocks, normalizeConfirm } from "./card.js";
 
 const BLOCK_LABELS = {
   meta: "定位/同步", hero: "车图", energy: "能耗仪表", alerts: "车辆告警",
@@ -97,9 +97,10 @@ class HaCarEditor extends HTMLElement {
     this._config.entities = Object.assign({}, this._config.entities || {});
     this._config.find = Object.assign({ phone: "", car: "" }, this._config.find && typeof this._config.find === "object" ? this._config.find : {});
     if (!Array.isArray(this._config.modules)) this._config.modules = DEFAULTS.modules.slice();
-    if (!Array.isArray(this._config.confirm)) this._config.confirm = DEFAULTS.confirm.slice();
     this._config.blocks = normBlocks(this._config);
+    this._config.confirm = normalizeConfirm(config, this._config);
     if (!this._built) this._build();
+    else this._renderChips();
     this._sync();
   }
 
@@ -274,8 +275,9 @@ class HaCarEditor extends HTMLElement {
     });
 
     q("guard").addEventListener("click", () => {
-      this._config.confirm = this._config.confirm.length ? [] : DEFAULTS.confirm.slice();
-      this._sync();
+      this._config.confirm = this._config.confirm.length ? [] : actionKeys(this._config);
+      this._renderChips();
+      this._syncConfirms();
       this._emit();
     });
 
@@ -446,11 +448,37 @@ class HaCarEditor extends HTMLElement {
   }
 
   _renderChips() {
-
     const confirms = this.shadowRoot.getElementById("confirms");
-    confirms.innerHTML = CONFIRMABLE.map(
-      (k) => `<button class="tg" type="button" data-confirm="${k}">${ACTION_LABELS[k] || k}</button>`,
+    if (!confirms) return;
+    confirms.innerHTML = actionKeys(this._config).map(
+      (k) => `<button class="tg" type="button" data-confirm="${esc(k)}">${esc(this._confirmLabel(k))}</button>`,
     ).join("");
+  }
+
+  _confirmLabel(key) {
+    if (ACTION_LABELS[key]) return ACTION_LABELS[key];
+    for (const b of this._config.blocks || []) {
+      if (b.type !== "actions") continue;
+      for (const it of this._blockItems(b)) {
+        if ((it.slot || it.entity) !== key) continue;
+        if (it.label) return it.label;
+        if (it.slot && ITEM_DEFS[it.slot]) return ITEM_DEFS[it.slot].zh;
+        const st = it.entity && this._hass && this._hass.states[it.entity];
+        const fn = st && st.attributes && st.attributes.friendly_name;
+        if (fn) return String(fn);
+        return it.entity || key;
+      }
+    }
+    return key;
+  }
+
+  _syncConfirms() {
+    const list = this._config.confirm || [];
+    const guard = this.shadowRoot.getElementById("guard");
+    if (guard) guard.setAttribute("aria-checked", String(list.length > 0));
+    this.shadowRoot.querySelectorAll("[data-confirm]").forEach((b) => {
+      b.setAttribute("aria-pressed", String(list.includes(b.dataset.confirm)));
+    });
   }
 
   _blockItems(b) {
@@ -541,6 +569,15 @@ class HaCarEditor extends HTMLElement {
     items[j] = Object.assign({}, items[j], { entity: value });
     blocks[i] = Object.assign({}, b, { items });
     this._config.blocks = blocks;
+    // 防误触已开启时，新选的自定义动作按钮默认也纳入长按
+    if (b.type === "actions" && value) {
+      const key = items[j].slot || value;
+      if ((this._config.confirm || []).length && !this._config.confirm.includes(key)) {
+        this._config.confirm = [...this._config.confirm, key];
+      }
+      this._renderChips();
+      this._syncConfirms();
+    }
     this._emit();
   }
 
@@ -629,13 +666,10 @@ class HaCarEditor extends HTMLElement {
       b.setAttribute("aria-pressed", String(b.dataset.layout === (this._config.layout || "full")));
     });
     this._renderBlocks();
-    q("guard").setAttribute("aria-checked", String((this._config.confirm || []).length > 0));
+    this._syncConfirms();
     const hold = Number(this._config.hold_ms) || 2000;
     q("hold").value = String(hold);
     q("holdv").textContent = `${hold} ms`;
-    this.shadowRoot.querySelectorAll("[data-confirm]").forEach((b) => {
-      b.setAttribute("aria-pressed", String((this._config.confirm || []).includes(b.dataset.confirm)));
-    });
     q("imgmode").value = this._config.image || "auto";
     q("imgurl").style.display = this._config.image === "custom" ? "block" : "none";
     q("imgurl").value = this._config.image_url || "";

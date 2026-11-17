@@ -158,7 +158,7 @@ const DEFAULTS = {
   modules: MODULES.filter((m) => m !== "service"),
   // 模块顺序：null 时按 modules 兼容推导（老配置无需迁移）
   blocks: null,
-  confirm: ["btn_unlock", "btn_lock", "sw_engine", "sw_honk"],
+  confirm: CONFIRMABLE.slice(),
   hold_ms: 2000,
   accent: "#37d6e8",
   theme: "midnight",
@@ -211,6 +211,32 @@ export function normBlocks(cfg) {
   return list;
 }
 
+const LEGACY_CONFIRM = ["btn_unlock", "btn_lock", "sw_engine", "sw_honk"];
+
+// 卡片里所有可长按的按钮键：内置动作 + 动作模块里的自定义按钮
+export function actionKeys(cfg) {
+  const keys = CONFIRMABLE.slice();
+  for (const b of normBlocks(cfg || {})) {
+    if (b.type !== "actions") continue;
+    const items = Array.isArray(b.items) ? b.items : defaultItems("actions");
+    for (const it of items) {
+      const key = String(it.slot || it.entity || "").trim();
+      if (key) keys.push(key);
+    }
+  }
+  return Array.from(new Set(keys));
+}
+
+// 没写 confirm 或仍是旧版默认 4 项时，默认改为「全部按钮」
+export function normalizeConfirm(config, cfg) {
+  const has = config && Object.prototype.hasOwnProperty.call(config, "confirm");
+  const raw = has ? config.confirm : null;
+  if (!Array.isArray(raw)) return actionKeys(cfg);
+  const list = raw.filter((k) => typeof k === "string" && k.trim()).map((k) => k.trim());
+  const legacy = list.length === LEGACY_CONFIRM.length && LEGACY_CONFIRM.every((k) => list.includes(k));
+  return legacy ? actionKeys(cfg) : Array.from(new Set(list));
+}
+
 const SLOT_KEYS = Object.keys(SLOTS);
 
 class HaCarCard extends HTMLElement {
@@ -245,9 +271,6 @@ class HaCarCard extends HTMLElement {
     cfg.modules = Array.isArray(cfg.modules)
       ? cfg.modules.filter((m) => MODULES.includes(m))
       : DEFAULTS.modules.slice();
-    cfg.confirm = Array.isArray(cfg.confirm)
-      ? cfg.confirm.filter((k) => CONFIRMABLE.includes(k))
-      : DEFAULTS.confirm.slice();
     cfg.entities = cfg.entities && typeof cfg.entities === "object" ? cfg.entities : {};
     cfg.find = Object.assign({ phone: "", car: "" }, cfg.find && typeof cfg.find === "object" ? cfg.find : {});
     cfg.find.phone = typeof cfg.find.phone === "string" ? cfg.find.phone : "";
@@ -256,6 +279,7 @@ class HaCarCard extends HTMLElement {
     if (cfg.bg_image && !bgUrl(cfg.bg_image)) cfg.bg_image = "";
     cfg.hold_ms = clamp(Number(cfg.hold_ms) || DEFAULTS.hold_ms, 300, 3000);
     cfg.blocks = normBlocks(cfg);
+    cfg.confirm = normalizeConfirm(config, cfg);
     this._config = cfg;
     this._sig = "";
     this._toast = null;
@@ -912,6 +936,7 @@ class HaCarCard extends HTMLElement {
 
   // ---------- 模块内实体项 ----------
   _items(b) {
+    if (!b) return [];
     if (Array.isArray(b.items)) return b.items;
     if (b.type === "custom" && (b.entity || b.label || b.icon)) {
       return [{ slot: "", entity: b.entity, label: b.label, unit: b.unit, icon: b.icon }];
@@ -986,6 +1011,7 @@ class HaCarCard extends HTMLElement {
   }
 
   _extraChips(b, data, t, skipKinds) {
+    if (!b) return "";
     const items = this._items(b).filter((it) => {
       const def = this._itemDef(it);
       const kind = def ? def.kind : "custom";
