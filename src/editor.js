@@ -188,7 +188,7 @@ class HaCarEditor extends HTMLElement {
         <label class="f">${L.accent}</label>
         <div class="swatches" id="swatches">
           ${ACCENTS.map((c) => `<span class="swatch" data-color="${c}" style="background:${c}"></span>`).join("")}
-          <input type="color" id="color" style="width:30px;height:28px;border:none;background:none;cursor:pointer">
+          <input type="color" id="color" title="自定义强调色">
         </div>
       </div>
 

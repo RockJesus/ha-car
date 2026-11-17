@@ -843,6 +843,11 @@ label.f { display: block; font-size: 11px; font-weight: 600; letter-spacing: .04
 .tg[aria-pressed="true"] { border-color: var(--primary-color, #03a9f4); color: var(--primary-color, #03a9f4);
   background: rgba(3,169,244,.12); }
 .swatches { display: flex; gap: 6px; align-items: center; }
+#color { width: 26px; height: 26px; padding: 0; border: none; border-radius: 999px; background: none;
+  cursor: pointer; overflow: hidden; box-shadow: inset 0 0 0 2px rgba(255,255,255,.22); }
+#color::-webkit-color-swatch-wrapper { padding: 0; border-radius: 999px; }
+#color::-webkit-color-swatch { border: none; border-radius: 999px; }
+#color::-moz-color-swatch { border: none; border-radius: 999px; }
 .swatch { width: 26px; height: 26px; border-radius: 999px; cursor: pointer; border: 2px solid transparent;
   box-shadow: 0 0 0 1px rgba(255,255,255,.16) inset; }
 .swatch.sel { border-color: var(--primary-text-color); }

@@ -1160,6 +1160,11 @@ label.f { display: block; font-size: 11px; font-weight: 600; letter-spacing: .04
 .tg[aria-pressed="true"] { border-color: var(--primary-color, #03a9f4); color: var(--primary-color, #03a9f4);
   background: rgba(3,169,244,.12); }
 .swatches { display: flex; gap: 6px; align-items: center; }
+#color { width: 26px; height: 26px; padding: 0; border: none; border-radius: 999px; background: none;
+  cursor: pointer; overflow: hidden; box-shadow: inset 0 0 0 2px rgba(255,255,255,.22); }
+#color::-webkit-color-swatch-wrapper { padding: 0; border-radius: 999px; }
+#color::-webkit-color-swatch { border: none; border-radius: 999px; }
+#color::-moz-color-swatch { border: none; border-radius: 999px; }
 .swatch { width: 26px; height: 26px; border-radius: 999px; cursor: pointer; border: 2px solid transparent;
   box-shadow: 0 0 0 1px rgba(255,255,255,.16) inset; }
 .swatch.sel { border-color: var(--primary-text-color); }
@@ -3805,7 +3810,7 @@ var HaCarEditor = class extends HTMLElement {
         <label class="f">${L.accent}</label>
         <div class="swatches" id="swatches">
           ${ACCENTS.map((c) => `<span class="swatch" data-color="${c}" style="background:${c}"></span>`).join("")}
-          <input type="color" id="color" style="width:30px;height:28px;border:none;background:none;cursor:pointer">
+          <input type="color" id="color" title="自定义强调色">
         </div>
       </div>
 
@@ -4261,7 +4266,7 @@ var HaCarEditor = class extends HTMLElement {
 customElements.define("ha-car-editor", HaCarEditor);
 
 // src/main.js
-var VERSION = "2.2.3";
+var VERSION = "2.2.4";
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "ha-car",
