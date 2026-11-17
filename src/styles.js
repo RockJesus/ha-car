@@ -846,11 +846,14 @@ label.f { display: block; font-size: 11px; font-weight: 600; letter-spacing: .04
 .tg[aria-pressed="true"] { border-color: var(--primary-color, #03a9f4); color: var(--primary-color, #03a9f4);
   background: rgba(3,169,244,.12); }
 .swatches { display: flex; gap: 6px; align-items: center; }
-#color { width: 26px; height: 26px; padding: 0; border: none; border-radius: 999px; background: none;
-  cursor: pointer; overflow: hidden; box-shadow: inset 0 0 0 2px rgba(255,255,255,.22); }
-#color::-webkit-color-swatch-wrapper { padding: 0; border-radius: 999px; }
-#color::-webkit-color-swatch { border: none; border-radius: 999px; }
-#color::-moz-color-swatch { border: none; border-radius: 999px; }
+.cwheel { position: relative; width: 30px; height: 30px; flex: 0 0 auto; border-radius: 999px; cursor: pointer;
+  box-shadow: inset 0 0 0 1.5px rgba(255,255,255,.2); }
+.cwheel input { position: absolute; inset: 0; z-index: 3; width: 100%; height: 100%; padding: 0; border: none;
+  opacity: 0; cursor: pointer; }
+.cface { position: absolute; inset: 0; border-radius: 999px;
+  background: conic-gradient(from 0deg, #ff5252, #ffb74d, #8ef07a, #3ee6d1, #4d9cff, #b06bff, #ff4dd2, #ff5252); }
+.cdot { position: absolute; inset: 8px; border-radius: 999px; background: var(--pick, #37d6e8);
+  box-shadow: inset 0 0 0 1.5px rgba(0,0,0,.35); }
 .swatch { width: 26px; height: 26px; border-radius: 999px; cursor: pointer; border: 2px solid transparent;
   box-shadow: 0 0 0 1px rgba(255,255,255,.16) inset; }
 .swatch.sel { border-color: var(--primary-text-color); }

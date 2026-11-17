@@ -191,7 +191,10 @@ class HaCarEditor extends HTMLElement {
         <label class="f">${L.accent}</label>
         <div class="swatches" id="swatches">
           ${ACCENTS.map((c) => `<span class="swatch" data-color="${c}" style="background:${c}"></span>`).join("")}
-          <input type="color" id="color" title="自定义强调色">
+          <label class="cwheel" id="colorwheel" title="自定义强调色" aria-label="自定义强调色">
+            <input type="color" id="color" aria-label="自定义强调色">
+            <span class="cface" aria-hidden="true"></span><span class="cdot" aria-hidden="true"></span>
+          </label>
         </div>
         <label class="f" for="bgimage">${L.bgLabel}</label>
         <input class="tf" id="bgimage" type="text" placeholder="${L.bgPlaceholder}">
@@ -638,7 +641,10 @@ class HaCarEditor extends HTMLElement {
     q("imgurl").value = this._config.image_url || "";
     q("theme").value = this._config.theme || DEFAULTS.theme;
     q("bgimage").value = this._config.bg_image || "";
-    q("color").value = /^#[0-9a-f]{6}$/i.test(this._config.accent || "") ? this._config.accent : (THEMES[this._config.theme] || THEMES.midnight).accent;
+    const picked = /^#[0-9a-f]{6}$/i.test(this._config.accent || "") ? this._config.accent : (THEMES[this._config.theme] || THEMES.midnight).accent;
+    q("color").value = picked;
+    const wheel = this.shadowRoot.getElementById("colorwheel");
+    if (wheel) wheel.style.setProperty("--pick", picked);
     this.shadowRoot.querySelectorAll(".swatch").forEach((s) => {
       s.classList.toggle("sel", s.dataset.color.toLowerCase() === String(this._config.accent || "").toLowerCase());
     });

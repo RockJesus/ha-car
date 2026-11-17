@@ -1163,11 +1163,14 @@ label.f { display: block; font-size: 11px; font-weight: 600; letter-spacing: .04
 .tg[aria-pressed="true"] { border-color: var(--primary-color, #03a9f4); color: var(--primary-color, #03a9f4);
   background: rgba(3,169,244,.12); }
 .swatches { display: flex; gap: 6px; align-items: center; }
-#color { width: 26px; height: 26px; padding: 0; border: none; border-radius: 999px; background: none;
-  cursor: pointer; overflow: hidden; box-shadow: inset 0 0 0 2px rgba(255,255,255,.22); }
-#color::-webkit-color-swatch-wrapper { padding: 0; border-radius: 999px; }
-#color::-webkit-color-swatch { border: none; border-radius: 999px; }
-#color::-moz-color-swatch { border: none; border-radius: 999px; }
+.cwheel { position: relative; width: 30px; height: 30px; flex: 0 0 auto; border-radius: 999px; cursor: pointer;
+  box-shadow: inset 0 0 0 1.5px rgba(255,255,255,.2); }
+.cwheel input { position: absolute; inset: 0; z-index: 3; width: 100%; height: 100%; padding: 0; border: none;
+  opacity: 0; cursor: pointer; }
+.cface { position: absolute; inset: 0; border-radius: 999px;
+  background: conic-gradient(from 0deg, #ff5252, #ffb74d, #8ef07a, #3ee6d1, #4d9cff, #b06bff, #ff4dd2, #ff5252); }
+.cdot { position: absolute; inset: 8px; border-radius: 999px; background: var(--pick, #37d6e8);
+  box-shadow: inset 0 0 0 1.5px rgba(0,0,0,.35); }
 .swatch { width: 26px; height: 26px; border-radius: 999px; cursor: pointer; border: 2px solid transparent;
   box-shadow: 0 0 0 1px rgba(255,255,255,.16) inset; }
 .swatch.sel { border-color: var(--primary-text-color); }
@@ -3855,7 +3858,10 @@ var HaCarEditor = class extends HTMLElement {
         <label class="f">${L.accent}</label>
         <div class="swatches" id="swatches">
           ${ACCENTS.map((c) => `<span class="swatch" data-color="${c}" style="background:${c}"></span>`).join("")}
-          <input type="color" id="color" title="自定义强调色">
+          <label class="cwheel" id="colorwheel" title="自定义强调色" aria-label="自定义强调色">
+            <input type="color" id="color" aria-label="自定义强调色">
+            <span class="cface" aria-hidden="true"></span><span class="cdot" aria-hidden="true"></span>
+          </label>
         </div>
         <label class="f" for="bgimage">${L.bgLabel}</label>
         <input class="tf" id="bgimage" type="text" placeholder="${L.bgPlaceholder}">
@@ -4266,7 +4272,10 @@ var HaCarEditor = class extends HTMLElement {
     q("imgurl").value = this._config.image_url || "";
     q("theme").value = this._config.theme || DEFAULTS.theme;
     q("bgimage").value = this._config.bg_image || "";
-    q("color").value = /^#[0-9a-f]{6}$/i.test(this._config.accent || "") ? this._config.accent : (THEMES[this._config.theme] || THEMES.midnight).accent;
+    const picked = /^#[0-9a-f]{6}$/i.test(this._config.accent || "") ? this._config.accent : (THEMES[this._config.theme] || THEMES.midnight).accent;
+    q("color").value = picked;
+    const wheel = this.shadowRoot.getElementById("colorwheel");
+    if (wheel) wheel.style.setProperty("--pick", picked);
     this.shadowRoot.querySelectorAll(".swatch").forEach((s) => {
       s.classList.toggle("sel", s.dataset.color.toLowerCase() === String(this._config.accent || "").toLowerCase());
     });
@@ -4320,7 +4329,7 @@ var HaCarEditor = class extends HTMLElement {
 customElements.define("ha-car-editor", HaCarEditor);
 
 // src/main.js
-var VERSION = "2.3.0";
+var VERSION = "2.3.1";
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "ha-car",
