@@ -868,19 +868,13 @@ ha-card.panel:not(.fit) .baseline.solo { padding: 3px 8px; font-size: 10px; }
   background: radial-gradient(90% 60% at 50% 0%, rgba(var(--hc-a,55,214,232),.10), transparent 62%),
     linear-gradient(170deg, #101b29 0%, #0a1119 60%, #070c13 100%); }
 ha-card.panel { box-sizing: border-box; width: 100%; height: 100%; margin: 0; }
-/* 选择器缩略卡：固定 186px，只画轻量预览，不把整张 660px 卡片塞进选择器 */
-ha-card.preview { height: 186px; overflow: hidden; }
+/* 选择器缩略卡：照真机卡整体版式缩小（竖版小卡），车牌/位置/数值全是假数据 */
+ha-card.preview { height: 660px; overflow: hidden; }
 ha-card.preview .wrap {
-  padding: 10px 12px 9px; height: 100%; box-sizing: border-box;
-  display: flex; flex-direction: column; gap: 4px;
+  padding: 13px 14px 11px; height: 100%; box-sizing: border-box;
+  display: flex; flex-direction: column; gap: 9px;
   container-type: inline-size; pointer-events: none;
 }
-ha-card.preview .pv-top h1 { font-size: 14px; }
-ha-card.preview .pv-top .status { padding: 2px 7px; font-size: 8.5px; }
-ha-card.preview .pv-plate { font-size: 8.5px; margin-top: -2px; }
-ha-card.preview .pv-hero { min-height: 86px; height: 86px; flex: 0 0 86px; }
-ha-card.preview .pv-ring { width: 96px; height: 96px; }
-ha-card.preview .pv-carimg { width: 72px; height: 84px; }
 .pv-top { display: flex; align-items: center; gap: 8px; }
 .pv-top h1 { margin: 0; font-size: 17px; font-weight: 700; letter-spacing: .01em; }
 .pv-top .status { margin-left: auto; flex: 0 0 auto; height: auto; padding: 3px 9px; font-size: 9.5px; gap: 4px; line-height: 1.5; }
@@ -905,9 +899,6 @@ ha-card.preview .gauge { max-width: 92px; }
 ha-card.preview .gn b { font-size: 21px; }
 ha-card.preview .gl { font-size: 9px; }
 .pv-chips { flex: 0 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 4px; }
-.pv-sum { flex: 0 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 10px; font-size: 9px; color: rgba(206, 228, 242, .48); white-space: nowrap; }
-.pv-sum b { font-size: 14px; line-height: 1; color: rgba(235, 247, 255, .92); }
-.pv-sum em { font-style: normal; font-size: 8px; color: rgba(206, 228, 242, .55); margin: 0 2px 0 1px; }
 .pv-chips span { display: inline-flex; align-items: baseline; gap: 3px; font-size: 8.5px; color: rgba(206, 228, 242, .42); white-space: nowrap; }
 .pv-chips span + span { padding-left: 2px; }
 .pv-chips span b { font-size: 10.5px; color: rgba(226, 240, 250, .82); }
@@ -1814,7 +1805,6 @@ var HaCarCard = class extends HTMLElement {
     this._config = cfg;
     this._sig = "";
     this._toast = null;
-    this._previewReady = false;
     this._render(true);
   }
   set hass(hass) {
@@ -1828,11 +1818,6 @@ var HaCarCard = class extends HTMLElement {
     this._mountSync = true;
     requestAnimationFrame(() => {
       if (!this._config) return;
-      if (this._isPreview()) {
-        this._renderPreview(true);
-        return;
-      }
-      this._ensureInteractions();
       this._syncPanel();
       this._render(true);
     });
@@ -2152,10 +2137,7 @@ var HaCarCard = class extends HTMLElement {
     const next = v === true || v === "true";
     if (next === this._previewFlag) return;
     this._previewFlag = next;
-    if (this._config && this.isConnected) {
-      if (next && this._isPreview()) this._renderPreview(true);
-      else this._syncPanel();
-    }
+    if (this._config && this.isConnected) this._syncPanel();
   }
   // 祖先链里出现编辑态包装层 → 这是仪表盘编辑，不是选择器缩略卡
   // 卡片配置弹窗里的预览卡也挂在模拟的 hui-grid-section 下；
@@ -2210,35 +2192,24 @@ var HaCarCard = class extends HTMLElement {
       return;
     }
     if (!this._built) this._build();
-    if (!this.isConnected) {
-      if (this._isPreview()) this._renderPreview(force);
-      return;
-    }
     if (!this._hass) {
       if (force) this._wrap.innerHTML = this._empty(dict(null));
       return;
     }
+    if (!this._built) this._build();
+    this._syncPanel();
     if (this._isPreview()) {
-      this._renderPreview(force);
+      const card = this.shadowRoot.querySelector("ha-card");
+      this._wrap.className = "wrap";
+      card.classList.add("compact", "preview");
+      this._wrap.innerHTML = this._previewBody();
       return;
     }
-    this._syncPanel();
     const data = resolve(this._hass, this._config);
     const sig = this._signature(data);
     if (!force && sig === this._sig) return;
     this._sig = sig;
     this._paint(data);
-  }
-  // 选择器缩略卡只画固定高度的轻量预览，不启动交互、观察器或传感器监听，
-  // 否则「添加卡片」每打开一次都要为整张 660px 卡片做布局，选择器会明显卡顿。
-  _renderPreview(force) {
-    if (!this._previewReady || force) {
-      this._wrap.className = "wrap";
-      this._card.classList.remove("compact");
-      this._card.classList.add("preview");
-      this._wrap.innerHTML = this._previewBody();
-      this._previewReady = true;
-    }
   }
   _build() {
     const root = this.shadowRoot;
@@ -2246,14 +2217,8 @@ var HaCarCard = class extends HTMLElement {
     this._wrap = root.querySelector(".wrap");
     this._card = root.querySelector("ha-card");
     this._built = true;
-  }
-  // 真实卡片才需要手势、方向传感器和尺寸观察器；选择器预览不绑定这些。
-  _ensureInteractions() {
-    if (this._interactions) return;
-    this._interactions = true;
     this._bind();
     this._bindOrientation();
-    if (typeof ResizeObserver === "undefined") return;
     this._panelRO = new ResizeObserver(() => {
       this._fitPanel();
       this._fitGrid();
@@ -2355,10 +2320,8 @@ var HaCarCard = class extends HTMLElement {
   }
   _paint(data) {
     const cfg = this._config;
-    if (this.isConnected && !this._isPreview()) this._ensureInteractions();
     this._syncPanel();
     this._syncGrid();
-    this._card.classList.remove("preview");
     this._card.classList.toggle("compact", cfg.layout === "compact");
     const th = THEMES[cfg.theme] || THEMES.midnight;
     this._card.classList.toggle("theme-glass", !!th.glass);
@@ -2415,16 +2378,28 @@ var HaCarCard = class extends HTMLElement {
   _empty(msg) {
     return `<div class="empty">${icon("car")}<div>${esc(msg)}</div></div>`;
   }
-  // 选择器缩略卡：固定 186px 的轻量预览，只保留标题、状态、车图和两项关键数据。
-  // 不渲染仪表环、控制按钮、服务/位置/胎压等整卡模块，避免拖慢「添加卡片」。
+  // 选择器缩略卡：照真机卡片的竖版小卡 1:1 缩小；隐私字段（车牌/地址/数值）全部用随机假数据
   _previewBody() {
     const t = dict(this._hass);
     const en = isEn(this._hass);
     const fake = {
       plate: en ? "XYZ-1234" : "京A·12345",
+      loc: en ? "Sample City, Yunshan Rd 8" : "示例市 云杉路 8 号",
+      sync: en ? "just now" : "刚刚",
+      tire: ["245", "248", "243", "226"],
+      odo: "12,345",
+      batt: "12.4",
+      oil: "78",
       fuel: "62",
       range: "486"
     };
+    const acts = [
+      { ic: "unlock", lb: t.unlock || "开锁", on: true },
+      { ic: "trunk", lb: en ? "Trunk" : "后备箱" },
+      { ic: "power", lb: t.engine || "远程启动" },
+      { ic: "megaphone", lb: t.honk || "鸣笛寻车" }
+    ];
+    const tires = ["L", "R", "L", "R"].map((_, i) => `<span class="pv-tvec${i === 3 ? " warn" : ""}">${icon("tire")}<b>${esc(fake.tire[i])}</b><em>kPa</em></span>`).join("");
     return `<div class="pv-top"><h1>${esc(en ? "My car" : "我的座驾")}</h1>
         <span class="status ok"><span class="dot"></span>${esc(t.locked)}</span></div>
       <div class="pv-plate">${esc(fake.plate)}</div>
@@ -2432,10 +2407,27 @@ var HaCarCard = class extends HTMLElement {
         <span class="pv-ring"><i class="pv-nd n1"></i><i class="pv-nd n2"></i><i class="pv-nd n3"></i><i class="pv-nd n4"></i></span>
         <img class="pv-carimg" src="${PREVIEW_CAR}" alt="" />
       </div>
-      <div class="pv-sum">
-        <span><b>${esc(fake.fuel)}</b><em>%</em> ${esc(t.fuel || "燃油")}</span>
-        <span><b>${esc(fake.range)}</b><em>km</em> ${esc(t.range || "续航")}</span>
-      </div>`;
+      <div class="pv-gauges">
+        ${this._gauge({ pct: 62, label: t.fuel, value: fake.fuel, unit: "%", ic: "fuel" })}
+        <span class="pv-gsep">${icon("tire")}</span>
+        ${this._gauge({ pct: 81, label: t.range, value: fake.range, unit: "km", ic: "gauge" })}
+      </div>
+      <div class="pv-chips">
+        <span><i>${esc(t.odo || "总里程")}</i><b>${esc(fake.odo)}</b><em>km</em></span>
+        <span><i>${esc(en ? "Battery" : "蓄电池")}</i><b>${esc(fake.batt)}</b><em>V</em></span>
+        <span><i>${esc(en ? "Oil" : "机油寿命")}</i><b>${esc(fake.oil)}</b><em>%</em></span>
+      </div>
+      <div class="pv-acts">
+        ${acts.map((a) => `<span class="pv-act${a.on ? " on" : ""}"><b>${icon(a.ic)}</b><em>${esc(a.lb)}</em></span>`).join("")}
+      </div>
+      <div class="pv-seek">
+        <span>${icon("speaker")}${esc(en ? "Sound & light" : "声光寻车")}</span>
+        <span>${icon("bulb")}${esc(en ? "Light horn" : "灯光寻车")}</span>
+      </div>
+      <div class="pv-closed">${icon("car")}${esc(en ? "Doors & windows closed" : "车门车窗已关闭")}</div>
+      <div class="pv-svc">${icon("wrench")}${esc(en ? "Service info" : "服务信息")}${icon("chevron")}</div>
+      <div class="pv-loc">${icon("pin")}${esc(fake.loc)}</div>
+      <div class="pv-tires">${tires}<span class="pv-sync">${icon("refresh")}${esc(fake.sync)}</span></div>`;
   }
   // ---------- 卡片主体 ----------
   // ---------- 模块内实体项 ----------
@@ -4626,7 +4618,7 @@ var HaCarEditor = class extends HTMLElement {
 customElements.define("ha-car-editor", HaCarEditor);
 
 // src/main.js
-var VERSION = "2.4.1";
+var VERSION = "2.4.0";
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "ha-car",
