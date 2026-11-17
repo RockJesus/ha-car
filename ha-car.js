@@ -1257,7 +1257,6 @@ var ZH = {
   refresh: "刷新",
   refreshOk: "已请求云端刷新，约 30–60 秒回传",
   holdMore: "继续按住",
-  holdMore: "继续按住",
   holdHint: "长按确认后执行，防误触",
   armed: "松手执行",
   sent: "已发送指令，等待车辆响应",
@@ -1355,7 +1354,6 @@ var EN = {
   light: "Find by lights",
   refresh: "Refresh",
   refreshOk: "Cloud refresh requested, 30–60 s",
-  holdMore: "继续按住",
   holdMore: "Keep holding",
   holdHint: "Hold to confirm and prevent mis-touch",
   armed: "Release to run",
@@ -2254,7 +2252,10 @@ var HaCarCard = class extends HTMLElement {
     this._prunePending(data);
     const twoCol = this._card.classList.contains("fit") || this._card.classList.contains("gtwo");
     this._wrap.innerHTML = this._body(data, twoCol);
-    if (this._findOpen) this._card.insertAdjacentHTML("beforeend", this._findModal(data));
+    if (this._findOpen) {
+      this._card.querySelectorAll(".findmodal").forEach((m) => m.remove());
+      this._card.insertAdjacentHTML("beforeend", this._findModal(data));
+    }
     this._findData = data;
     this._updateFind();
     this._placeOverlay();
@@ -2956,7 +2957,7 @@ var HaCarCard = class extends HTMLElement {
       <div class="fcomp"><i class="fring"></i><i class="farrow" data-farrow>${icon("nav")}</i><span class="fdot"></span></div>
       <div class="fdir" data-fdir>${esc(this._dirText(bearing, null))}</div>
       <div class="ffoot"><button class="fperm" data-findperm type="button">${icon("gauge")}校准指南针</button>
-        <span class="facc">${esc(isEn(this._hass) ? "GPS bearing · compass" : "车辆方位 · 手机指南针")}</span></div>
+        <span class="facc" data-fstat>${esc(isEn(this._hass) ? "GPS bearing · compass" : "车辆方位 · 手机指南针")}</span></div>
       <div class="fnote">${isEn(this._hass) ? "Hold the phone flat and point the top away from you." : "手机尽量水平，顶部朝向正前方；箭头会随手机转向。"}</div></div>`;
   }
   _dirText(bearing, heading) {
@@ -2996,11 +2997,41 @@ var HaCarCard = class extends HTMLElement {
     if (this._orientHandler) {
       window.removeEventListener("deviceorientationabsolute", this._orientHandler, true);
       window.removeEventListener("deviceorientation", this._orientHandler, true);
+      window.removeEventListener("deviceorientation", this._orientHandler, false);
     }
     this._orientHandler = this._orientHandler || ((ev) => this._onDeviceOrient(ev));
+    try {
+      if (!window.ondeviceorientation) window.ondeviceorientation = this._orientHandler;
+    } catch {
+    }
     window.addEventListener("deviceorientationabsolute", this._orientHandler, true);
     window.addEventListener("deviceorientation", this._orientHandler, true);
+    window.addEventListener("deviceorientation", this._orientHandler, false);
     this._orientBound = true;
+  }
+  _startGpsHeading() {
+    if (this._gpsWatch != null || !navigator.geolocation) return;
+    try {
+      this._gpsWatch = navigator.geolocation.watchPosition((pos) => {
+        const h = pos && pos.coords && pos.coords.heading;
+        if (!Number.isFinite(h) || h < 0) return;
+        if (this._headingSrc === "compass") return;
+        this._heading = h;
+        this._headingSrc = "gps";
+        if (this._findOpen) this._updateFind();
+      }, () => {
+      }, { enableHighAccuracy: true, maximumAge: 1e3, timeout: 15e3 });
+    } catch {
+    }
+  }
+  _stopGpsHeading() {
+    if (this._gpsWatch != null && navigator.geolocation) {
+      try {
+        navigator.geolocation.clearWatch(this._gpsWatch);
+      } catch {
+      }
+    }
+    this._gpsWatch = null;
   }
   _updateFind() {
     if (!this._findOpen || !this._findData) return;
@@ -3009,15 +3040,27 @@ var HaCarCard = class extends HTMLElement {
     const bearing = this._bearing(p.phone, p.car);
     if (d == null || bearing == null) return;
     const root = this._card;
-    const distEl = root && root.querySelector("[data-fdist]");
-    const arrow = root && root.querySelector("[data-farrow]");
-    const dir = root && root.querySelector("[data-fdir]");
+    const modals = root ? root.querySelectorAll(".findmodal") : [];
+    const modal = modals.length ? modals[modals.length - 1] : null;
+    const q = (sel) => modal ? modal.querySelector(sel) : root && root.querySelector(sel);
+    const distEl = q("[data-fdist]");
+    const arrow = q("[data-farrow]");
+    const dir = q("[data-fdir]");
+    const stat = q("[data-fstat]");
     if (distEl) distEl.textContent = this._distText(d);
     const rel = this._heading == null ? bearing : (bearing - this._heading + 360) % 360;
     if (arrow) arrow.style.transform = `rotate(${rel}deg)`;
     if (dir) dir.textContent = this._dirText(bearing, this._heading);
+    if (stat) {
+      const en = isEn(this._hass);
+      if (this._heading == null) stat.textContent = en ? "Compass not active" : "指南针未启用";
+      else if (this._headingSrc === "gps") stat.textContent = en ? `GPS heading ${Math.round(this._heading)}°` : `移动方向 ${Math.round(this._heading)}°`;
+      else stat.textContent = en ? `Compass ${Math.round(this._heading)}°` : `指南针 ${Math.round(this._heading)}°`;
+    }
   }
   _onDeviceOrient(ev) {
+    if (!ev || ev === this._lastOrientEv) return;
+    this._lastOrientEv = ev;
     const fin = (v) => {
       if (v === null || v === void 0 || v === "") return null;
       const n = typeof v === "number" ? v : Number(v);
@@ -3042,19 +3085,25 @@ var HaCarCard = class extends HTMLElement {
     h = (h + screenAngle + 360) % 360;
     h = (h % 360 + 360) % 360;
     this._heading = h;
+    this._headingSrc = "compass";
     this._compassGot = true;
-    if (!this._findOpen) return;
-    cancelAnimationFrame(this._headingRaf);
-    this._headingRaf = requestAnimationFrame(() => this._updateFind());
+    clearTimeout(this._compassTimer);
+    this._stopGpsHeading();
+    if (this._findOpen) this._updateFind();
   }
   _openFind() {
     this._findOpen = true;
+    this._heading = null;
+    this._headingSrc = null;
+    this._compassGot = false;
+    this._lastOrientEv = null;
     this._sig = "";
     if (this._hass) this._paint(resolve(this._hass, this._config));
     else this._render(true);
   }
   _closeFind() {
     this._findOpen = false;
+    this._stopGpsHeading();
     cancelAnimationFrame(this._headingRaf);
     this._sig = "";
     const m = this._card && this._card.querySelector(".findmodal");
@@ -3072,11 +3121,17 @@ var HaCarCard = class extends HTMLElement {
       }
       this._bindOrientation(true);
       this._compassGot = false;
+      this._heading = null;
+      this._headingSrc = null;
+      this._lastOrientEv = null;
+      if (this._findOpen) this._updateFind();
       this._showToast(isEn(this._hass) ? "Compass on — turn your phone" : "指南针已开启，缓慢转动手机", "ok");
       clearTimeout(this._compassTimer);
       this._compassTimer = setTimeout(() => {
         if (this._findOpen && !this._compassGot) {
-          this._showToast(isEn(this._hass) ? "No compass data — check Motion access" : "未收到指南针数据，请检查系统「运动与方向」权限", "err");
+          this._startGpsHeading();
+          this._showToast(isEn(this._hass) ? "No compass data — trying GPS heading" : "未收到指南针，已尝试用移动方向", "err");
+          if (this._findOpen) this._updateFind();
         }
       }, 1800);
       return true;
@@ -4370,7 +4425,7 @@ var HaCarEditor = class extends HTMLElement {
 customElements.define("ha-car-editor", HaCarEditor);
 
 // src/main.js
-var VERSION = "2.3.2";
+var VERSION = "2.3.3";
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "ha-car",
