@@ -772,7 +772,7 @@ class HaCarCard extends HTMLElement {
     this._prunePending(data);
     const twoCol = this._card.classList.contains("fit") || this._card.classList.contains("gtwo");
     this._wrap.innerHTML = this._body(data, twoCol);
-    if (this._findOpen) this._wrap.insertAdjacentHTML("beforeend", this._findModal(data));
+    if (this._findOpen) this._card.insertAdjacentHTML("beforeend", this._findModal(data));
     this._findData = data;
     this._updateFind();
 
@@ -1597,9 +1597,10 @@ class HaCarCard extends HTMLElement {
     const d = this._distanceM(p.phone, p.car);
     const bearing = this._bearing(p.phone, p.car);
     if (d == null || bearing == null) return;
-    const distEl = this._wrap && this._wrap.querySelector("[data-fdist]");
-    const arrow = this._wrap && this._wrap.querySelector("[data-farrow]");
-    const dir = this._wrap && this._wrap.querySelector("[data-fdir]");
+    const root = this._card;
+    const distEl = root && root.querySelector("[data-fdist]");
+    const arrow = root && root.querySelector("[data-farrow]");
+    const dir = root && root.querySelector("[data-fdir]");
     if (distEl) distEl.textContent = this._distText(d);
     const rel = this._heading == null ? bearing : (bearing - this._heading + 360) % 360;
     if (arrow) arrow.style.transform = `rotate(${rel}deg)`;
@@ -1625,7 +1626,7 @@ class HaCarCard extends HTMLElement {
   _closeFind() {
     this._findOpen = false;
     this._sig = "";
-    const m = this._wrap && this._wrap.querySelector(".findmodal");
+    const m = this._card && this._card.querySelector(".findmodal");
     if (m) m.remove();
     this._render(true);
   }
@@ -2036,7 +2037,7 @@ class HaCarCard extends HTMLElement {
   // ---------- 交互 ----------
 
   _bind() {
-    const w = this._wrap;
+    const w = this._card;
     w.addEventListener("change", (ev) => {
       const sel = ev.target.closest && ev.target.closest("select[data-sel]");
       if (!sel || !this._hass) return;
