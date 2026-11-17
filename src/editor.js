@@ -8,14 +8,6 @@ const BLOCK_LABELS = {
 };
 import { esc } from "./util.js";
 
-const ACTION_LABELS = {
-  btn_unlock: "开锁",
-  btn_lock: "上锁",
-  sw_engine: "远程启动/熄火",
-  sw_honk: "鸣笛寻车",
-  sw_va: "声光寻车",
-  sw_light: "灯光寻车",
-};
 const OVERRIDES = [
   ["lock", "门锁状态"],
   ["door_fl", "主驾车门"],
@@ -56,10 +48,9 @@ const L = {
   layoutCompact: "紧凑",
 
   guard: "防误触",
-  guardHint: "开启后，下列动作需要按住不放才执行；松手太早只提示、不动作。适合后备箱、远程启动这类有实际后果的指令。",
+  guardHint: "开启后，所有动作按钮（含动作模块里自定义添加的实体按钮）都需要按住不放才执行；松手太早只提示、不动作。下拉选择不参与。",
   guardOn: "启用长按确认",
   holdMs: "长按时长",
-  confirmWhich: "需要长按的动作",
   look: "外观",
   imageMode: "车辆图片",
   imageUrl: "图片地址",
@@ -100,7 +91,6 @@ class HaCarEditor extends HTMLElement {
     this._config.blocks = normBlocks(this._config);
     this._config.confirm = normalizeConfirm(config, this._config);
     if (!this._built) this._build();
-    else this._renderChips();
     this._sync();
   }
 
@@ -173,8 +163,6 @@ class HaCarEditor extends HTMLElement {
         <label class="f">${L.holdMs}</label>
         <div class="ranged"><input type="range" id="hold" min="300" max="2000" step="100">
           <span id="holdv" style="font-size:12px;min-width:64px">2000 ms</span></div>
-        <label class="f">${L.confirmWhich}</label>
-        <div class="chips2" id="confirms"></div>
       </div>
 
       <div class="sec">
@@ -219,7 +207,6 @@ class HaCarEditor extends HTMLElement {
 
     this._built = true;
     this._wire();
-    this._renderChips();
   }
 
   _wire() {
@@ -276,24 +263,13 @@ class HaCarEditor extends HTMLElement {
 
     q("guard").addEventListener("click", () => {
       this._config.confirm = this._config.confirm.length ? [] : actionKeys(this._config);
-      this._renderChips();
-      this._syncConfirms();
+      this._syncGuard();
       this._emit();
     });
 
     q("hold").addEventListener("input", (e) => {
       this._config.hold_ms = Number(e.target.value);
       this.shadowRoot.getElementById("holdv").textContent = `${this._config.hold_ms} ms`;
-      this._emit();
-    });
-
-    this.shadowRoot.getElementById("confirms").addEventListener("click", (e) => {
-      const b = e.target.closest("[data-confirm]");
-      if (!b) return;
-      const key = b.dataset.confirm;
-      const list = this._config.confirm || [];
-      this._config.confirm = list.includes(key) ? list.filter((k) => k !== key) : [...list, key];
-      this._sync();
       this._emit();
     });
 
@@ -447,38 +423,9 @@ class HaCarEditor extends HTMLElement {
     });
   }
 
-  _renderChips() {
-    const confirms = this.shadowRoot.getElementById("confirms");
-    if (!confirms) return;
-    confirms.innerHTML = actionKeys(this._config).map(
-      (k) => `<button class="tg" type="button" data-confirm="${esc(k)}">${esc(this._confirmLabel(k))}</button>`,
-    ).join("");
-  }
-
-  _confirmLabel(key) {
-    if (ACTION_LABELS[key]) return ACTION_LABELS[key];
-    for (const b of this._config.blocks || []) {
-      if (b.type !== "actions") continue;
-      for (const it of this._blockItems(b)) {
-        if ((it.slot || it.entity) !== key) continue;
-        if (it.label) return it.label;
-        if (it.slot && ITEM_DEFS[it.slot]) return ITEM_DEFS[it.slot].zh;
-        const st = it.entity && this._hass && this._hass.states[it.entity];
-        const fn = st && st.attributes && st.attributes.friendly_name;
-        if (fn) return String(fn);
-        return it.entity || key;
-      }
-    }
-    return key;
-  }
-
-  _syncConfirms() {
-    const list = this._config.confirm || [];
+  _syncGuard() {
     const guard = this.shadowRoot.getElementById("guard");
-    if (guard) guard.setAttribute("aria-checked", String(list.length > 0));
-    this.shadowRoot.querySelectorAll("[data-confirm]").forEach((b) => {
-      b.setAttribute("aria-pressed", String(list.includes(b.dataset.confirm)));
-    });
+    if (guard) guard.setAttribute("aria-checked", String((this._config.confirm || []).length > 0));
   }
 
   _blockItems(b) {
@@ -575,8 +522,6 @@ class HaCarEditor extends HTMLElement {
       if ((this._config.confirm || []).length && !this._config.confirm.includes(key)) {
         this._config.confirm = [...this._config.confirm, key];
       }
-      this._renderChips();
-      this._syncConfirms();
     }
     this._emit();
   }
@@ -666,7 +611,7 @@ class HaCarEditor extends HTMLElement {
       b.setAttribute("aria-pressed", String(b.dataset.layout === (this._config.layout || "full")));
     });
     this._renderBlocks();
-    this._syncConfirms();
+    this._syncGuard();
     const hold = Number(this._config.hold_ms) || 2000;
     q("hold").value = String(hold);
     q("holdv").textContent = `${hold} ms`;

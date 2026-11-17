@@ -211,8 +211,6 @@ export function normBlocks(cfg) {
   return list;
 }
 
-const LEGACY_CONFIRM = ["btn_unlock", "btn_lock", "sw_engine", "sw_honk"];
-
 // 卡片里所有可长按的按钮键：内置动作 + 动作模块里的自定义按钮
 export function actionKeys(cfg) {
   const keys = CONFIRMABLE.slice();
@@ -232,14 +230,13 @@ export function actionKeys(cfg) {
   return Array.from(new Set(keys));
 }
 
-// 没写 confirm 或仍是旧版默认 4 项时，默认改为「全部按钮」
+// 防误触只有「开」和「关」：非空 confirm 统一覆盖全部动作按钮，[] 表示关闭
 export function normalizeConfirm(config, cfg) {
   const has = config && Object.prototype.hasOwnProperty.call(config, "confirm");
   const raw = has ? config.confirm : null;
   if (!Array.isArray(raw)) return actionKeys(cfg);
-  const list = raw.filter((k) => typeof k === "string" && k.trim()).map((k) => k.trim());
-  const legacy = list.length === LEGACY_CONFIRM.length && LEGACY_CONFIRM.every((k) => list.includes(k));
-  return legacy ? actionKeys(cfg) : Array.from(new Set(list));
+  const list = raw.filter((k) => typeof k === "string" && k.trim());
+  return list.length ? actionKeys(cfg) : [];
 }
 
 const SLOT_KEYS = Object.keys(SLOTS);
