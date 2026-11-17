@@ -549,13 +549,19 @@ ha-card.panel:not(.fit) .baseline.solo { padding: 3px 8px; font-size: 10px; }
   background: radial-gradient(90% 60% at 50% 0%, rgba(var(--hc-a,55,214,232),.10), transparent 62%),
     linear-gradient(170deg, #101b29 0%, #0a1119 60%, #070c13 100%); }
 ha-card.panel { box-sizing: border-box; width: 100%; height: 100%; margin: 0; }
-/* 选择器缩略卡：照真机卡整体版式缩小（竖版小卡），车牌/位置/数值全是假数据 */
-ha-card.preview { height: 660px; overflow: hidden; }
+/* 选择器缩略卡：固定 186px，只画轻量预览，不把整张 660px 卡片塞进选择器 */
+ha-card.preview { height: 186px; overflow: hidden; }
 ha-card.preview .wrap {
-  padding: 13px 14px 11px; height: 100%; box-sizing: border-box;
-  display: flex; flex-direction: column; gap: 9px;
+  padding: 10px 12px 9px; height: 100%; box-sizing: border-box;
+  display: flex; flex-direction: column; gap: 4px;
   container-type: inline-size; pointer-events: none;
 }
+ha-card.preview .pv-top h1 { font-size: 14px; }
+ha-card.preview .pv-top .status { padding: 2px 7px; font-size: 8.5px; }
+ha-card.preview .pv-plate { font-size: 8.5px; margin-top: -2px; }
+ha-card.preview .pv-hero { min-height: 86px; height: 86px; flex: 0 0 86px; }
+ha-card.preview .pv-ring { width: 96px; height: 96px; }
+ha-card.preview .pv-carimg { width: 72px; height: 84px; }
 .pv-top { display: flex; align-items: center; gap: 8px; }
 .pv-top h1 { margin: 0; font-size: 17px; font-weight: 700; letter-spacing: .01em; }
 .pv-top .status { margin-left: auto; flex: 0 0 auto; height: auto; padding: 3px 9px; font-size: 9.5px; gap: 4px; line-height: 1.5; }
@@ -580,6 +586,9 @@ ha-card.preview .gauge { max-width: 92px; }
 ha-card.preview .gn b { font-size: 21px; }
 ha-card.preview .gl { font-size: 9px; }
 .pv-chips { flex: 0 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 4px; }
+.pv-sum { flex: 0 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 10px; font-size: 9px; color: rgba(206, 228, 242, .48); white-space: nowrap; }
+.pv-sum b { font-size: 14px; line-height: 1; color: rgba(235, 247, 255, .92); }
+.pv-sum em { font-style: normal; font-size: 8px; color: rgba(206, 228, 242, .55); margin: 0 2px 0 1px; }
 .pv-chips span { display: inline-flex; align-items: baseline; gap: 3px; font-size: 8.5px; color: rgba(206, 228, 242, .42); white-space: nowrap; }
 .pv-chips span + span { padding-left: 2px; }
 .pv-chips span b { font-size: 10.5px; color: rgba(226, 240, 250, .82); }
