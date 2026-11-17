@@ -1,4 +1,5 @@
 import { icon, ICON_NAMES } from "./icons.js";
+import { artForSlot } from "./button-art.js";
 import { resolve, detectVehicles, SLOTS } from "./resolve.js";
 import { STYLES } from "./styles.js";
 import { dict, isEn } from "./strings.js";
@@ -2040,6 +2041,8 @@ class HaCarCard extends HTMLElement {
       let cls = "";
       let dom = "homeassistant";
       let svc = "toggle";
+      let art = null;
+      let wide = false;
       if (slot === "btn_unlock") {
         label = it.label || t.unlock;
         ic = "unlock";
@@ -2073,8 +2076,13 @@ class HaCarCard extends HTMLElement {
           continue;
         }
       }
+      const artSpec = artForSlot(slot);
+      if (artSpec) {
+        art = artSpec.src;
+        wide = artSpec.wide;
+      }
       tiles.push(this._tile({
-        key: slot || ent, ent, ic, label, cls, dom, svc, hold, offline,
+        key: slot || ent, ent, ic, label, cls, dom, svc, hold, offline, art, wide,
       }));
     }
 
@@ -2091,7 +2099,9 @@ class HaCarCard extends HTMLElement {
       data-act="${esc(o.key)}" data-ent="${esc(o.ent)}" data-dom="${esc(o.dom)}" data-svc="${esc(o.svc)}"
       data-label="${esc(o.label)}"${o.hold(o.key)} role="button" tabindex="0"
       aria-label="${esc(o.label + "，" + t.holdHint)}">
-      <span class="orb"><svg class="hring" viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="47"/></svg>${icon(o.ic)}</span>
+      <span class="orb${o.art ? " art" : ""}"><svg class="hring" viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="47"/></svg>${o.art
+        ? `<img class="glyph${o.wide ? " wide" : ""}" src="${o.art}" alt="" aria-hidden="true" draggable="false" />`
+        : icon(o.ic)}</span>
       <span class="lbl">${esc(o.label)}</span></button>`;
   }
 

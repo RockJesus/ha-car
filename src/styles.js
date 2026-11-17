@@ -192,9 +192,20 @@ h1 { margin: 0; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-s
   background: radial-gradient(60% 60% at 50% 50%, rgba(255,255,255,.6), rgba(255,255,255,.08) 68%, transparent 78%);
   filter: blur(1px); pointer-events: none; opacity: .7; }
 .tile .ic { width: 27px; height: 27px; color: #ddf8ff; filter: drop-shadow(0 1px 2px rgba(0,0,0,.7)); }
+.tile .glyph { width: 62px; height: 62px; object-fit: contain; pointer-events: none;
+  filter: drop-shadow(0 2px 3px rgba(0,0,0,.72)); }
+.tile .glyph.wide { width: 70px; height: 46px; }
+/* 艺术按钮：去掉球体底和霓虹圈，让 3D logo 本身成为按钮 */
+.orb.art { background: none; border-color: transparent; box-shadow: none; }
+.orb.art::before, .orb.art::after { display: none; }
+.tile.hot .orb.art, .tile.on .orb.art { background: none; border-color: transparent; box-shadow: none; animation: none; }
+.tile.hot .orb.art .glyph { filter: drop-shadow(0 0 8px rgba(var(--cy-c),.8)) drop-shadow(0 2px 3px rgba(0,0,0,.72)); }
+.tile.on .orb.art .glyph { filter: drop-shadow(0 0 8px rgba(var(--cy-ok),.7)) drop-shadow(0 2px 3px rgba(0,0,0,.72)); }
+.tile:active .orb.art, .tile.pressing .orb.art { box-shadow: none; }
 .tile .lbl { max-width: 100%; font-size: 13.5px; font-weight: 620; letter-spacing: .06em;
   color: rgba(206,229,244,.88); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 @keyframes hc-ring-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+.tile.spin .orb.art::before, .tile:active .orb.art::before { display: block; }
 .tile.spin .orb::before, .tile:active .orb::before {
   animation: hc-ring-spin .8s linear infinite;
   opacity: 1;
@@ -252,6 +263,7 @@ h1 { margin: 0; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-s
 .tile.armed .orb { border-color: rgba(var(--hc-a,55,214,232),.7);
   box-shadow: 0 0 26px -4px rgba(var(--hc-a,55,214,232),.85), inset 0 0 18px -6px rgba(var(--hc-a,55,214,232),.6); }
 .tile.armed .lbl { color: var(--hc-accent); }
+.tile.pending .orb.art::after { display: block; }
 .tile.pending .orb::after { content: ""; position: absolute; top: 1px; right: 4px; width: 6px; height: 6px;
   border-radius: 50%; background: var(--hc-accent); animation: hc-pulse 1.4s ease-in-out infinite; }
 .pills { display: flex; gap: 8px; margin-top: 10px; }
@@ -419,6 +431,8 @@ h1 { margin: 0; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-s
 .compact .orbit.o2 { display: none; }
 .compact .orb { width: 58px; height: 58px; }
 .compact .tile .ic { width: 22px; height: 22px; }
+.compact .tile .glyph { width: 48px; height: 48px; }
+.compact .tile .glyph.wide { width: 56px; height: 36px; }
 .compact .tile { gap: 7px; }
 .compact .gauge { max-width: 96px; }
 .compact .gn b { font-size: 25px; }
@@ -532,6 +546,8 @@ ha-card.panel:not(.fit) .hero { --r: 72px; }
 ha-card.panel:not(.fit) .energy { column-gap: 6px; }
 ha-card.panel:not(.fit) .orb { width: 58px; height: 58px; }
 ha-card.panel:not(.fit) .tile .ic { width: 22px; height: 22px; }
+ha-card.panel:not(.fit) .tile .glyph { width: 48px; height: 48px; }
+ha-card.panel:not(.fit) .tile .glyph.wide { width: 56px; height: 36px; }
 ha-card.panel:not(.fit) .tile { gap: 7px; }
 ha-card.panel:not(.fit) .tile .lbl { font-size: 11px; letter-spacing: .04em; }
 ha-card.panel:not(.fit) .pills { margin-top: 2px; gap: 6px; }
