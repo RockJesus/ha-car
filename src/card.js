@@ -221,7 +221,12 @@ export function actionKeys(cfg) {
     const items = Array.isArray(b.items) ? b.items : defaultItems("actions");
     for (const it of items) {
       const key = String(it.slot || it.entity || "").trim();
-      if (key) keys.push(key);
+      if (!key) continue;
+      // 下拉选择胶囊（寻车时长/类型等）不是按钮，不参与长按
+      const def = it.slot ? ITEM_DEFS[it.slot] : null;
+      const kind = def ? def.kind : key.split(".")[0];
+      if (kind === "select") continue;
+      keys.push(key);
     }
   }
   return Array.from(new Set(keys));

@@ -1741,7 +1741,11 @@ function actionKeys(cfg) {
     const items = Array.isArray(b.items) ? b.items : defaultItems("actions");
     for (const it of items) {
       const key = String(it.slot || it.entity || "").trim();
-      if (key) keys.push(key);
+      if (!key) continue;
+      const def = it.slot ? ITEM_DEFS[it.slot] : null;
+      const kind = def ? def.kind : key.split(".")[0];
+      if (kind === "select") continue;
+      keys.push(key);
     }
   }
   return Array.from(new Set(keys));
@@ -4518,7 +4522,7 @@ var HaCarEditor = class extends HTMLElement {
 customElements.define("ha-car-editor", HaCarEditor);
 
 // src/main.js
-var VERSION = "2.3.5";
+var VERSION = "2.3.6";
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "ha-car",
