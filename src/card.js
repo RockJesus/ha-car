@@ -29,6 +29,7 @@ const BLOCK_TYPES = ["meta", "hero", "energy", "alerts", "doors", "charging", "s
 // 每个模块的 items 可在编辑器里增删与排序，卡片按 items 顺序渲染。
 export const ITEM_DEFS = {
   addr: { zh: "定位地址", en: "Location", icon: "pin", kind: "location" },
+  place: { zh: "在家/外出", en: "Home / away", icon: "home", kind: "place" },
   sync: { zh: "云端同步", en: "Cloud sync", icon: "refresh", kind: "sync" },
   image: { zh: "车辆图片", en: "Vehicle image", icon: "car", kind: "image" },
   fuel: { zh: "燃油", en: "Fuel", icon: "fuel", kind: "pct", full: 620 },
@@ -75,7 +76,7 @@ export const ITEM_DEFS = {
 };
 
 export const DEFAULT_ITEMS = {
-  meta: [{ slot: "addr" }, { slot: "sync" }],
+  meta: [{ slot: "addr" }, { slot: "place" }, { slot: "sync" }],
   hero: [{ slot: "image" }],
   energy: ["fuel", "battery", "range", "odo", "volt", "oil"],
   alerts: ["alerts"],
@@ -1147,9 +1148,10 @@ class HaCarCard extends HTMLElement {
         case "meta": {
           const locH = compact ? "" : this._metaLocation(b, data, t);
           const syncH = this._baseline(data, t, b);
+          const placeH = compact ? "" : this._placeChip(b, data);
           const findH = compact ? "" : this._findChip(data);
-          const extra = this._extraChips(b, data, t, ["location", "sync"]);
-          if (locH || syncH || findH || extra) html = `<div class="b-meta"><div class="hmeta">${locH}${findH}${syncH}</div>${extra}</div>`;
+          const extra = this._extraChips(b, data, t, ["location", "place", "sync"]);
+          if (locH || syncH || placeH || findH || extra) html = `<div class="b-meta"><div class="hmeta">${locH}${placeH}${findH}${syncH}</div>${extra}</div>`;
           break;
         }
         case "hero": {
@@ -1663,6 +1665,30 @@ class HaCarCard extends HTMLElement {
     if (m == null) return "—";
     if (m < 1000) return m < 10 ? "就在附近" : `${Math.round(m)} m`;
     return `${(m / 1000).toFixed(m < 10000 ? 1 : 0)} km`;
+  }
+
+  _placeChip(b, data) {
+    const it = this._items(b).find((x) => {
+      const def = this._itemDef(x);
+      return def && def.kind === "place";
+    });
+    if (!it) return "";
+    const p = this._findPoints(data);
+    let atHome = null;
+    const zone = this._hass && this._hass.states ? this._hass.states["zone.home"] : null;
+    const c = zone && this._ll(zone);
+    if (c) {
+      const r = Number(zone.attributes && zone.attributes.radius);
+      atHome = p.car ? this._distanceM(p.car, c) <= (Number.isFinite(r) && r > 0 ? r : 100) : null;
+    }
+    if (atHome == null && p.carSt) {
+      const st = String(p.carSt.state || "").toLowerCase();
+      if (st === "home") atHome = true;
+      else if (st === "not_home" || st === "away") atHome = false;
+    }
+    if (atHome == null) return "";
+    const label = isEn(this._hass) ? (atHome ? "Home" : "Away") : (atHome ? "在家" : "外出");
+    return `<span class="door pchip ${atHome ? "home" : "away"}" data-place title="${esc(isEn(this._hass) ? "Based on zone.home and vehicle location" : "根据家庭区域与车辆定位计算")}">${icon(atHome ? "home" : "car")}<span class="addr">${label}</span></span>`;
   }
 
   _findChip(data) {

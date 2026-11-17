@@ -10,6 +10,7 @@ var PATHS = {
   speaker: "M155.51,24.81a8,8,0,0,0-8.42.88L77.25,80H32A16,16,0,0,0,16,96v64a16,16,0,0,0,16,16H77.25l69.84,54.31A8,8,0,0,0,160,224V32A8,8,0,0,0,155.51,24.81ZM32,96H72v64H32ZM144,207.64,88,164.09V91.91l56-43.55Zm54-106.08a40,40,0,0,1,0,52.88,8,8,0,0,1-12-10.58,24,24,0,0,0,0-31.72,8,8,0,0,1,12-10.58ZM248,128a79.9,79.9,0,0,1-20.37,53.34,8,8,0,0,1-11.92-10.67,64,64,0,0,0,0-85.33,8,8,0,1,1,11.92-10.67A79.83,79.83,0,0,1,248,128Z",
   bulb: "M176,232a8,8,0,0,1-8,8H88a8,8,0,0,1,0-16h80A8,8,0,0,1,176,232Zm40-128a87.55,87.55,0,0,1-33.64,69.21A16.24,16.24,0,0,0,176,186v6a16,16,0,0,1-16,16H96a16,16,0,0,1-16-16v-6a16,16,0,0,0-6.23-12.66A87.59,87.59,0,0,1,40,104.49C39.74,56.83,78.26,17.14,125.88,16A88,88,0,0,1,216,104Zm-16,0a72,72,0,0,0-73.74-72c-39,.92-70.47,33.39-70.26,72.39a71.65,71.65,0,0,0,27.64,56.3A32,32,0,0,1,96,186v6h64v-6a32.15,32.15,0,0,1,12.47-25.35A71.65,71.65,0,0,0,200,104Zm-16.11-9.34a57.6,57.6,0,0,0-46.56-46.55,8,8,0,0,0-2.66,15.78c16.57,2.79,30.63,16.85,33.44,33.45A8,8,0,0,0,176,104a9,9,0,0,0,1.35-.11A8,8,0,0,0,183.89,94.66Z",
   refresh: "M224,48V96a8,8,0,0,1-8,8H168a8,8,0,0,1,0-16h28.69L182.06,73.37a79.56,79.56,0,0,0-56.13-23.43h-.45A79.52,79.52,0,0,0,69.59,72.71,8,8,0,0,1,58.41,61.27a96,96,0,0,1,135,.79L208,76.69V48a8,8,0,0,1,16,0ZM186.41,183.29a80,80,0,0,1-112.47-.66L59.31,168H88a8,8,0,0,0,0-16H40a8,8,0,0,0-8,8v48a8,8,0,0,0,16,0V179.31l14.63,14.63A95.43,95.43,0,0,0,130,222.06h.53a95.36,95.36,0,0,0,67.07-27.33,8,8,0,0,0-11.18-11.44Z",
+  home: "M218.83,103.77l-80-75.48a8,8,0,0,0-11.66,0l-80,75.48A8,8,0,0,0,40,112H48v88a16,16,0,0,0,16,16H192a16,16,0,0,0,16-16V112h8a8,8,0,0,0,3.83-15.23ZM192,200H64V112H72a8,8,0,0,0,5.66-2.55L128,49.17l63.34,60.28A8,8,0,0,0,192,112Z",
   pin: "M128,64a40,40,0,1,0,40,40A40,40,0,0,0,128,64Zm0,64a24,24,0,1,1,24-24A24,24,0,0,1,128,128Zm0-112a88.1,88.1,0,0,0-88,88c0,31.4,14.51,64.68,42,96.25a254.19,254.19,0,0,0,41.45,38.3,8,8,0,0,0,9.18,0A254.19,254.19,0,0,0,174,200.25c27.45-31.57,42-64.85,42-96.25A88.1,88.1,0,0,0,128,16Zm0,206c-16.53-13-72-60.75-72-118a72,72,0,0,1,144,0C200,161.23,144.53,209,128,222Z",
   warning: "M236.8,188.09,149.35,36.22h0a24.76,24.76,0,0,0-42.7,0L19.2,188.09a23.51,23.51,0,0,0,0,23.72A24.35,24.35,0,0,0,40.55,224h174.9a24.35,24.35,0,0,0,21.33-12.19A23.51,23.51,0,0,0,236.8,188.09ZM222.93,203.8a8.5,8.5,0,0,1-7.48,4.2H40.55a8.5,8.5,0,0,1-7.48-4.2,7.59,7.59,0,0,1,0-7.72L120.52,44.21a8.75,8.75,0,0,1,15,0l87.45,151.87A7.59,7.59,0,0,1,222.93,203.8ZM120,144V104a8,8,0,0,1,16,0v40a8,8,0,0,1-16,0Zm20,36a12,12,0,1,1-12-12A12,12,0,0,1,140,180Z",
   wrench: "M226.76,69a8,8,0,0,0-12.84-2.88l-40.3,37.19-17.23-3.7-3.7-17.23,37.19-40.3A8,8,0,0,0,187,29.24,72,72,0,0,0,88,96,72.34,72.34,0,0,0,94,124.94L33.79,177c-.15.12-.29.26-.43.39a32,32,0,0,0,45.26,45.26c.13-.13.27-.28.39-.42L131.06,162A72,72,0,0,0,232,96,71.56,71.56,0,0,0,226.76,69ZM160,152a56.14,56.14,0,0,1-27.07-7,8,8,0,0,0-9.92,1.77L67.11,211.51a16,16,0,0,1-22.62-22.62L109.18,133a8,8,0,0,0,1.77-9.93,56,56,0,0,1,58.36-82.31l-31.2,33.81a8,8,0,0,0-1.94,7.1L141.83,108a8,8,0,0,0,6.14,6.14l26.35,5.66a8,8,0,0,0,7.1-1.94l33.81-31.2A56.06,56.06,0,0,1,160,152Z",
@@ -1097,6 +1098,9 @@ ha-card.panel.fit .pills { width: 100%; max-width: none; }
   background: rgba(55,214,232,.10); }
 .hmeta .door.fchip:hover { background: rgba(55,214,232,.18); }
 .hmeta .door.fchip .addr { flex: 0 0 auto; overflow: visible; }
+.hmeta .door.pchip { flex: 0 0 auto; border-color: rgba(111,224,168,.28); background: rgba(111,224,168,.08); color: #8af0bd; }
+.hmeta .door.pchip.away { border-color: rgba(55,214,232,.26); background: rgba(55,214,232,.08); color: #8fe9f5; }
+.hmeta .door.pchip .addr { flex: 0 0 auto; overflow: visible; }
 .findmodal { position: absolute; inset: 0; z-index: 60; border-radius: var(--ha-card-border-radius, 28px); overflow: hidden; display: flex;
   flex-direction: column; align-items: center; justify-content: center; gap: clamp(8px, 1.8cqmin, 20px);
   padding: clamp(16px, 2.4cqmin, 30px); container-type: size;
@@ -1566,6 +1570,7 @@ var MODULES = ["status", "actions", "energy", "tires", "doors", "charging", "ale
 var BLOCK_TYPES = ["meta", "hero", "energy", "alerts", "doors", "charging", "service", "actions", "custom"];
 var ITEM_DEFS = {
   addr: { zh: "定位地址", en: "Location", icon: "pin", kind: "location" },
+  place: { zh: "在家/外出", en: "Home / away", icon: "home", kind: "place" },
   sync: { zh: "云端同步", en: "Cloud sync", icon: "refresh", kind: "sync" },
   image: { zh: "车辆图片", en: "Vehicle image", icon: "car", kind: "image" },
   fuel: { zh: "燃油", en: "Fuel", icon: "fuel", kind: "pct", full: 620 },
@@ -1611,7 +1616,7 @@ var ITEM_DEFS = {
   chirp_type: { zh: "寻车类型", en: "Honk type", icon: "speaker", kind: "select" }
 };
 var DEFAULT_ITEMS = {
-  meta: [{ slot: "addr" }, { slot: "sync" }],
+  meta: [{ slot: "addr" }, { slot: "place" }, { slot: "sync" }],
   hero: [{ slot: "image" }],
   energy: ["fuel", "battery", "range", "odo", "volt", "oil"],
   alerts: ["alerts"],
@@ -2549,9 +2554,10 @@ var HaCarCard = class extends HTMLElement {
         case "meta": {
           const locH = compact ? "" : this._metaLocation(b, data, t);
           const syncH = this._baseline(data, t, b);
+          const placeH = compact ? "" : this._placeChip(b, data);
           const findH = compact ? "" : this._findChip(data);
-          const extra = this._extraChips(b, data, t, ["location", "sync"]);
-          if (locH || syncH || findH || extra) html = `<div class="b-meta"><div class="hmeta">${locH}${findH}${syncH}</div>${extra}</div>`;
+          const extra = this._extraChips(b, data, t, ["location", "place", "sync"]);
+          if (locH || syncH || placeH || findH || extra) html = `<div class="b-meta"><div class="hmeta">${locH}${placeH}${findH}${syncH}</div>${extra}</div>`;
           break;
         }
         case "hero": {
@@ -3011,6 +3017,29 @@ var HaCarCard = class extends HTMLElement {
     if (m == null) return "—";
     if (m < 1e3) return m < 10 ? "就在附近" : `${Math.round(m)} m`;
     return `${(m / 1e3).toFixed(m < 1e4 ? 1 : 0)} km`;
+  }
+  _placeChip(b, data) {
+    const it = this._items(b).find((x) => {
+      const def = this._itemDef(x);
+      return def && def.kind === "place";
+    });
+    if (!it) return "";
+    const p = this._findPoints(data);
+    let atHome = null;
+    const zone = this._hass && this._hass.states ? this._hass.states["zone.home"] : null;
+    const c = zone && this._ll(zone);
+    if (c) {
+      const r = Number(zone.attributes && zone.attributes.radius);
+      atHome = p.car ? this._distanceM(p.car, c) <= (Number.isFinite(r) && r > 0 ? r : 100) : null;
+    }
+    if (atHome == null && p.carSt) {
+      const st = String(p.carSt.state || "").toLowerCase();
+      if (st === "home") atHome = true;
+      else if (st === "not_home" || st === "away") atHome = false;
+    }
+    if (atHome == null) return "";
+    const label = isEn(this._hass) ? atHome ? "Home" : "Away" : atHome ? "在家" : "外出";
+    return `<span class="door pchip ${atHome ? "home" : "away"}" data-place title="${esc(isEn(this._hass) ? "Based on zone.home and vehicle location" : "根据家庭区域与车辆定位计算")}">${icon(atHome ? "home" : "car")}<span class="addr">${label}</span></span>`;
   }
   _findChip(data) {
     if (!data) return "";
@@ -4589,7 +4618,7 @@ var HaCarEditor = class extends HTMLElement {
 customElements.define("ha-car-editor", HaCarEditor);
 
 // src/main.js
-var VERSION = "2.3.8";
+var VERSION = "2.3.9";
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "ha-car",

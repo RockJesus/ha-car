@@ -779,6 +779,9 @@ ha-card.panel.fit .pills { width: 100%; max-width: none; }
   background: rgba(55,214,232,.10); }
 .hmeta .door.fchip:hover { background: rgba(55,214,232,.18); }
 .hmeta .door.fchip .addr { flex: 0 0 auto; overflow: visible; }
+.hmeta .door.pchip { flex: 0 0 auto; border-color: rgba(111,224,168,.28); background: rgba(111,224,168,.08); color: #8af0bd; }
+.hmeta .door.pchip.away { border-color: rgba(55,214,232,.26); background: rgba(55,214,232,.08); color: #8fe9f5; }
+.hmeta .door.pchip .addr { flex: 0 0 auto; overflow: visible; }
 .findmodal { position: absolute; inset: 0; z-index: 60; border-radius: var(--ha-card-border-radius, 28px); overflow: hidden; display: flex;
   flex-direction: column; align-items: center; justify-content: center; gap: clamp(8px, 1.8cqmin, 20px);
   padding: clamp(16px, 2.4cqmin, 30px); container-type: size;
