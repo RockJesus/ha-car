@@ -1038,17 +1038,21 @@ ha-card.panel { box-sizing: border-box; width: 100%; height: 100%; margin: 0; }
 ha-card.preview { height: 300px; overflow: hidden; }
 ha-card.preview .wrap {
   padding: 12px 14px 12px; height: 100%; box-sizing: border-box;
-  display: flex; flex-direction: column; gap: 7px;
+  display: flex; flex-direction: column; gap: 6px;
   container-type: inline-size; pointer-events: none;
 }
-.pv-top { display: flex; align-items: center; gap: 8px; }
-.pv-top h1 { margin: 0; font-size: 17px; font-weight: 700; letter-spacing: .01em; }
-.pv-top .status { margin-left: auto; flex: 0 0 auto; height: auto; padding: 3px 9px; font-size: 9.5px; gap: 4px; line-height: 1.5; }
+.pv-top { display: flex; align-items: center; gap: 6px; }
+.pv-top h1 { margin: 0; font-size: 15px; font-weight: 700; letter-spacing: .01em; }
+.pv-top .status { flex: 0 0 auto; height: auto; padding: 3px 8px; font-size: 9px; gap: 4px; line-height: 1.5; }
+.pv-eng { margin-left: auto; display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 999px;
+  font-size: 8.5px; color: rgba(206, 228, 242, .72); background: rgba(255, 255, 255, .06);
+  border: 1px solid rgba(255, 255, 255, .12); white-space: nowrap; }
+.pv-eng .dot { width: 4px; height: 4px; border-radius: 50%; background: rgba(150, 170, 190, .8); }
 .pv-top .status .dot { width: 5px; height: 5px; }
 .pv-plate { font-size: 9.5px; letter-spacing: .10em; color: rgba(206, 228, 242, .62); margin-top: -3px; }
-.pv-hero { position: relative; flex: 0 0 130px; display: flex; align-items: center; justify-content: center; }
+.pv-hero { position: relative; flex: 0 0 128px; display: flex; align-items: center; justify-content: center; }
 .pv-halo {
-  position: absolute; left: 50%; top: 50%; width: 126px; height: 126px; transform: translate(-50%, -50%);
+  position: absolute; left: 50%; top: 50%; width: 120px; height: 120px; transform: translate(-50%, -50%);
   border-radius: 50%; border: 1px solid rgba(200, 230, 255, .16);
   background:
     radial-gradient(60% 38% at 30% 16%, rgba(255, 255, 255, .14), transparent 62%),
@@ -1056,7 +1060,7 @@ ha-card.preview .wrap {
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, .16), inset 0 -18px 34px rgba(185, 139, 255, .12), 0 16px 34px rgba(0, 0, 0, .45);
   backdrop-filter: blur(9px);
 }
-.pv-carimg { position: relative; z-index: 1; width: 76px; height: 108px; object-fit: contain;
+.pv-carimg { position: relative; z-index: 1; width: 62px; height: 88px; object-fit: contain;
   filter: brightness(1.06) saturate(1.04) drop-shadow(0 14px 16px rgba(2, 6, 12, .8)); }
 .pv-cap { position: absolute; left: 50%; transform: translateX(-50%); z-index: 2;
   padding: 2px 8px; border-radius: 999px; white-space: nowrap; font-size: 7.5px; letter-spacing: .02em;
@@ -1065,29 +1069,31 @@ ha-card.preview .wrap {
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, .14), 0 6px 14px rgba(0, 0, 0, .4); }
 .pv-cap.pt { top: 2px; }
 .pv-cap.pb { bottom: 2px; }
-.pv-loc-chip { position: absolute; z-index: 2; top: 50%; transform: translateY(-50%);
-  display: flex; flex-direction: column; align-items: flex-start; gap: 1px;
-  padding: 5px 7px 6px; border-radius: 10px; min-width: 66px;
+.pv-loc-chip { position: absolute; z-index: 2;
+  display: flex; flex-direction: column; align-items: flex-start; gap: 0;
+  padding: 4px 6px 5px; border-radius: 9px; min-width: 54px;
   background: linear-gradient(180deg, rgba(34, 52, 72, .72), rgba(12, 20, 30, .82));
   border: 1px solid rgba(200, 230, 255, .24); backdrop-filter: blur(10px);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, .13), 0 6px 16px rgba(0, 0, 0, .42); }
-.pv-loc-chip.lf { left: 2px; }
-.pv-loc-chip.rf { right: 2px; }
-.pv-loc-chip i { font-style: normal; font-size: 8px; letter-spacing: .06em; color: #e6f1fb; }
-.pv-loc-chip b { font-size: 9px; font-weight: 600; color: #ffffff; line-height: 1.15; }
+.pv-loc-chip.lf { left: 0; }
+.pv-loc-chip.rf { right: 0; }
+.pv-loc-chip.a { top: 16px; }
+.pv-loc-chip.b { bottom: 16px; }
+.pv-loc-chip i { font-style: normal; font-size: 7.5px; letter-spacing: .06em; color: #e6f1fb; }
+.pv-loc-chip b { font-size: 8.5px; font-weight: 600; color: #ffffff; line-height: 1.15; }
 .pv-loc-chip u { text-decoration: none; display: inline-flex; align-items: baseline; gap: 2px;
-  font-size: 10px; font-weight: 700; color: #ffffff; line-height: 1.1; }
-.pv-loc-chip u s { text-decoration: none; font-size: 7px; font-weight: 500; color: rgba(230, 242, 252, .72); }
+  font-size: 9.5px; font-weight: 700; color: #ffffff; line-height: 1.1; }
+.pv-loc-chip u s { text-decoration: none; font-size: 6.5px; font-weight: 500; color: rgba(230, 242, 252, .72); }
 .pv-stats { flex: 0 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 6px;
-  padding: 6px 9px; border-radius: 9px; font-size: 8.5px; color: rgba(206, 228, 242, .48);
+  padding: 5px 9px; border-radius: 9px; font-size: 8px; color: rgba(206, 228, 242, .48);
   background: rgba(255, 255, 255, .035); border: 1px solid rgba(255, 255, 255, .07); }
 .pv-stats b { font-size: 10.5px; color: rgba(236, 246, 253, .9); margin: 0 2px; }
 .pv-acts { flex: 0 0 auto; display: flex; justify-content: space-between; gap: 6px; }
 .pv-act { flex: 1 1 0; display: flex; flex-direction: column; align-items: center; gap: 1px; }
-.pv-art { width: 46px; height: 46px; object-fit: contain;
+.pv-art { width: 38px; height: 38px; object-fit: contain;
   filter: hue-rotate(60deg) saturate(1.15) drop-shadow(0 0 7px rgba(185, 139, 255, .5))
     drop-shadow(0 2px 3px rgba(0, 0, 0, .7)); }
-.pv-act em { font-style: normal; font-size: 8.5px; color: rgba(206, 228, 242, .55); white-space: nowrap; }
+.pv-act em { font-style: normal; font-size: 8px; color: rgba(206, 228, 242, .55); white-space: nowrap; }
 @media (max-width: 400px) {
   .loc { min-width: max(84px, 38cqw); }
   .loc .lh span { font-size: max(9px, 4.5cqw); }
@@ -2656,15 +2662,19 @@ var HaCarCard = class extends HTMLElement {
       { art: BUTTON_ART.start, lb: en ? "Start" : "远程启动" },
       { art: BUTTON_ART.horn, lb: en ? "Honk" : "鸣笛寻车" }
     ];
+    const chip = (cls, label, tire) => `<span class="pv-loc-chip ${cls}"><i>${esc(label)}</i><b>${esc(en ? "Closed" : "已关闭")}</b><u>${esc(tire)}<s>kPa</s></u></span>`;
     return `<div class="pv-top"><h1>${esc(en ? "My car" : "我的座驾")}</h1>
+        <span class="pv-eng"><span class="dot"></span>${esc(en ? "Engine" : "引擎")} · ${esc(en ? "Off" : "已熄火")}</span>
         <span class="status ok"><span class="dot"></span>${esc(t.locked)}</span></div>
       <div class="pv-plate">${esc(fake.plate)}</div>
       <div class="pv-hero">
         <span class="pv-halo"></span>
         <span class="pv-cap pt">${esc(en ? "Hood" : "引擎盖")} · ${esc(en ? "Closed" : "已关闭")}</span>
         <span class="pv-cap pb">${esc(en ? "Trunk" : "尾门")} · ${esc(en ? "Closed" : "已关闭")}</span>
-        <span class="pv-loc-chip lf"><i>${esc(en ? "Driver" : "主驾")}</i><b>${esc(en ? "Closed" : "已关闭")}</b><u>${esc(fake.tire[0])}<s>kPa</s></u></span>
-        <span class="pv-loc-chip rf"><i>${esc(en ? "Pass." : "副驾")}</i><b>${esc(en ? "Closed" : "已关闭")}</b><u>${esc(fake.tire[1])}<s>kPa</s></u></span>
+        ${chip("lf a", en ? "Driver" : "主驾", fake.tire[0])}
+        ${chip("lf b", en ? "Rear L" : "左后", "239")}
+        ${chip("rf a", en ? "Pass." : "副驾", fake.tire[1])}
+        ${chip("rf b", en ? "Rear R" : "右后", "247")}
         <img class="pv-carimg" src="${PREVIEW_CAR}" alt="" />
       </div>
       <div class="pv-stats">
@@ -5172,7 +5182,7 @@ var HaCarEditor = class extends HTMLElement {
 customElements.define("ha-car-editor", HaCarEditor);
 
 // src/main.js
-var VERSION = "3.0.1";
+var VERSION = "3.0.2";
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "ha-car",

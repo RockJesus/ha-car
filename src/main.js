@@ -1,7 +1,7 @@
 import "./card.js";
 import "./editor.js";
 
-const VERSION = "3.0.1";
+const VERSION = "3.0.2";
 
 window.customCards = window.customCards || [];
 window.customCards.push({

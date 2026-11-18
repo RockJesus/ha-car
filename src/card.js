@@ -1012,15 +1012,19 @@ class HaCarCard extends HTMLElement {
       { art: BUTTON_ART.start, lb: en ? "Start" : "远程启动" },
       { art: BUTTON_ART.horn, lb: en ? "Honk" : "鸣笛寻车" },
     ];
+    const chip = (cls, label, tire) => `<span class="pv-loc-chip ${cls}"><i>${esc(label)}</i><b>${esc(en ? "Closed" : "已关闭")}</b><u>${esc(tire)}<s>kPa</s></u></span>`;
     return `<div class="pv-top"><h1>${esc(en ? "My car" : "我的座驾")}</h1>
+        <span class="pv-eng"><span class="dot"></span>${esc(en ? "Engine" : "引擎")} · ${esc(en ? "Off" : "已熄火")}</span>
         <span class="status ok"><span class="dot"></span>${esc(t.locked)}</span></div>
       <div class="pv-plate">${esc(fake.plate)}</div>
       <div class="pv-hero">
         <span class="pv-halo"></span>
         <span class="pv-cap pt">${esc(en ? "Hood" : "引擎盖")} · ${esc(en ? "Closed" : "已关闭")}</span>
         <span class="pv-cap pb">${esc(en ? "Trunk" : "尾门")} · ${esc(en ? "Closed" : "已关闭")}</span>
-        <span class="pv-loc-chip lf"><i>${esc(en ? "Driver" : "主驾")}</i><b>${esc(en ? "Closed" : "已关闭")}</b><u>${esc(fake.tire[0])}<s>kPa</s></u></span>
-        <span class="pv-loc-chip rf"><i>${esc(en ? "Pass." : "副驾")}</i><b>${esc(en ? "Closed" : "已关闭")}</b><u>${esc(fake.tire[1])}<s>kPa</s></u></span>
+        ${chip("lf a", en ? "Driver" : "主驾", fake.tire[0])}
+        ${chip("lf b", en ? "Rear L" : "左后", "239")}
+        ${chip("rf a", en ? "Pass." : "副驾", fake.tire[1])}
+        ${chip("rf b", en ? "Rear R" : "右后", "247")}
         <img class="pv-carimg" src="${PREVIEW_CAR}" alt="" />
       </div>
       <div class="pv-stats">
