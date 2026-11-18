@@ -707,7 +707,15 @@ ha-card.preview .wrap {
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, .16), inset 0 -18px 34px rgba(185, 139, 255, .12), 0 16px 34px rgba(0, 0, 0, .45);
   backdrop-filter: blur(9px);
 }
-.pv-carimg { position: relative; z-index: 1; width: 62px; height: 88px; object-fit: contain;
+.pv-orbit { position: absolute; left: 50%; top: 50%; width: 104px; height: 104px; transform: translate(-50%, -50%);
+  border-radius: 50%; border: 1px solid rgba(120, 220, 255, .16); }
+.pv-node { position: absolute; z-index: 2; width: 4px; height: 4px; border-radius: 50%; background: #7fe6ff;
+  box-shadow: 0 0 6px rgba(127, 230, 255, .9); }
+.pv-node.n1 { left: 50%; top: 8px; transform: translateX(-50%); }
+.pv-node.n2 { right: 8px; top: 50%; transform: translateY(-50%); }
+.pv-node.n3 { left: 50%; bottom: 8px; transform: translateX(-50%); }
+.pv-node.n4 { left: 8px; top: 50%; transform: translateY(-50%); }
+.pv-carimg { position: relative; z-index: 1; width: 50px; height: 98px; object-fit: contain;
   filter: brightness(1.06) saturate(1.04) drop-shadow(0 14px 16px rgba(2, 6, 12, .8)); }
 .pv-cap { position: absolute; left: 50%; transform: translateX(-50%); z-index: 2;
   padding: 2px 8px; border-radius: 999px; white-space: nowrap; font-size: 7.5px; letter-spacing: .02em;
