@@ -1,0 +1,38 @@
+# ha-car 车楼层自动记录示例
+#
+# 前提：
+#   1. sensor.phone_pressure 是手机气压计（单位 hPa）
+#   2. sensor.ha_car_floor_base 是楼层基准气压实体（在 1F 打开找车面板点“校准为 1F”后写入）
+#   3. sensor.ha_car_floor 是车楼层实体，由本自动化写入 ha-car/floor/car
+#   4. 车辆泊车状态实体在“已泊车”时触发
+#
+# 层高固定按 3 米计算；如果车库层高不同，同时修改下面的 3。
+alias: ha-car 泊车自动记录车楼层
+description: 车状态变为已泊车时，用手机气压计估算当前楼层并写入车楼层实体
+mode: single
+trigger:
+  - platform: state
+    entity_id: sensor.car_parking_state
+    to: "已泊车"
+condition:
+  - condition: template
+    value_template: >-
+      {{ states('sensor.ha_car_floor_base') | float(0) > 0 and
+         states('sensor.phone_pressure') | float(0) > 0 }}
+action:
+  - service: mqtt.publish
+    data:
+      topic: ha-car/floor/car
+      retain: true
+      payload_template: >-
+        {%- set base = states('sensor.ha_car_floor_base') | float(0) -%}
+        {%- set p = states('sensor.phone_pressure') | float(0) -%}
+        {%- if base <= 0 or p <= 0 -%}unknown
+        {%- else -%}
+        {%- set h = 44330 * (1 - (p / base) ** (1 / 5.255)) -%}
+        {%- set n = 1 + ((h / 3) | round(0)) -%}
+        {%- if n >= 1 -%}F{{ n | int }}
+        {%- elif n == 0 -%}B1
+        {%- else -%}B{{ (1 - n) | int }}
+        {%- endif -%}
+        {%- endif -%}

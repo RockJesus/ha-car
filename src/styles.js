@@ -795,6 +795,9 @@ ha-card.panel.fit .pills { width: 100%; max-width: none; }
   background: rgba(55,214,232,.10); }
 .hmeta .door.fchip:hover { background: rgba(55,214,232,.18); }
 .hmeta .door.fchip .addr { flex: 0 0 auto; overflow: visible; }
+.hmeta .door.ffloor { border-color: rgba(125,166,255,.30); background: rgba(125,166,255,.09); color: #b8d0ff; }
+.hmeta .door.ffloor:hover { background: rgba(125,166,255,.17); }
+.hmeta .door.ffloor .addr { flex: 0 0 auto; overflow: visible; }
 .hmeta .door.pchip { flex: 0 0 auto; border-color: rgba(111,224,168,.28); background: rgba(111,224,168,.08); color: #8af0bd; }
 .hmeta .door.pchip.away { border-color: rgba(55,214,232,.26); background: rgba(55,214,232,.08); color: #8fe9f5; }
 .hmeta .door.pchip .addr { flex: 0 0 auto; overflow: visible; }
@@ -828,6 +831,20 @@ ha-card.panel.fit .pills { width: 100%; max-width: none; }
 .findmodal .fdot { position: absolute; width: 8px; height: 8px; border-radius: 50%; background: #37d6e8;
   box-shadow: 0 0 12px rgba(55,214,232,.8); }
 .findmodal .fdir { font-size: clamp(14px, 1.9cqmin, 24px); font-weight: 600; color: #dceaf5; }
+.findmodal .ffloor { display: flex; align-items: center; justify-content: center; gap: clamp(8px, 1.6cqmin, 18px); flex-wrap: wrap;
+  max-width: min(92%, 640px); padding: clamp(7px, 1.2cqmin, 12px) clamp(12px, 2cqmin, 22px);
+  border: 1px solid rgba(125,166,255,.26); border-radius: 14px; background: rgba(125,166,255,.08); }
+.findmodal .ffloor .fwho { display: inline-flex; align-items: baseline; gap: 5px; }
+.findmodal .ffloor .fwho b { font-size: clamp(15px, 2.2cqmin, 28px); font-weight: 800; color: #dce9ff; line-height: 1; }
+.findmodal .ffloor .fwho i { font-size: clamp(10px, 1.15cqmin, 13px); font-style: normal; color: #8ea6c0; }
+.findmodal .ffloor .fsep { color: #6e8cab; font-size: clamp(14px, 1.8cqmin, 22px); }
+.findmodal .ffloor .fex { font-size: clamp(10px, 1.15cqmin, 14px); color: #8ea6c0; }
+.findmodal .ffloor.same { border-color: rgba(111,224,168,.3); background: rgba(111,224,168,.08); }
+.findmodal .ffloor.same .fwho b { color: #9af0c2; }
+.findmodal .fcal { display: inline-flex; align-items: center; height: clamp(28px, 3.4cqmin, 42px); padding: 0 clamp(10px, 1.8cqmin, 20px);
+  border-radius: 999px; border: 1px solid rgba(125,166,255,.4); background: rgba(125,166,255,.12); color: #dbe8ff;
+  font-size: clamp(11px, 1.3cqmin, 16px); cursor: pointer; }
+.findmodal .fcal:hover { background: rgba(125,166,255,.2); }
 .findmodal .ffoot { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: center; }
 .findmodal .fperm { display: inline-flex; align-items: center; gap: 6px; height: clamp(30px, 3.8cqmin, 48px);
   padding: 0 clamp(12px, 2cqmin, 22px); border-radius: 999px; border: 1px solid rgba(55,214,232,.4);

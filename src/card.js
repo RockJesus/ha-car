@@ -174,7 +174,15 @@ const DEFAULTS = {
   image_url: "",
   bg_image: "",
   entities: {},
-  find: { phone: "", car: "" },
+  find: { phone: "", car: "", device: "" },
+  floor: {
+    pressure: "",
+    base: "sensor.ha_car_floor_base",
+    car: "sensor.ha_car_floor",
+    base_topic: "ha-car/floor/base",
+    base_floor: 1,
+    height: 3,
+  },
 };
 
 // blocks 归一化：老配置没有 blocks 时按 modules 推导等价顺序
@@ -284,6 +292,12 @@ class HaCarCard extends HTMLElement {
     cfg.find.phone = typeof cfg.find.phone === "string" ? cfg.find.phone : "";
     cfg.find.car = typeof cfg.find.car === "string" ? cfg.find.car : "";
     cfg.find.device = typeof cfg.find.device === "string" ? cfg.find.device : "";
+    cfg.floor = Object.assign({}, DEFAULTS.floor, cfg.floor && typeof cfg.floor === "object" ? cfg.floor : {});
+    for (const k of ["pressure", "base", "car", "base_topic"]) {
+      cfg.floor[k] = typeof cfg.floor[k] === "string" ? cfg.floor[k].trim() : DEFAULTS.floor[k];
+    }
+    cfg.floor.base_floor = clamp(Number(cfg.floor.base_floor) || DEFAULTS.floor.base_floor, -5, 20);
+    cfg.floor.height = clamp(Number(cfg.floor.height) || DEFAULTS.floor.height, 2, 6);
     cfg.bg_image = typeof cfg.bg_image === "string" ? cfg.bg_image.trim() : "";
     if (cfg.bg_image && !bgUrl(cfg.bg_image) && !isMediaSource(cfg.bg_image)) cfg.bg_image = "";
     cfg.hold_ms = clamp(Number(cfg.hold_ms) || DEFAULTS.hold_ms, 300, 3000);
@@ -1152,8 +1166,9 @@ class HaCarCard extends HTMLElement {
           const syncH = this._baseline(data, t, b);
           const placeH = compact ? "" : this._placeChip(b, data);
           const findH = compact ? "" : this._findChip(data);
+          const floorH = compact ? "" : this._floorChip(data);
           const extra = this._extraChips(b, data, t, ["location", "place", "sync"]);
-          if (locH || syncH || placeH || findH || extra) html = `<div class="b-meta"><div class="hmeta">${locH}${placeH}${findH}${syncH}</div>${extra}</div>`;
+          if (locH || syncH || placeH || findH || floorH || extra) html = `<div class="b-meta"><div class="hmeta">${locH}${placeH}${findH}${floorH}${syncH}</div>${extra}</div>`;
           break;
         }
         case "hero": {
@@ -1636,6 +1651,117 @@ class HaCarCard extends HTMLElement {
     return { lat, lon };
   }
 
+  _pressureHpa(st) {
+    if (!st) return null;
+    const v = num(st);
+    if (!Number.isFinite(v) || v <= 0) return null;
+    const u = String(attrs(st, "unit_of_measurement") || "").toLowerCase();
+    if (u === "kpa") return v * 10;
+    if (u === "pa") return v / 100;
+    return v;
+  }
+
+  _floorLabel(n) {
+    const x = Math.round(Number(n));
+    if (!Number.isFinite(x)) return "";
+    if (x >= 1) return `F${x}`;
+    if (x === 0) return "B1";
+    return `B${1 - x}`;
+  }
+
+  _normFloor(v) {
+    const s = String(v == null ? "" : v).trim().toUpperCase();
+    if (!s || s === "UNKNOWN" || s === "UNAVAILABLE" || s === "NONE" || s === "NULL") return "";
+    if (/^-?\d+(\.\d+)?$/.test(s)) return this._floorLabel(Number(s));
+    if (/^F\d+$/.test(s)) return s;
+    if (/^\d+F$/.test(s)) return `F${Number(s.slice(0, -1))}`;
+    if (/^B\d+$/.test(s)) return s;
+    return s.slice(0, 5);
+  }
+
+  _floorData(_data) {
+    const f = (this._config && this._config.floor) || DEFAULTS.floor;
+    const pSt = f.pressure && this._hass ? this._hass.states[f.pressure] : null;
+    const bSt = f.base && this._hass ? this._hass.states[f.base] : null;
+    const cSt = f.car && this._hass ? this._hass.states[f.car] : null;
+    const p = this._pressureHpa(pSt);
+    const base = this._pressureHpa(bSt);
+    const height = clamp(Number(f.height) || 3, 2, 6);
+    const baseFloor = clamp(Number(f.base_floor) || 1, -5, 20);
+    let phone = null;
+    if (p != null && base != null) {
+      const h = 44330 * (1 - Math.pow(p / base, 1 / 5.255));
+      phone = baseFloor + h / height;
+    }
+    const car = cSt ? this._normFloor(cSt.state) : "";
+    return {
+      p,
+      base,
+      height,
+      baseFloor,
+      phone,
+      phoneText: phone == null ? "" : this._floorLabel(phone),
+      carText: car,
+      show: !!(p != null || car),
+      calibrated: p != null && base != null,
+    };
+  }
+
+  _floorChip(data) {
+    const fd = this._floorData(data);
+    if (!fd.show) return "";
+    const en = isEn(this._hass);
+    let label = "";
+    if (fd.phoneText && fd.carText) label = `${fd.phoneText}→${fd.carText}`;
+    else if (fd.carText) label = (en ? "Car " : "车 ") + fd.carText;
+    else if (fd.phoneText) label = `${fd.phoneText}→?`;
+    if (!label) return "";
+    const tip = en ? "Open find-car panel · floor" : "打开找车面板 · 楼层";
+    return `<span class="door fchip ffloor" data-floor role="button" tabindex="0" title="${esc(tip)}">${icon("home")}<span class="addr">${esc(label)}</span></span>`;
+  }
+
+  _floorStrip(data) {
+    const fd = this._floorData(data);
+    if (!fd.show) return "";
+    const en = isEn(this._hass);
+    const phone = fd.phoneText || (en ? "not set" : "未校准");
+    const car = fd.carText || (en ? "not recorded" : "未记录");
+    const same = !!(fd.phoneText && fd.carText && fd.phoneText === fd.carText);
+    let tip = "";
+    if (!fd.phoneText) tip = en ? "Floor not calibrated" : "未校准";
+    else if (!fd.carText) tip = en ? "Car floor not recorded" : "车楼层未记录";
+    else if (same) tip = en ? "Floors match" : "同层";
+    else tip = en ? "You and the car are on different floors" : "你和车不在同一层";
+    return `<div class="ffloor${same ? " same" : ""}" data-floorstrip>
+      <span class="fwho"><b>${esc(phone)}</b><i>${en ? "you" : "你"}</i></span>
+      <span class="fsep">→</span>
+      <span class="fwho"><b>${esc(car)}</b><i>${en ? "car" : "车"}</i></span>
+      <span class="fex">${esc(tip)}</span>
+      <button class="fcal" data-floorcal type="button">${esc(en ? `Set ${this._floorLabel(fd.baseFloor)}` : `校准为 ${this._floorLabel(fd.baseFloor)}`)}</button>
+    </div>`;
+  }
+
+  _calibrateFloor() {
+    const f = (this._config && this._config.floor) || DEFAULTS.floor;
+    const st = f.pressure && this._hass ? this._hass.states[f.pressure] : null;
+    const p = this._pressureHpa(st);
+    if (p == null) {
+      this._showToast(isEn(this._hass) ? "No phone pressure reading" : "没有读到手机气压", "err");
+      return;
+    }
+    if (!this._hass || !this._hass.services || !this._hass.services.mqtt || !this._hass.services.mqtt.publish) {
+      this._showToast(isEn(this._hass) ? "MQTT is not available" : "未找到 MQTT 服务", "err");
+      return;
+    }
+    const topic = f.base_topic || "ha-car/floor/base";
+    const done = this._hass.callService("mqtt", "publish", { topic, payload: p.toFixed(2), retain: true });
+    if (done && typeof done.catch === "function") {
+      done.catch((err) => this._showToast((isEn(this._hass) ? "Calibration failed: " : "校准失败：") + (err && err.message ? err.message : err), "err"));
+      return;
+    }
+    this._showToast(isEn(this._hass) ? `Calibrated ${this._floorLabel(f.base_floor)}` : `已校准为 ${this._floorLabel(f.base_floor)}`, "ok");
+  }
+
   _findPoints(data) {
     const f = (this._config && this._config.find) || {};
     const phoneSt = f.phone && this._hass ? this._hass.states[f.phone] : null;
@@ -1795,6 +1921,7 @@ class HaCarCard extends HTMLElement {
     const bearing = this._bearing(loc.coords, p.car);
     const ok = d != null && bearing != null;
     const title = isEn(this._hass) ? "Find my car" : "找车";
+    const floorH = this._floorStrip(data);
     if (!ok) {
       const en = isEn(this._hass);
       let note = en ? "Unable to get a location for this device or the car." : "未取得可用于定位的坐标。";
@@ -1803,13 +1930,14 @@ class HaCarCard extends HTMLElement {
       else note = en ? "Phone, network and logged-in-device locations are unavailable. Check the find-car entities." : "手机、网络和登录设备定位均不可用，请检查找车定位实体。";
       return `<div class="findmodal" role="dialog" aria-label="${esc(title)}"><button class="fx" data-findclose type="button" aria-label="关闭">✕</button>
         <div class="fhead">${icon("pin")}${esc(title)}</div>
-        <div class="fnote">${note}</div></div>`;
+        <div class="fnote">${note}</div>${floorH}</div>`;
     }
     return `<div class="findmodal" role="dialog" aria-label="${esc(title)}"><button class="fx" data-findclose type="button" aria-label="关闭">✕</button>
       <div class="fhead">${icon("pin")}${esc(title)}</div>
       <div class="fdist"><b data-fdist>${esc(this._distText(d))}</b><span>${isEn(this._hass) ? "away" : "距离"}</span></div>
       <div class="fcomp"><i class="fring"></i><i class="farrow" data-farrow>${icon("nav")}</i><span class="fdot"></span></div>
       <div class="fdir" data-fdir>${esc(this._dirText(bearing, null))}</div>
+      ${floorH}
       <div class="ffoot"><button class="fperm" data-findperm type="button">${icon("gauge")}校准指南针</button>
         <span class="facc" data-fstat>${esc(isEn(this._hass) ? "GPS bearing · compass" : "车辆方位 · 手机指南针")} · ${esc(this._findSourceText(loc.source))}</span></div>
       <div class="fnote">${esc(loc.source === "phone"
@@ -2640,8 +2768,18 @@ class HaCarCard extends HTMLElement {
       this._askCompass();
       return;
     }
+    const floorCal = ev.target.closest && ev.target.closest("[data-floorcal]");
+    if (floorCal) {
+      this._calibrateFloor();
+      return;
+    }
     const findBtn = ev.target.closest && ev.target.closest("[data-find]");
     if (findBtn) {
+      this._openFind();
+      return;
+    }
+    const floorBtn = ev.target.closest && ev.target.closest("[data-floor]");
+    if (floorBtn) {
       this._openFind();
       return;
     }
