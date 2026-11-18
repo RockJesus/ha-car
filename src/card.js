@@ -1,5 +1,5 @@
 import { icon, ICON_NAMES } from "./icons.js";
-import { artForSlot } from "./button-art.js";
+import { artForSlot, BUTTON_ART } from "./button-art.js";
 import { resolve, detectVehicles, SLOTS } from "./resolve.js";
 import { STYLES } from "./styles.js";
 import { dict, isEn } from "./strings.js";
@@ -984,52 +984,36 @@ class HaCarCard extends HTMLElement {
     const en = isEn(this._hass);
     const fake = {
       plate: en ? "XYZ-1234" : "京A·12345",
-      loc: en ? "Sample City, Yunshan Rd 8" : "示例市 云杉路 8 号",
-      sync: en ? "just now" : "刚刚",
-      tire: ["245", "248", "243", "226"],
+      tire: ["222", "227"],
       odo: "12,345",
-      batt: "12.4",
-      oil: "78",
       fuel: "62",
       range: "486",
     };
     const acts = [
-      { ic: "unlock", lb: t.unlock || "开锁", on: true },
-      { ic: "trunk", lb: en ? "Trunk" : "后备箱" },
-      { ic: "power", lb: t.engine || "远程启动" },
-      { ic: "megaphone", lb: t.honk || "鸣笛寻车" },
+      { art: BUTTON_ART.unlock, lb: t.unlock || "开锁" },
+      { art: BUTTON_ART.lock, lb: t.lock || "上锁" },
+      { art: BUTTON_ART.start, lb: en ? "Start" : "远程启动" },
+      { art: BUTTON_ART.horn, lb: en ? "Honk" : "鸣笛寻车" },
     ];
-    const tires = ["L", "R", "L", "R"]
-      .map((_, i) => `<span class="pv-tvec${i === 3 ? " warn" : ""}">${icon("tire")}<b>${esc(fake.tire[i])}</b><em>kPa</em></span>`)
-      .join("");
     return `<div class="pv-top"><h1>${esc(en ? "My car" : "我的座驾")}</h1>
         <span class="status ok"><span class="dot"></span>${esc(t.locked)}</span></div>
       <div class="pv-plate">${esc(fake.plate)}</div>
       <div class="pv-hero">
-        <span class="pv-ring"><i class="pv-nd n1"></i><i class="pv-nd n2"></i><i class="pv-nd n3"></i><i class="pv-nd n4"></i></span>
+        <span class="pv-halo"></span>
+        <span class="pv-cap pt">${esc(en ? "Hood" : "引擎盖")} · ${esc(en ? "Closed" : "已关闭")}</span>
+        <span class="pv-cap pb">${esc(en ? "Trunk" : "尾门")} · ${esc(en ? "Closed" : "已关闭")}</span>
+        <span class="pv-loc-chip lf"><i>${esc(en ? "Driver" : "主驾")}</i><b>${esc(en ? "Closed" : "已关闭")}</b><u>${esc(fake.tire[0])}<s>kPa</s></u></span>
+        <span class="pv-loc-chip rf"><i>${esc(en ? "Pass." : "副驾")}</i><b>${esc(en ? "Closed" : "已关闭")}</b><u>${esc(fake.tire[1])}<s>kPa</s></u></span>
         <img class="pv-carimg" src="${PREVIEW_CAR}" alt="" />
       </div>
-      <div class="pv-gauges">
-        ${this._gauge({ pct: 62, label: t.fuel, value: fake.fuel, unit: "%", ic: "fuel" })}
-        <span class="pv-gsep">${icon("tire")}</span>
-        ${this._gauge({ pct: 81, label: t.range, value: fake.range, unit: "km", ic: "gauge" })}
-      </div>
-      <div class="pv-chips">
-        <span><i>${esc(t.odo || "总里程")}</i><b>${esc(fake.odo)}</b><em>km</em></span>
-        <span><i>${esc(en ? "Battery" : "蓄电池")}</i><b>${esc(fake.batt)}</b><em>V</em></span>
-        <span><i>${esc(en ? "Oil" : "机油寿命")}</i><b>${esc(fake.oil)}</b><em>%</em></span>
+      <div class="pv-stats">
+        <span>${esc(t.fuel || "燃油")}<b>${esc(fake.fuel)}</b>%</span>
+        <span>${esc(t.range || "续航")}<b>${esc(fake.range)}</b>km</span>
+        <span>${esc(t.odo || "总里程")}<b>${esc(fake.odo)}</b>km</span>
       </div>
       <div class="pv-acts">
-        ${acts.map((a) => `<span class="pv-act${a.on ? " on" : ""}"><b>${icon(a.ic)}</b><em>${esc(a.lb)}</em></span>`).join("")}
-      </div>
-      <div class="pv-seek">
-        <span>${icon("speaker")}${esc(en ? "Sound & light" : "声光寻车")}</span>
-        <span>${icon("bulb")}${esc(en ? "Light horn" : "灯光寻车")}</span>
-      </div>
-      <div class="pv-closed">${icon("car")}${esc(en ? "Doors & windows closed" : "车门车窗已关闭")}</div>
-      <div class="pv-svc">${icon("wrench")}${esc(en ? "Service info" : "服务信息")}${icon("chevron")}</div>
-      <div class="pv-loc">${icon("pin")}${esc(fake.loc)}</div>
-      <div class="pv-tires">${tires}<span class="pv-sync">${icon("refresh")}${esc(fake.sync)}</span></div>`;
+        ${acts.map((a) => `<span class="pv-act"><img class="pv-art" src="${a.art}" alt=""><em>${esc(a.lb)}</em></span>`).join("")}
+      </div>`;
   }
 
   // ---------- 卡片主体 ----------
