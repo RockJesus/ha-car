@@ -458,6 +458,7 @@ h1 { margin: 0; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-s
   border: 1px solid rgba(255,255,255,.11); white-space: nowrap;
   backdrop-filter: blur(6px); }
 .brand { display: inline-flex; align-items: center; margin-right: 7px; vertical-align: -1px; }
+.brand.lin svg { width: 60px; }
 .brand svg { width: 46px; height: 21px; display: block;
   filter: drop-shadow(0 0 8px rgba(var(--hc-a,55,214,232),.35)) drop-shadow(0 2px 4px rgba(0,0,0,.5));
   transform: translateZ(0); }
@@ -1802,6 +1803,11 @@ var FORD_LOGO = `<span class="brand" aria-hidden="true"><svg viewBox="0 0 44 20"
 <ellipse cx="22" cy="10" rx="17.6" ry="6.6" fill="none" stroke="#eef4ff" stroke-width=".9" opacity=".85"/>
 <text x="22" y="13.4" text-anchor="middle" font-family="Georgia,'Times New Roman',serif" font-style="italic"
  font-weight="700" font-size="9.4" fill="#f4f8ff" letter-spacing=".4">Ford</text></svg></span>`;
+var LINCOLN_LOGO = `<span class="brand lin" aria-hidden="true"><svg viewBox="0 0 60 20" xmlns="http://www.w3.org/2000/svg">
+<path d="M7 3.2 L8.6 8.4 L13.8 10 L8.6 11.6 L7 16.8 L5.4 11.6 L.2 10 L5.4 8.4 Z" fill="#cfd8e6" opacity=".18"/>
+<path d="M7 4.8 L8.1 8.7 L12 10 L8.1 11.3 L7 15.2 L5.9 11.3 L2 10 L5.9 8.7 Z" fill="#eef4ff"/>
+<text x="37" y="13" text-anchor="middle" font-family="Georgia,'Times New Roman',serif"
+ font-weight="700" font-size="7.4" fill="#f4f8ff" letter-spacing="1.04">LINCOLN</text></svg></span>`;
 var MODULES = ["status", "actions", "energy", "tires", "doors", "charging", "alerts", "service"];
 var BLOCK_TYPES = ["meta", "hero", "energy", "alerts", "doors", "charging", "service", "actions", "custom"];
 var ITEM_DEFS = {
@@ -1947,6 +1953,7 @@ function hexRgb(hex) {
 }
 var DEFAULTS = {
   title: "",
+  brand: "auto",
   layout: "full",
   // 默认不渲染「服务信息」，可在编辑器里手动勾选
   modules: MODULES.filter((m) => m !== "service"),
@@ -2365,6 +2372,33 @@ var HaCarCard = class extends HTMLElement {
   _setRadius(k) {
     if (!this._card || !k) return;
     this._card.style.borderRadius = `${Math.round(24 / k)}px`;
+  }
+  // 品牌识别：设备 manufacturer/model/名称里带林肯特征就用林肯标，也允许配置里强制指定
+  _brand() {
+    const force = this._config && this._config.brand || "auto";
+    if (force === "ford" || force === "lincoln") return force;
+    const h = this._hass;
+    if (!h || !h.entities || !h.devices) return "ford";
+    const ids = /* @__PURE__ */ new Set();
+    try {
+      const data = resolve(h, this._config);
+      for (const hit of data.slots.values()) if (hit && hit.id) ids.add(hit.id);
+    } catch {
+    }
+    for (const v of Object.values(this._config && this._config.entities || {})) {
+      if (typeof v === "string" && v) ids.add(v);
+    }
+    for (const id of ids) {
+      const ent = h.entities[id];
+      const dev = ent && ent.device_id ? h.devices[ent.device_id] : null;
+      if (!dev) continue;
+      const txt = `${dev.manufacturer || ""} ${dev.model || ""} ${dev.name || ""}`;
+      if (/lincoln|林肯|冒险家|航海家|领航员|corsair|nautilus|navigator|continental|zephyr/i.test(txt)) return "lincoln";
+    }
+    return "ford";
+  }
+  _logo() {
+    return this._brand() === "lincoln" ? LINCOLN_LOGO : FORD_LOGO;
   }
   _fitPanel() {
     if (!this._panel || !this._card) return;
@@ -2817,7 +2851,7 @@ var HaCarCard = class extends HTMLElement {
     if (running) chips.push({ cls: "warn", label: t.running });
     const blocks = [];
     const plateTxt = cfg.show_plate && plate ? cfg.privacy ? maskPlate(plate) : plate : "";
-    const head = `<div class="head"><div class="ttl"><h1>${FORD_LOGO}${esc(title)}</h1>` + (plateTxt ? `<span class="plate">${esc(plateTxt)}</span>` : "") + `</div><span class="status ${status.cls}"><span class="dot"></span>${esc(status.label)}</span></div>`;
+    const head = `<div class="head"><div class="ttl"><h1>${this._logo()}${esc(title)}</h1>` + (plateTxt ? `<span class="plate">${esc(plateTxt)}</span>` : "") + `</div><span class="status ${status.cls}"><span class="dot"></span>${esc(status.label)}</span></div>`;
     const hero = this._imagePair(data);
     for (const b of list) {
       if (b.on === false) continue;
@@ -4567,6 +4601,12 @@ var HaCarEditor = class extends HTMLElement {
         <p class="hint" id="vehhint" style="margin-top:6px"></p>
         <label class="f" for="title">${L.title}</label>
         <input class="tf" id="title" type="text" placeholder="我的座驾">
+        <label class="f">品牌标识</label>
+        <select class="tf" id="brand">
+          <option value="auto">自动识别（按设备厂商）</option>
+          <option value="ford">福特 Ford</option>
+          <option value="lincoln">林肯 Lincoln</option>
+        </select>
         <div class="row"><span class="rl">${L.showPlate}</span>
           <button class="sw" id="plate" role="switch" aria-checked="true"></button></div>
         <div class="row"><span class="rl">${L.privacy}</span>
@@ -4714,6 +4754,10 @@ var HaCarEditor = class extends HTMLElement {
     });
     q("title").addEventListener("input", (e) => {
       this._config.title = e.target.value.trim();
+      this._emit();
+    });
+    q("brand").addEventListener("change", (e) => {
+      this._config.brand = e.target.value;
       this._emit();
     });
     q("privacy").addEventListener("click", () => {
@@ -5117,6 +5161,7 @@ var HaCarEditor = class extends HTMLElement {
     const q = (id) => this.shadowRoot.getElementById(id);
     this._syncVehicles();
     q("title").value = this._config.title || "";
+    q("brand").value = ["auto", "ford", "lincoln"].includes(this._config.brand) ? this._config.brand : "auto";
     q("plate").setAttribute("aria-checked", String(Boolean(this._config.show_plate)));
     q("privacy").setAttribute("aria-checked", String(Boolean(this._config.privacy)));
     this.shadowRoot.querySelectorAll("[data-layout]").forEach((b) => {
@@ -5197,7 +5242,7 @@ var HaCarEditor = class extends HTMLElement {
 customElements.define("ha-car-editor", HaCarEditor);
 
 // src/main.js
-var VERSION = "3.0.5";
+var VERSION = "3.1.0";
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "ha-car",

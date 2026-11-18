@@ -25,6 +25,12 @@ const FORD_LOGO = `<span class="brand" aria-hidden="true"><svg viewBox="0 0 44 2
 <text x="22" y="13.4" text-anchor="middle" font-family="Georgia,'Times New Roman',serif" font-style="italic"
  font-weight="700" font-size="9.4" fill="#f4f8ff" letter-spacing=".4">Ford</text></svg></span>`;
 
+const LINCOLN_LOGO = `<span class="brand lin" aria-hidden="true"><svg viewBox="0 0 60 20" xmlns="http://www.w3.org/2000/svg">
+<path d="M7 3.2 L8.6 8.4 L13.8 10 L8.6 11.6 L7 16.8 L5.4 11.6 L.2 10 L5.4 8.4 Z" fill="#cfd8e6" opacity=".18"/>
+<path d="M7 4.8 L8.1 8.7 L12 10 L8.1 11.3 L7 15.2 L5.9 11.3 L2 10 L5.9 8.7 Z" fill="#eef4ff"/>
+<text x="37" y="13" text-anchor="middle" font-family="Georgia,'Times New Roman',serif"
+ font-weight="700" font-size="7.4" fill="#f4f8ff" letter-spacing="1.04">LINCOLN</text></svg></span>`;
+
 const MODULES = ["status", "actions", "energy", "tires", "doors", "charging", "alerts", "service"];
 // 可自由排序/增删的模块类型（blocks）
 const BLOCK_TYPES = ["meta", "hero", "energy", "alerts", "doors", "charging", "service", "actions", "custom"];
@@ -181,6 +187,7 @@ function hexRgb(hex) {
 
 const DEFAULTS = {
   title: "",
+  brand: "auto",
   layout: "full",
   // 默认不渲染「服务信息」，可在编辑器里手动勾选
   modules: MODULES.filter((m) => m !== "service"),
@@ -660,6 +667,35 @@ class HaCarCard extends HTMLElement {
   _setRadius(k) {
     if (!this._card || !k) return;
     this._card.style.borderRadius = `${Math.round(24 / k)}px`;
+  }
+
+
+  // 品牌识别：设备 manufacturer/model/名称里带林肯特征就用林肯标，也允许配置里强制指定
+  _brand() {
+    const force = (this._config && this._config.brand) || "auto";
+    if (force === "ford" || force === "lincoln") return force;
+    const h = this._hass;
+    if (!h || !h.entities || !h.devices) return "ford";
+    const ids = new Set();
+    try {
+      const data = resolve(h, this._config);
+      for (const hit of data.slots.values()) if (hit && hit.id) ids.add(hit.id);
+    } catch { /* 解析失败按福特处理 */ }
+    for (const v of Object.values((this._config && this._config.entities) || {})) {
+      if (typeof v === "string" && v) ids.add(v);
+    }
+    for (const id of ids) {
+      const ent = h.entities[id];
+      const dev = ent && ent.device_id ? h.devices[ent.device_id] : null;
+      if (!dev) continue;
+      const txt = `${dev.manufacturer || ""} ${dev.model || ""} ${dev.name || ""}`;
+      if (/lincoln|林肯|冒险家|航海家|领航员|corsair|nautilus|navigator|continental|zephyr/i.test(txt)) return "lincoln";
+    }
+    return "ford";
+  }
+
+  _logo() {
+    return this._brand() === "lincoln" ? LINCOLN_LOGO : FORD_LOGO;
   }
 
   _fitPanel() {
@@ -1182,7 +1218,7 @@ class HaCarCard extends HTMLElement {
 
     const blocks = [];
     const plateTxt = cfg.show_plate && plate ? (cfg.privacy ? maskPlate(plate) : plate) : "";
-    const head = `<div class="head"><div class="ttl"><h1>${FORD_LOGO}${esc(title)}</h1>` +
+    const head = `<div class="head"><div class="ttl"><h1>${this._logo()}${esc(title)}</h1>` +
       (plateTxt ? `<span class="plate">${esc(plateTxt)}</span>` : "") +
       `</div><span class="status ${status.cls}"><span class="dot"></span>${esc(status.label)}</span></div>`;
 

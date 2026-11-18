@@ -120,6 +120,12 @@ class HaCarEditor extends HTMLElement {
         <p class="hint" id="vehhint" style="margin-top:6px"></p>
         <label class="f" for="title">${L.title}</label>
         <input class="tf" id="title" type="text" placeholder="我的座驾">
+        <label class="f">品牌标识</label>
+        <select class="tf" id="brand">
+          <option value="auto">自动识别（按设备厂商）</option>
+          <option value="ford">福特 Ford</option>
+          <option value="lincoln">林肯 Lincoln</option>
+        </select>
         <div class="row"><span class="rl">${L.showPlate}</span>
           <button class="sw" id="plate" role="switch" aria-checked="true"></button></div>
         <div class="row"><span class="rl">${L.privacy}</span>
@@ -269,6 +275,11 @@ class HaCarEditor extends HTMLElement {
 
     q("title").addEventListener("input", (e) => {
       this._config.title = e.target.value.trim();
+      this._emit();
+    });
+
+    q("brand").addEventListener("change", (e) => {
+      this._config.brand = e.target.value;
       this._emit();
     });
 
@@ -714,6 +725,7 @@ class HaCarEditor extends HTMLElement {
     const q = (id) => this.shadowRoot.getElementById(id);
     this._syncVehicles();
     q("title").value = this._config.title || "";
+    q("brand").value = ["auto", "ford", "lincoln"].includes(this._config.brand) ? this._config.brand : "auto";
     q("plate").setAttribute("aria-checked", String(Boolean(this._config.show_plate)));
     q("privacy").setAttribute("aria-checked", String(Boolean(this._config.privacy)));
     this.shadowRoot.querySelectorAll("[data-layout]").forEach((b) => {

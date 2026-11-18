@@ -105,6 +105,7 @@ h1 { margin: 0; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-s
   border: 1px solid rgba(255,255,255,.11); white-space: nowrap;
   backdrop-filter: blur(6px); }
 .brand { display: inline-flex; align-items: center; margin-right: 7px; vertical-align: -1px; }
+.brand.lin svg { width: 60px; }
 .brand svg { width: 46px; height: 21px; display: block;
   filter: drop-shadow(0 0 8px rgba(var(--hc-a,55,214,232),.35)) drop-shadow(0 2px 4px rgba(0,0,0,.5));
   transform: translateZ(0); }
