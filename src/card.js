@@ -313,17 +313,32 @@ class HaCarCard extends HTMLElement {
     cfg.chip_style = CHIP_STYLES.indexOf(cfg.chip_style) >= 0 ? cfg.chip_style : DEFAULTS.chip_style;
     if (cfg.bg_image && !bgUrl(cfg.bg_image) && !isMediaSource(cfg.bg_image)) cfg.bg_image = "";
     cfg.hold_ms = clamp(Number(cfg.hold_ms) || DEFAULTS.hold_ms, 300, 3000);
+    delete cfg.floor; // 楼层功能已下线，清掉旧配置残留，避免读取不存在的实体导致整卡报错
     cfg.blocks = normBlocks(cfg);
     cfg.confirm = normalizeConfirm(config, cfg);
     this._config = cfg;
     this._sig = "";
     this._toast = null;
-    this._render(true);
+    this._safeRender(true);
   }
 
   set hass(hass) {
     this._hass = hass;
-    this._render();
+    this._safeRender();
+  }
+
+  _safeRender(force) {
+    try {
+      this._render(force);
+    } catch (e) {
+      console.error("[ha-car] render failed:", e);
+      if (this._wrap) {
+        this._wrap.innerHTML =
+          '<div style="padding:18px;font:13px/1.6 system-ui,sans-serif;color:#ff8c8c">ha-car 渲染出错：' +
+          String((e && e.message) || e).replace(/[<>&]/g, (c) => ({ "<": "&lt;", ">": "&gt;", "&": "&amp;" }[c])) +
+          "</div>";
+      }
+    }
   }
 
   // 挂载后再判定一次上下文：选择器缩略卡/面板都依赖祖先链或 HA 的 preview 标记，

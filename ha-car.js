@@ -2041,16 +2041,27 @@ var HaCarCard = class extends HTMLElement {
     cfg.chip_style = CHIP_STYLES.indexOf(cfg.chip_style) >= 0 ? cfg.chip_style : DEFAULTS.chip_style;
     if (cfg.bg_image && !bgUrl(cfg.bg_image) && !isMediaSource(cfg.bg_image)) cfg.bg_image = "";
     cfg.hold_ms = clamp(Number(cfg.hold_ms) || DEFAULTS.hold_ms, 300, 3e3);
+    delete cfg.floor;
     cfg.blocks = normBlocks(cfg);
     cfg.confirm = normalizeConfirm(config, cfg);
     this._config = cfg;
     this._sig = "";
     this._toast = null;
-    this._render(true);
+    this._safeRender(true);
   }
   set hass(hass) {
     this._hass = hass;
-    this._render();
+    this._safeRender();
+  }
+  _safeRender(force) {
+    try {
+      this._render(force);
+    } catch (e) {
+      console.error("[ha-car] render failed:", e);
+      if (this._wrap) {
+        this._wrap.innerHTML = '<div style="padding:18px;font:13px/1.6 system-ui,sans-serif;color:#ff8c8c">ha-car 渲染出错：' + String(e && e.message || e).replace(/[<>&]/g, (c) => ({ "<": "&lt;", ">": "&gt;", "&": "&amp;" })[c]) + "</div>";
+      }
+    }
   }
   // 挂载后再判定一次上下文：选择器缩略卡/面板都依赖祖先链或 HA 的 preview 标记，
   // 而 setConfig/set hass 往往发生在元素挂进 DOM 之前。
@@ -5030,6 +5041,7 @@ var HaCarEditor = class extends HTMLElement {
     }
     p.hass = this._hass;
     p.selector = domain ? { entity: { domain } } : { entity: {} };
+    p.required = false;
     if (placeholder) p.placeholder = placeholder;
     if (p.value !== (value || void 0)) p.value = value || void 0;
   }
@@ -5159,7 +5171,7 @@ var HaCarEditor = class extends HTMLElement {
 customElements.define("ha-car-editor", HaCarEditor);
 
 // src/main.js
-var VERSION = "2.9.9";
+var VERSION = "2.10.0";
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "ha-car",

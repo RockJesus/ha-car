@@ -659,6 +659,7 @@ class HaCarEditor extends HTMLElement {
     }
     p.hass = this._hass;
     p.selector = domain ? { entity: { domain } } : { entity: {} };
+    p.required = false; // 找车三项都是可选项，留空走兜底，不能因为它拦保存
     if (placeholder) p.placeholder = placeholder;
     if (p.value !== (value || undefined)) p.value = value || undefined;
   }
