@@ -141,24 +141,6 @@ class HaCarEditor extends HTMLElement {
       </div>
 
       <div class="sec">
-        <h3>楼层感知</h3>
-        <p class="hint">手机气压计估算所在楼层；到 1 楼后在找车面板点一次“校准为 1F”。车辆楼层会在泊车时自动记录，需先在 HA 里创建楼层辅助实体和自动化。</p>
-        <label class="f">手机气压计</label>
-        <div class="pick" id="floorpressure"></div>
-        <div class="grid2" style="margin-top:6px">
-          <label class="f">基准楼层</label>
-          <label class="f">层高（米）</label>
-          <input class="tf" id="floorbasefloor" type="number" min="-5" max="20" step="1" value="1">
-          <input class="tf" id="floorheight" type="number" min="2" max="6" step="0.1" value="3">
-        </div>
-        <label class="f" style="margin-top:6px">基准气压实体</label>
-        <div class="pick" id="floorbase"></div>
-        <label class="f" style="margin-top:6px">车楼层实体</label>
-        <div class="pick" id="floorcar"></div>
-        <p class="hint" id="floorhint"></p>
-      </div>
-
-      <div class="sec">
         <h3>模块布局</h3>
         <p class="hint">上下箭头调整顺序，开关控制显示，✕ 删除。手机从上到下排列；宽屏时车图固定在左栏，其余模块按此顺序排右栏。所有模块和模块内实体都能增删与排序。</p>
         <div id="blk" class="blklist"></div>
@@ -296,15 +278,6 @@ class HaCarEditor extends HTMLElement {
     q("hold").addEventListener("input", (e) => {
       this._config.hold_ms = Number(e.target.value);
       this.shadowRoot.getElementById("holdv").textContent = `${this._config.hold_ms} ms`;
-      this._emit();
-    });
-
-    q("floorbasefloor").addEventListener("input", (e) => {
-      this._config.floor = Object.assign({}, DEFAULTS.floor, this._config.floor || {}, { base_floor: Number(e.target.value) || 1 });
-      this._emit();
-    });
-    q("floorheight").addEventListener("input", (e) => {
-      this._config.floor = Object.assign({}, DEFAULTS.floor, this._config.floor || {}, { height: Number(e.target.value) || 3 });
       this._emit();
     });
 
@@ -731,36 +704,6 @@ class HaCarEditor extends HTMLElement {
     });
     this._syncPickers();
     this._syncFind();
-    this._syncFloor();
-  }
-
-  _syncFloor() {
-    if (!this._built) return;
-    const f = Object.assign({}, DEFAULTS.floor, this._config.floor || {});
-    const q = (id) => this.shadowRoot.getElementById(id);
-    q("floorbasefloor").value = String(f.base_floor);
-    q("floorheight").value = String(f.height);
-    const hp = q("floorpressure");
-    const hb = q("floorbase");
-    const hc = q("floorcar");
-    if (!hp || !hb || !hc) return;
-    this._mountPicker(hp, f.pressure || "", (v) => {
-      this._config.floor = Object.assign({}, DEFAULTS.floor, this._config.floor || {}, { pressure: v });
-      this._emit();
-      this._syncFloor();
-    }, "选择手机气压计实体", "sensor");
-    this._mountPicker(hb, f.base || "", (v) => {
-      this._config.floor = Object.assign({}, DEFAULTS.floor, this._config.floor || {}, { base: v });
-      this._emit();
-      this._syncFloor();
-    }, "楼层基准气压实体", "sensor");
-    this._mountPicker(hc, f.car || "", (v) => {
-      this._config.floor = Object.assign({}, DEFAULTS.floor, this._config.floor || {}, { car: v });
-      this._emit();
-      this._syncFloor();
-    }, "车楼层实体", "sensor");
-    const hint = q("floorhint");
-    if (hint) hint.textContent = !f.pressure ? "未选择手机气压计，楼层感知不会显示。" : (f.base && f.car ? "楼层感知已启用：手机气压算人楼层，车楼层由泊车自动化写入。" : "请选择基准气压实体和车楼层实体。");
   }
 
   _syncFind() {

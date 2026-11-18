@@ -1168,7 +1168,7 @@ ha-card.panel.fit .pills { width: 100%; max-width: none; }
   text-shadow: 0 0 24px rgba(55,214,232,.45); }
 .findmodal .fdist span { font-size: clamp(12px, 1.35cqmin, 17px); color: #9fb3c8; }
 /* 上半屏只放地图，下半屏放全部找车信息 */
-.findmodal .fmapview { position: relative; flex: 0 0 auto; width: 100%; height: 44%; min-height: clamp(200px, 30cqmin, 320px);
+.findmodal .fmapview { position: relative; flex: 0 0 auto; width: 100%; height: 47%; min-height: clamp(200px, 30cqmin, 320px);
   overflow: hidden; background: #0b1624; border-bottom: 1px solid rgba(120,160,200,.22); }
 .findmodal .finfo { flex: 1 1 auto; min-height: 0; overflow: hidden auto; width: 100%;
   display: flex; flex-direction: column; align-items: center; justify-content: safe center; gap: clamp(6px, 1.2cqmin, 14px);
@@ -1209,7 +1209,7 @@ ha-card.panel.fit .pills { width: 100%; max-width: none; }
 .findmodal .fmapnote .lg.car .ic { width: 1.15em; height: 1.15em; color: #ffcaa8; }
 .findmodal .fmapnote .lgd { color: #9fb3c8; }
 .findmodal .ffoot[hidden] { display: none; }
-.findmodal .fcomp { position: relative; width: min(44cqmin, 268px); aspect-ratio: 1; display: flex;
+.findmodal .fcomp { position: relative; width: min(48cqmin, 290px); aspect-ratio: 1; display: flex;
   align-items: center; justify-content: center; margin: 2px 0 0; }
 .findmodal .frose { position: absolute; inset: 0; transform-origin: 50% 50%; will-change: transform; }
 .findmodal .fring { position: absolute; inset: 0; border-radius: 50%;
@@ -1231,20 +1231,6 @@ ha-card.panel.fit .pills { width: 100%; max-width: none; }
 .findmodal .farrow .ic { width: 100%; height: 100%; }
 .findmodal .fdot { position: absolute; width: 7px; height: 7px; border-radius: 50%; background: rgba(55,214,232,.9);
   box-shadow: 0 0 10px rgba(55,214,232,.8); pointer-events: none; }
-.findmodal .ffloor { display: flex; align-items: center; justify-content: center; gap: clamp(8px, 1.6cqmin, 18px); flex-wrap: wrap;
-  max-width: min(92%, 640px); padding: clamp(7px, 1.2cqmin, 12px) clamp(12px, 2cqmin, 22px);
-  border: 1px solid rgba(125,166,255,.26); border-radius: 14px; background: rgba(125,166,255,.08); }
-.findmodal .ffloor .fwho { display: inline-flex; align-items: baseline; gap: 5px; }
-.findmodal .ffloor .fwho b { font-size: clamp(15px, 2.2cqmin, 28px); font-weight: 800; color: #dce9ff; line-height: 1; }
-.findmodal .ffloor .fwho i { font-size: clamp(10px, 1.15cqmin, 13px); font-style: normal; color: #8ea6c0; }
-.findmodal .ffloor .fsep { color: #6e8cab; font-size: clamp(14px, 1.8cqmin, 22px); }
-.findmodal .ffloor .fex { font-size: clamp(10px, 1.15cqmin, 14px); color: #8ea6c0; }
-.findmodal .ffloor.same { border-color: rgba(111,224,168,.3); background: rgba(111,224,168,.08); }
-.findmodal .ffloor.same .fwho b { color: #9af0c2; }
-.findmodal .fcal { display: inline-flex; align-items: center; height: clamp(28px, 3.4cqmin, 42px); padding: 0 clamp(10px, 1.8cqmin, 20px);
-  border-radius: 999px; border: 1px solid rgba(125,166,255,.4); background: rgba(125,166,255,.12); color: #dbe8ff;
-  font-size: clamp(11px, 1.3cqmin, 16px); cursor: pointer; }
-.findmodal .fcal:hover { background: rgba(125,166,255,.2); }
 .findmodal .ffoot { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: center; }
 .findmodal .fperm { display: inline-flex; align-items: center; gap: 6px; height: clamp(30px, 3.8cqmin, 48px);
   padding: 0 clamp(12px, 2cqmin, 22px); border-radius: 999px; border: 1px solid rgba(55,214,232,.4);
@@ -1822,15 +1808,7 @@ var DEFAULTS = {
   image_url: "",
   bg_image: "",
   entities: {},
-  find: { phone: "", car: "", device: "" },
-  floor: {
-    pressure: "",
-    base: "sensor.ha_car_floor_base",
-    car: "sensor.ha_car_floor",
-    base_topic: "ha-car/floor/base",
-    base_floor: 1,
-    height: 3
-  }
+  find: { phone: "", car: "", device: "" }
 };
 function normBlocks(cfg) {
   const raw = Array.isArray(cfg.blocks) ? cfg.blocks : null;
@@ -1920,12 +1898,6 @@ var HaCarCard = class extends HTMLElement {
     cfg.find.phone = typeof cfg.find.phone === "string" ? cfg.find.phone : "";
     cfg.find.car = typeof cfg.find.car === "string" ? cfg.find.car : "";
     cfg.find.device = typeof cfg.find.device === "string" ? cfg.find.device : "";
-    cfg.floor = Object.assign({}, DEFAULTS.floor, cfg.floor && typeof cfg.floor === "object" ? cfg.floor : {});
-    for (const k of ["pressure", "base", "car", "base_topic"]) {
-      cfg.floor[k] = typeof cfg.floor[k] === "string" ? cfg.floor[k].trim() : DEFAULTS.floor[k];
-    }
-    cfg.floor.base_floor = clamp(Number(cfg.floor.base_floor) || DEFAULTS.floor.base_floor, -5, 20);
-    cfg.floor.height = clamp(Number(cfg.floor.height) || DEFAULTS.floor.height, 2, 6);
     cfg.bg_image = typeof cfg.bg_image === "string" ? cfg.bg_image.trim() : "";
     if (cfg.bg_image && !bgUrl(cfg.bg_image) && !isMediaSource(cfg.bg_image)) cfg.bg_image = "";
     cfg.hold_ms = clamp(Number(cfg.hold_ms) || DEFAULTS.hold_ms, 300, 3e3);
@@ -3124,98 +3096,6 @@ var HaCarCard = class extends HTMLElement {
     const acc = Number.isFinite(raw) && raw > 0 && raw < 5e3 ? raw : null;
     return { lat, lon, acc };
   }
-  _pressureHpa(st) {
-    if (!st) return null;
-    const v = num(st);
-    if (!Number.isFinite(v) || v <= 0) return null;
-    const u = String(attrs(st, "unit_of_measurement") || "").toLowerCase();
-    if (u === "kpa") return v * 10;
-    if (u === "pa") return v / 100;
-    return v;
-  }
-  _floorLabel(n) {
-    const x = Math.round(Number(n));
-    if (!Number.isFinite(x)) return "";
-    if (x >= 1) return `F${x}`;
-    if (x === 0) return "B1";
-    return `B${1 - x}`;
-  }
-  _normFloor(v) {
-    const s = String(v == null ? "" : v).trim().toUpperCase();
-    if (!s || s === "UNKNOWN" || s === "UNAVAILABLE" || s === "NONE" || s === "NULL") return "";
-    if (/^-?\d+(\.\d+)?$/.test(s)) return this._floorLabel(Number(s));
-    if (/^F\d+$/.test(s)) return s;
-    if (/^\d+F$/.test(s)) return `F${Number(s.slice(0, -1))}`;
-    if (/^B\d+$/.test(s)) return s;
-    return s.slice(0, 5);
-  }
-  _floorData(_data) {
-    const f = this._config && this._config.floor || DEFAULTS.floor;
-    const pSt = f.pressure && this._hass ? this._hass.states[f.pressure] : null;
-    const bSt = f.base && this._hass ? this._hass.states[f.base] : null;
-    const cSt = f.car && this._hass ? this._hass.states[f.car] : null;
-    const p = this._pressureHpa(pSt);
-    const base = this._pressureHpa(bSt);
-    const height = clamp(Number(f.height) || 3, 2, 6);
-    const baseFloor = clamp(Number(f.base_floor) || 1, -5, 20);
-    let phone = null;
-    if (p != null && base != null) {
-      const h = 44330 * (1 - Math.pow(p / base, 1 / 5.255));
-      phone = baseFloor + h / height;
-    }
-    const car = cSt ? this._normFloor(cSt.state) : "";
-    return {
-      p,
-      base,
-      height,
-      baseFloor,
-      phone,
-      phoneText: phone == null ? "" : this._floorLabel(phone),
-      carText: car,
-      show: !!(p != null || car),
-      calibrated: p != null && base != null
-    };
-  }
-  _floorStrip(data) {
-    const fd = this._floorData(data);
-    if (!fd.show) return "";
-    const en = isEn(this._hass);
-    const phone = fd.phoneText || (en ? "not set" : "未校准");
-    const car = fd.carText || (en ? "not recorded" : "未记录");
-    const same = !!(fd.phoneText && fd.carText && fd.phoneText === fd.carText);
-    let tip = "";
-    if (!fd.phoneText) tip = en ? "Floor not calibrated" : "未校准";
-    else if (!fd.carText) tip = en ? "Car floor not recorded" : "车楼层未记录";
-    else if (same) tip = en ? "Floors match" : "同层";
-    else tip = en ? "You and the car are on different floors" : "你和车不在同一层";
-    return `<div class="ffloor${same ? " same" : ""}" data-floorstrip>
-      <span class="fwho"><b>${esc(phone)}</b><i>${en ? "you" : "你"}</i></span>
-      <span class="fsep">→</span>
-      <span class="fwho"><b>${esc(car)}</b><i>${en ? "car" : "车"}</i></span>
-      <span class="fex">${esc(tip)}</span>
-      <button class="fcal" data-floorcal type="button">${esc(en ? `Set ${this._floorLabel(fd.baseFloor)}` : `校准为 ${this._floorLabel(fd.baseFloor)}`)}</button>
-    </div>`;
-  }
-  _calibrateFloor() {
-    const f = this._config && this._config.floor || DEFAULTS.floor;
-    const st = f.pressure && this._hass ? this._hass.states[f.pressure] : null;
-    const p = this._pressureHpa(st);
-    if (p == null) {
-      this._showToast(isEn(this._hass) ? "No phone pressure reading" : "没有读到手机气压", "err");
-      return;
-    }
-    if (!this._hass || !this._hass.services || !this._hass.services.mqtt || !this._hass.services.mqtt.publish) {
-      this._showToast(isEn(this._hass) ? "MQTT is not available" : "未找到 MQTT 服务", "err");
-      return;
-    }
-    const topic = f.base_topic || "ha-car/floor/base";
-    const done = this._hass.callService("mqtt", "publish", { topic, payload: p.toFixed(2), retain: true });
-    if (done && typeof done.catch === "function") {
-      done.catch((err) => this._showToast((isEn(this._hass) ? "Calibration failed: " : "校准失败：") + (err && err.message ? err.message : err), "err"));
-      return;
-    }
-    this._showToast(isEn(this._hass) ? `Calibrated ${this._floorLabel(f.base_floor)}` : `已校准为 ${this._floorLabel(f.base_floor)}`, "ok");
-  }
   _findPoints(data) {
     const f = this._config && this._config.find || {};
     const phoneSt = f.phone && this._hass ? this._hass.states[f.phone] : null;
@@ -3363,7 +3243,6 @@ var HaCarCard = class extends HTMLElement {
     const bearing = this._bearing(loc.coords, p.car);
     const ok = d != null && bearing != null;
     const title = isEn(this._hass) ? "Find my car" : "找车";
-    const floorH = this._floorStrip(data);
     const en = isEn(this._hass);
     const close = `<button class="fx" data-findclose type="button" aria-label="${esc(en ? "Close" : "关闭")}">✕</button>`;
     if (!ok) {
@@ -3375,11 +3254,11 @@ var HaCarCard = class extends HTMLElement {
         return `<div class="findmodal" role="dialog" aria-label="${esc(title)}">${close}
           <div class="fmapview">${this._findMapPane()}</div>
           <div class="finfo"><div class="fhead">${icon("pin")}${esc(title)}</div>
-            <div class="fnote">${esc(note)}</div>${floorH}</div></div>`;
+            <div class="fnote">${esc(note)}</div></div></div>`;
       }
       return `<div class="findmodal" role="dialog" aria-label="${esc(title)}">${close}
         <div class="fhead">${icon("pin")}${esc(title)}</div>
-        <div class="fnote">${note}</div>${floorH}</div>`;
+        <div class="fnote">${note}</div></div>`;
     }
     return `<div class="findmodal" role="dialog" aria-label="${esc(title)}">${close}
       <div class="fmapview">${this._findMapPane()}</div>
@@ -3387,7 +3266,6 @@ var HaCarCard = class extends HTMLElement {
         <div class="fhead">${icon("pin")}${esc(title)}</div>
         <div class="fdist"><b data-fdist>${esc(this._distText(d))}</b><span>${en ? "away" : "距离"}</span></div>
         <div class="fcomp"><i class="frose" data-frose><i class="fring"></i><span class="fn" data-fn>N</span></i><i class="farrow" data-farrow>${icon("nav")}</i><span class="fdot"></span></div>
-        ${floorH}
         <div class="ffoot"><button class="fperm" data-findperm type="button">${icon("gauge")}${en ? "Calibrate compass" : "校准指南针"}</button>
           <span class="facc" data-fstat>${esc(en ? "Compass" : "指南针")} · ${esc(this._findSourceText(loc.source))}</span></div>
         <div class="fnote" data-fhint>${esc(this._findHint(loc.source))}</div>
@@ -4295,11 +4173,6 @@ var HaCarCard = class extends HTMLElement {
       this._askCompass();
       return;
     }
-    const floorCal = ev.target.closest && ev.target.closest("[data-floorcal]");
-    if (floorCal) {
-      this._calibrateFloor();
-      return;
-    }
     const findBtn = ev.target.closest && ev.target.closest("[data-find]");
     if (findBtn) {
       this._openFind();
@@ -4506,24 +4379,6 @@ var HaCarEditor = class extends HTMLElement {
       </div>
 
       <div class="sec">
-        <h3>楼层感知</h3>
-        <p class="hint">手机气压计估算所在楼层；到 1 楼后在找车面板点一次“校准为 1F”。车辆楼层会在泊车时自动记录，需先在 HA 里创建楼层辅助实体和自动化。</p>
-        <label class="f">手机气压计</label>
-        <div class="pick" id="floorpressure"></div>
-        <div class="grid2" style="margin-top:6px">
-          <label class="f">基准楼层</label>
-          <label class="f">层高（米）</label>
-          <input class="tf" id="floorbasefloor" type="number" min="-5" max="20" step="1" value="1">
-          <input class="tf" id="floorheight" type="number" min="2" max="6" step="0.1" value="3">
-        </div>
-        <label class="f" style="margin-top:6px">基准气压实体</label>
-        <div class="pick" id="floorbase"></div>
-        <label class="f" style="margin-top:6px">车楼层实体</label>
-        <div class="pick" id="floorcar"></div>
-        <p class="hint" id="floorhint"></p>
-      </div>
-
-      <div class="sec">
         <h3>模块布局</h3>
         <p class="hint">上下箭头调整顺序，开关控制显示，✕ 删除。手机从上到下排列；宽屏时车图固定在左栏，其余模块按此顺序排右栏。所有模块和模块内实体都能增删与排序。</p>
         <div id="blk" class="blklist"></div>
@@ -4654,14 +4509,6 @@ var HaCarEditor = class extends HTMLElement {
     q("hold").addEventListener("input", (e) => {
       this._config.hold_ms = Number(e.target.value);
       this.shadowRoot.getElementById("holdv").textContent = `${this._config.hold_ms} ms`;
-      this._emit();
-    });
-    q("floorbasefloor").addEventListener("input", (e) => {
-      this._config.floor = Object.assign({}, DEFAULTS.floor, this._config.floor || {}, { base_floor: Number(e.target.value) || 1 });
-      this._emit();
-    });
-    q("floorheight").addEventListener("input", (e) => {
-      this._config.floor = Object.assign({}, DEFAULTS.floor, this._config.floor || {}, { height: Number(e.target.value) || 3 });
       this._emit();
     });
     q("imgmode").addEventListener("change", (e) => {
@@ -5053,35 +4900,6 @@ var HaCarEditor = class extends HTMLElement {
     });
     this._syncPickers();
     this._syncFind();
-    this._syncFloor();
-  }
-  _syncFloor() {
-    if (!this._built) return;
-    const f = Object.assign({}, DEFAULTS.floor, this._config.floor || {});
-    const q = (id) => this.shadowRoot.getElementById(id);
-    q("floorbasefloor").value = String(f.base_floor);
-    q("floorheight").value = String(f.height);
-    const hp = q("floorpressure");
-    const hb = q("floorbase");
-    const hc = q("floorcar");
-    if (!hp || !hb || !hc) return;
-    this._mountPicker(hp, f.pressure || "", (v) => {
-      this._config.floor = Object.assign({}, DEFAULTS.floor, this._config.floor || {}, { pressure: v });
-      this._emit();
-      this._syncFloor();
-    }, "选择手机气压计实体", "sensor");
-    this._mountPicker(hb, f.base || "", (v) => {
-      this._config.floor = Object.assign({}, DEFAULTS.floor, this._config.floor || {}, { base: v });
-      this._emit();
-      this._syncFloor();
-    }, "楼层基准气压实体", "sensor");
-    this._mountPicker(hc, f.car || "", (v) => {
-      this._config.floor = Object.assign({}, DEFAULTS.floor, this._config.floor || {}, { car: v });
-      this._emit();
-      this._syncFloor();
-    }, "车楼层实体", "sensor");
-    const hint = q("floorhint");
-    if (hint) hint.textContent = !f.pressure ? "未选择手机气压计，楼层感知不会显示。" : f.base && f.car ? "楼层感知已启用：手机气压算人楼层，车楼层由泊车自动化写入。" : "请选择基准气压实体和车楼层实体。";
   }
   _syncFind() {
     if (!this._built) return;
@@ -5136,7 +4954,7 @@ var HaCarEditor = class extends HTMLElement {
 customElements.define("ha-car-editor", HaCarEditor);
 
 // src/main.js
-var VERSION = "2.7.2";
+var VERSION = "2.8.0";
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "ha-car",
