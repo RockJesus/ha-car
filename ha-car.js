@@ -1124,6 +1124,10 @@ ha-card.preview .wrap {
 
 /* sections 视图小卡片：整卡缩进栅格单元，不溢出、不压住编辑按钮 */
 :host(.gridcard) { position: relative; overflow: hidden; max-width: none; margin: 0; }
+/* 适配前先隐藏，避免整卡先以原尺寸画一帧、再被缩放/位移，视觉上「飞进来」 */
+:host(.gridcard:not(.fitready)) ha-card,
+:host(.panel:not(.fitready)) ha-card { visibility: hidden; }
+
 ha-card.gfit {
   position: absolute; left: 0; top: 0; box-sizing: border-box;
   transform: scale(var(--gscale, 1)); transform-origin: 0 0;
@@ -2082,6 +2086,7 @@ var HaCarCard = class extends HTMLElement {
   connectedCallback() {
     if (this._mountSync) return;
     this._mountSync = true;
+    setTimeout(() => this.classList.add("fitready"), 400);
     requestAnimationFrame(() => {
       if (!this._config) return;
       this._syncPanel();
@@ -2296,6 +2301,7 @@ var HaCarCard = class extends HTMLElement {
       this._card.style.removeProperty("--gscale");
       this._card.style.setProperty("--fit", String(Math.round(k2 * 1e3) / 1e3));
       this._setRadius(k2);
+      this.classList.add("fitready");
       if (wideChanged && this._hass) this._render(true);
       return;
     }
@@ -2313,6 +2319,7 @@ var HaCarCard = class extends HTMLElement {
     this._card.style.height = `${ch}px`;
     this._card.style.left = `${left}px`;
     this._card.style.top = `${top}px`;
+    this.classList.add("fitready");
     if (wideChanged && this._hass) this._render(true);
   }
   _pinHostSize() {
@@ -2383,11 +2390,13 @@ var HaCarCard = class extends HTMLElement {
       this._card.style.width = `${Math.round(w / k2)}px`;
       this._card.style.height = `${Math.round(h / k2)}px`;
       this._setRadius(k2);
+      this.classList.add("fitready");
       return;
     }
     if (!fit) return;
     const k = Math.min(w / 1440, h / 900);
     this._card.style.setProperty("--fit", String(Math.round(k * 1e3) / 1e3));
+    this.classList.add("fitready");
     this._setRadius(k);
     const designW = Math.max(1440, Math.round(w / k));
     const designH = Math.max(900, Math.round(h / k));
@@ -5188,7 +5197,7 @@ var HaCarEditor = class extends HTMLElement {
 customElements.define("ha-car-editor", HaCarEditor);
 
 // src/main.js
-var VERSION = "3.0.4";
+var VERSION = "3.0.5";
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "ha-car",

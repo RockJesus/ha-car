@@ -346,6 +346,7 @@ class HaCarCard extends HTMLElement {
   connectedCallback() {
     if (this._mountSync) return;
     this._mountSync = true;
+    setTimeout(() => this.classList.add("fitready"), 400);
     requestAnimationFrame(() => {
       if (!this._config) return;
       this._syncPanel();
@@ -587,6 +588,7 @@ class HaCarCard extends HTMLElement {
       this._card.style.removeProperty("--gscale");
       this._card.style.setProperty("--fit", String(Math.round(k * 1000) / 1000));
       this._setRadius(k);
+      this.classList.add("fitready");
       if (wideChanged && this._hass) this._render(true);
       return;
     }
@@ -605,6 +607,7 @@ class HaCarCard extends HTMLElement {
     this._card.style.height = `${ch}px`;
     this._card.style.left = `${left}px`;
     this._card.style.top = `${top}px`;
+    this.classList.add("fitready");
     if (wideChanged && this._hass) this._render(true);
   }
 
@@ -695,11 +698,13 @@ class HaCarCard extends HTMLElement {
       this._card.style.width = `${Math.round(w / k)}px`;
       this._card.style.height = `${Math.round(h / k)}px`;
       this._setRadius(k);
+      this.classList.add("fitready");
       return;
     }
     if (!fit) return;
     const k = Math.min(w / 1440, h / 900);
     this._card.style.setProperty("--fit", String(Math.round(k * 1000) / 1000));
+    this.classList.add("fitready");
     this._setRadius(k);
     // 画布按等比缩放后的容器尺寸反算：宽/高两侧都补到容器边界，
     // 避免高受限时固定画布只占满高度、左右留下大片空白。

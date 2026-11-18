@@ -771,6 +771,10 @@ ha-card.preview .wrap {
 
 /* sections 视图小卡片：整卡缩进栅格单元，不溢出、不压住编辑按钮 */
 :host(.gridcard) { position: relative; overflow: hidden; max-width: none; margin: 0; }
+/* 适配前先隐藏，避免整卡先以原尺寸画一帧、再被缩放/位移，视觉上「飞进来」 */
+:host(.gridcard:not(.fitready)) ha-card,
+:host(.panel:not(.fitready)) ha-card { visibility: hidden; }
+
 ha-card.gfit {
   position: absolute; left: 0; top: 0; box-sizing: border-box;
   transform: scale(var(--gscale, 1)); transform-origin: 0 0;
