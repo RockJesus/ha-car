@@ -1844,9 +1844,10 @@ var HaCarCard = class extends HTMLElement {
     const cfg = Object.assign({}, DEFAULTS, config || {});
     cfg.modules = Array.isArray(cfg.modules) ? cfg.modules.filter((m) => MODULES.includes(m)) : DEFAULTS.modules.slice();
     cfg.entities = cfg.entities && typeof cfg.entities === "object" ? cfg.entities : {};
-    cfg.find = Object.assign({ phone: "", car: "" }, cfg.find && typeof cfg.find === "object" ? cfg.find : {});
+    cfg.find = Object.assign({ phone: "", car: "", device: "" }, cfg.find && typeof cfg.find === "object" ? cfg.find : {});
     cfg.find.phone = typeof cfg.find.phone === "string" ? cfg.find.phone : "";
     cfg.find.car = typeof cfg.find.car === "string" ? cfg.find.car : "";
+    cfg.find.device = typeof cfg.find.device === "string" ? cfg.find.device : "";
     cfg.bg_image = typeof cfg.bg_image === "string" ? cfg.bg_image.trim() : "";
     if (cfg.bg_image && !bgUrl(cfg.bg_image) && !isMediaSource(cfg.bg_image)) cfg.bg_image = "";
     cfg.hold_ms = clamp(Number(cfg.hold_ms) || DEFAULTS.hold_ms, 300, 3e3);
@@ -3042,9 +3043,84 @@ var HaCarCard = class extends HTMLElement {
   _findPoints(data) {
     const f = this._config && this._config.find || {};
     const phoneSt = f.phone && this._hass ? this._hass.states[f.phone] : null;
+    const devSt = f.device && this._hass ? this._hass.states[f.device] : null;
     const carEnt = f.car || (data && data.id ? data.id("tracker") : "");
     const carSt = carEnt && this._hass ? this._hass.states[carEnt] : null;
-    return { phone: this._ll(phoneSt), car: this._ll(carSt), phoneSt, carSt, carEnt };
+    return {
+      phone: this._ll(phoneSt),
+      device: this._ll(devSt),
+      car: this._ll(carSt),
+      phoneSt,
+      deviceSt: devSt,
+      carSt,
+      carEnt
+    };
+  }
+  _isPhoneView() {
+    const ua = navigator.userAgent || "";
+    if (/Android|iPhone|iPad|iPod|Mobile|HarmonyOS/i.test(ua)) return true;
+    return /Macintosh/i.test(ua) && Number(navigator.maxTouchPoints) > 1;
+  }
+  _loginPoint() {
+    const user = this._hass && this._hass.user;
+    if (!user || !this._hass.states) return null;
+    for (const st of Object.values(this._hass.states)) {
+      if (!st || !String(st.entity_id || "").startsWith("person.")) continue;
+      if (st.attributes && st.attributes.user_id === user.id) return this._ll(st);
+    }
+    return null;
+  }
+  _findLocation(p) {
+    if (!this._isPhoneView() && this._netLoc) return { coords: this._netLoc, source: "network" };
+    if (p.phone) return { coords: p.phone, source: "phone" };
+    if (this._netLoc) return { coords: this._netLoc, source: "network" };
+    if (p.device) return { coords: p.device, source: "device" };
+    const person = this._loginPoint();
+    if (person) return { coords: person, source: "person" };
+    return { coords: null, source: "" };
+  }
+  _findSourceText(source) {
+    const en = isEn(this._hass);
+    if (source === "phone") return en ? "phone location" : "手机定位";
+    if (source === "network") return en ? "network location" : "网络定位";
+    if (source === "device") return en ? "logged-in device" : "登录设备";
+    if (source === "person") return en ? "logged-in user" : "登录用户";
+    return "";
+  }
+  _requestNetworkLocation() {
+    if (this._netLoc || this._netPending || !navigator.geolocation) return;
+    this._netPending = true;
+    this._netFailed = false;
+    try {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          this._netPending = false;
+          const lat = Number(pos && pos.coords && pos.coords.latitude);
+          const lon = Number(pos && pos.coords && pos.coords.longitude);
+          if (!Number.isFinite(lat) || !Number.isFinite(lon)) {
+            this._netFailed = true;
+            if (this._findOpen) this._refreshFind();
+            return;
+          }
+          this._netLoc = { lat, lon };
+          if (this._findOpen) this._refreshFind();
+          else this._render(true);
+        },
+        () => {
+          this._netPending = false;
+          this._netFailed = true;
+          if (this._findOpen) this._refreshFind();
+        },
+        { enableHighAccuracy: false, timeout: 12e3, maximumAge: 12e4 }
+      );
+    } catch {
+    }
+  }
+  _refreshFind() {
+    if (this._findOpen && this._hass) {
+      this._paint(resolve(this._hass, this._config));
+      this._updateFind();
+    }
   }
   _distanceM(a, b) {
     if (!a || !b) return null;
@@ -3094,22 +3170,31 @@ var HaCarCard = class extends HTMLElement {
   _findChip(data) {
     if (!data) return "";
     const p = this._findPoints(data);
-    const d = this._distanceM(p.phone, p.car);
+    const loc = this._findLocation(p);
+    const d = this._distanceM(loc.coords, p.car);
     const label = isEn(this._hass) ? "Find car" : "找车";
     const dist = d == null ? "" : ` ${esc(this._distText(d))}`;
+    const src = this._findSourceText(loc.source);
     const hint = isEn(this._hass) ? "Open find-car panel" : "打开找车面板";
-    return `<span class="door fchip" data-find role="button" tabindex="0" title="${esc(hint)}">${icon("pin")}<span class="addr">${label}${dist}</span></span>`;
+    const tip = src ? `${hint} · ${src}` : hint;
+    return `<span class="door fchip" data-find role="button" tabindex="0" title="${esc(tip)}">${icon("pin")}<span class="addr">${label}${dist}</span></span>`;
   }
   _findModal(data) {
     const p = this._findPoints(data);
-    const d = this._distanceM(p.phone, p.car);
-    const bearing = this._bearing(p.phone, p.car);
+    const loc = this._findLocation(p);
+    const d = this._distanceM(loc.coords, p.car);
+    const bearing = this._bearing(loc.coords, p.car);
     const ok = d != null && bearing != null;
     const title = isEn(this._hass) ? "Find my car" : "找车";
     if (!ok) {
+      const en = isEn(this._hass);
+      let note = en ? "Unable to get a location for this device or the car." : "未取得可用于定位的坐标。";
+      if (!p.car) note = en ? "The car location entity has no latitude / longitude." : "车辆定位实体没有 latitude / longitude 属性。";
+      else if (!loc.coords && this._netPending) note = en ? "Getting network location…" : "正在获取网络位置…";
+      else note = en ? "Phone, network and logged-in-device locations are unavailable. Check the find-car entities." : "手机、网络和登录设备定位均不可用，请检查找车定位实体。";
       return `<div class="findmodal" role="dialog" aria-label="${esc(title)}"><button class="fx" data-findclose type="button" aria-label="关闭">✕</button>
         <div class="fhead">${icon("pin")}${esc(title)}</div>
-        <div class="fnote">未取得手机或车辆的经纬度。请在编辑器里选择手机定位实体，并确认车辆定位实体带 latitude / longitude 属性。</div></div>`;
+        <div class="fnote">${note}</div></div>`;
     }
     return `<div class="findmodal" role="dialog" aria-label="${esc(title)}"><button class="fx" data-findclose type="button" aria-label="关闭">✕</button>
       <div class="fhead">${icon("pin")}${esc(title)}</div>
@@ -3117,8 +3202,8 @@ var HaCarCard = class extends HTMLElement {
       <div class="fcomp"><i class="fring"></i><i class="farrow" data-farrow>${icon("nav")}</i><span class="fdot"></span></div>
       <div class="fdir" data-fdir>${esc(this._dirText(bearing, null))}</div>
       <div class="ffoot"><button class="fperm" data-findperm type="button">${icon("gauge")}校准指南针</button>
-        <span class="facc" data-fstat>${esc(isEn(this._hass) ? "GPS bearing · compass" : "车辆方位 · 手机指南针")}</span></div>
-      <div class="fnote">${isEn(this._hass) ? "Hold the phone flat and point the top away from you." : "手机尽量水平，顶部朝向正前方；箭头会随手机转向。"}</div></div>`;
+        <span class="facc" data-fstat>${esc(isEn(this._hass) ? "GPS bearing · compass" : "车辆方位 · 手机指南针")} · ${esc(this._findSourceText(loc.source))}</span></div>
+      <div class="fnote">${esc(loc.source === "phone" ? isEn(this._hass) ? "Hold the phone flat and point the top away from you." : "手机尽量水平，顶部朝向正前方；箭头会随手机转向。" : isEn(this._hass) ? "Using this device/network location; the arrow shows the car's absolute bearing. Phone compass is only available on mobile." : "当前使用本机/网络定位，箭头显示车辆绝对方位；手机指南针仅在手机端可用。")}</div></div>`;
   }
   _dirText(bearing, heading) {
     const en = isEn(this._hass);
@@ -3196,8 +3281,9 @@ var HaCarCard = class extends HTMLElement {
   _updateFind() {
     if (!this._findOpen || !this._findData) return;
     const p = this._findPoints(this._findData);
-    const d = this._distanceM(p.phone, p.car);
-    const bearing = this._bearing(p.phone, p.car);
+    const loc = this._findLocation(p);
+    const d = this._distanceM(loc.coords, p.car);
+    const bearing = this._bearing(loc.coords, p.car);
     if (d == null || bearing == null) return;
     const root = this._card;
     const modals = root ? root.querySelectorAll(".findmodal") : [];
@@ -3213,9 +3299,9 @@ var HaCarCard = class extends HTMLElement {
     if (dir) dir.textContent = this._dirText(bearing, this._heading);
     if (stat) {
       const en = isEn(this._hass);
-      if (this._heading == null) stat.textContent = en ? "Compass not active" : "指南针未启用";
-      else if (this._headingSrc === "gps") stat.textContent = en ? `GPS heading ${Math.round(this._heading)}°` : `移动方向 ${Math.round(this._heading)}°`;
-      else stat.textContent = en ? `Compass ${Math.round(this._heading)}°` : `指南针 ${Math.round(this._heading)}°`;
+      const src = this._findSourceText(loc.source);
+      const base = this._heading == null ? en ? "Compass not active" : "指南针未启用" : this._headingSrc === "gps" ? en ? `GPS heading ${Math.round(this._heading)}°` : `移动方向 ${Math.round(this._heading)}°` : en ? `Compass ${Math.round(this._heading)}°` : `指南针 ${Math.round(this._heading)}°`;
+      stat.textContent = src ? `${base} · ${src}` : base;
     }
   }
   _smoothCompass(raw) {
@@ -3294,6 +3380,8 @@ var HaCarCard = class extends HTMLElement {
     this._compassGot = false;
     this._lastOrientEv = null;
     this._sig = "";
+    const pts = this._findData ? this._findPoints(this._findData) : { phone: null };
+    if (!this._isPhoneView() || !pts.phone) this._requestNetworkLocation();
     if (this._hass) this._paint(resolve(this._hass, this._config));
     else this._render(true);
   }
@@ -4100,9 +4188,11 @@ var HaCarEditor = class extends HTMLElement {
 
       <div class="sec">
         <h3>找车引导</h3>
-        <p class="hint">选择手机与车辆的定位实体。手机定位需带 latitude / longitude，车距与罗盘方向都按实时坐标计算；手机指南针需在找车面板里点一次“校准指南针”授权。</p>
+        <p class="hint">选择手机、登录设备与车辆的定位实体。手机定位需带 latitude / longitude；未取得手机坐标时会尝试浏览器网络定位，再退回登录设备定位。手机指南针需在找车面板里点一次“校准指南针”授权。</p>
         <label class="f">手机定位</label>
         <div class="pick" id="findphone"></div>
+        <label class="f" style="margin-top:6px">登录设备定位（兜底）</label>
+        <div class="pick" id="finddevice"></div>
         <label class="f" style="margin-top:6px">车辆定位</label>
         <div class="pick" id="findcar"></div>
         <p class="hint" id="findhint"></p>
@@ -4633,22 +4723,28 @@ var HaCarEditor = class extends HTMLElement {
   }
   _syncFind() {
     if (!this._built) return;
-    const f = this._config.find || { phone: "", car: "" };
+    const f = this._config.find || { phone: "", car: "", device: "" };
     const hp = this.shadowRoot.getElementById("findphone");
+    const hd = this.shadowRoot.getElementById("finddevice");
     const hc = this.shadowRoot.getElementById("findcar");
-    if (!hp || !hc) return;
+    if (!hp || !hd || !hc) return;
     this._mountPicker(hp, f.phone || "", (v) => {
-      this._config.find = Object.assign({ phone: "", car: "" }, this._config.find || {}, { phone: v });
+      this._config.find = Object.assign({ phone: "", car: "", device: "" }, this._config.find || {}, { phone: v });
       this._emit();
       this._syncFind();
     }, "选择手机定位实体", "device_tracker");
+    this._mountPicker(hd, f.device || "", (v) => {
+      this._config.find = Object.assign({ phone: "", car: "", device: "" }, this._config.find || {}, { device: v });
+      this._emit();
+      this._syncFind();
+    }, "选择登录设备定位实体（兜底）", "device_tracker");
     this._mountPicker(hc, f.car || "", (v) => {
-      this._config.find = Object.assign({ phone: "", car: "" }, this._config.find || {}, { car: v });
+      this._config.find = Object.assign({ phone: "", car: "", device: "" }, this._config.find || {}, { car: v });
       this._emit();
       this._syncFind();
     }, "留空自动使用车辆定位", "device_tracker");
     const hint = this.shadowRoot.getElementById("findhint");
-    if (hint) hint.textContent = f.phone ? "已启用：定位行会显示“找车”胶囊，点它打开找车罗盘。" : "未选择手机定位，卡片不会显示人车距离。";
+    if (hint) hint.textContent = f.phone ? "已启用：定位行会显示“找车”胶囊，点它打开找车罗盘。" : f.device ? "未选择手机定位，将使用登录设备或浏览器网络定位兜底。" : "未选择手机定位，将尝试浏览器网络定位兜底。";
   }
   _emit() {
     const cfg = Object.assign({}, this._config);
@@ -4678,7 +4774,7 @@ var HaCarEditor = class extends HTMLElement {
 customElements.define("ha-car-editor", HaCarEditor);
 
 // src/main.js
-var VERSION = "2.4.3";
+var VERSION = "2.4.4";
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "ha-car",

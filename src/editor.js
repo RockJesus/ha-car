@@ -130,9 +130,11 @@ class HaCarEditor extends HTMLElement {
 
       <div class="sec">
         <h3>找车引导</h3>
-        <p class="hint">选择手机与车辆的定位实体。手机定位需带 latitude / longitude，车距与罗盘方向都按实时坐标计算；手机指南针需在找车面板里点一次“校准指南针”授权。</p>
+        <p class="hint">选择手机、登录设备与车辆的定位实体。手机定位需带 latitude / longitude；未取得手机坐标时会尝试浏览器网络定位，再退回登录设备定位。手机指南针需在找车面板里点一次“校准指南针”授权。</p>
         <label class="f">手机定位</label>
         <div class="pick" id="findphone"></div>
+        <label class="f" style="margin-top:6px">登录设备定位（兜底）</label>
+        <div class="pick" id="finddevice"></div>
         <label class="f" style="margin-top:6px">车辆定位</label>
         <div class="pick" id="findcar"></div>
         <p class="hint" id="findhint"></p>
@@ -706,22 +708,28 @@ class HaCarEditor extends HTMLElement {
 
   _syncFind() {
     if (!this._built) return;
-    const f = this._config.find || { phone: "", car: "" };
+    const f = this._config.find || { phone: "", car: "", device: "" };
     const hp = this.shadowRoot.getElementById("findphone");
+    const hd = this.shadowRoot.getElementById("finddevice");
     const hc = this.shadowRoot.getElementById("findcar");
-    if (!hp || !hc) return;
+    if (!hp || !hd || !hc) return;
     this._mountPicker(hp, f.phone || "", (v) => {
-      this._config.find = Object.assign({ phone: "", car: "" }, this._config.find || {}, { phone: v });
+      this._config.find = Object.assign({ phone: "", car: "", device: "" }, this._config.find || {}, { phone: v });
       this._emit();
       this._syncFind();
     }, "选择手机定位实体", "device_tracker");
+    this._mountPicker(hd, f.device || "", (v) => {
+      this._config.find = Object.assign({ phone: "", car: "", device: "" }, this._config.find || {}, { device: v });
+      this._emit();
+      this._syncFind();
+    }, "选择登录设备定位实体（兜底）", "device_tracker");
     this._mountPicker(hc, f.car || "", (v) => {
-      this._config.find = Object.assign({ phone: "", car: "" }, this._config.find || {}, { car: v });
+      this._config.find = Object.assign({ phone: "", car: "", device: "" }, this._config.find || {}, { car: v });
       this._emit();
       this._syncFind();
     }, "留空自动使用车辆定位", "device_tracker");
     const hint = this.shadowRoot.getElementById("findhint");
-    if (hint) hint.textContent = f.phone ? "已启用：定位行会显示“找车”胶囊，点它打开找车罗盘。" : "未选择手机定位，卡片不会显示人车距离。";
+    if (hint) hint.textContent = f.phone ? "已启用：定位行会显示“找车”胶囊，点它打开找车罗盘。" : (f.device ? "未选择手机定位，将使用登录设备或浏览器网络定位兜底。" : "未选择手机定位，将尝试浏览器网络定位兜底。");
   }
 
   _emit() {
