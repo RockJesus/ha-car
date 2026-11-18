@@ -539,7 +539,7 @@ h1 { margin: 0; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-s
 .node { position: absolute; left: 50%; top: 50%; width: 7px; height: 7px; margin: -3.5px 0 0 -3.5px;
   transform: translate(-50%, -50%);
   border-radius: 50%; background: #9ef4ff;
-  box-shadow: 0 0 6px 1px rgba(var(--hc-a,55,214,232),.9), 0 0 16px 5px rgba(var(--hc-a,55,214,232),.35);
+  box-shadow: 0 0 4px 0 rgba(var(--hc-a,55,214,232),.75), 0 0 9px 2px rgba(var(--hc-a,55,214,232),.22);
   animation: hc-node 3.2s ease-in-out infinite; }
 .node.n1 { top: 0; animation-delay: 0s; }
 .node.n2 { top: 50%; left: 100%; animation-delay: .8s; }
@@ -5068,7 +5068,7 @@ var HaCarEditor = class extends HTMLElement {
 customElements.define("ha-car-editor", HaCarEditor);
 
 // src/main.js
-var VERSION = "2.8.4";
+var VERSION = "2.8.5";
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "ha-car",
