@@ -1661,30 +1661,22 @@ class HaCarCard extends HTMLElement {
       // 引擎状态胶囊：贴在圆环左上角的圈外，跟着圆圈一起自适应
       const enp = this._wrap.querySelector(".enp");
       if (enp) {
-        const cx0 = (ringL + ringR) / 2;
-        const cy0 = (ringT + ringB) / 2;
         const rr = (ringR - ringL) / 2;
         // 胶囊尺寸跟着圆环大小缩放（窄屏收、宽屏略放大）
-        const kp = Math.max(0.82, Math.min(1.1, rr / 190));
+        const kp0 = Math.max(0.82, Math.min(1.1, rr / 190));
+        // 胶囊固定放在圆环左外侧的留白里，右边缘不越过圆环左沿，绝不压到圆圈；
+        // 左侧留白不够时按可用宽度等比缩小（最多缩到 0.62）
+        enp.style.transform = "translate(-50%, -50%)";
+        const baseW = enp.offsetWidth;
+        const gapLeft = Math.max(60, ringL - 12);
+        let kp = Math.min(kp0, Math.max(0.62, (gapLeft - 4) / baseW));
+        kp = Math.round(kp * 1000) / 1000;
         enp.style.transform = `translate(-50%, -50%) scale(${kp.toFixed(3)})`;
-        const w = enp.offsetWidth * kp, h = enp.offsetHeight * kp;
-        let ex = cx0 - rr * 0.78;
-        let ey = cy0 - rr * 0.78;
-        // 两行胶囊整套落在圆环外：右下角到圆心距离 ≥ 半径 + 8
-        for (let pass = 0; pass < 3; pass++) {
-          const dx = ex + w / 2 - cx0;
-          const dy = ey + h / 2 - cy0;
-          const dd = Math.hypot(dx, dy) || 1;
-          const target = rr + 8;
-          if (dd < target) {
-            const lam = target / dd;
-            ex = cx0 + dx * lam - w / 2;
-            ey = cy0 + dy * lam - h / 2;
-          }
-        }
-        // 不超出 hero（否则会被裁切）
-        ex = Math.max(6 - img.offsetLeft + w / 2, Math.min(hero.clientWidth - 6 - w / 2 - img.offsetLeft, ex));
-        ey = Math.max(6 - (img.offsetTop + shift) + h / 2, ey);
+        const w = baseW * kp, h = enp.offsetHeight * kp;
+        const offX = img.offsetLeft, offY = img.offsetTop + shift;
+        const ex = Math.max(6 - offX + w / 2, ringL - 7 - w / 2);
+        let ey = ringT + h / 2 + Math.max(6, Math.round(rr * 0.1));
+        ey = Math.max(6 - offY + h / 2, Math.min(ringB - h / 2, ey));
         enp.style.left = `${Math.round(ex)}px`;
         enp.style.top = `${Math.round(ey)}px`;
         // 别压到主驾卡片

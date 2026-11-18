@@ -3264,27 +3264,19 @@ var HaCarCard = class extends HTMLElement {
       });
       const enp = this._wrap.querySelector(".enp");
       if (enp) {
-        const cx0 = (ringL + ringR) / 2;
-        const cy0 = (ringT + ringB) / 2;
         const rr = (ringR - ringL) / 2;
-        const kp = Math.max(0.82, Math.min(1.1, rr / 190));
+        const kp0 = Math.max(0.82, Math.min(1.1, rr / 190));
+        enp.style.transform = "translate(-50%, -50%)";
+        const baseW = enp.offsetWidth;
+        const gapLeft = Math.max(60, ringL - 12);
+        let kp = Math.min(kp0, Math.max(0.62, (gapLeft - 4) / baseW));
+        kp = Math.round(kp * 1e3) / 1e3;
         enp.style.transform = `translate(-50%, -50%) scale(${kp.toFixed(3)})`;
-        const w = enp.offsetWidth * kp, h = enp.offsetHeight * kp;
-        let ex = cx0 - rr * 0.78;
-        let ey = cy0 - rr * 0.78;
-        for (let pass = 0; pass < 3; pass++) {
-          const dx = ex + w / 2 - cx0;
-          const dy = ey + h / 2 - cy0;
-          const dd = Math.hypot(dx, dy) || 1;
-          const target = rr + 8;
-          if (dd < target) {
-            const lam = target / dd;
-            ex = cx0 + dx * lam - w / 2;
-            ey = cy0 + dy * lam - h / 2;
-          }
-        }
-        ex = Math.max(6 - img.offsetLeft + w / 2, Math.min(hero.clientWidth - 6 - w / 2 - img.offsetLeft, ex));
-        ey = Math.max(6 - (img.offsetTop + shift) + h / 2, ey);
+        const w = baseW * kp, h = enp.offsetHeight * kp;
+        const offX = img.offsetLeft, offY = img.offsetTop + shift;
+        const ex = Math.max(6 - offX + w / 2, ringL - 7 - w / 2);
+        let ey = ringT + h / 2 + Math.max(6, Math.round(rr * 0.1));
+        ey = Math.max(6 - offY + h / 2, Math.min(ringB - h / 2, ey));
         enp.style.left = `${Math.round(ex)}px`;
         enp.style.top = `${Math.round(ey)}px`;
         const first = this._wrap.querySelector(".loc.lf");
@@ -5350,7 +5342,7 @@ var HaCarEditor = class extends HTMLElement {
 customElements.define("ha-car-editor", HaCarEditor);
 
 // src/main.js
-var VERSION = "3.4.0";
+var VERSION = "3.4.1";
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "ha-car",
