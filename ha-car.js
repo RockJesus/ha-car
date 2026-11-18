@@ -3095,9 +3095,10 @@ var HaCarCard = class extends HTMLElement {
     if (!data) return "";
     const p = this._findPoints(data);
     const d = this._distanceM(p.phone, p.car);
-    if (d == null) return "";
     const label = isEn(this._hass) ? "Find car" : "找车";
-    return `<span class="door fchip" data-find role="button" tabindex="0">${icon("pin")}<span class="addr">${label} ${esc(this._distText(d))}</span></span>`;
+    const dist = d == null ? "" : ` ${esc(this._distText(d))}`;
+    const hint = isEn(this._hass) ? "Open find-car panel" : "打开找车面板";
+    return `<span class="door fchip" data-find role="button" tabindex="0" title="${esc(hint)}">${icon("pin")}<span class="addr">${label}${dist}</span></span>`;
   }
   _findModal(data) {
     const p = this._findPoints(data);
@@ -4677,7 +4678,7 @@ var HaCarEditor = class extends HTMLElement {
 customElements.define("ha-car-editor", HaCarEditor);
 
 // src/main.js
-var VERSION = "2.4.2";
+var VERSION = "2.4.3";
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "ha-car",
