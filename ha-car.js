@@ -2282,10 +2282,7 @@ var HaCarCard = class extends HTMLElement {
     const visH = this.clientHeight;
     const w = visW && visW < bw ? visW : bw;
     const h = visH && visH < bh ? visH : bh;
-    const editorPv = this._inCardEditor();
-    const sw = window.innerWidth || 0;
-    const sh = window.innerHeight || 0;
-    const wide = editorPv ? sw >= sh * 1.02 : w / h >= 1.15;
+    const wide = w / h >= 1.15;
     const wideChanged = wide !== this._wide;
     this._wide = wide;
     if (wide) {
@@ -5191,7 +5188,7 @@ var HaCarEditor = class extends HTMLElement {
 customElements.define("ha-car-editor", HaCarEditor);
 
 // src/main.js
-var VERSION = "3.0.3";
+var VERSION = "3.0.4";
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "ha-car",

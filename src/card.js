@@ -572,10 +572,8 @@ class HaCarCard extends HTMLElement {
     const h = visH && visH < bh ? visH : bh;
     // 宽格子直接复用面板的 1440×900 双栏设计稿（同一套左右分栏与字号），窄格子走单栏缩放
     // 配置弹窗里的预览：横屏编辑给横版预览、竖屏编辑给竖版预览（按屏幕方向而不是预览小框比例）
-    const editorPv = this._inCardEditor();
-    const sw = window.innerWidth || 0;
-    const sh = window.innerHeight || 0;
-    const wide = editorPv ? sw >= sh * 1.02 : w / h >= 1.15;
+    // 方向按“预览框自身”的宽高比决定：编辑弹窗里竖长的一列要用竖版，否则会被缩成很小一块
+    const wide = w / h >= 1.15;
     const wideChanged = wide !== this._wide;
     this._wide = wide;
     if (wide) {
