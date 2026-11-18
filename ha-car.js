@@ -1265,6 +1265,8 @@ ha-card.panel.fit .pills { width: 100%; max-width: none; }
   background: rgba(9,18,26,.84); border: 1px solid rgba(140,170,190,.22); color: #a9b6bf;
   letter-spacing: .08em; white-space: nowrap; backdrop-filter: blur(8px);
   box-shadow: 0 4px 14px rgba(0,0,0,.35); pointer-events: none; }
+.enp .rsleft { display: block; margin-top: 1px; font-size: 10.5px; line-height: 1;
+  font-variant-numeric: tabular-nums; letter-spacing: .4px; opacity: .92; color: currentColor; }
 .enp .row { display: flex; align-items: center; gap: 6px; }
 .enp span { font-size: 10px; opacity: .7; letter-spacing: .14em; }
 .enp b { font-size: 13px; font-weight: 600; color: #cfd9e0; letter-spacing: .04em; line-height: 1.1; }
@@ -2852,7 +2854,7 @@ var HaCarCard = class extends HTMLElement {
     const chgNow = chargingNow(s("chg_status"));
     const onlineRaw = text(s("online")).toLowerCase();
     const offline = onlineRaw ? /offline|离线|not[ _-]?online|不可用/.test(onlineRaw) : false;
-    const running = (() => {
+    let running = (() => {
       const rs = text(s("remote_start")).toLowerCase();
       if (rs && !rs.includes("未") && !rs.includes("not")) {
         if (rs.includes("已") || rs.includes("启动中") || rs.includes("running") || rs.includes("started")) return true;
@@ -2862,6 +2864,7 @@ var HaCarCard = class extends HTMLElement {
       const v = String(st.state).toLowerCase();
       return v === "on" || v.includes("已启动") || v.includes("running") || v.includes("启动中");
     })();
+    if (this._rsEndMs(data)) running = true;
     const title = cfg.title || data.name || text(s("nickname")) || (isEn(this._hass) ? "My car" : "我的座驾");
     const plate = text(s("plate"));
     const status = offline ? { cls: "bad", label: t.offline } : lockNorm === "unlocked" ? { cls: "bad", label: t.unlocked } : lockNorm === "locked" ? { cls: "ok", label: t.locked } : { cls: "", label: t.locking };
@@ -2961,7 +2964,49 @@ var HaCarCard = class extends HTMLElement {
     } else {
       inner = blocks.map((b) => b.html).join("");
     }
+    if (this._rsEndAt && !this._rsTimer) {
+      this._rsTimer = setInterval(() => this._rsTick(), 1e3);
+    } else if (!this._rsEndAt && this._rsTimer) {
+      clearInterval(this._rsTimer);
+      this._rsTimer = 0;
+    }
     return `${head}<div class="blocks">${inner}</div>${this._toast ? this._toastHtml() : ""}`;
+  }
+  // 远程启动倒计时：用「距离自动熄火时间」实体的 running / duration_minutes / start_time
+  // 算出结束时间戳，卡片每秒本地递减，不用等云端刷新
+  _rsEndMs(data) {
+    const st = data && data.get ? data.get("auto_off") : null;
+    if (!st) return null;
+    const a = st.attributes || {};
+    const raw = String(st.state);
+    if (a.running !== true && !(/^\d+(\.\d+)?$/.test(raw) && Number(raw) > 0)) return null;
+    const dur = Number(a.duration_minutes) || Number(raw) || 0;
+    const startRaw = a.start_time || a.timestamp;
+    const start = startRaw ? Date.parse(startRaw) : NaN;
+    if (Number.isFinite(start)) return start + dur * 6e4;
+    if (Number.isFinite(dur) && dur > 0) return Date.now() + Number(raw) * 6e4;
+    return null;
+  }
+  _rsLeftText(endMs) {
+    const left = Math.max(0, Math.round((endMs - Date.now()) / 1e3));
+    const mm = Math.floor(left / 60);
+    const ss = left % 60;
+    return `${String(mm).padStart(2, "0")}:${String(ss).padStart(2, "0")}`;
+  }
+  _rsTick() {
+    const nodes = this.shadowRoot ? this.shadowRoot.querySelectorAll("[data-rsend]") : [];
+    for (const n of nodes) {
+      const end = Number(n.getAttribute("data-rsend"));
+      if (!Number.isFinite(end)) continue;
+      const txt = this._rsLeftText(end);
+      if (n.textContent !== txt) n.textContent = txt;
+    }
+    const end2 = this._rsEndAt;
+    if (end2 && Date.now() > end2 + 8e3) {
+      clearInterval(this._rsTimer);
+      this._rsTimer = 0;
+      this._rsEndAt = 0;
+    }
   }
   // 车图 + 同心轨道 + 四枚发光节点（无图时落回圆形占位）
   _hero(imgUrl, fbUrl, overlay, running) {
@@ -3011,8 +3056,10 @@ var HaCarCard = class extends HTMLElement {
     const engSt = doors ? engItem ? this._itemState(engItem, data) : data.get("sw_engine") || data.get("remote_start") : null;
     if (engSt) {
       const engEnt = engItem ? this._itemEnt(engItem, data) : data.id("sw_engine") || data.id("remote_start") || data.id("ignition");
-      const engTxt = engItem ? String(engSt.state) : running ? zh ? "已启动" : "Running" : zh ? "已熄火" : "Off";
-      out.push(`<div class="enp${running ? " on" : ""}"${engEnt ? ` data-more="${esc(engEnt)}"` : ""}><div class="row"><i class="ed"></i><span>${zh ? "引擎" : "ENGINE"}</span></div><b>${esc(engTxt)}</b></div>`);
+      const rsEnd = this._rsEndMs(data);
+      const engTxt = rsEnd ? zh ? "远程启动" : "Remote" : engItem ? String(engSt.state) : running ? zh ? "已启动" : "Running" : zh ? "已熄火" : "Off";
+      if (rsEnd) this._rsEndAt = rsEnd;
+      out.push(`<div class="enp${running ? " on" : ""}"${engEnt ? ` data-more="${esc(engEnt)}"` : ""}><div class="row"><i class="ed"></i><span>${zh ? "引擎" : "ENGINE"}</span></div><b>${esc(engTxt)}</b>` + (rsEnd ? `<i class="rsleft" data-rsend="${Math.round(rsEnd)}">${this._rsLeftText(rsEnd)}</i>` : "") + `</div>`);
     }
     if (!doors) return { inner: out.join(""), edge: "" };
     const quads = [
@@ -5303,7 +5350,7 @@ var HaCarEditor = class extends HTMLElement {
 customElements.define("ha-car-editor", HaCarEditor);
 
 // src/main.js
-var VERSION = "3.3.1";
+var VERSION = "3.4.0";
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "ha-car",

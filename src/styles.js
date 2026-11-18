@@ -912,6 +912,8 @@ ha-card.panel.fit .pills { width: 100%; max-width: none; }
   background: rgba(9,18,26,.84); border: 1px solid rgba(140,170,190,.22); color: #a9b6bf;
   letter-spacing: .08em; white-space: nowrap; backdrop-filter: blur(8px);
   box-shadow: 0 4px 14px rgba(0,0,0,.35); pointer-events: none; }
+.enp .rsleft { display: block; margin-top: 1px; font-size: 10.5px; line-height: 1;
+  font-variant-numeric: tabular-nums; letter-spacing: .4px; opacity: .92; color: currentColor; }
 .enp .row { display: flex; align-items: center; gap: 6px; }
 .enp span { font-size: 10px; opacity: .7; letter-spacing: .14em; }
 .enp b { font-size: 13px; font-weight: 600; color: #cfd9e0; letter-spacing: .04em; line-height: 1.1; }
