@@ -338,14 +338,14 @@ class HaCarCard extends HTMLElement {
     });
   }
 
+  // 瀑布流用 50px 为单位估算高度；实测整卡 full≈844-876px、compact≈580px
   getCardSize() {
-    return this._config && this._config.layout === "compact" ? 4 : 7;
+    return this._config && this._config.layout === "compact" ? 12 : 17;
   }
 
+  // 分区视图里高度交给内容（rows: "auto"），避免固定行数比内容矮导致下半截被裁
   getGridOptions() {
-    const rows = this.getCardSize();
-    // 允许把格子拉得更高：行数上限放宽到 24（编辑面板里的竖向滑块跟着变长），最小 4 行保证不挤成一团
-    return { columns: 12, rows, min_columns: 6, min_rows: 4, max_rows: 24 };
+    return { columns: 12, min_columns: 6, rows: "auto" };
   }
 
   getLayoutOptions() {

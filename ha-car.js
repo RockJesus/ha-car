@@ -2049,12 +2049,13 @@ var HaCarCard = class extends HTMLElement {
       this._render(true);
     });
   }
+  // 瀑布流用 50px 为单位估算高度；实测整卡 full≈844-876px、compact≈580px
   getCardSize() {
-    return this._config && this._config.layout === "compact" ? 4 : 7;
+    return this._config && this._config.layout === "compact" ? 12 : 17;
   }
+  // 分区视图里高度交给内容（rows: "auto"），避免固定行数比内容矮导致下半截被裁
   getGridOptions() {
-    const rows = this.getCardSize();
-    return { columns: 12, rows, min_columns: 6, min_rows: 4, max_rows: 24 };
+    return { columns: 12, min_columns: 6, rows: "auto" };
   }
   getLayoutOptions() {
     const g = this.getGridOptions();
@@ -5144,7 +5145,7 @@ var HaCarEditor = class extends HTMLElement {
 customElements.define("ha-car-editor", HaCarEditor);
 
 // src/main.js
-var VERSION = "2.9.7";
+var VERSION = "2.9.8";
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "ha-car",
