@@ -1921,9 +1921,9 @@ var DEFAULTS = {
   confirm: CONFIRMABLE.slice(),
   hold_ms: 2e3,
   accent: "#37d6e8",
-  theme: "midnight",
-  bg_style: "radar",
-  chip_style: "glass",
+  theme: "cyber",
+  bg_style: "glass",
+  chip_style: "liquid",
   show_plate: true,
   privacy: false,
   image: "auto",
@@ -5153,7 +5153,7 @@ var HaCarEditor = class extends HTMLElement {
 customElements.define("ha-car-editor", HaCarEditor);
 
 // src/main.js
-var VERSION = "2.9.2";
+var VERSION = "2.9.3";
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "ha-car",
