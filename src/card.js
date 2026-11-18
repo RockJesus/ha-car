@@ -1653,7 +1653,9 @@ class HaCarCard extends HTMLElement {
     const lat = Number(st.attributes.latitude);
     const lon = Number(st.attributes.longitude);
     if (!Number.isFinite(lat) || !Number.isFinite(lon)) return null;
-    return { lat, lon };
+    const raw = Number(st.attributes.gps_accuracy != null ? st.attributes.gps_accuracy : st.attributes.accuracy);
+    const acc = Number.isFinite(raw) && raw > 0 && raw < 5000 ? raw : null;
+    return { lat, lon, acc };
   }
 
   _pressureHpa(st) {
@@ -1823,7 +1825,8 @@ class HaCarCard extends HTMLElement {
             if (this._findOpen) this._refreshFind();
             return;
           }
-          this._netLoc = { lat, lon };
+          const acc = Number(pos && pos.coords && pos.coords.accuracy);
+          this._netLoc = { lat, lon, acc: Number.isFinite(acc) && acc > 0 ? acc : null };
           if (this._findOpen) this._refreshFind();
           else this._render(true);
         },
@@ -1924,50 +1927,49 @@ class HaCarCard extends HTMLElement {
       if (p.car) {
         // 有车坐标时仍给一张只标车的图，比纯文字更好定位
         return `<div class="findmodal" role="dialog" aria-label="${esc(title)}">${close}
-          <div class="fhead">${icon("pin")}${esc(title)}</div>${this._findMapPane()}
-          <div class="fnote">${esc(note)}</div>${floorH}</div>`;
+          <div class="fmapview">${this._findMapPane()}</div>
+          <div class="finfo"><div class="fhead">${icon("pin")}${esc(title)}</div>
+            <div class="fnote">${esc(note)}</div>${floorH}</div></div>`;
       }
       return `<div class="findmodal" role="dialog" aria-label="${esc(title)}">${close}
         <div class="fhead">${icon("pin")}${esc(title)}</div>
         <div class="fnote">${note}</div>${floorH}</div>`;
     }
     return `<div class="findmodal" role="dialog" aria-label="${esc(title)}">${close}
-      <div class="fhead">${icon("pin")}${esc(title)}</div>
-      <div class="fdist"><b data-fdist>${esc(this._distText(d))}</b><span>${en ? "away" : "距离"}</span></div>
-      ${this._findMapPane()}
-      <div class="fview fcompview">
-        <div class="fcomp"><i class="fring"></i><i class="farrow" data-farrow>${icon("nav")}</i><span class="fdot"></span></div>
-        <div class="fdir" data-fdir>${esc(this._dirText(bearing, null))}</div>
-      </div>
-      ${floorH}
-      <div class="ffoot"><button class="fperm" data-findperm type="button">${icon("gauge")}${en ? "Calibrate compass" : "校准指南针"}</button>
-        <span class="facc" data-fstat>${esc(en ? "GPS bearing · compass" : "车辆方位 · 手机指南针")} · ${esc(this._findSourceText(loc.source))}</span></div>
-      <div class="fnote" data-fhint>${esc(this._findHint(loc.source))}</div></div>`;
+      <div class="fmapview">${this._findMapPane()}</div>
+      <div class="finfo">
+        <div class="fhead">${icon("pin")}${esc(title)}</div>
+        <div class="fdist"><b data-fdist>${esc(this._distText(d))}</b><span>${en ? "away" : "距离"}</span></div>
+        <div class="fcomp"><i class="frose" data-frose><i class="fring"></i><span class="fn" data-fn>N</span></i><i class="farrow" data-farrow>${icon("nav")}</i><span class="fdot"></span></div>
+        ${floorH}
+        <div class="ffoot"><button class="fperm" data-findperm type="button">${icon("gauge")}${en ? "Calibrate compass" : "校准指南针"}</button>
+          <span class="facc" data-fstat>${esc(en ? "Compass" : "指南针")} · ${esc(this._findSourceText(loc.source))}</span></div>
+        <div class="fnote" data-fhint>${esc(this._findHint(loc.source))}</div>
+      </div></div>`;
   }
 
   _findHint(src) {
     const en = isEn(this._hass);
     if (src === "phone") {
       return en
-        ? "Map tiles from AutoNavi, loaded only while this panel is open; the line is straight-line distance. Hold the phone flat so the compass arrow follows it."
-        : "地图瓦片来自高德，只在打开时加载，连线是直线距离；罗盘箭头跟随手机朝向，手机尽量水平。";
+        ? "Map tiles from AutoNavi, loaded only while this panel is open; the line is straight-line distance. The ring turns with the phone so N always points north."
+        : "地图瓦片来自高德，只在打开时加载，连线是直线距离；罗盘环随手机转动，N 始终指向正北。";
     }
     return en
-      ? "Map tiles from AutoNavi, loaded only while this panel is open; the line is straight-line distance. Compass shows the car's absolute bearing on this device."
-      : "地图瓦片来自高德，只在打开时加载，连线是直线距离；当前用本机/网络定位，箭头显示车辆绝对方位。";
+      ? "Map tiles from AutoNavi, loaded only while this panel is open; the line is straight-line distance. North is up; the arrow points at the car."
+      : "地图瓦片来自高德，只在打开时加载，连线是直线距离；北向朝上，箭头指向车辆。";
   }
 
   _findMapPane() {
-    return `<div class="fview fmapview">
-      <div class="fmap" data-fmap>
+    return `<div class="fmap" data-fmap>
         <div class="ftiles" data-ftiles></div>
         <svg class="flink" data-flink aria-hidden="true"><line data-fline x1="0" y1="0" x2="0" y2="0"></line></svg>
+        <span class="faccring" data-faccring hidden></span>
         <span class="fpin you" data-fyou hidden></span>
         <span class="fpin car" data-fcar hidden>${icon("car")}</span>
         <span class="fattr">© 高德地图</span>
-      </div>
-      <div class="fmapnote" data-fmapnote></div>
-    </div>`;
+        <div class="fmapnote" data-fmapnote></div>
+      </div>`;
   }
 
   // 高德栅格瓦片（webrd 子域，无需 Key），只按两点取景静态绘制，交互仍交给卡片本身
@@ -1994,13 +1996,14 @@ class HaCarCard extends HTMLElement {
       const y = (0.5 - Math.log((1 + s) / (1 - s)) / (4 * Math.PI)) * n;
       return { x, y };
     };
-    let z = 16;
+    let z = 18;
     if (me && car) {
-      const pad = Math.min(w, h) * 0.22;
+      // 上半屏整块都是地图，留边收窄并把层级顶到 z18，能看清门牌/楼栋
+      const pad = Math.min(w, h) * 0.13;
       for (z = 18; z >= 3; z--) {
         const a = proj(me.lat, me.lon, z);
         const b = proj(car.lat, car.lon, z);
-        if (Math.abs(a.x - b.x) <= Math.max(30, w - 2 * pad) && Math.abs(a.y - b.y) <= Math.max(30, h - 2 * pad)) break;
+        if (Math.abs(a.x - b.x) <= Math.max(40, w - 2 * pad) && Math.abs(a.y - b.y) <= Math.max(40, h - 2 * pad)) break;
       }
       z = Math.max(3, Math.min(18, z));
     }
@@ -2025,15 +2028,41 @@ class HaCarCard extends HTMLElement {
         }
       }
       tiles.innerHTML = parts.join("");
+      // 瓦片子域偶尔抽风会整块空白：失败时换子域重试两次，避免地图缺角
+      tiles.querySelectorAll("img").forEach((img) => {
+        img.addEventListener("error", function retry() {
+          const n = Number(this.dataset.retry || 0);
+          if (n >= 2) return;
+          this.dataset.retry = String(n + 1);
+          const rnd = 1 + Math.floor(Math.random() * 4);
+          this.src = this.src.replace(/webrd0[1-4]/, "webrd0" + rnd);
+        });
+      });
     }
     const at = (pt) => {
       const q = proj(pt.lat, pt.lon, z);
       return { x: q.x - tl.x, y: q.y - tl.y };
     };
     let youP = me ? at(me) : null;
+    const youP0 = youP;
     const carP = car ? at(car) : null;
     if (youP && carP && Math.abs(youP.x - carP.x) < 26 && Math.abs(youP.y - carP.y) < 26) {
       youP = { x: youP.x - 16, y: youP.y - 12 };
+    }
+    // GPS 精度圈：按米换算成当前层级的像素半径，直观看「大概在这一圈内」
+    const ringEl = box.querySelector("[data-faccring]");
+    if (ringEl) {
+      const acc = me && me.acc ? me.acc : null;
+      if (me && acc && acc < 400) {
+        const pxPerM = (256 * Math.pow(2, z)) / (40075016.686 * Math.cos((me.lat * Math.PI) / 180));
+        const r = Math.max(9, Math.min(90, acc * pxPerM));
+        ringEl.hidden = false;
+        ringEl.style.left = Math.round(youP0.x) + "px";
+        ringEl.style.top = Math.round(youP0.y) + "px";
+        ringEl.style.width = ringEl.style.height = Math.round(r * 2) + "px";
+      } else {
+        ringEl.hidden = true;
+      }
     }
     const youEl = box.querySelector("[data-fyou]");
     const carEl = box.querySelector("[data-fcar]");
@@ -2064,32 +2093,12 @@ class HaCarCard extends HTMLElement {
       const you = `<span class="lg you"><i></i>${esc(en ? "You" : "你")}</span>`;
       const carLg = `<span class="lg car">${icon("car")}${esc(en ? "Car" : "车")}</span>`;
       let txt = "";
-      if (me && car) txt = `<span class="lgd">${esc((en ? "Straight line " : "直线 ") + this._distText(this._distanceM(me, car)))}</span>`;
+      const accTxt = me && me.acc && me.acc < 400 ? (en ? ` · ±${Math.round(me.acc)} m` : ` · 精度 ±${Math.round(me.acc)} m`) : "";
+      if (me && car) txt = `<span class="lgd">${esc((en ? "Straight line " : "直线 ") + this._distText(this._distanceM(me, car)) + accTxt)}</span>`;
       else if (car) txt = `<span class="lgd">${esc(en ? "Car only — no device location" : "仅车辆定位，本机没有可用定位")}</span>`;
       else txt = `<span class="lgd">${esc(en ? "Device only — car coords missing" : "仅本机定位，车辆坐标缺失")}</span>`;
       note.innerHTML = (me ? you : "") + (car ? carLg : "") + txt;
     }
-  }
-
-  _dirText(bearing, heading) {
-    const en = isEn(this._hass);
-    if (heading == null) {
-      const abs = [
-        ["正北", "North"], ["东北", "North-east"], ["正东", "East"], ["东南", "South-east"],
-        ["正南", "South"], ["西南", "South-west"], ["正西", "West"], ["西北", "North-west"],
-      ];
-      const ai = Math.round(bearing / 45) % 8;
-      return `${abs[ai][en ? 1 : 0]} · ${en ? "car at " : "车在 "}${Math.round(bearing)}°`;
-    }
-    const rel = (bearing - heading + 360) % 360;
-    const dirs = [
-      ["前方", "Ahead"], ["右前方", "Front right"], ["右侧", "Right"], ["右后方", "Back right"],
-      ["后方", "Behind"], ["左后方", "Back left"], ["左侧", "Left"], ["左前方", "Front left"],
-    ];
-    const idx = Math.round(rel / 45) % 8;
-    const name = dirs[idx][en ? 1 : 0];
-    const delta = Math.round(((rel + 180) % 360) - 180);
-    return `${name} · ${en ? "offset " : "偏 "}${Math.abs(delta)}°`;
   }
 
   _bindOrientation(force) {
@@ -2142,20 +2151,24 @@ class HaCarCard extends HTMLElement {
     const q = (sel) => (modal ? modal.querySelector(sel) : root && root.querySelector(sel));
     const distEl = q("[data-fdist]");
     const arrow = q("[data-farrow]");
-    const dir = q("[data-fdir]");
+    const rose = q("[data-frose]");
+    const fn = q("[data-fn]");
     const stat = q("[data-fstat]");
     if (distEl) distEl.textContent = this._distText(d);
+    const h = this._heading == null ? 0 : this._heading;
     const rel = this._heading == null ? bearing : (bearing - this._heading + 360) % 360;
     if (arrow) arrow.style.transform = `rotate(${rel}deg)`;
-    if (dir) dir.textContent = this._dirText(bearing, this._heading);
+    // 罗盘环整体反转手机朝向，让 N 实时停在正北；N 字再反向抵消，保持正立
+    if (rose) rose.style.transform = `rotate(${-h}deg)`;
+    if (fn) fn.style.transform = `translateX(-50%) rotate(${h}deg)`;
     if (stat) {
       const en = isEn(this._hass);
       const src = this._findSourceText(loc.source);
       const base = this._heading == null
-        ? (en ? "Compass not active" : "指南针未启用")
+        ? (en ? "Compass off" : "指南针未启用")
         : this._headingSrc === "gps"
-          ? (en ? `GPS heading ${Math.round(this._heading)}°` : `移动方向 ${Math.round(this._heading)}°`)
-          : (en ? `Compass ${Math.round(this._heading)}°` : `指南针 ${Math.round(this._heading)}°`);
+          ? (en ? "Moving direction" : "移动方向")
+          : (en ? "Compass" : "指南针");
       stat.textContent = src ? `${base} · ${src}` : base;
     }
   }

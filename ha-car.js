@@ -1151,15 +1151,15 @@ ha-card.panel.fit .pills { width: 100%; max-width: none; }
 .hmeta .door.pchip { flex: 0 0 auto; border-color: rgba(111,224,168,.28); background: rgba(111,224,168,.08); color: #8af0bd; }
 .hmeta .door.pchip.away { border-color: rgba(55,214,232,.26); background: rgba(55,214,232,.08); color: #8fe9f5; }
 .hmeta .door.pchip .addr { flex: 0 0 auto; overflow: visible; }
-.findmodal { position: absolute; inset: 0; z-index: 60; border-radius: var(--ha-card-border-radius, 28px); overflow: hidden auto; display: flex;
-  flex-direction: column; align-items: center; justify-content: safe center; gap: clamp(6px, 1.2cqmin, 14px);
-  padding: clamp(14px, 2cqmin, 26px); container-type: size;
+.findmodal { position: absolute; inset: 0; z-index: 60; border-radius: var(--ha-card-border-radius, 28px); overflow: hidden; display: flex;
+  flex-direction: column; align-items: stretch; justify-content: flex-start; gap: 0;
+  padding: 0; container-type: size;
   background: radial-gradient(120% 90% at 50% 0%, #233a54 0%, #0b1624 58%, #070e17 100%);
   color: #eaf6ff; }
 .findmodal .fx { position: absolute; top: clamp(10px, 1.8cqmin, 22px); right: clamp(10px, 1.8cqmin, 22px);
   width: clamp(30px, 4cqmin, 48px); height: clamp(30px, 4cqmin, 48px); border-radius: 50%;
-  border: 1px solid rgba(255,255,255,.18); background: rgba(255,255,255,.06); color: #dceaf5;
-  font-size: clamp(13px, 1.6cqmin, 18px); cursor: pointer; }
+  border: 1px solid rgba(255,255,255,.2); background: rgba(6,16,26,.62); backdrop-filter: blur(8px);
+  color: #dceaf5; font-size: clamp(13px, 1.6cqmin, 18px); cursor: pointer; z-index: 3; }
 .findmodal .fhead { display: flex; align-items: center; gap: 6px; font-size: clamp(13px, 1.5cqmin, 19px);
   color: #9fb3c8; letter-spacing: .12em; text-transform: uppercase; }
 .findmodal .fhead .ic { width: 1.15em; height: 1.15em; }
@@ -1167,14 +1167,15 @@ ha-card.panel.fit .pills { width: 100%; max-width: none; }
 .findmodal .fdist b { font-size: clamp(32px, 7.2cqmin, 84px); line-height: 1; font-weight: 800; color: #fff;
   text-shadow: 0 0 24px rgba(55,214,232,.45); }
 .findmodal .fdist span { font-size: clamp(12px, 1.35cqmin, 17px); color: #9fb3c8; }
-/* 地图 / 罗盘 视图切换 */
-.findmodal .fview { display: flex; flex-direction: column; align-items: center; gap: clamp(6px, 1.2cqmin, 14px); width: 100%; }
-.findmodal .fview[hidden] { display: none; }
-.findmodal .fcompview .fcomp { margin: 0; }
-/* 找车地图：高德栅格瓦片静态取景，只标手机与车辆，不做拖动缩放 */
-.findmodal .fmap { position: relative; width: min(100%, 720px); height: clamp(140px, 26cqmin, 280px);
-  border-radius: 16px; overflow: hidden; background: #0b1624;
-  border: 1px solid rgba(120,160,200,.24); box-shadow: 0 12px 30px rgba(0,0,0,.35); }
+/* 上半屏只放地图，下半屏放全部找车信息 */
+.findmodal .fmapview { position: relative; flex: 0 0 auto; width: 100%; height: 44%; min-height: clamp(200px, 30cqmin, 320px);
+  overflow: hidden; background: #0b1624; border-bottom: 1px solid rgba(120,160,200,.22); }
+.findmodal .finfo { flex: 1 1 auto; min-height: 0; overflow: hidden auto; width: 100%;
+  display: flex; flex-direction: column; align-items: center; justify-content: safe center; gap: clamp(6px, 1.2cqmin, 14px);
+  padding: clamp(10px, 1.6cqmin, 20px) clamp(14px, 2cqmin, 26px) clamp(12px, 1.8cqmin, 22px); }
+/* 找车地图：高德栅格瓦片静态取景，铺满上半屏，只标手机与车辆 */
+.findmodal .fmap { position: absolute; inset: 0; width: 100%; height: 100%;
+  overflow: hidden; background: #0b1624; }
 .findmodal .ftiles { position: absolute; inset: 0; }
 .findmodal .fmap::after { content: ""; position: absolute; inset: 0; pointer-events: none;
   box-shadow: inset 0 0 46px rgba(3,10,18,.72); }
@@ -1185,6 +1186,9 @@ ha-card.panel.fit .pills { width: 100%; max-width: none; }
 .findmodal .flink { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
 .findmodal .flink line { stroke: rgba(55,214,232,.8); stroke-width: 2; stroke-dasharray: 7 7;
   filter: drop-shadow(0 0 4px rgba(55,214,232,.55)); }
+.findmodal .faccring { position: absolute; transform: translate(-50%, -50%); border-radius: 50%; pointer-events: none;
+  border: 1px solid rgba(55,214,232,.5); background: radial-gradient(circle, rgba(55,214,232,.16), rgba(55,214,232,.04) 70%, transparent 72%);
+  box-shadow: 0 0 12px rgba(55,214,232,.25) inset; }
 .findmodal .fpin { position: absolute; transform: translate(-50%, -50%); pointer-events: none; }
 .findmodal .fpin.you { width: clamp(10px, 1.6cqmin, 16px); height: clamp(10px, 1.6cqmin, 16px); border-radius: 50%;
   background: #37d6e8; box-shadow: 0 0 0 3px rgba(55,214,232,.18), 0 0 12px rgba(55,214,232,.9); }
@@ -1193,29 +1197,40 @@ ha-card.panel.fit .pills { width: 100%; max-width: none; }
   background: rgba(8,20,32,.92); border: 1px solid rgba(255,138,76,.85); color: #ffcaa8;
   box-shadow: 0 0 0 3px rgba(255,138,76,.14), 0 0 14px rgba(255,138,76,.35); }
 .findmodal .fpin.car .ic { width: 58%; height: 58%; }
-.findmodal .fattr { position: absolute; right: 5px; bottom: 3px; padding: 0 4px; border-radius: 4px;
-  font-size: 9px; color: rgba(210,230,245,.55); background: rgba(6,16,26,.55); }
-.findmodal .fmapnote { display: flex; align-items: center; gap: clamp(8px, 1.4cqmin, 16px); flex-wrap: wrap;
-  justify-content: center; font-size: clamp(10px, 1.2cqmin, 14px); color: #8ea6c0; }
+.findmodal .fattr { position: absolute; right: 5px; bottom: 4px; padding: 0 5px; border-radius: 4px;
+  font-size: 9px; color: rgba(210,230,245,.6); background: rgba(6,16,26,.6); }
+.findmodal .fmapnote { position: absolute; left: 8px; bottom: 6px; display: flex; align-items: center;
+  gap: clamp(8px, 1.2cqmin, 14px); flex-wrap: wrap; max-width: calc(100% - 90px);
+  padding: clamp(4px, .7cqmin, 7px) clamp(7px, 1.1cqmin, 12px); border-radius: 9px;
+  background: rgba(6,16,26,.88); border: 1px solid rgba(120,160,200,.22); backdrop-filter: blur(10px);
+  font-size: clamp(10px, 1.2cqmin, 14px); color: #a9bfd4; }
 .findmodal .fmapnote .lg { display: inline-flex; align-items: center; gap: 5px; }
 .findmodal .fmapnote .lg.you i { width: 8px; height: 8px; border-radius: 50%; background: #37d6e8; box-shadow: 0 0 8px rgba(55,214,232,.8); }
 .findmodal .fmapnote .lg.car .ic { width: 1.15em; height: 1.15em; color: #ffcaa8; }
 .findmodal .fmapnote .lgd { color: #9fb3c8; }
 .findmodal .ffoot[hidden] { display: none; }
-.findmodal .fcomp { position: relative; width: min(40cqmin, 300px); aspect-ratio: 1; display: flex;
-  align-items: center; justify-content: center; margin: 4px 0 2px; }
+.findmodal .fcomp { position: relative; width: min(44cqmin, 268px); aspect-ratio: 1; display: flex;
+  align-items: center; justify-content: center; margin: 2px 0 0; }
+.findmodal .frose { position: absolute; inset: 0; transform-origin: 50% 50%; will-change: transform; }
 .findmodal .fring { position: absolute; inset: 0; border-radius: 50%;
-  border: 1px dashed rgba(55,214,232,.35); box-shadow: 0 0 0 10px rgba(55,214,232,.04) inset, 0 0 30px rgba(55,214,232,.12); }
+  border: 1px dashed rgba(55,214,232,.38); box-shadow: 0 0 0 10px rgba(55,214,232,.04) inset, 0 0 30px rgba(55,214,232,.12); }
 .findmodal .fring::before, .findmodal .fring::after { content: ""; position: absolute; left: 50%; top: -1px;
-  width: 2px; height: 8px; background: rgba(55,214,232,.55); transform: translateX(-50%); }
+  width: 2px; height: 9px; background: rgba(55,214,232,.6); transform: translateX(-50%); }
 .findmodal .fring::after { top: auto; bottom: -1px; }
+.findmodal .frose::before, .findmodal .frose::after { content: ""; position: absolute; top: 50%; left: -1px;
+  width: 9px; height: 2px; background: rgba(55,214,232,.45); transform: translateY(-50%); }
+.findmodal .frose::after { left: auto; right: -1px; }
+.findmodal .fn { position: absolute; left: 50%; top: -14px; transform: translateX(-50%);
+  display: flex; align-items: center; justify-content: center; min-width: 20px; height: 20px; padding: 0 5px;
+  border-radius: 10px; background: rgba(6,16,26,.75); border: 1px solid rgba(111,224,168,.35);
+  font-size: clamp(11px, 1.4cqmin, 16px); font-weight: 800; letter-spacing: .04em; color: #8bf5c0;
+  text-shadow: 0 0 10px rgba(111,224,168,.7); }
 .findmodal .farrow { position: relative; display: flex; align-items: center; justify-content: center;
-  width: 62%; height: 62%; transform-origin: 50% 50%; transition: none; color: #37d6e8; will-change: transform;
-  filter: drop-shadow(0 0 14px rgba(55,214,232,.55)); }
+  width: 66%; height: 66%; transform-origin: 50% 50%; transition: none; color: #37d6e8; will-change: transform;
+  filter: drop-shadow(0 0 18px rgba(55,214,232,.65)); }
 .findmodal .farrow .ic { width: 100%; height: 100%; }
-.findmodal .fdot { position: absolute; width: 8px; height: 8px; border-radius: 50%; background: #37d6e8;
-  box-shadow: 0 0 12px rgba(55,214,232,.8); }
-.findmodal .fdir { font-size: clamp(14px, 1.9cqmin, 24px); font-weight: 600; color: #dceaf5; }
+.findmodal .fdot { position: absolute; width: 7px; height: 7px; border-radius: 50%; background: rgba(55,214,232,.9);
+  box-shadow: 0 0 10px rgba(55,214,232,.8); pointer-events: none; }
 .findmodal .ffloor { display: flex; align-items: center; justify-content: center; gap: clamp(8px, 1.6cqmin, 18px); flex-wrap: wrap;
   max-width: min(92%, 640px); padding: clamp(7px, 1.2cqmin, 12px) clamp(12px, 2cqmin, 22px);
   border: 1px solid rgba(125,166,255,.26); border-radius: 14px; background: rgba(125,166,255,.08); }
@@ -3105,7 +3120,9 @@ var HaCarCard = class extends HTMLElement {
     const lat = Number(st.attributes.latitude);
     const lon = Number(st.attributes.longitude);
     if (!Number.isFinite(lat) || !Number.isFinite(lon)) return null;
-    return { lat, lon };
+    const raw = Number(st.attributes.gps_accuracy != null ? st.attributes.gps_accuracy : st.attributes.accuracy);
+    const acc = Number.isFinite(raw) && raw > 0 && raw < 5e3 ? raw : null;
+    return { lat, lon, acc };
   }
   _pressureHpa(st) {
     if (!st) return null;
@@ -3261,7 +3278,8 @@ var HaCarCard = class extends HTMLElement {
             if (this._findOpen) this._refreshFind();
             return;
           }
-          this._netLoc = { lat, lon };
+          const acc = Number(pos && pos.coords && pos.coords.accuracy);
+          this._netLoc = { lat, lon, acc: Number.isFinite(acc) && acc > 0 ? acc : null };
           if (this._findOpen) this._refreshFind();
           else this._render(true);
         },
@@ -3355,44 +3373,43 @@ var HaCarCard = class extends HTMLElement {
       else note = en ? "Phone, network and logged-in-device locations are unavailable. Check the find-car entities." : "手机、网络和登录设备定位均不可用，请检查找车定位实体。";
       if (p.car) {
         return `<div class="findmodal" role="dialog" aria-label="${esc(title)}">${close}
-          <div class="fhead">${icon("pin")}${esc(title)}</div>${this._findMapPane()}
-          <div class="fnote">${esc(note)}</div>${floorH}</div>`;
+          <div class="fmapview">${this._findMapPane()}</div>
+          <div class="finfo"><div class="fhead">${icon("pin")}${esc(title)}</div>
+            <div class="fnote">${esc(note)}</div>${floorH}</div></div>`;
       }
       return `<div class="findmodal" role="dialog" aria-label="${esc(title)}">${close}
         <div class="fhead">${icon("pin")}${esc(title)}</div>
         <div class="fnote">${note}</div>${floorH}</div>`;
     }
     return `<div class="findmodal" role="dialog" aria-label="${esc(title)}">${close}
-      <div class="fhead">${icon("pin")}${esc(title)}</div>
-      <div class="fdist"><b data-fdist>${esc(this._distText(d))}</b><span>${en ? "away" : "距离"}</span></div>
-      ${this._findMapPane()}
-      <div class="fview fcompview">
-        <div class="fcomp"><i class="fring"></i><i class="farrow" data-farrow>${icon("nav")}</i><span class="fdot"></span></div>
-        <div class="fdir" data-fdir>${esc(this._dirText(bearing, null))}</div>
-      </div>
-      ${floorH}
-      <div class="ffoot"><button class="fperm" data-findperm type="button">${icon("gauge")}${en ? "Calibrate compass" : "校准指南针"}</button>
-        <span class="facc" data-fstat>${esc(en ? "GPS bearing · compass" : "车辆方位 · 手机指南针")} · ${esc(this._findSourceText(loc.source))}</span></div>
-      <div class="fnote" data-fhint>${esc(this._findHint(loc.source))}</div></div>`;
+      <div class="fmapview">${this._findMapPane()}</div>
+      <div class="finfo">
+        <div class="fhead">${icon("pin")}${esc(title)}</div>
+        <div class="fdist"><b data-fdist>${esc(this._distText(d))}</b><span>${en ? "away" : "距离"}</span></div>
+        <div class="fcomp"><i class="frose" data-frose><i class="fring"></i><span class="fn" data-fn>N</span></i><i class="farrow" data-farrow>${icon("nav")}</i><span class="fdot"></span></div>
+        ${floorH}
+        <div class="ffoot"><button class="fperm" data-findperm type="button">${icon("gauge")}${en ? "Calibrate compass" : "校准指南针"}</button>
+          <span class="facc" data-fstat>${esc(en ? "Compass" : "指南针")} · ${esc(this._findSourceText(loc.source))}</span></div>
+        <div class="fnote" data-fhint>${esc(this._findHint(loc.source))}</div>
+      </div></div>`;
   }
   _findHint(src) {
     const en = isEn(this._hass);
     if (src === "phone") {
-      return en ? "Map tiles from AutoNavi, loaded only while this panel is open; the line is straight-line distance. Hold the phone flat so the compass arrow follows it." : "地图瓦片来自高德，只在打开时加载，连线是直线距离；罗盘箭头跟随手机朝向，手机尽量水平。";
+      return en ? "Map tiles from AutoNavi, loaded only while this panel is open; the line is straight-line distance. The ring turns with the phone so N always points north." : "地图瓦片来自高德，只在打开时加载，连线是直线距离；罗盘环随手机转动，N 始终指向正北。";
     }
-    return en ? "Map tiles from AutoNavi, loaded only while this panel is open; the line is straight-line distance. Compass shows the car's absolute bearing on this device." : "地图瓦片来自高德，只在打开时加载，连线是直线距离；当前用本机/网络定位，箭头显示车辆绝对方位。";
+    return en ? "Map tiles from AutoNavi, loaded only while this panel is open; the line is straight-line distance. North is up; the arrow points at the car." : "地图瓦片来自高德，只在打开时加载，连线是直线距离；北向朝上，箭头指向车辆。";
   }
   _findMapPane() {
-    return `<div class="fview fmapview">
-      <div class="fmap" data-fmap>
+    return `<div class="fmap" data-fmap>
         <div class="ftiles" data-ftiles></div>
         <svg class="flink" data-flink aria-hidden="true"><line data-fline x1="0" y1="0" x2="0" y2="0"></line></svg>
+        <span class="faccring" data-faccring hidden></span>
         <span class="fpin you" data-fyou hidden></span>
         <span class="fpin car" data-fcar hidden>${icon("car")}</span>
         <span class="fattr">© 高德地图</span>
-      </div>
-      <div class="fmapnote" data-fmapnote></div>
-    </div>`;
+        <div class="fmapnote" data-fmapnote></div>
+      </div>`;
   }
   // 高德栅格瓦片（webrd 子域，无需 Key），只按两点取景静态绘制，交互仍交给卡片本身
   _paintFindMap(force) {
@@ -3418,13 +3435,13 @@ var HaCarCard = class extends HTMLElement {
       const y = (0.5 - Math.log((1 + s) / (1 - s)) / (4 * Math.PI)) * n2;
       return { x, y };
     };
-    let z = 16;
+    let z = 18;
     if (me && car) {
-      const pad = Math.min(w, h) * 0.22;
+      const pad = Math.min(w, h) * 0.13;
       for (z = 18; z >= 3; z--) {
         const a = proj(me.lat, me.lon, z);
         const b = proj(car.lat, car.lon, z);
-        if (Math.abs(a.x - b.x) <= Math.max(30, w - 2 * pad) && Math.abs(a.y - b.y) <= Math.max(30, h - 2 * pad)) break;
+        if (Math.abs(a.x - b.x) <= Math.max(40, w - 2 * pad) && Math.abs(a.y - b.y) <= Math.max(40, h - 2 * pad)) break;
       }
       z = Math.max(3, Math.min(18, z));
     }
@@ -3449,15 +3466,39 @@ var HaCarCard = class extends HTMLElement {
         }
       }
       tiles.innerHTML = parts.join("");
+      tiles.querySelectorAll("img").forEach((img) => {
+        img.addEventListener("error", function retry() {
+          const n2 = Number(this.dataset.retry || 0);
+          if (n2 >= 2) return;
+          this.dataset.retry = String(n2 + 1);
+          const rnd = 1 + Math.floor(Math.random() * 4);
+          this.src = this.src.replace(/webrd0[1-4]/, "webrd0" + rnd);
+        });
+      });
     }
     const at = (pt) => {
       const q = proj(pt.lat, pt.lon, z);
       return { x: q.x - tl.x, y: q.y - tl.y };
     };
     let youP = me ? at(me) : null;
+    const youP0 = youP;
     const carP = car ? at(car) : null;
     if (youP && carP && Math.abs(youP.x - carP.x) < 26 && Math.abs(youP.y - carP.y) < 26) {
       youP = { x: youP.x - 16, y: youP.y - 12 };
+    }
+    const ringEl = box.querySelector("[data-faccring]");
+    if (ringEl) {
+      const acc = me && me.acc ? me.acc : null;
+      if (me && acc && acc < 400) {
+        const pxPerM = 256 * Math.pow(2, z) / (40075016686e-3 * Math.cos(me.lat * Math.PI / 180));
+        const r = Math.max(9, Math.min(90, acc * pxPerM));
+        ringEl.hidden = false;
+        ringEl.style.left = Math.round(youP0.x) + "px";
+        ringEl.style.top = Math.round(youP0.y) + "px";
+        ringEl.style.width = ringEl.style.height = Math.round(r * 2) + "px";
+      } else {
+        ringEl.hidden = true;
+      }
     }
     const youEl = box.querySelector("[data-fyou]");
     const carEl = box.querySelector("[data-fcar]");
@@ -3488,43 +3529,12 @@ var HaCarCard = class extends HTMLElement {
       const you = `<span class="lg you"><i></i>${esc(en ? "You" : "你")}</span>`;
       const carLg = `<span class="lg car">${icon("car")}${esc(en ? "Car" : "车")}</span>`;
       let txt = "";
-      if (me && car) txt = `<span class="lgd">${esc((en ? "Straight line " : "直线 ") + this._distText(this._distanceM(me, car)))}</span>`;
+      const accTxt = me && me.acc && me.acc < 400 ? en ? ` · ±${Math.round(me.acc)} m` : ` · 精度 ±${Math.round(me.acc)} m` : "";
+      if (me && car) txt = `<span class="lgd">${esc((en ? "Straight line " : "直线 ") + this._distText(this._distanceM(me, car)) + accTxt)}</span>`;
       else if (car) txt = `<span class="lgd">${esc(en ? "Car only — no device location" : "仅车辆定位，本机没有可用定位")}</span>`;
       else txt = `<span class="lgd">${esc(en ? "Device only — car coords missing" : "仅本机定位，车辆坐标缺失")}</span>`;
       note.innerHTML = (me ? you : "") + (car ? carLg : "") + txt;
     }
-  }
-  _dirText(bearing, heading) {
-    const en = isEn(this._hass);
-    if (heading == null) {
-      const abs = [
-        ["正北", "North"],
-        ["东北", "North-east"],
-        ["正东", "East"],
-        ["东南", "South-east"],
-        ["正南", "South"],
-        ["西南", "South-west"],
-        ["正西", "West"],
-        ["西北", "North-west"]
-      ];
-      const ai = Math.round(bearing / 45) % 8;
-      return `${abs[ai][en ? 1 : 0]} · ${en ? "car at " : "车在 "}${Math.round(bearing)}°`;
-    }
-    const rel = (bearing - heading + 360) % 360;
-    const dirs = [
-      ["前方", "Ahead"],
-      ["右前方", "Front right"],
-      ["右侧", "Right"],
-      ["右后方", "Back right"],
-      ["后方", "Behind"],
-      ["左后方", "Back left"],
-      ["左侧", "Left"],
-      ["左前方", "Front left"]
-    ];
-    const idx = Math.round(rel / 45) % 8;
-    const name = dirs[idx][en ? 1 : 0];
-    const delta = Math.round((rel + 180) % 360 - 180);
-    return `${name} · ${en ? "offset " : "偏 "}${Math.abs(delta)}°`;
   }
   _bindOrientation(force) {
     if (this._orientBound && !force) return;
@@ -3580,16 +3590,19 @@ var HaCarCard = class extends HTMLElement {
     const q = (sel) => modal ? modal.querySelector(sel) : root && root.querySelector(sel);
     const distEl = q("[data-fdist]");
     const arrow = q("[data-farrow]");
-    const dir = q("[data-fdir]");
+    const rose = q("[data-frose]");
+    const fn = q("[data-fn]");
     const stat = q("[data-fstat]");
     if (distEl) distEl.textContent = this._distText(d);
+    const h = this._heading == null ? 0 : this._heading;
     const rel = this._heading == null ? bearing : (bearing - this._heading + 360) % 360;
     if (arrow) arrow.style.transform = `rotate(${rel}deg)`;
-    if (dir) dir.textContent = this._dirText(bearing, this._heading);
+    if (rose) rose.style.transform = `rotate(${-h}deg)`;
+    if (fn) fn.style.transform = `translateX(-50%) rotate(${h}deg)`;
     if (stat) {
       const en = isEn(this._hass);
       const src = this._findSourceText(loc.source);
-      const base = this._heading == null ? en ? "Compass not active" : "指南针未启用" : this._headingSrc === "gps" ? en ? `GPS heading ${Math.round(this._heading)}°` : `移动方向 ${Math.round(this._heading)}°` : en ? `Compass ${Math.round(this._heading)}°` : `指南针 ${Math.round(this._heading)}°`;
+      const base = this._heading == null ? en ? "Compass off" : "指南针未启用" : this._headingSrc === "gps" ? en ? "Moving direction" : "移动方向" : en ? "Compass" : "指南针";
       stat.textContent = src ? `${base} · ${src}` : base;
     }
   }
@@ -5123,7 +5136,7 @@ var HaCarEditor = class extends HTMLElement {
 customElements.define("ha-car-editor", HaCarEditor);
 
 // src/main.js
-var VERSION = "2.7.1";
+var VERSION = "2.7.2";
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "ha-car",
