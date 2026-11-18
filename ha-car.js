@@ -3289,6 +3289,36 @@ var HaCarCard = class extends HTMLElement {
         <div class="fmapnote" data-fmapnote></div>
       </div>`;
   }
+  // 高德瓦片是 GCJ-02（火星坐标），HA 上报的是 WGS-84；直接叠会偏几百米，所以地图上统一先纠偏
+  _wgs2gcj(lat, lon) {
+    if (!Number.isFinite(lat) || !Number.isFinite(lon)) return { lat, lon };
+    if (lon < 72.004 || lon > 137.8347 || lat < 0.8293 || lat > 55.8271) return { lat, lon };
+    const a = 6378245;
+    const ee = 0.006693421622965943;
+    const dLat = (x, y) => {
+      let r = -100 + 2 * x + 3 * y + 0.2 * y * y + 0.1 * x * y + 0.2 * Math.sqrt(Math.abs(x));
+      r += (20 * Math.sin(6 * x * Math.PI) + 20 * Math.sin(2 * x * Math.PI)) * 2 / 3;
+      r += (20 * Math.sin(y * Math.PI) + 40 * Math.sin(y / 3 * Math.PI)) * 2 / 3;
+      r += (160 * Math.sin(y / 12 * Math.PI) + 320 * Math.sin(y * Math.PI / 30)) * 2 / 3;
+      return r;
+    };
+    const dLon = (x, y) => {
+      let r = 300 + x + 2 * y + 0.1 * x * x + 0.1 * x * y + 0.1 * Math.sqrt(Math.abs(x));
+      r += (20 * Math.sin(6 * x * Math.PI) + 20 * Math.sin(2 * x * Math.PI)) * 2 / 3;
+      r += (20 * Math.sin(x * Math.PI) + 40 * Math.sin(x / 3 * Math.PI)) * 2 / 3;
+      r += (150 * Math.sin(x / 12 * Math.PI) + 300 * Math.sin(x / 30 * Math.PI)) * 2 / 3;
+      return r;
+    };
+    const rad = (d) => d * Math.PI / 180;
+    let dlat = dLat(lon - 105, lat - 35);
+    let dlon = dLon(lon - 105, lat - 35);
+    const srad = Math.sin(rad(lat));
+    const magic = 1 - ee * srad * srad;
+    const sq = Math.sqrt(magic);
+    dlat = dlat * 180 / (a * (1 - ee) / (magic * sq) * Math.PI);
+    dlon = dlon * 180 / (a / sq * Math.cos(rad(lat)) * Math.PI);
+    return { lat: lat + dlat, lon: lon + dlon };
+  }
   // 高德栅格瓦片（webrd 子域，无需 Key），只按两点取景静态绘制，交互仍交给卡片本身
   _paintFindMap(force) {
     if (!this._findOpen || !this._findData) return;
@@ -3305,6 +3335,8 @@ var HaCarCard = class extends HTMLElement {
     const me = loc.coords;
     const car = p.car;
     if (!me && !car) return;
+    const meG = me ? this._wgs2gcj(me.lat, me.lon) : null;
+    const carG = car ? this._wgs2gcj(car.lat, car.lon) : null;
     const en = isEn(this._hass);
     const proj = (lat, lng, z2) => {
       const n2 = 256 * Math.pow(2, z2);
@@ -3314,16 +3346,16 @@ var HaCarCard = class extends HTMLElement {
       return { x, y };
     };
     let z = 18;
-    if (me && car) {
+    if (meG && carG) {
       const pad = Math.min(w, h) * 0.13;
       for (z = 18; z >= 3; z--) {
-        const a = proj(me.lat, me.lon, z);
-        const b = proj(car.lat, car.lon, z);
+        const a = proj(meG.lat, meG.lon, z);
+        const b = proj(carG.lat, carG.lon, z);
         if (Math.abs(a.x - b.x) <= Math.max(40, w - 2 * pad) && Math.abs(a.y - b.y) <= Math.max(40, h - 2 * pad)) break;
       }
       z = Math.max(3, Math.min(18, z));
     }
-    const c0 = me && car ? { lat: (me.lat + car.lat) / 2, lon: (me.lon + car.lon) / 2 } : car || me;
+    const c0 = meG && carG ? { lat: (meG.lat + carG.lat) / 2, lon: (meG.lon + carG.lon) / 2 } : carG || meG;
     const ctr = proj(c0.lat, c0.lon, z);
     const tl = { x: ctr.x - w / 2, y: ctr.y - h / 2 };
     const sig = [w, h, z, tl.x.toFixed(1), tl.y.toFixed(1)].join("|");
@@ -3358,9 +3390,9 @@ var HaCarCard = class extends HTMLElement {
       const q = proj(pt.lat, pt.lon, z);
       return { x: q.x - tl.x, y: q.y - tl.y };
     };
-    let youP = me ? at(me) : null;
+    let youP = meG ? at(meG) : null;
     const youP0 = youP;
-    const carP = car ? at(car) : null;
+    const carP = carG ? at(carG) : null;
     if (youP && carP && Math.abs(youP.x - carP.x) < 26 && Math.abs(youP.y - carP.y) < 26) {
       youP = { x: youP.x - 16, y: youP.y - 12 };
     }
@@ -4954,7 +4986,7 @@ var HaCarEditor = class extends HTMLElement {
 customElements.define("ha-car-editor", HaCarEditor);
 
 // src/main.js
-var VERSION = "2.8.0";
+var VERSION = "2.8.1";
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "ha-car",
