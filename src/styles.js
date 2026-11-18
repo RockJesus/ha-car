@@ -241,14 +241,14 @@ h1 { margin: 0; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-s
   filter: blur(1px); pointer-events: none; opacity: .7; }
 .tile .ic { width: 27px; height: 27px; color: #ddf8ff; filter: drop-shadow(0 1px 2px rgba(0,0,0,.7)); }
 .tile .glyph { width: 62px; height: 62px; object-fit: contain; pointer-events: none;
-  filter: drop-shadow(0 2px 3px rgba(0,0,0,.72)); }
+  filter: hue-rotate(var(--hc-btnhue,0deg)) saturate(var(--hc-btnsat,1)) drop-shadow(0 2px 3px rgba(0,0,0,.72)); }
 .tile .glyph.wide { width: 70px; height: 46px; }
 /* 艺术按钮：去掉球体底和霓虹圈，让 3D logo 本身成为按钮 */
 .orb.art { background: none; border-color: transparent; box-shadow: none; }
 .orb.art::before, .orb.art::after { display: none; }
 .tile.hot .orb.art, .tile.on .orb.art { background: none; border-color: transparent; box-shadow: none; animation: none; }
-.tile.hot .orb.art .glyph { filter: drop-shadow(0 0 8px rgba(var(--cy-c),.8)) drop-shadow(0 2px 3px rgba(0,0,0,.72)); }
-.tile.on .orb.art .glyph { filter: drop-shadow(0 0 8px rgba(var(--cy-ok),.7)) drop-shadow(0 2px 3px rgba(0,0,0,.72)); }
+.tile.hot .orb.art .glyph { filter: hue-rotate(var(--hc-btnhue,0deg)) saturate(var(--hc-btnsat,1)) drop-shadow(0 0 8px rgba(var(--cy-c),.8)) drop-shadow(0 2px 3px rgba(0,0,0,.72)); }
+.tile.on .orb.art .glyph { filter: hue-rotate(var(--hc-btnhue,0deg)) saturate(var(--hc-btnsat,1)) drop-shadow(0 0 8px rgba(var(--cy-ok),.7)) drop-shadow(0 2px 3px rgba(0,0,0,.72)); }
 .tile:active .orb.art, .tile.pressing .orb.art { box-shadow: none; }
 .tile .lbl { max-width: 100%; font-size: 13.5px; font-weight: 620; letter-spacing: .06em;
   color: rgba(206,229,244,.88); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }

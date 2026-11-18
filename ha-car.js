@@ -594,14 +594,14 @@ h1 { margin: 0; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-s
   filter: blur(1px); pointer-events: none; opacity: .7; }
 .tile .ic { width: 27px; height: 27px; color: #ddf8ff; filter: drop-shadow(0 1px 2px rgba(0,0,0,.7)); }
 .tile .glyph { width: 62px; height: 62px; object-fit: contain; pointer-events: none;
-  filter: drop-shadow(0 2px 3px rgba(0,0,0,.72)); }
+  filter: hue-rotate(var(--hc-btnhue,0deg)) saturate(var(--hc-btnsat,1)) drop-shadow(0 2px 3px rgba(0,0,0,.72)); }
 .tile .glyph.wide { width: 70px; height: 46px; }
 /* 艺术按钮：去掉球体底和霓虹圈，让 3D logo 本身成为按钮 */
 .orb.art { background: none; border-color: transparent; box-shadow: none; }
 .orb.art::before, .orb.art::after { display: none; }
 .tile.hot .orb.art, .tile.on .orb.art { background: none; border-color: transparent; box-shadow: none; animation: none; }
-.tile.hot .orb.art .glyph { filter: drop-shadow(0 0 8px rgba(var(--cy-c),.8)) drop-shadow(0 2px 3px rgba(0,0,0,.72)); }
-.tile.on .orb.art .glyph { filter: drop-shadow(0 0 8px rgba(var(--cy-ok),.7)) drop-shadow(0 2px 3px rgba(0,0,0,.72)); }
+.tile.hot .orb.art .glyph { filter: hue-rotate(var(--hc-btnhue,0deg)) saturate(var(--hc-btnsat,1)) drop-shadow(0 0 8px rgba(var(--cy-c),.8)) drop-shadow(0 2px 3px rgba(0,0,0,.72)); }
+.tile.on .orb.art .glyph { filter: hue-rotate(var(--hc-btnhue,0deg)) saturate(var(--hc-btnsat,1)) drop-shadow(0 0 8px rgba(var(--cy-ok),.7)) drop-shadow(0 2px 3px rgba(0,0,0,.72)); }
 .tile:active .orb.art, .tile.pressing .orb.art { box-shadow: none; }
 .tile .lbl { max-width: 100%; font-size: 13.5px; font-weight: 620; letter-spacing: .06em;
   color: rgba(206,229,244,.88); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -1905,6 +1905,24 @@ function themeBg(t) {
   const th = THEMES[t] || THEMES.midnight;
   return `radial-gradient(120% 80% at 50% -10%, rgba(${th.glow},.14), transparent 58%),radial-gradient(70% 50% at 15% 105%, rgba(${th.glow},.10), transparent 70%),linear-gradient(168deg, ${th.top} 0%, ${th.mid} 52%, ${th.low} 100%)`;
 }
+function accentHsl(hex) {
+  const m = /^#?([0-9a-f]{6})$/i.exec(String(hex || "").trim());
+  if (!m) return { h: 210, s: 0.6 };
+  const n = parseInt(m[1], 16);
+  const r = (n >> 16 & 255) / 255, g = (n >> 8 & 255) / 255, b = (n & 255) / 255;
+  const mx = Math.max(r, g, b), mn = Math.min(r, g, b), d = mx - mn;
+  const l = (mx + mn) / 2;
+  let h = 210;
+  if (d) {
+    if (mx === r) h = (g - b) / d % 6;
+    else if (mx === g) h = (b - r) / d + 2;
+    else h = (r - g) / d + 4;
+    h *= 60;
+    if (h < 0) h += 360;
+  }
+  const s = d ? d / (1 - Math.abs(2 * l - 1)) : 0;
+  return { h, s: Math.min(1, s) };
+}
 function hexRgb(hex) {
   const m = /^#?([0-9a-f]{6})$/i.exec(String(hex || "").trim());
   if (!m) return "55,214,232";
@@ -2555,6 +2573,9 @@ var HaCarCard = class extends HTMLElement {
     const accent = cfg.accent && cfg.accent !== DEFAULTS.accent ? cfg.accent : th.accent;
     this._card.style.setProperty("--hc-accent", accent);
     this._card.style.setProperty("--hc-a", hexRgb(accent));
+    const ah = accentHsl(accent);
+    this._card.style.setProperty("--hc-btnhue", `${Math.round(ah.h - 210)}deg`);
+    this._card.style.setProperty("--hc-btnsat", String(Math.round((0.55 + ah.s * 0.75) * 100) / 100));
     this._card.style.setProperty("--hc-bg", themeBg(cfg.theme));
     this._applyBg();
     this._prunePending(data);
@@ -5153,7 +5174,7 @@ var HaCarEditor = class extends HTMLElement {
 customElements.define("ha-car-editor", HaCarEditor);
 
 // src/main.js
-var VERSION = "2.9.3";
+var VERSION = "2.9.4";
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "ha-car",

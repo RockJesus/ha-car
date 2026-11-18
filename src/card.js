@@ -153,6 +153,25 @@ function themeBg(t) {
     `linear-gradient(168deg, ${th.top} 0%, ${th.mid} 52%, ${th.low} 100%)`;
 }
 
+function accentHsl(hex) {
+  const m = /^#?([0-9a-f]{6})$/i.exec(String(hex || "").trim());
+  if (!m) return { h: 210, s: 0.6 };
+  const n = parseInt(m[1], 16);
+  const r = ((n >> 16) & 255) / 255, g = ((n >> 8) & 255) / 255, b = (n & 255) / 255;
+  const mx = Math.max(r, g, b), mn = Math.min(r, g, b), d = mx - mn;
+  const l = (mx + mn) / 2;
+  let h = 210;
+  if (d) {
+    if (mx === r) h = ((g - b) / d) % 6;
+    else if (mx === g) h = (b - r) / d + 2;
+    else h = (r - g) / d + 4;
+    h *= 60;
+    if (h < 0) h += 360;
+  }
+  const s = d ? d / (1 - Math.abs(2 * l - 1)) : 0;
+  return { h, s: Math.min(1, s) };
+}
+
 function hexRgb(hex) {
   const m = /^#?([0-9a-f]{6})$/i.exec(String(hex || "").trim());
   if (!m) return "55,214,232";
@@ -896,6 +915,10 @@ class HaCarCard extends HTMLElement {
     const accent = cfg.accent && cfg.accent !== DEFAULTS.accent ? cfg.accent : th.accent;
     this._card.style.setProperty("--hc-accent", accent);
     this._card.style.setProperty("--hc-a", hexRgb(accent));
+    // 控制按钮艺术图跟随主题强调色（原图基调约 210° 钢蓝）
+    const ah = accentHsl(accent);
+    this._card.style.setProperty("--hc-btnhue", `${Math.round(ah.h - 210)}deg`);
+    this._card.style.setProperty("--hc-btnsat", String(Math.round((0.55 + ah.s * 0.75) * 100) / 100));
     this._card.style.setProperty("--hc-bg", themeBg(cfg.theme));
     this._applyBg();
     this._prunePending(data);
