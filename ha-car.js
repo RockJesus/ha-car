@@ -2676,10 +2676,20 @@ var HaCarCard = class extends HTMLElement {
     if (img) img.addEventListener("load", () => this._placeOverlay(), { once: true });
     if (img && img.dataset.fb) {
       img.addEventListener("error", () => {
-        const fb = img.dataset.fb;
-        delete img.dataset.fb;
-        img.src = fb;
-      }, { once: true });
+        let list = [];
+        try {
+          list = JSON.parse(img.dataset.fb) || [];
+        } catch {
+          list = [];
+        }
+        if (!Array.isArray(list) || !list.length) {
+          delete img.dataset.fb;
+          return;
+        }
+        const next = list.shift();
+        img.dataset.fb = JSON.stringify(list);
+        if (next) img.src = next;
+      });
     }
   }
   _prunePending(data) {
@@ -2871,7 +2881,7 @@ var HaCarCard = class extends HTMLElement {
           const dx = this._extraChips(doorsB, data, t, ["door", "stat", "cap", "tire"]);
           html = `<div class="blk b-hero">${this._hero(
             this._imgFrom(this._heroImageEnt(b, data), hero.src),
-            hero.fb,
+            hero.alts,
             this._carOverlay(data, t, doorsB, running),
             running
           )}${this._extraChips(b, data, t, ["image"])}${dx ? `<div class="xchips">${dx}</div>` : ""}</div>`;
@@ -2952,7 +2962,7 @@ var HaCarCard = class extends HTMLElement {
     return `<div class="hero bs-${esc(bg)}${running ? " run" : ""}"><div class="halo"></div>
       <span class="orbit${running ? " run" : ""}"><svg class="hring2" viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="49"/></svg><i class="node n1"></i><i class="node n2"></i><i class="node n3"></i><i class="node n4"></i></span>
       <span class="orbit o2"></span>
-      ${imgUrl ? `<img class="carimg" src="${esc(imgUrl)}"${fbUrl ? ` data-fb="${esc(fbUrl)}"` : ""} alt="">` : `<div class="carph">${icon("car")}</div>`}
+      ${imgUrl ? `<img class="carimg" src="${esc(imgUrl)}"${fbUrl && fbUrl.length ? ` data-fb="${esc(JSON.stringify(fbUrl))}"` : ""} alt="">` : `<div class="carph">${icon("car")}</div>`}
       <div class="ground"></div><div class="covl cs-${esc(this._config && this._config.chip_style || "glass")}">${inner}</div>${edge ? `<div class="cedge">${edge}</div>` : ""}</div>`;
   }
   // 俯视图状态层：每个车门一张聚合卡（门 + 窗 + 该轮位胎压），前后盖各一张小卡，全部落在圆环内侧
@@ -3260,33 +3270,37 @@ var HaCarCard = class extends HTMLElement {
   }
   _imagePair(data) {
     const cfg = this._config;
-    const pic = (slot) => {
-      const st = data.get(slot);
-      if (!st) return null;
+    const alts = [];
+    const urlsOf = (st) => {
+      if (!st) return [];
       const direct = attrs(st, "image_url");
       const proxy = attrs(st, "entity_picture") || null;
       const okDirect = direct && /^https?:\/\//.test(String(direct));
-      if (cfg.privacy) {
-        return { src: proxy || (okDirect ? direct : null), fb: proxy && okDirect ? direct : null };
-      }
-      return { src: okDirect ? direct : proxy, fb: okDirect && proxy ? proxy : null };
+      const out = cfg.privacy ? [proxy, okDirect ? direct : null] : [okDirect ? direct : proxy, okDirect && proxy ? proxy : null];
+      return out.filter(Boolean).map(String);
     };
-    if (cfg.image === "custom" && cfg.image_url) return { src: cfg.image_url, fb: null };
+    const push = (st) => {
+      if (!st) return;
+      for (const u of urlsOf(st)) if (!alts.includes(u)) alts.push(u);
+    };
+    const all = ["image_overlook", "image_3d", "image_side"];
+    let order = all;
+    if (cfg.image === "custom" && cfg.image_url) return { src: cfg.image_url, alts: [] };
     if (cfg.image && cfg.image !== "auto") {
-      if (/^https?:\/\//.test(cfg.image)) return { src: cfg.image, fb: null };
-      if (data.states[cfg.image]) {
-        const st = data.states[cfg.image];
-        const direct = attrs(st, "image_url");
-        const proxy = attrs(st, "entity_picture") || null;
-        const okDirect = direct && /^https?:\/\//.test(String(direct));
-        if (cfg.privacy) return { src: proxy || (okDirect ? direct : null), fb: proxy && okDirect ? direct : null };
-        return { src: okDirect ? direct : proxy, fb: okDirect && proxy ? proxy : null };
+      if (/^https?:\/\//.test(cfg.image)) return { src: cfg.image, alts: [] };
+      const st = data.states[cfg.image];
+      if (st) {
+        push(st);
+        order = order.filter((s) => s !== cfg.image);
+      } else {
+        if (cfg.image === "overlook") order = ["image_overlook", "image_3d", "image_side"];
+        else if (cfg.image === "3d") order = ["image_3d", "image_overlook", "image_side"];
+        else if (cfg.image === "side") order = ["image_side", "image_overlook", "image_3d"];
       }
-      if (cfg.image === "overlook") return pic("image_overlook") || { src: null, fb: null };
-      if (cfg.image === "3d") return pic("image_3d") || { src: null, fb: null };
-      if (cfg.image === "side") return pic("image_side") || { src: null, fb: null };
     }
-    return pic("image_overlook") || pic("image_3d") || pic("image_side") || { src: null, fb: null };
+    for (const slot of order) push(data.get(slot));
+    if (!alts.length) alts.push(PREVIEW_CAR);
+    return { src: alts[0], alts: alts.slice(1) };
   }
   // ---------- 人车距离 / 手机指南针找车 ----------
   _ll(st) {
@@ -5242,7 +5256,7 @@ var HaCarEditor = class extends HTMLElement {
 customElements.define("ha-car-editor", HaCarEditor);
 
 // src/main.js
-var VERSION = "3.1.0";
+var VERSION = "3.2.0";
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "ha-car",
