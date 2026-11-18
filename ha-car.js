@@ -478,13 +478,13 @@ h1 { margin: 0; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-s
 
 /* 主视觉：车图 + 双同心轨道 + 四枚发光节点（参考图同构） */
 .hero { position: relative; height: 224px; display: flex; align-items: center; justify-content: center;
-  overflow: hidden; --r: 92px; }
+  overflow: clip; overflow-clip-margin: 44px; --r: 92px; }
 .halo { position: absolute; inset: -20% -12% -10%; pointer-events: none;
   background: radial-gradient(46% 52% at 50% 50%, rgba(var(--hc-a,55,214,232),.20), rgba(var(--hc-a,55,214,232),.06) 46%, transparent 72%);
   filter: blur(2px); }
 /* 传感器区背景样式：radar / grid / glass / cyber / minimal */
-.hero.bs-grid::before, .hero.bs-glass::before, .hero.bs-cyber::before, .hero.bs-minimal::before,
-.hero.bs-grid::after, .hero.bs-cyber::after { content: ""; position: absolute; pointer-events: none; }
+.hero.bs-grid::before, .hero.bs-glass::before, .hero.bs-cyber::before, .hero.bs-minimal::before
+  { content: ""; position: absolute; pointer-events: none; }
 .hero.bs-grid .halo, .hero.bs-glass .halo, .hero.bs-cyber .halo, .hero.bs-minimal .halo {
   inset: auto; left: 50%; top: 50%; width: 92%; aspect-ratio: 1; border-radius: 50%;
   transform: translate(-50%, -50%); }
@@ -520,8 +520,7 @@ h1 { margin: 0; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-s
   conic-gradient(from 205deg, rgba(var(--hc-a,55,214,232),0) 0deg, rgba(var(--hc-a,55,214,232),.30) 18deg, rgba(var(--hc-a,55,214,232),0) 46deg,
     rgba(var(--hc-a,55,214,232),0) 180deg, rgba(var(--hc-a,55,214,232),.22) 200deg, rgba(var(--hc-a,55,214,232),0) 232deg);
   filter: blur(6px); }
-.hero.bs-cyber::after { left: 50%; top: 3%; width: 46px; height: 2px; border-radius: 2px; transform: translateX(-50%);
-  background: linear-gradient(90deg, transparent, rgba(var(--hc-a,55,214,232),.9)); box-shadow: 0 0 10px rgba(var(--hc-a,55,214,232),.8); }
+
 
 .hero.bs-minimal .halo { width: 74%;
   background: radial-gradient(44% 48% at 50% 50%, rgba(var(--hc-a,55,214,232),.16), transparent 66%); filter: blur(8px); }
@@ -532,10 +531,10 @@ h1 { margin: 0; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-s
   background: radial-gradient(circle, rgba(6,14,22,.55), transparent 66%); }
 
 .orbit, .orbit.o2 { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
-  border-radius: 50%; pointer-events: none; height: 94%; aspect-ratio: 1; width: auto; }
+  border-radius: 50%; pointer-events: none; width: 94%; height: auto; aspect-ratio: 1; }
 .orbit { border: 1px solid rgba(70,220,240,.22);
   box-shadow: inset 0 0 34px -14px rgba(var(--hc-a,55,214,232),.55), 0 0 24px -16px rgba(var(--hc-a,55,214,232),.5); }
-.orbit.o2 { height: 97%;
+.orbit.o2 { width: 97%;
   border: 1px solid rgba(var(--hc-a,55,214,232),.08); }
 .node { position: absolute; left: 50%; top: 50%; width: 7px; height: 7px; margin: -3.5px 0 0 -3.5px;
   transform: translate(-50%, -50%);
@@ -1098,8 +1097,8 @@ ha-card.panel.fit .b-side > .b-meta,
 ha-card.panel.fit .b-side > .b-alerts,
 ha-card.panel.fit .b-side > .b-actions { flex: 0 0 auto; }
 ha-card.panel.fit .b-hero .hero { height: 100%; min-height: 600px; }
-ha-card.panel.fit .orbit { height: 78%; }
-ha-card.panel.fit .orbit.o2 { height: 86%; }
+ha-card.panel.fit .orbit { width: 78%; }
+ha-card.panel.fit .orbit.o2 { width: 86%; }
 ha-card.panel.fit .hmeta { grid-column: 1 / -1; }
 ha-card.panel.fit .acts { width: 100%; max-width: none; }
 ha-card.panel.fit .pills { width: 100%; max-width: none; }
@@ -5069,7 +5068,7 @@ var HaCarEditor = class extends HTMLElement {
 customElements.define("ha-car-editor", HaCarEditor);
 
 // src/main.js
-var VERSION = "2.8.3";
+var VERSION = "2.8.4";
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "ha-car",
