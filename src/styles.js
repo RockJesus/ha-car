@@ -585,6 +585,46 @@ ha-card.theme-glass .gauge { filter: drop-shadow(0 10px 22px rgba(0,0,0,.35)); }
 .covl.cs-cyber .loc, .covl.cs-cyber .cap { border-radius: 0; border-color: rgba(var(--hc-a,55,214,232),.5);
   box-shadow: 0 0 6cqw -2.4cqw rgba(var(--hc-a,55,214,232),.85);
   clip-path: polygon(2.6cqw 0, calc(100% - 2.6cqw) 0, 100% 2.6cqw, 100% calc(100% - 2.6cqw), calc(100% - 2.6cqw) 100%, 2.6cqw 100%, 0 calc(100% - 2.6cqw), 0 2.6cqw); }
+/* 各款状态卡独立配色（与 glass 默认的冷灰蓝区分） */
+.covl.cs-pill .loc, .covl.cs-pill .cap, .covl.cs-pill .enp {
+  background: linear-gradient(180deg, rgba(13,54,62,.94), rgba(7,26,34,.94));
+  border-color: rgba(92,235,220,.38); box-shadow: 0 0 4cqw -1.6cqw rgba(92,235,220,.55); }
+.covl.cs-pill .loc .lh span, .covl.cs-pill .cap b, .covl.cs-pill .enp span { color: #9fe9e1; }
+.covl.cs-pill .loc .lr b, .covl.cs-pill .cap i, .covl.cs-pill .enp b { color: #e9fffb; }
+.covl.cs-pill .loc .lr.tire b { color: #7ff0e2; }
+.covl.cs-pill .loc .lr .ri, .covl.cs-pill .cap .ri { color: #63d9cf; }
+.covl.cs-pill .loc .lh .lk.on, .covl.cs-pill .cap .lk.on { color: #b6ffe9; }
+
+.covl.cs-bar .loc, .covl.cs-bar .cap, .covl.cs-bar .enp {
+  background: linear-gradient(180deg, rgba(40,28,12,.94), rgba(20,14,7,.94));
+  border-color: rgba(255,178,87,.26); border-left-color: #ffb257; }
+.covl.cs-bar .loc .lh span, .covl.cs-bar .cap b, .covl.cs-bar .enp span { color: #f0c48d; }
+.covl.cs-bar .loc .lr b, .covl.cs-bar .cap i, .covl.cs-bar .enp b { color: #fff3e2; }
+.covl.cs-bar .loc .lr.tire b { color: #ffc978; }
+.covl.cs-bar .loc .lr .ri, .covl.cs-bar .cap .ri { color: #e2955a; }
+.covl.cs-bar .loc .lh .lk.on, .covl.cs-bar .cap .lk.on { color: #ffd9a6; }
+
+.covl.cs-liquid .loc .lh span, .covl.cs-liquid .cap b, .covl.cs-liquid .enp span { color: #eaf2fb; }
+.covl.cs-liquid .loc .lr b, .covl.cs-liquid .cap i, .covl.cs-liquid .enp b { color: #ffffff; }
+.covl.cs-liquid .loc .lr.tire b { color: #f2f9ff; }
+.covl.cs-liquid .loc .lr .ri, .covl.cs-liquid .cap .ri { color: #cfe3f7; }
+.covl.cs-liquid .loc .lh .lk.on, .covl.cs-liquid .cap .lk.on { color: #d8ffe9; }
+
+.covl.cs-line .loc, .covl.cs-line .cap, .covl.cs-line .enp { border-color: rgba(127,176,255,.46); }
+.covl.cs-line .loc .lh span, .covl.cs-line .cap b, .covl.cs-line .enp span { color: #9dbde0; }
+.covl.cs-line .loc .lr b, .covl.cs-line .cap i, .covl.cs-line .enp b { color: #d6e6ff; }
+.covl.cs-line .loc .lr.tire b { color: #a9c8ff; }
+.covl.cs-line .loc .lr .ri, .covl.cs-line .cap .ri { color: #7fb0ff; }
+
+.covl.cs-cyber .loc, .covl.cs-cyber .cap, .covl.cs-cyber .enp {
+  background: linear-gradient(180deg, rgba(6,22,32,.96), rgba(4,12,20,.96));
+  border-color: rgba(55,214,232,.55); }
+.covl.cs-cyber .loc .lh span, .covl.cs-cyber .cap b, .covl.cs-cyber .enp span { color: #63e7f5; }
+.covl.cs-cyber .loc .lr b, .covl.cs-cyber .cap i, .covl.cs-cyber .enp b { color: #f2fdff; }
+.covl.cs-cyber .loc .lr.tire b { color: #ff6fd0; }
+.covl.cs-cyber .loc .lr .ri, .covl.cs-cyber .cap .ri { color: #37d6e8; }
+.covl.cs-cyber .loc .lh .lk.on, .covl.cs-cyber .cap .lk.on { color: #7dffd8; }
+
 /* 前后盖小卡：车头/车尾正上方与正下方，仍落在圆环内侧 */
 .cap { left: 50%; width: auto; max-width: 46cqw; flex-direction: row; align-items: center; justify-content: flex-start;
   gap: 1.6cqw; padding: 1.9cqw 2.6cqw 1.9cqw 3cqw; border-radius: 5.2cqw; }
