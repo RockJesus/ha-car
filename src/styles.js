@@ -814,6 +814,48 @@ ha-card.panel.fit .pills { width: 100%; max-width: none; }
 .findmodal .fdist b { font-size: clamp(32px, 7.2cqmin, 84px); line-height: 1; font-weight: 800; color: #fff;
   text-shadow: 0 0 24px rgba(55,214,232,.45); }
 .findmodal .fdist span { font-size: clamp(12px, 1.35cqmin, 17px); color: #9fb3c8; }
+/* 地图 / 罗盘 视图切换 */
+.findmodal .fviews { display: flex; gap: 8px; }
+.findmodal .fv { display: inline-flex; align-items: center; gap: 6px; padding: clamp(3px, .7cqmin, 7px) clamp(10px, 1.4cqmin, 16px);
+  border-radius: 999px; border: 1px solid rgba(255,255,255,.14); background: rgba(255,255,255,.04);
+  color: #9fb3c8; font-size: clamp(10px, 1.2cqmin, 14px); line-height: 1; cursor: pointer; }
+.findmodal .fv .ic { width: 1.1em; height: 1.1em; }
+.findmodal .fv.on { color: #eaf6ff; border-color: rgba(55,214,232,.55); background: rgba(55,214,232,.14);
+  box-shadow: 0 0 16px rgba(55,214,232,.18); }
+.findmodal .fview { display: flex; flex-direction: column; align-items: center; gap: clamp(6px, 1.2cqmin, 14px); width: 100%; }
+.findmodal .fview[hidden] { display: none; }
+.findmodal .fcompview .fcomp { margin: 0; }
+/* 找车地图：高德栅格瓦片静态取景，只标手机与车辆，不做拖动缩放 */
+.findmodal .fmap { position: relative; width: min(100%, 720px); height: clamp(150px, 34cqmin, 340px);
+  border-radius: 16px; overflow: hidden; background: #0b1624;
+  border: 1px solid rgba(120,160,200,.24); box-shadow: 0 12px 30px rgba(0,0,0,.35); }
+.findmodal .ftiles { position: absolute; inset: 0; }
+.findmodal .fmap::after { content: ""; position: absolute; inset: 0; pointer-events: none;
+  box-shadow: inset 0 0 46px rgba(3,10,18,.72); }
+.findmodal .ftiles img { position: absolute; width: 256px; height: 256px; opacity: 0;
+  user-select: none; -webkit-user-drag: none; filter: brightness(.86) saturate(.95) contrast(1.05);
+  animation: hc-mapfade .35s ease forwards; }
+@keyframes hc-mapfade { to { opacity: 1; } }
+.findmodal .flink { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.findmodal .flink line { stroke: rgba(55,214,232,.8); stroke-width: 2; stroke-dasharray: 7 7;
+  filter: drop-shadow(0 0 4px rgba(55,214,232,.55)); }
+.findmodal .fpin { position: absolute; transform: translate(-50%, -50%); pointer-events: none; }
+.findmodal .fpin.you { width: clamp(10px, 1.6cqmin, 16px); height: clamp(10px, 1.6cqmin, 16px); border-radius: 50%;
+  background: #37d6e8; box-shadow: 0 0 0 3px rgba(55,214,232,.18), 0 0 12px rgba(55,214,232,.9); }
+.findmodal .fpin.car { display: flex; align-items: center; justify-content: center;
+  width: clamp(20px, 3.2cqmin, 30px); height: clamp(20px, 3.2cqmin, 30px); border-radius: 50%;
+  background: rgba(8,20,32,.92); border: 1px solid rgba(255,138,76,.85); color: #ffcaa8;
+  box-shadow: 0 0 0 3px rgba(255,138,76,.14), 0 0 14px rgba(255,138,76,.35); }
+.findmodal .fpin.car .ic { width: 58%; height: 58%; }
+.findmodal .fattr { position: absolute; right: 5px; bottom: 3px; padding: 0 4px; border-radius: 4px;
+  font-size: 9px; color: rgba(210,230,245,.55); background: rgba(6,16,26,.55); }
+.findmodal .fmapnote { display: flex; align-items: center; gap: clamp(8px, 1.4cqmin, 16px); flex-wrap: wrap;
+  justify-content: center; font-size: clamp(10px, 1.2cqmin, 14px); color: #8ea6c0; }
+.findmodal .fmapnote .lg { display: inline-flex; align-items: center; gap: 5px; }
+.findmodal .fmapnote .lg.you i { width: 8px; height: 8px; border-radius: 50%; background: #37d6e8; box-shadow: 0 0 8px rgba(55,214,232,.8); }
+.findmodal .fmapnote .lg.car .ic { width: 1.15em; height: 1.15em; color: #ffcaa8; }
+.findmodal .fmapnote .lgd { color: #9fb3c8; }
+.findmodal .ffoot[hidden] { display: none; }
 .findmodal .fcomp { position: relative; width: min(56cqmin, 460px); aspect-ratio: 1; display: flex;
   align-items: center; justify-content: center; margin: 4px 0 2px; }
 .findmodal .fring { position: absolute; inset: 0; border-radius: 50%;

@@ -1167,6 +1167,48 @@ ha-card.panel.fit .pills { width: 100%; max-width: none; }
 .findmodal .fdist b { font-size: clamp(32px, 7.2cqmin, 84px); line-height: 1; font-weight: 800; color: #fff;
   text-shadow: 0 0 24px rgba(55,214,232,.45); }
 .findmodal .fdist span { font-size: clamp(12px, 1.35cqmin, 17px); color: #9fb3c8; }
+/* 地图 / 罗盘 视图切换 */
+.findmodal .fviews { display: flex; gap: 8px; }
+.findmodal .fv { display: inline-flex; align-items: center; gap: 6px; padding: clamp(3px, .7cqmin, 7px) clamp(10px, 1.4cqmin, 16px);
+  border-radius: 999px; border: 1px solid rgba(255,255,255,.14); background: rgba(255,255,255,.04);
+  color: #9fb3c8; font-size: clamp(10px, 1.2cqmin, 14px); line-height: 1; cursor: pointer; }
+.findmodal .fv .ic { width: 1.1em; height: 1.1em; }
+.findmodal .fv.on { color: #eaf6ff; border-color: rgba(55,214,232,.55); background: rgba(55,214,232,.14);
+  box-shadow: 0 0 16px rgba(55,214,232,.18); }
+.findmodal .fview { display: flex; flex-direction: column; align-items: center; gap: clamp(6px, 1.2cqmin, 14px); width: 100%; }
+.findmodal .fview[hidden] { display: none; }
+.findmodal .fcompview .fcomp { margin: 0; }
+/* 找车地图：高德栅格瓦片静态取景，只标手机与车辆，不做拖动缩放 */
+.findmodal .fmap { position: relative; width: min(100%, 720px); height: clamp(150px, 34cqmin, 340px);
+  border-radius: 16px; overflow: hidden; background: #0b1624;
+  border: 1px solid rgba(120,160,200,.24); box-shadow: 0 12px 30px rgba(0,0,0,.35); }
+.findmodal .ftiles { position: absolute; inset: 0; }
+.findmodal .fmap::after { content: ""; position: absolute; inset: 0; pointer-events: none;
+  box-shadow: inset 0 0 46px rgba(3,10,18,.72); }
+.findmodal .ftiles img { position: absolute; width: 256px; height: 256px; opacity: 0;
+  user-select: none; -webkit-user-drag: none; filter: brightness(.86) saturate(.95) contrast(1.05);
+  animation: hc-mapfade .35s ease forwards; }
+@keyframes hc-mapfade { to { opacity: 1; } }
+.findmodal .flink { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.findmodal .flink line { stroke: rgba(55,214,232,.8); stroke-width: 2; stroke-dasharray: 7 7;
+  filter: drop-shadow(0 0 4px rgba(55,214,232,.55)); }
+.findmodal .fpin { position: absolute; transform: translate(-50%, -50%); pointer-events: none; }
+.findmodal .fpin.you { width: clamp(10px, 1.6cqmin, 16px); height: clamp(10px, 1.6cqmin, 16px); border-radius: 50%;
+  background: #37d6e8; box-shadow: 0 0 0 3px rgba(55,214,232,.18), 0 0 12px rgba(55,214,232,.9); }
+.findmodal .fpin.car { display: flex; align-items: center; justify-content: center;
+  width: clamp(20px, 3.2cqmin, 30px); height: clamp(20px, 3.2cqmin, 30px); border-radius: 50%;
+  background: rgba(8,20,32,.92); border: 1px solid rgba(255,138,76,.85); color: #ffcaa8;
+  box-shadow: 0 0 0 3px rgba(255,138,76,.14), 0 0 14px rgba(255,138,76,.35); }
+.findmodal .fpin.car .ic { width: 58%; height: 58%; }
+.findmodal .fattr { position: absolute; right: 5px; bottom: 3px; padding: 0 4px; border-radius: 4px;
+  font-size: 9px; color: rgba(210,230,245,.55); background: rgba(6,16,26,.55); }
+.findmodal .fmapnote { display: flex; align-items: center; gap: clamp(8px, 1.4cqmin, 16px); flex-wrap: wrap;
+  justify-content: center; font-size: clamp(10px, 1.2cqmin, 14px); color: #8ea6c0; }
+.findmodal .fmapnote .lg { display: inline-flex; align-items: center; gap: 5px; }
+.findmodal .fmapnote .lg.you i { width: 8px; height: 8px; border-radius: 50%; background: #37d6e8; box-shadow: 0 0 8px rgba(55,214,232,.8); }
+.findmodal .fmapnote .lg.car .ic { width: 1.15em; height: 1.15em; color: #ffcaa8; }
+.findmodal .fmapnote .lgd { color: #9fb3c8; }
+.findmodal .ffoot[hidden] { display: none; }
 .findmodal .fcomp { position: relative; width: min(56cqmin, 460px); aspect-ratio: 1; display: flex;
   align-items: center; justify-content: center; margin: 4px 0 2px; }
 .findmodal .fring { position: absolute; inset: 0; border-radius: 50%;
@@ -2420,7 +2462,10 @@ var HaCarCard = class extends HTMLElement {
     }
     this._findData = data;
     this._updateFind();
-    this._placeOverlay();
+    if (this._findOpen) {
+      cancelAnimationFrame(this._mapRaf);
+      this._mapRaf = requestAnimationFrame(() => this._paintFindMap(true));
+    }
     this._placeToast();
     cancelAnimationFrame(this._pt1);
     this._pt1 = requestAnimationFrame(() => {
@@ -2429,6 +2474,7 @@ var HaCarCard = class extends HTMLElement {
       this._pt2 = requestAnimationFrame(() => {
         this._placeOverlay();
         this._placeToast();
+        this._paintFindMap(false);
       });
     });
     clearTimeout(this._pt3);
@@ -3307,25 +3353,185 @@ var HaCarCard = class extends HTMLElement {
     const ok = d != null && bearing != null;
     const title = isEn(this._hass) ? "Find my car" : "找车";
     const floorH = this._floorStrip(data);
+    const en = isEn(this._hass);
+    const close = `<button class="fx" data-findclose type="button" aria-label="${esc(en ? "Close" : "关闭")}">✕</button>`;
     if (!ok) {
-      const en = isEn(this._hass);
       let note = en ? "Unable to get a location for this device or the car." : "未取得可用于定位的坐标。";
       if (!p.car) note = en ? "The car location entity has no latitude / longitude." : "车辆定位实体没有 latitude / longitude 属性。";
       else if (!loc.coords && this._netPending) note = en ? "Getting network location…" : "正在获取网络位置…";
       else note = en ? "Phone, network and logged-in-device locations are unavailable. Check the find-car entities." : "手机、网络和登录设备定位均不可用，请检查找车定位实体。";
-      return `<div class="findmodal" role="dialog" aria-label="${esc(title)}"><button class="fx" data-findclose type="button" aria-label="关闭">✕</button>
+      if (p.car) {
+        this._findView = "map";
+        return `<div class="findmodal" role="dialog" aria-label="${esc(title)}">${close}
+          <div class="fhead">${icon("pin")}${esc(title)}</div>${this._findMapPane()}
+          <div class="fnote">${esc(note)}</div>${floorH}</div>`;
+      }
+      return `<div class="findmodal" role="dialog" aria-label="${esc(title)}">${close}
         <div class="fhead">${icon("pin")}${esc(title)}</div>
         <div class="fnote">${note}</div>${floorH}</div>`;
     }
-    return `<div class="findmodal" role="dialog" aria-label="${esc(title)}"><button class="fx" data-findclose type="button" aria-label="关闭">✕</button>
+    const compassHidden = (this._findView || "map") === "compass" ? "" : " hidden";
+    return `<div class="findmodal" role="dialog" aria-label="${esc(title)}">${close}
       <div class="fhead">${icon("pin")}${esc(title)}</div>
-      <div class="fdist"><b data-fdist>${esc(this._distText(d))}</b><span>${isEn(this._hass) ? "away" : "距离"}</span></div>
-      <div class="fcomp"><i class="fring"></i><i class="farrow" data-farrow>${icon("nav")}</i><span class="fdot"></span></div>
-      <div class="fdir" data-fdir>${esc(this._dirText(bearing, null))}</div>
+      <div class="fdist"><b data-fdist>${esc(this._distText(d))}</b><span>${en ? "away" : "距离"}</span></div>
+      ${this._findTabs()}
+      <div class="fview fcompview" data-fviewpane="compass"${compassHidden}>
+        <div class="fcomp"><i class="fring"></i><i class="farrow" data-farrow>${icon("nav")}</i><span class="fdot"></span></div>
+        <div class="fdir" data-fdir>${esc(this._dirText(bearing, null))}</div>
+      </div>
+      ${this._findMapPane()}
       ${floorH}
-      <div class="ffoot"><button class="fperm" data-findperm type="button">${icon("gauge")}校准指南针</button>
-        <span class="facc" data-fstat>${esc(isEn(this._hass) ? "GPS bearing · compass" : "车辆方位 · 手机指南针")} · ${esc(this._findSourceText(loc.source))}</span></div>
-      <div class="fnote">${esc(loc.source === "phone" ? isEn(this._hass) ? "Hold the phone flat and point the top away from you." : "手机尽量水平，顶部朝向正前方；箭头会随手机转向。" : isEn(this._hass) ? "Using this device/network location; the arrow shows the car's absolute bearing. Phone compass is only available on mobile." : "当前使用本机/网络定位，箭头显示车辆绝对方位；手机指南针仅在手机端可用。")}</div></div>`;
+      <div class="ffoot" data-fcomp${compassHidden}><button class="fperm" data-findperm type="button">${icon("gauge")}${en ? "Calibrate compass" : "校准指南针"}</button>
+        <span class="facc" data-fstat>${esc(en ? "GPS bearing · compass" : "车辆方位 · 手机指南针")} · ${esc(this._findSourceText(loc.source))}</span></div>
+      <div class="fnote" data-fhint>${esc(this._findHint(loc.source))}</div></div>`;
+  }
+  _findTabs() {
+    const en = isEn(this._hass);
+    const cur = this._findView || "map";
+    return `<div class="fviews">
+      <button class="fv${cur === "map" ? " on" : ""}" data-fview="map" type="button">${icon("pin")}${esc(en ? "Map" : "地图")}</button>
+      <button class="fv${cur === "compass" ? " on" : ""}" data-fview="compass" type="button">${icon("nav")}${esc(en ? "Compass" : "罗盘")}</button>
+    </div>`;
+  }
+  _findHint(src) {
+    const en = isEn(this._hass);
+    if ((this._findView || "map") === "map") {
+      return en ? "Map tiles from AutoNavi, loaded only while this panel is open. The line is straight-line distance, not a route." : "地图瓦片来自高德，只在打开找车面板时加载；连线是直线距离，不是导航路线。";
+    }
+    return src === "phone" ? en ? "Hold the phone flat and point the top away from you." : "手机尽量水平，顶部朝向正前方；箭头会随手机转向。" : en ? "Using this device/network location; the arrow shows the car's absolute bearing. Phone compass is only available on mobile." : "当前使用本机/网络定位，箭头显示车辆绝对方位；手机指南针仅在手机端可用。";
+  }
+  _findMapPane() {
+    const hidden = (this._findView || "map") === "map" ? "" : " hidden";
+    return `<div class="fview fmapview" data-fviewpane="map"${hidden}>
+      <div class="fmap" data-fmap>
+        <div class="ftiles" data-ftiles></div>
+        <svg class="flink" data-flink aria-hidden="true"><line data-fline x1="0" y1="0" x2="0" y2="0"></line></svg>
+        <span class="fpin you" data-fyou hidden></span>
+        <span class="fpin car" data-fcar hidden>${icon("car")}</span>
+        <span class="fattr">© 高德地图</span>
+      </div>
+      <div class="fmapnote" data-fmapnote></div>
+    </div>`;
+  }
+  _setFindView(view) {
+    this._findView = view === "compass" ? "compass" : "map";
+    const modal = this._card ? this._card.querySelector(".findmodal") : null;
+    if (!modal) return;
+    modal.querySelectorAll("[data-fviewpane]").forEach((pane) => {
+      pane.hidden = pane.getAttribute("data-fviewpane") !== this._findView;
+    });
+    modal.querySelectorAll("[data-fview]").forEach((btn) => {
+      btn.classList.toggle("on", btn.getAttribute("data-fview") === this._findView);
+    });
+    const foot = modal.querySelector("[data-fcomp]");
+    if (foot) foot.hidden = this._findView !== "compass";
+    const hint = modal.querySelector("[data-fhint]");
+    if (hint) {
+      const loc = this._findData ? this._findLocation(this._findPoints(this._findData)) : null;
+      hint.textContent = this._findHint(loc ? loc.source : "");
+    }
+    if (this._findView === "map") this._paintFindMap(true);
+  }
+  // 高德栅格瓦片（webrd 子域，无需 Key），只按两点取景静态绘制，交互仍交给卡片本身
+  _paintFindMap(force) {
+    if (!this._findOpen || !this._findData) return;
+    if ((this._findView || "map") !== "map") return;
+    const modal = this._card ? this._card.querySelector(".findmodal") : null;
+    if (!modal) return;
+    const box = modal.querySelector("[data-fmap]");
+    const tiles = box ? box.querySelector("[data-ftiles]") : null;
+    if (!box || !tiles) return;
+    const w = Math.round(box.clientWidth);
+    const h = Math.round(box.clientHeight);
+    if (w < 60 || h < 60) return;
+    const p = this._findPoints(this._findData);
+    const loc = this._findLocation(p);
+    const me = loc.coords;
+    const car = p.car;
+    if (!me && !car) return;
+    const en = isEn(this._hass);
+    const proj = (lat, lng, z2) => {
+      const n2 = 256 * Math.pow(2, z2);
+      const x = (lng + 180) / 360 * n2;
+      const s = Math.min(Math.max(Math.sin(lat * Math.PI / 180), -0.9999), 0.9999);
+      const y = (0.5 - Math.log((1 + s) / (1 - s)) / (4 * Math.PI)) * n2;
+      return { x, y };
+    };
+    let z = 16;
+    if (me && car) {
+      const pad = Math.min(w, h) * 0.22;
+      for (z = 18; z >= 3; z--) {
+        const a = proj(me.lat, me.lon, z);
+        const b = proj(car.lat, car.lon, z);
+        if (Math.abs(a.x - b.x) <= Math.max(30, w - 2 * pad) && Math.abs(a.y - b.y) <= Math.max(30, h - 2 * pad)) break;
+      }
+      z = Math.max(3, Math.min(18, z));
+    }
+    const c0 = me && car ? { lat: (me.lat + car.lat) / 2, lon: (me.lon + car.lon) / 2 } : car || me;
+    const ctr = proj(c0.lat, c0.lon, z);
+    const tl = { x: ctr.x - w / 2, y: ctr.y - h / 2 };
+    const sig = [w, h, z, tl.x.toFixed(1), tl.y.toFixed(1)].join("|");
+    const n = Math.pow(2, z);
+    if (force || sig !== this._mapSig) {
+      this._mapSig = sig;
+      const parts = [];
+      const tx0 = Math.floor(tl.x / 256);
+      const tx1 = Math.floor((tl.x + w - 1) / 256);
+      const ty0 = Math.floor(tl.y / 256);
+      const ty1 = Math.floor((tl.y + h - 1) / 256);
+      for (let ty = ty0; ty <= ty1; ty++) {
+        if (ty < 0 || ty >= n) continue;
+        for (let tx = tx0; tx <= tx1; tx++) {
+          const wx = (tx % n + n) % n;
+          const url = `https://webrd0${wx % 4 + 1}.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=8&x=${wx}&y=${ty}&z=${z}`;
+          parts.push(`<img src="${url}" alt="" draggable="false" loading="eager" style="left:${Math.round(tx * 256 - tl.x)}px;top:${Math.round(ty * 256 - tl.y)}px">`);
+        }
+      }
+      tiles.innerHTML = parts.join("");
+    }
+    const at = (pt) => {
+      const q = proj(pt.lat, pt.lon, z);
+      return { x: q.x - tl.x, y: q.y - tl.y };
+    };
+    let youP = me ? at(me) : null;
+    const carP = car ? at(car) : null;
+    if (youP && carP && Math.abs(youP.x - carP.x) < 26 && Math.abs(youP.y - carP.y) < 26) {
+      youP = { x: youP.x - 16, y: youP.y - 12 };
+    }
+    const youEl = box.querySelector("[data-fyou]");
+    const carEl = box.querySelector("[data-fcar]");
+    const lineEl = box.querySelector("[data-fline]");
+    const linkEl = box.querySelector("[data-flink]");
+    const place = (el, pt) => {
+      if (!el) return;
+      el.hidden = !pt;
+      if (pt) {
+        el.style.left = Math.round(pt.x) + "px";
+        el.style.top = Math.round(pt.y) + "px";
+      }
+    };
+    place(youEl, youP);
+    place(carEl, carP);
+    if (lineEl && linkEl) {
+      const show = !!(youP && carP);
+      linkEl.style.display = show ? "" : "none";
+      if (show) {
+        lineEl.setAttribute("x1", Math.round(youP.x));
+        lineEl.setAttribute("y1", Math.round(youP.y));
+        lineEl.setAttribute("x2", Math.round(carP.x));
+        lineEl.setAttribute("y2", Math.round(carP.y));
+      }
+    }
+    const note = modal.querySelector("[data-fmapnote]");
+    if (note) {
+      const you = `<span class="lg you"><i></i>${esc(en ? "You" : "你")}</span>`;
+      const carLg = `<span class="lg car">${icon("car")}${esc(en ? "Car" : "车")}</span>`;
+      let txt = "";
+      if (me && car) txt = `<span class="lgd">${esc((en ? "Straight line " : "直线 ") + this._distText(this._distanceM(me, car)))}</span>`;
+      else if (car) txt = `<span class="lgd">${esc(en ? "Car only — no device location" : "仅车辆定位，本机没有可用定位")}</span>`;
+      else txt = `<span class="lgd">${esc(en ? "Device only — car coords missing" : "仅本机定位，车辆坐标缺失")}</span>`;
+      note.innerHTML = (me ? you : "") + (car ? carLg : "") + txt;
+    }
   }
   _dirText(bearing, heading) {
     const en = isEn(this._hass);
@@ -3495,6 +3701,7 @@ var HaCarCard = class extends HTMLElement {
   }
   _openFind() {
     this._findOpen = true;
+    if (!this._findView) this._findView = "map";
     this._heading = null;
     this._headingSrc = null;
     this._headingSamples = [];
@@ -4113,6 +4320,11 @@ var HaCarCard = class extends HTMLElement {
     const findPerm = ev.target.closest && ev.target.closest("[data-findperm]");
     if (findPerm) {
       this._askCompass();
+      return;
+    }
+    const viewBtn = ev.target.closest && ev.target.closest("[data-fview]");
+    if (viewBtn) {
+      this._setFindView(viewBtn.getAttribute("data-fview"));
       return;
     }
     const floorCal = ev.target.closest && ev.target.closest("[data-floorcal]");
@@ -4956,7 +5168,7 @@ var HaCarEditor = class extends HTMLElement {
 customElements.define("ha-car-editor", HaCarEditor);
 
 // src/main.js
-var VERSION = "2.6.0";
+var VERSION = "2.7.0";
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "ha-car",
