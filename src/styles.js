@@ -798,9 +798,9 @@ ha-card.panel.fit .pills { width: 100%; max-width: none; }
 .hmeta .door.pchip { flex: 0 0 auto; border-color: rgba(111,224,168,.28); background: rgba(111,224,168,.08); color: #8af0bd; }
 .hmeta .door.pchip.away { border-color: rgba(55,214,232,.26); background: rgba(55,214,232,.08); color: #8fe9f5; }
 .hmeta .door.pchip .addr { flex: 0 0 auto; overflow: visible; }
-.findmodal { position: absolute; inset: 0; z-index: 60; border-radius: var(--ha-card-border-radius, 28px); overflow: hidden; display: flex;
-  flex-direction: column; align-items: center; justify-content: center; gap: clamp(8px, 1.8cqmin, 20px);
-  padding: clamp(16px, 2.4cqmin, 30px); container-type: size;
+.findmodal { position: absolute; inset: 0; z-index: 60; border-radius: var(--ha-card-border-radius, 28px); overflow: hidden auto; display: flex;
+  flex-direction: column; align-items: center; justify-content: safe center; gap: clamp(6px, 1.2cqmin, 14px);
+  padding: clamp(14px, 2cqmin, 26px); container-type: size;
   background: radial-gradient(120% 90% at 50% 0%, #233a54 0%, #0b1624 58%, #070e17 100%);
   color: #eaf6ff; }
 .findmodal .fx { position: absolute; top: clamp(10px, 1.8cqmin, 22px); right: clamp(10px, 1.8cqmin, 22px);
@@ -815,18 +815,11 @@ ha-card.panel.fit .pills { width: 100%; max-width: none; }
   text-shadow: 0 0 24px rgba(55,214,232,.45); }
 .findmodal .fdist span { font-size: clamp(12px, 1.35cqmin, 17px); color: #9fb3c8; }
 /* 地图 / 罗盘 视图切换 */
-.findmodal .fviews { display: flex; gap: 8px; }
-.findmodal .fv { display: inline-flex; align-items: center; gap: 6px; padding: clamp(3px, .7cqmin, 7px) clamp(10px, 1.4cqmin, 16px);
-  border-radius: 999px; border: 1px solid rgba(255,255,255,.14); background: rgba(255,255,255,.04);
-  color: #9fb3c8; font-size: clamp(10px, 1.2cqmin, 14px); line-height: 1; cursor: pointer; }
-.findmodal .fv .ic { width: 1.1em; height: 1.1em; }
-.findmodal .fv.on { color: #eaf6ff; border-color: rgba(55,214,232,.55); background: rgba(55,214,232,.14);
-  box-shadow: 0 0 16px rgba(55,214,232,.18); }
 .findmodal .fview { display: flex; flex-direction: column; align-items: center; gap: clamp(6px, 1.2cqmin, 14px); width: 100%; }
 .findmodal .fview[hidden] { display: none; }
 .findmodal .fcompview .fcomp { margin: 0; }
 /* 找车地图：高德栅格瓦片静态取景，只标手机与车辆，不做拖动缩放 */
-.findmodal .fmap { position: relative; width: min(100%, 720px); height: clamp(150px, 34cqmin, 340px);
+.findmodal .fmap { position: relative; width: min(100%, 720px); height: clamp(140px, 26cqmin, 280px);
   border-radius: 16px; overflow: hidden; background: #0b1624;
   border: 1px solid rgba(120,160,200,.24); box-shadow: 0 12px 30px rgba(0,0,0,.35); }
 .findmodal .ftiles { position: absolute; inset: 0; }
@@ -856,7 +849,7 @@ ha-card.panel.fit .pills { width: 100%; max-width: none; }
 .findmodal .fmapnote .lg.car .ic { width: 1.15em; height: 1.15em; color: #ffcaa8; }
 .findmodal .fmapnote .lgd { color: #9fb3c8; }
 .findmodal .ffoot[hidden] { display: none; }
-.findmodal .fcomp { position: relative; width: min(56cqmin, 460px); aspect-ratio: 1; display: flex;
+.findmodal .fcomp { position: relative; width: min(40cqmin, 300px); aspect-ratio: 1; display: flex;
   align-items: center; justify-content: center; margin: 4px 0 2px; }
 .findmodal .fring { position: absolute; inset: 0; border-radius: 50%;
   border: 1px dashed rgba(55,214,232,.35); box-shadow: 0 0 0 10px rgba(55,214,232,.04) inset, 0 0 30px rgba(55,214,232,.12); }

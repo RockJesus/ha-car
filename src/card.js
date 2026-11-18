@@ -1923,7 +1923,6 @@ class HaCarCard extends HTMLElement {
       else note = en ? "Phone, network and logged-in-device locations are unavailable. Check the find-car entities." : "手机、网络和登录设备定位均不可用，请检查找车定位实体。";
       if (p.car) {
         // 有车坐标时仍给一张只标车的图，比纯文字更好定位
-        this._findView = "map";
         return `<div class="findmodal" role="dialog" aria-label="${esc(title)}">${close}
           <div class="fhead">${icon("pin")}${esc(title)}</div>${this._findMapPane()}
           <div class="fnote">${esc(note)}</div>${floorH}</div>`;
@@ -1932,46 +1931,34 @@ class HaCarCard extends HTMLElement {
         <div class="fhead">${icon("pin")}${esc(title)}</div>
         <div class="fnote">${note}</div>${floorH}</div>`;
     }
-    const compassHidden = (this._findView || "map") === "compass" ? "" : " hidden";
     return `<div class="findmodal" role="dialog" aria-label="${esc(title)}">${close}
       <div class="fhead">${icon("pin")}${esc(title)}</div>
       <div class="fdist"><b data-fdist>${esc(this._distText(d))}</b><span>${en ? "away" : "距离"}</span></div>
-      ${this._findTabs()}
-      <div class="fview fcompview" data-fviewpane="compass"${compassHidden}>
+      ${this._findMapPane()}
+      <div class="fview fcompview">
         <div class="fcomp"><i class="fring"></i><i class="farrow" data-farrow>${icon("nav")}</i><span class="fdot"></span></div>
         <div class="fdir" data-fdir>${esc(this._dirText(bearing, null))}</div>
       </div>
-      ${this._findMapPane()}
       ${floorH}
-      <div class="ffoot" data-fcomp${compassHidden}><button class="fperm" data-findperm type="button">${icon("gauge")}${en ? "Calibrate compass" : "校准指南针"}</button>
+      <div class="ffoot"><button class="fperm" data-findperm type="button">${icon("gauge")}${en ? "Calibrate compass" : "校准指南针"}</button>
         <span class="facc" data-fstat>${esc(en ? "GPS bearing · compass" : "车辆方位 · 手机指南针")} · ${esc(this._findSourceText(loc.source))}</span></div>
       <div class="fnote" data-fhint>${esc(this._findHint(loc.source))}</div></div>`;
   }
 
-  _findTabs() {
-    const en = isEn(this._hass);
-    const cur = this._findView || "map";
-    return `<div class="fviews">
-      <button class="fv${cur === "map" ? " on" : ""}" data-fview="map" type="button">${icon("pin")}${esc(en ? "Map" : "地图")}</button>
-      <button class="fv${cur === "compass" ? " on" : ""}" data-fview="compass" type="button">${icon("nav")}${esc(en ? "Compass" : "罗盘")}</button>
-    </div>`;
-  }
-
   _findHint(src) {
     const en = isEn(this._hass);
-    if ((this._findView || "map") === "map") {
+    if (src === "phone") {
       return en
-        ? "Map tiles from AutoNavi, loaded only while this panel is open. The line is straight-line distance, not a route."
-        : "地图瓦片来自高德，只在打开找车面板时加载；连线是直线距离，不是导航路线。";
+        ? "Map tiles from AutoNavi, loaded only while this panel is open; the line is straight-line distance. Hold the phone flat so the compass arrow follows it."
+        : "地图瓦片来自高德，只在打开时加载，连线是直线距离；罗盘箭头跟随手机朝向，手机尽量水平。";
     }
-    return src === "phone"
-      ? (en ? "Hold the phone flat and point the top away from you." : "手机尽量水平，顶部朝向正前方；箭头会随手机转向。")
-      : (en ? "Using this device/network location; the arrow shows the car's absolute bearing. Phone compass is only available on mobile." : "当前使用本机/网络定位，箭头显示车辆绝对方位；手机指南针仅在手机端可用。");
+    return en
+      ? "Map tiles from AutoNavi, loaded only while this panel is open; the line is straight-line distance. Compass shows the car's absolute bearing on this device."
+      : "地图瓦片来自高德，只在打开时加载，连线是直线距离；当前用本机/网络定位，箭头显示车辆绝对方位。";
   }
 
   _findMapPane() {
-    const hidden = (this._findView || "map") === "map" ? "" : " hidden";
-    return `<div class="fview fmapview" data-fviewpane="map"${hidden}>
+    return `<div class="fview fmapview">
       <div class="fmap" data-fmap>
         <div class="ftiles" data-ftiles></div>
         <svg class="flink" data-flink aria-hidden="true"><line data-fline x1="0" y1="0" x2="0" y2="0"></line></svg>
@@ -1983,30 +1970,9 @@ class HaCarCard extends HTMLElement {
     </div>`;
   }
 
-  _setFindView(view) {
-    this._findView = view === "compass" ? "compass" : "map";
-    const modal = this._card ? this._card.querySelector(".findmodal") : null;
-    if (!modal) return;
-    modal.querySelectorAll("[data-fviewpane]").forEach((pane) => {
-      pane.hidden = pane.getAttribute("data-fviewpane") !== this._findView;
-    });
-    modal.querySelectorAll("[data-fview]").forEach((btn) => {
-      btn.classList.toggle("on", btn.getAttribute("data-fview") === this._findView);
-    });
-    const foot = modal.querySelector("[data-fcomp]");
-    if (foot) foot.hidden = this._findView !== "compass";
-    const hint = modal.querySelector("[data-fhint]");
-    if (hint) {
-      const loc = this._findData ? this._findLocation(this._findPoints(this._findData)) : null;
-      hint.textContent = this._findHint(loc ? loc.source : "");
-    }
-    if (this._findView === "map") this._paintFindMap(true);
-  }
-
   // 高德栅格瓦片（webrd 子域，无需 Key），只按两点取景静态绘制，交互仍交给卡片本身
   _paintFindMap(force) {
     if (!this._findOpen || !this._findData) return;
-    if ((this._findView || "map") !== "map") return;
     const modal = this._card ? this._card.querySelector(".findmodal") : null;
     if (!modal) return;
     const box = modal.querySelector("[data-fmap]");
@@ -2271,7 +2237,6 @@ class HaCarCard extends HTMLElement {
 
   _openFind() {
     this._findOpen = true;
-    if (!this._findView) this._findView = "map";
     this._heading = null;
     this._headingSrc = null;
     this._headingSamples = [];
@@ -2927,11 +2892,6 @@ class HaCarCard extends HTMLElement {
     const findPerm = ev.target.closest && ev.target.closest("[data-findperm]");
     if (findPerm) {
       this._askCompass();
-      return;
-    }
-    const viewBtn = ev.target.closest && ev.target.closest("[data-fview]");
-    if (viewBtn) {
-      this._setFindView(viewBtn.getAttribute("data-fview"));
       return;
     }
     const floorCal = ev.target.closest && ev.target.closest("[data-floorcal]");
