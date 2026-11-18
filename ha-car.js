@@ -3233,9 +3233,9 @@ var HaCarCard = class extends HTMLElement {
         const hH = fit(capH, bodyT - ringT - gapHood + 8);
         const tH = fit(capT, ringB - bodyB);
         let hTop = bodyT - gapHood - hH;
-        if (hTop < ringT + 3) hTop = ringT + 3;
+        if (hTop < ringT + 10) hTop = ringT + 10;
         let tTop = bodyB + 4;
-        if (tTop + tH > ringB - 3) tTop = ringB - 3 - tH;
+        if (tTop + tH > ringB - 10) tTop = ringB - 10 - tH;
         capH.style.top = `${Math.round(hTop)}px`;
         capT.style.top = `${Math.round(tTop)}px`;
       }
@@ -3262,6 +3262,38 @@ var HaCarCard = class extends HTMLElement {
         else cy = Math.max(cy, midY + vGap / 2 + h / 2);
         card.style.top = `${Math.round(cy)}px`;
       });
+      {
+        const orb3 = this._wrap.querySelector(".orbit");
+        if (orb3) {
+          const ob = orb3.getBoundingClientRect();
+          const ocx = ob.left + ob.width / 2;
+          const ocy = ob.top + ob.height / 2;
+          const orr = ob.width / 2;
+          for (let pass = 0; pass < 8; pass++) {
+            let changed = false;
+            for (const el of this._wrap.querySelectorAll(".covl .loc")) {
+              const m = String(el.style.transform || "").match(/scale\(([\d.]+)\)/);
+              const base = m ? parseFloat(m[1]) : 1;
+              const b = el.getBoundingClientRect();
+              const far = Math.hypot(
+                Math.max(Math.abs(b.left - ocx), Math.abs(b.right - ocx)),
+                Math.max(Math.abs(b.top - ocy), Math.abs(b.bottom - ocy))
+              );
+              if (far > orr - 6) {
+                const ns = Math.max(base * 0.7, Math.min(base - 2e-3, base * ((orr - 9) / far)));
+                if (ns < base - 1e-3) {
+                  const top = el.classList.contains("cap");
+                  el.style.transform = `${top ? "translate(-50%, 0)" : "translate(-50%, -50%)"} scale(${ns.toFixed(3)})`;
+                  el.style.willChange = "transform";
+                  if (top) el.style.transformOrigin = "50% 0";
+                  changed = true;
+                }
+              }
+            }
+            if (!changed) break;
+          }
+        }
+      }
       const enp = this._wrap.querySelector(".enp");
       if (enp) {
         const rr = (ringR - ringL) / 2;
@@ -5342,7 +5374,7 @@ var HaCarEditor = class extends HTMLElement {
 customElements.define("ha-car-editor", HaCarEditor);
 
 // src/main.js
-var VERSION = "3.4.1";
+var VERSION = "3.4.2";
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "ha-car",
