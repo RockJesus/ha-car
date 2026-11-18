@@ -411,6 +411,7 @@ ha-card.has-photo .wrap { background-image:
   linear-gradient(180deg, rgba(5,10,18,.58) 0%, rgba(5,10,18,.78) 48%, rgba(4,8,14,.9) 100%),
   var(--hc-photo); background-size: cover; background-position: center; background-repeat: no-repeat; }
 .wrap { position: relative; z-index: 2; padding: 18px 16px 14px; display: flex; flex-direction: column; gap: 14px;
+  container-type: inline-size;
   background-image: var(--hc-bg,
     radial-gradient(120% 80% at 50% -10%, rgba(var(--hc-a,55,214,232),.14), transparent 58%),
     radial-gradient(70% 50% at 15% 105%, rgba(40,120,180,.10), transparent 70%),
@@ -477,7 +478,7 @@ h1 { margin: 0; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-s
   border-color: rgba(255,255,255,.055); }
 
 /* 主视觉：车图 + 双同心轨道 + 四枚发光节点（参考图同构） */
-.hero { position: relative; height: 224px; display: flex; align-items: center; justify-content: center;
+.hero { position: relative; height: clamp(224px, 52cqw, 430px); display: flex; align-items: center; justify-content: center;
   overflow: clip; overflow-clip-margin: 60px; --r: 92px; container-type: size; }
 .halo { position: absolute; inset: 0; border-radius: 50%; pointer-events: none;
   background: radial-gradient(46% 52% at 50% 50%, rgba(var(--hc-a,55,214,232),.20), rgba(var(--hc-a,55,214,232),.06) 46%, transparent 72%);
@@ -1087,6 +1088,19 @@ ha-card.preview .wrap {
   filter: hue-rotate(60deg) saturate(1.15) drop-shadow(0 0 7px rgba(185, 139, 255, .5))
     drop-shadow(0 2px 3px rgba(0, 0, 0, .7)); }
 .pv-act em { font-style: normal; font-size: 8.5px; color: rgba(206, 228, 242, .55); white-space: nowrap; }
+@media (max-width: 400px) {
+  .loc { min-width: max(84px, 38cqw); }
+  .loc .lh span { font-size: max(9px, 4.5cqw); }
+  .loc .lr b { font-size: max(10.5px, 4.8cqw); }
+  .loc .lr.tire b { font-size: max(10.5px, 5cqw); }
+  .loc .lr.tire b s { font-size: max(8px, 3.8cqw); }
+  .loc .lr .ri, .loc .lh .lk { width: max(9.5px, 5.2cqw); height: max(9.5px, 5.2cqw); }
+  .loc { padding: max(5px, 2.4cqw) max(6px, 2.8cqw); }
+  .cap { max-width: max(108px, 46cqw); }
+  .cap b { font-size: max(8px, 4.2cqw); }
+  .cap i { font-size: max(10.5px, 5.4cqw); }
+  .cap .ri { flex-basis: max(10px, 5.4cqw); height: max(10px, 5.4cqw); }
+}
 /* 超窄格子（<285px）去掉每格的 kPa 后缀，保证底部条一行装下 */
 @container (max-width: 285px) {
   .pv-tvec em { display: none; }
@@ -1154,7 +1168,7 @@ ha-card.panel.fit .pills { width: 100%; max-width: none; }
 @media (min-width: 860px) {
   :host { max-width: 860px; margin: 0 auto; }
   .wrap { padding: 24px 22px 18px; gap: 16px; }
-  .hero { height: 268px; --r: 104px; }
+  .hero { height: clamp(268px, 52cqw, 430px); --r: 104px; }
   .head { align-items: center; }
   /* 桌面/面板视图：车图在左，仪表与副指标在右 */
 
@@ -5145,7 +5159,7 @@ var HaCarEditor = class extends HTMLElement {
 customElements.define("ha-car-editor", HaCarEditor);
 
 // src/main.js
-var VERSION = "2.9.8";
+var VERSION = "2.9.9";
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "ha-car",
