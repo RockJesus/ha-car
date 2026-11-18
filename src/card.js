@@ -1882,6 +1882,35 @@ class HaCarCard extends HTMLElement {
     return `<span class="door fchip" data-find role="button" tabindex="0" title="${esc(tip)}">${icon("pin")}<span class="addr">${label}${dist}</span></span>`;
   }
 
+
+  // 围栏判定：命中任何 zone（含 zone.home）就显示「在 xxx」，否则显示「离家 1.2 km」
+  _zoneInfo(coords) {
+    if (!coords) return null;
+    const states = (this._hass && this._hass.states) || {};
+    const home = states["zone.home"] || null;
+    const hc = home ? this._ll(home) : null;
+    let inside = null;
+    for (const [id, st] of Object.entries(states)) {
+      if (!id.startsWith("zone.")) continue;
+      const c = this._ll(st);
+      if (!c) continue;
+      const r = Number(st.attributes && st.attributes.radius);
+      const rr = Number.isFinite(r) && r > 0 ? r : 100;
+      const d = this._distanceM(coords, c);
+      if (d == null || d > rr) continue;
+      const nm = (st.attributes && st.attributes.friendly_name) || id.split(".")[1];
+      // 更小的围栏优先（比如小区门比家更精确）
+      if (!inside || rr < inside.r) inside = { id, name: nm, r: rr };
+    }
+    if (inside) {
+      const homeLike = inside.id === "zone.home";
+      return { state: "in", name: inside.name, home: homeLike };
+    }
+    const dh = hc ? this._distanceM(coords, hc) : null;
+    return { state: "out", name: (home && home.attributes && home.attributes.friendly_name) || "家", dist: dh };
+  }
+
+
   _findModal(data) {
     const p = this._findPoints(data);
     const loc = this._findLocation(p);
@@ -1901,6 +1930,7 @@ class HaCarCard extends HTMLElement {
         return `<div class="findmodal" role="dialog" aria-label="${esc(title)}">${close}
           <div class="fmapview">${this._findMapPane()}</div>
           <div class="finfo"><div class="fhead">${icon("pin")}${esc(title)}</div>
+            ${this._zoneLine(p.car)}
             <div class="fnote">${esc(note)}</div></div></div>`;
       }
       return `<div class="findmodal" role="dialog" aria-label="${esc(title)}">${close}
@@ -1912,11 +1942,26 @@ class HaCarCard extends HTMLElement {
       <div class="finfo">
         <div class="fhead">${icon("pin")}${esc(title)}</div>
         <div class="fdist"><b data-fdist>${esc(this._distText(d))}</b><span>${en ? "away" : "距离"}</span></div>
+        ${this._zoneLine(p.car)}
         <div class="fcomp"><i class="frose" data-frose><i class="fring"></i><span class="fn" data-fn>N</span></i><i class="farrow" data-farrow>${icon("nav")}</i><span class="fcarpin" data-fcarpin hidden>${icon("car")}</span><span class="fdot"></span></div>
         <div class="ffoot"><button class="fperm" data-findperm type="button">${icon("gauge")}${en ? "Calibrate compass" : "校准指南针"}</button>
           <span class="facc" data-fstat>${esc(en ? "Compass" : "指南针")} · ${esc(this._findSourceText(loc.source))}</span></div>
         <div class="fnote" data-fhint>${esc(this._findHint(loc.source))}</div>
       </div></div>`;
+  }
+
+
+  _zoneLine(coords) {
+    const z = this._zoneInfo(coords);
+    if (!z) return "";
+    const en = isEn(this._hass);
+    if (z.state === "in") {
+      const txt = z.home ? (en ? "At home" : "在小区内") : (en ? `In ${z.name}` : `在 ${z.name}`);
+      return `<div class="fzone in">${icon("home")}<span>${esc(txt)}</span></div>`;
+    }
+    if (z.dist == null) return "";
+    const txt = en ? `${this._distText(z.dist)} from home` : `离家 ${this._distText(z.dist)}`;
+    return `<div class="fzone">${icon("home")}<span>${esc(txt)}</span></div>`;
   }
 
   _findHint(src) {
