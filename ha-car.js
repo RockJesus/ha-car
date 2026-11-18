@@ -913,6 +913,21 @@ ha-card.theme-glass .gauge { filter: drop-shadow(0 10px 22px rgba(0,0,0,.35)); }
 .loc.open { border-color: rgba(255,196,107,.5); background: linear-gradient(180deg, rgba(56,32,10,.9), rgba(28,17,7,.94));
   box-shadow: 0 2cqw 5cqw rgba(2,7,12,.5), 0 0 4cqw rgba(255,196,107,.14); }
 .loc.bad { border-color: rgba(255,145,130,.5); background: linear-gradient(180deg, rgba(58,18,18,.9), rgba(30,10,10,.94)); }
+/* 门/盖状态卡外形式样：chip_style = glass | pill | bar | liquid | line | cyber */
+.covl.cs-pill .loc, .covl.cs-pill .cap { border-radius: 999px; }
+.covl.cs-pill .loc { padding: 3cqw 4.2cqw; }
+.covl.cs-pill .cap { padding-left: 4cqw; padding-right: 3.4cqw; }
+.covl.cs-bar .loc, .covl.cs-bar .cap { border-left: 1.7cqw solid rgba(var(--hc-a,55,214,232),.85);
+  border-top-left-radius: 2.4cqw; border-bottom-left-radius: 2.4cqw;
+  box-shadow: -2.2cqw 0 5cqw -2.6cqw rgba(var(--hc-a,55,214,232),.75); }
+.covl.cs-liquid .loc, .covl.cs-liquid .cap {
+  background: linear-gradient(180deg, rgba(255,255,255,.17), rgba(255,255,255,.05));
+  border-color: rgba(255,255,255,.26); border-width: 1px; backdrop-filter: blur(12px);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.34), inset 0 -9cqw 18cqw -10cqw rgba(var(--hc-a,55,214,232),.35), 0 2cqw 5cqw -2cqw rgba(0,0,0,.55); }
+.covl.cs-line .loc, .covl.cs-line .cap { background: transparent; border: 1px solid rgba(170,205,232,.34); box-shadow: none; }
+.covl.cs-cyber .loc, .covl.cs-cyber .cap { border-radius: 0; border-color: rgba(var(--hc-a,55,214,232),.5);
+  box-shadow: 0 0 6cqw -2.4cqw rgba(var(--hc-a,55,214,232),.85);
+  clip-path: polygon(2.6cqw 0, calc(100% - 2.6cqw) 0, 100% 2.6cqw, 100% calc(100% - 2.6cqw), calc(100% - 2.6cqw) 100%, 2.6cqw 100%, 0 calc(100% - 2.6cqw), 0 2.6cqw); }
 /* 前后盖小卡：车头/车尾正上方与正下方，仍落在圆环内侧 */
 .cap { left: 50%; width: auto; max-width: 46cqw; flex-direction: row; align-items: center; justify-content: flex-start;
   gap: 1.6cqw; padding: 1.9cqw 2.6cqw 1.9cqw 3cqw; border-radius: 5.2cqw; }
@@ -1706,6 +1721,7 @@ function maskText(s) {
 // src/card.js
 var BG_RE = /^(?:https?:\/\/|\/\/|\/|data:image\/)/i;
 var BG_STYLES = ["radar", "grid", "glass", "cyber", "minimal"];
+var CHIP_STYLES = ["glass", "pill", "bar", "liquid", "line", "cyber"];
 var MEDIA_RE = /^media-source:\/\//i;
 function isMediaSource(v) {
   return MEDIA_RE.test(String(v || "").trim());
@@ -1857,6 +1873,7 @@ var DEFAULTS = {
   accent: "#37d6e8",
   theme: "midnight",
   bg_style: "radar",
+  chip_style: "glass",
   show_plate: true,
   privacy: false,
   image: "auto",
@@ -1955,6 +1972,7 @@ var HaCarCard = class extends HTMLElement {
     cfg.find.device = typeof cfg.find.device === "string" ? cfg.find.device : "";
     cfg.bg_image = typeof cfg.bg_image === "string" ? cfg.bg_image.trim() : "";
     cfg.bg_style = BG_STYLES.indexOf(cfg.bg_style) >= 0 ? cfg.bg_style : DEFAULTS.bg_style;
+    cfg.chip_style = CHIP_STYLES.indexOf(cfg.chip_style) >= 0 ? cfg.chip_style : DEFAULTS.chip_style;
     if (cfg.bg_image && !bgUrl(cfg.bg_image) && !isMediaSource(cfg.bg_image)) cfg.bg_image = "";
     cfg.hold_ms = clamp(Number(cfg.hold_ms) || DEFAULTS.hold_ms, 300, 3e3);
     cfg.blocks = normBlocks(cfg);
@@ -2808,7 +2826,7 @@ var HaCarCard = class extends HTMLElement {
       <span class="orbit${running ? " run" : ""}"><svg class="hring2" viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="49"/></svg><i class="node n1"></i><i class="node n2"></i><i class="node n3"></i><i class="node n4"></i></span>
       <span class="orbit o2"></span>
       ${imgUrl ? `<img class="carimg" src="${esc(imgUrl)}"${fbUrl ? ` data-fb="${esc(fbUrl)}"` : ""} alt="">` : `<div class="carph">${icon("car")}</div>`}
-      <div class="ground"></div><div class="covl">${inner}</div>${edge ? `<div class="cedge">${edge}</div>` : ""}</div>`;
+      <div class="ground"></div><div class="covl cs-${esc(this._config && this._config.chip_style || "glass")}">${inner}</div>${edge ? `<div class="cedge">${edge}</div>` : ""}</div>`;
   }
   // 俯视图状态层：每个车门一张聚合卡（门 + 窗 + 该轮位胎压），前后盖各一张小卡，全部落在圆环内侧
   _carOverlay(data, t, b, running) {
@@ -4402,6 +4420,8 @@ var L = {
   themeHint: "换一套漆面与背光配色，版式不变；下面的强调色会覆盖主题色。",
   bgStyle: "传感器背景",
   bgStyleHint: "换车图周围的环与光效，车图、状态卡与按钮不变。",
+  chipStyle: "状态卡样式",
+  chipStyleHint: "换四个车门与前后盖状态卡的外形，内容与尺寸不变。",
   items: "实体",
   addEntity: "添加实体",
   advanced: "高级：实体绑定",
@@ -4530,6 +4550,16 @@ var HaCarEditor = class extends HTMLElement {
           <option value="minimal">极简深空</option>
         </select>
         <p class="hint" style="margin-top:4px">${L.bgStyleHint}</p>
+        <label class="f" for="chipstyle">${L.chipStyle}</label>
+        <select class="tf" id="chipstyle">
+          <option value="glass">玻璃（默认）</option>
+          <option value="pill">全胶囊</option>
+          <option value="bar">侧光条</option>
+          <option value="liquid">液态玻璃</option>
+          <option value="line">线框极简</option>
+          <option value="cyber">赛博切角</option>
+        </select>
+        <p class="hint" style="margin-top:4px">${L.chipStyleHint}</p>
         <label class="f">${L.accent}</label>
         <div class="swatches" id="swatches">
           ${ACCENTS.map((c) => `<span class="swatch" data-color="${c}" style="background:${c}"></span>`).join("")}
@@ -4627,6 +4657,10 @@ var HaCarEditor = class extends HTMLElement {
     });
     q("imgurl").addEventListener("input", (e) => {
       this._config.image_url = e.target.value.trim();
+      this._emit();
+    });
+    q("chipstyle").addEventListener("change", (e) => {
+      this._config.chip_style = e.target.value;
       this._emit();
     });
     q("bgstyle").addEventListener("change", (e) => {
@@ -5004,6 +5038,7 @@ var HaCarEditor = class extends HTMLElement {
     q("imgurl").value = this._config.image_url || "";
     q("theme").value = this._config.theme || DEFAULTS.theme;
     q("bgstyle").value = this._config.bg_style || "radar";
+    q("chipstyle").value = this._config.chip_style || "glass";
     this._syncBackground();
     const picked = /^#[0-9a-f]{6}$/i.test(this._config.accent || "") ? this._config.accent : (THEMES[this._config.theme] || THEMES.midnight).accent;
     q("color").value = picked;
@@ -5068,7 +5103,7 @@ var HaCarEditor = class extends HTMLElement {
 customElements.define("ha-car-editor", HaCarEditor);
 
 // src/main.js
-var VERSION = "2.8.5";
+var VERSION = "2.9.0";
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "ha-car",

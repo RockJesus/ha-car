@@ -7,6 +7,7 @@ import { attrs, chargingNow, clamp, esc, fmtNum, isBad, maskAddr, maskPlate, mas
 
 const BG_RE = /^(?:https?:\/\/|\/\/|\/|data:image\/)/i;
 const BG_STYLES = ["radar", "grid", "glass", "cyber", "minimal"];
+const CHIP_STYLES = ["glass", "pill", "bar", "liquid", "line", "cyber"];
 
 const MEDIA_RE = /^media-source:\/\//i;
 export function isMediaSource(v) {
@@ -171,6 +172,7 @@ const DEFAULTS = {
   accent: "#37d6e8",
   theme: "midnight",
   bg_style: "radar",
+  chip_style: "glass",
   show_plate: true,
   privacy: false,
   image: "auto",
@@ -289,6 +291,7 @@ class HaCarCard extends HTMLElement {
     cfg.find.device = typeof cfg.find.device === "string" ? cfg.find.device : "";
     cfg.bg_image = typeof cfg.bg_image === "string" ? cfg.bg_image.trim() : "";
     cfg.bg_style = BG_STYLES.indexOf(cfg.bg_style) >= 0 ? cfg.bg_style : DEFAULTS.bg_style;
+    cfg.chip_style = CHIP_STYLES.indexOf(cfg.chip_style) >= 0 ? cfg.chip_style : DEFAULTS.chip_style;
     if (cfg.bg_image && !bgUrl(cfg.bg_image) && !isMediaSource(cfg.bg_image)) cfg.bg_image = "";
     cfg.hold_ms = clamp(Number(cfg.hold_ms) || DEFAULTS.hold_ms, 300, 3000);
     cfg.blocks = normBlocks(cfg);
@@ -1262,7 +1265,7 @@ class HaCarCard extends HTMLElement {
           ? `<img class="carimg" src="${esc(imgUrl)}"${fbUrl ? ` data-fb="${esc(fbUrl)}"` : ""} alt="">`
           : `<div class="carph">${icon("car")}</div>`
       }
-      <div class="ground"></div><div class="covl">${inner}</div>${edge ? `<div class="cedge">${edge}</div>` : ""}</div>`;
+      <div class="ground"></div><div class="covl cs-${esc((this._config && this._config.chip_style) || "glass")}">${inner}</div>${edge ? `<div class="cedge">${edge}</div>` : ""}</div>`;
   }
 
   // 俯视图状态层：每个车门一张聚合卡（门 + 窗 + 该轮位胎压），前后盖各一张小卡，全部落在圆环内侧

@@ -62,6 +62,8 @@ const L = {
   themeHint: "换一套漆面与背光配色，版式不变；下面的强调色会覆盖主题色。",
   bgStyle: "传感器背景",
   bgStyleHint: "换车图周围的环与光效，车图、状态卡与按钮不变。",
+  chipStyle: "状态卡样式",
+  chipStyleHint: "换四个车门与前后盖状态卡的外形，内容与尺寸不变。",
   items: "实体",
   addEntity: "添加实体",
   advanced: "高级：实体绑定",
@@ -194,6 +196,16 @@ class HaCarEditor extends HTMLElement {
           <option value="minimal">极简深空</option>
         </select>
         <p class="hint" style="margin-top:4px">${L.bgStyleHint}</p>
+        <label class="f" for="chipstyle">${L.chipStyle}</label>
+        <select class="tf" id="chipstyle">
+          <option value="glass">玻璃（默认）</option>
+          <option value="pill">全胶囊</option>
+          <option value="bar">侧光条</option>
+          <option value="liquid">液态玻璃</option>
+          <option value="line">线框极简</option>
+          <option value="cyber">赛博切角</option>
+        </select>
+        <p class="hint" style="margin-top:4px">${L.chipStyleHint}</p>
         <label class="f">${L.accent}</label>
         <div class="swatches" id="swatches">
           ${ACCENTS.map((c) => `<span class="swatch" data-color="${c}" style="background:${c}"></span>`).join("")}
@@ -300,6 +312,11 @@ class HaCarEditor extends HTMLElement {
 
     q("imgurl").addEventListener("input", (e) => {
       this._config.image_url = e.target.value.trim();
+      this._emit();
+    });
+
+    q("chipstyle").addEventListener("change", (e) => {
+      this._config.chip_style = e.target.value;
       this._emit();
     });
 
@@ -711,6 +728,7 @@ class HaCarEditor extends HTMLElement {
     q("imgurl").value = this._config.image_url || "";
     q("theme").value = this._config.theme || DEFAULTS.theme;
     q("bgstyle").value = this._config.bg_style || "radar";
+    q("chipstyle").value = this._config.chip_style || "glass";
     this._syncBackground();
     const picked = /^#[0-9a-f]{6}$/i.test(this._config.accent || "") ? this._config.accent : (THEMES[this._config.theme] || THEMES.midnight).accent;
     q("color").value = picked;

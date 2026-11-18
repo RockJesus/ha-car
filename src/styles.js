@@ -560,6 +560,21 @@ ha-card.theme-glass .gauge { filter: drop-shadow(0 10px 22px rgba(0,0,0,.35)); }
 .loc.open { border-color: rgba(255,196,107,.5); background: linear-gradient(180deg, rgba(56,32,10,.9), rgba(28,17,7,.94));
   box-shadow: 0 2cqw 5cqw rgba(2,7,12,.5), 0 0 4cqw rgba(255,196,107,.14); }
 .loc.bad { border-color: rgba(255,145,130,.5); background: linear-gradient(180deg, rgba(58,18,18,.9), rgba(30,10,10,.94)); }
+/* 门/盖状态卡外形式样：chip_style = glass | pill | bar | liquid | line | cyber */
+.covl.cs-pill .loc, .covl.cs-pill .cap { border-radius: 999px; }
+.covl.cs-pill .loc { padding: 3cqw 4.2cqw; }
+.covl.cs-pill .cap { padding-left: 4cqw; padding-right: 3.4cqw; }
+.covl.cs-bar .loc, .covl.cs-bar .cap { border-left: 1.7cqw solid rgba(var(--hc-a,55,214,232),.85);
+  border-top-left-radius: 2.4cqw; border-bottom-left-radius: 2.4cqw;
+  box-shadow: -2.2cqw 0 5cqw -2.6cqw rgba(var(--hc-a,55,214,232),.75); }
+.covl.cs-liquid .loc, .covl.cs-liquid .cap {
+  background: linear-gradient(180deg, rgba(255,255,255,.17), rgba(255,255,255,.05));
+  border-color: rgba(255,255,255,.26); border-width: 1px; backdrop-filter: blur(12px);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.34), inset 0 -9cqw 18cqw -10cqw rgba(var(--hc-a,55,214,232),.35), 0 2cqw 5cqw -2cqw rgba(0,0,0,.55); }
+.covl.cs-line .loc, .covl.cs-line .cap { background: transparent; border: 1px solid rgba(170,205,232,.34); box-shadow: none; }
+.covl.cs-cyber .loc, .covl.cs-cyber .cap { border-radius: 0; border-color: rgba(var(--hc-a,55,214,232),.5);
+  box-shadow: 0 0 6cqw -2.4cqw rgba(var(--hc-a,55,214,232),.85);
+  clip-path: polygon(2.6cqw 0, calc(100% - 2.6cqw) 0, 100% 2.6cqw, 100% calc(100% - 2.6cqw), calc(100% - 2.6cqw) 100%, 2.6cqw 100%, 0 calc(100% - 2.6cqw), 0 2.6cqw); }
 /* 前后盖小卡：车头/车尾正上方与正下方，仍落在圆环内侧 */
 .cap { left: 50%; width: auto; max-width: 46cqw; flex-direction: row; align-items: center; justify-content: flex-start;
   gap: 1.6cqw; padding: 1.9cqw 2.6cqw 1.9cqw 3cqw; border-radius: 5.2cqw; }
