@@ -1826,7 +1826,7 @@ class HaCarCard extends HTMLElement {
       <div class="finfo">
         <div class="fhead">${icon("pin")}${esc(title)}</div>
         <div class="fdist"><b data-fdist>${esc(this._distText(d))}</b><span>${en ? "away" : "距离"}</span></div>
-        <div class="fcomp"><i class="frose" data-frose><i class="fring"></i><span class="fn" data-fn>N</span></i><i class="farrow" data-farrow>${icon("nav")}</i><span class="fdot"></span></div>
+        <div class="fcomp"><i class="frose" data-frose><i class="fring"></i><span class="fn" data-fn>N</span></i><i class="farrow" data-farrow>${icon("nav")}</i><span class="fcarpin" data-fcarpin hidden>${icon("car")}</span><span class="fdot"></span></div>
         <div class="ffoot"><button class="fperm" data-findperm type="button">${icon("gauge")}${en ? "Calibrate compass" : "校准指南针"}</button>
           <span class="facc" data-fstat>${esc(en ? "Compass" : "指南针")} · ${esc(this._findSourceText(loc.source))}</span></div>
         <div class="fnote" data-fhint>${esc(this._findHint(loc.source))}</div>
@@ -2077,6 +2077,16 @@ class HaCarCard extends HTMLElement {
     const h = this._heading == null ? 0 : this._heading;
     const rel = this._heading == null ? bearing : (bearing - this._heading + 360) % 360;
     if (arrow) arrow.style.transform = `rotate(${rel}deg)`;
+    // 车标贴在罗盘环上、落在箭头指向的位置，图标本身保持正立
+    const carpin = q("[data-fcarpin]");
+    if (carpin) {
+      const ring = q(".fcomp");
+      const radius = ring ? Math.max(20, ring.clientWidth / 2 - 13) : 0;
+      const rad = (rel * Math.PI) / 180;
+      carpin.hidden = false;
+      carpin.style.left = `calc(50% + ${(Math.sin(rad) * radius).toFixed(1)}px)`;
+      carpin.style.top = `calc(50% - ${(Math.cos(rad) * radius).toFixed(1)}px)`;
+    }
     // 罗盘环整体反转手机朝向，让 N 实时停在正北；N 字再反向抵消，保持正立
     if (rose) rose.style.transform = `rotate(${-h}deg)`;
     if (fn) fn.style.transform = `translateX(-50%) rotate(${h}deg)`;

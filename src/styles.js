@@ -876,6 +876,11 @@ ha-card.panel.fit .pills { width: 100%; max-width: none; }
   width: 66%; height: 66%; transform-origin: 50% 50%; transition: none; color: #37d6e8; will-change: transform;
   filter: drop-shadow(0 0 18px rgba(55,214,232,.65)); }
 .findmodal .farrow .ic { width: 100%; height: 100%; }
+.findmodal .fcarpin { position: absolute; transform: translate(-50%, -50%); display: flex; align-items: center;
+  justify-content: center; width: clamp(18px, 2.9cqmin, 28px); height: clamp(18px, 2.9cqmin, 28px);
+  border-radius: 50%; background: rgba(8,20,32,.95); border: 1px solid rgba(255,138,76,.9); color: #ffcaa8;
+  box-shadow: 0 0 0 3px rgba(255,138,76,.16), 0 0 14px rgba(255,138,76,.45); pointer-events: none; }
+.findmodal .fcarpin .ic { width: 62%; height: 62%; }
 .findmodal .fdot { position: absolute; width: 7px; height: 7px; border-radius: 50%; background: rgba(55,214,232,.9);
   box-shadow: 0 0 10px rgba(55,214,232,.8); pointer-events: none; }
 .findmodal .ffoot { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: center; }

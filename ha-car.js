@@ -1229,6 +1229,11 @@ ha-card.panel.fit .pills { width: 100%; max-width: none; }
   width: 66%; height: 66%; transform-origin: 50% 50%; transition: none; color: #37d6e8; will-change: transform;
   filter: drop-shadow(0 0 18px rgba(55,214,232,.65)); }
 .findmodal .farrow .ic { width: 100%; height: 100%; }
+.findmodal .fcarpin { position: absolute; transform: translate(-50%, -50%); display: flex; align-items: center;
+  justify-content: center; width: clamp(18px, 2.9cqmin, 28px); height: clamp(18px, 2.9cqmin, 28px);
+  border-radius: 50%; background: rgba(8,20,32,.95); border: 1px solid rgba(255,138,76,.9); color: #ffcaa8;
+  box-shadow: 0 0 0 3px rgba(255,138,76,.16), 0 0 14px rgba(255,138,76,.45); pointer-events: none; }
+.findmodal .fcarpin .ic { width: 62%; height: 62%; }
 .findmodal .fdot { position: absolute; width: 7px; height: 7px; border-radius: 50%; background: rgba(55,214,232,.9);
   box-shadow: 0 0 10px rgba(55,214,232,.8); pointer-events: none; }
 .findmodal .ffoot { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: center; }
@@ -3265,7 +3270,7 @@ var HaCarCard = class extends HTMLElement {
       <div class="finfo">
         <div class="fhead">${icon("pin")}${esc(title)}</div>
         <div class="fdist"><b data-fdist>${esc(this._distText(d))}</b><span>${en ? "away" : "距离"}</span></div>
-        <div class="fcomp"><i class="frose" data-frose><i class="fring"></i><span class="fn" data-fn>N</span></i><i class="farrow" data-farrow>${icon("nav")}</i><span class="fdot"></span></div>
+        <div class="fcomp"><i class="frose" data-frose><i class="fring"></i><span class="fn" data-fn>N</span></i><i class="farrow" data-farrow>${icon("nav")}</i><span class="fcarpin" data-fcarpin hidden>${icon("car")}</span><span class="fdot"></span></div>
         <div class="ffoot"><button class="fperm" data-findperm type="button">${icon("gauge")}${en ? "Calibrate compass" : "校准指南针"}</button>
           <span class="facc" data-fstat>${esc(en ? "Compass" : "指南针")} · ${esc(this._findSourceText(loc.source))}</span></div>
         <div class="fnote" data-fhint>${esc(this._findHint(loc.source))}</div>
@@ -3507,6 +3512,15 @@ var HaCarCard = class extends HTMLElement {
     const h = this._heading == null ? 0 : this._heading;
     const rel = this._heading == null ? bearing : (bearing - this._heading + 360) % 360;
     if (arrow) arrow.style.transform = `rotate(${rel}deg)`;
+    const carpin = q("[data-fcarpin]");
+    if (carpin) {
+      const ring = q(".fcomp");
+      const radius = ring ? Math.max(20, ring.clientWidth / 2 - 13) : 0;
+      const rad = rel * Math.PI / 180;
+      carpin.hidden = false;
+      carpin.style.left = `calc(50% + ${(Math.sin(rad) * radius).toFixed(1)}px)`;
+      carpin.style.top = `calc(50% - ${(Math.cos(rad) * radius).toFixed(1)}px)`;
+    }
     if (rose) rose.style.transform = `rotate(${-h}deg)`;
     if (fn) fn.style.transform = `translateX(-50%) rotate(${h}deg)`;
     if (stat) {
@@ -4986,7 +5000,7 @@ var HaCarEditor = class extends HTMLElement {
 customElements.define("ha-car-editor", HaCarEditor);
 
 // src/main.js
-var VERSION = "2.8.1";
+var VERSION = "2.8.2";
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "ha-car",
