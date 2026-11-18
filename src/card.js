@@ -1941,8 +1941,7 @@ class HaCarCard extends HTMLElement {
       <div class="fmapview">${this._findMapPane()}</div>
       <div class="finfo">
         <div class="fhead">${icon("pin")}${esc(title)}</div>
-        <div class="fdist"><b data-fdist>${esc(this._distText(d))}</b><span>${en ? "away" : "距离"}</span></div>
-        ${this._zoneLine(p.car)}
+        <div class="fdist"><b data-fdist>${esc(this._distText(d))}</b><span>${en ? "away" : "距离"}</span>${this._zoneLine(p.car, true)}</div>
         <div class="fcomp"><i class="frose" data-frose><i class="fring"></i><span class="fn" data-fn>N</span></i><i class="farrow" data-farrow>${icon("nav")}</i><span class="fcarpin" data-fcarpin hidden>${icon("car")}</span><span class="fdot"></span></div>
         <div class="ffoot"><button class="fperm" data-findperm type="button">${icon("gauge")}${en ? "Calibrate compass" : "校准指南针"}</button>
           <span class="facc" data-fstat>${esc(en ? "Compass" : "指南针")} · ${esc(this._findSourceText(loc.source))}</span></div>
@@ -1951,17 +1950,17 @@ class HaCarCard extends HTMLElement {
   }
 
 
-  _zoneLine(coords) {
+  _zoneLine(coords, inline) {
     const z = this._zoneInfo(coords);
     if (!z) return "";
     const en = isEn(this._hass);
     if (z.state === "in") {
       const txt = z.home ? (en ? "At home" : "在小区内") : (en ? `In ${z.name}` : `在 ${z.name}`);
-      return `<div class="fzone in">${icon("home")}<span>${esc(txt)}</span></div>`;
+      return `<div class="fzone${inline ? " inline" : ""}${" in"}">${icon("home")}<span>${esc(txt)}</span></div>`;
     }
     if (z.dist == null) return "";
     const txt = en ? `${this._distText(z.dist)} from home` : `离家 ${this._distText(z.dist)}`;
-    return `<div class="fzone">${icon("home")}<span>${esc(txt)}</span></div>`;
+    return `<div class="fzone${inline ? " inline" : ""}">${icon("home")}<span>${esc(txt)}</span></div>`;
   }
 
   _findHint(src) {

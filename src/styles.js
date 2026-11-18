@@ -940,6 +940,9 @@ ha-card.panel.fit .pills { width: 100%; max-width: none; }
 .findmodal .fhead { display: flex; align-items: center; gap: 6px; font-size: clamp(13px, 1.5cqmin, 19px);
   color: #9fb3c8; letter-spacing: .12em; text-transform: uppercase; }
 .findmodal .fhead .ic { width: 1.15em; height: 1.15em; }
+.findmodal .fzone.inline { margin: 0 0 0 4px; align-self: center; font-size: clamp(10px, 1.1cqmin, 13px);
+  padding: 2px 8px; }
+.findmodal .fdist { flex-wrap: wrap; justify-content: center; }
 .findmodal .fzone { display: inline-flex; align-items: center; gap: 5px; margin: 0 0 8px;
   font-size: 11.5px; padding: 3px 9px; border-radius: 999px; border: 1px solid rgba(255,255,255,.12);
   background: rgba(255,255,255,.05); color: var(--secondary-text-color); }

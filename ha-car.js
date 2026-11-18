@@ -1293,6 +1293,9 @@ ha-card.panel.fit .pills { width: 100%; max-width: none; }
 .findmodal .fhead { display: flex; align-items: center; gap: 6px; font-size: clamp(13px, 1.5cqmin, 19px);
   color: #9fb3c8; letter-spacing: .12em; text-transform: uppercase; }
 .findmodal .fhead .ic { width: 1.15em; height: 1.15em; }
+.findmodal .fzone.inline { margin: 0 0 0 4px; align-self: center; font-size: clamp(10px, 1.1cqmin, 13px);
+  padding: 2px 8px; }
+.findmodal .fdist { flex-wrap: wrap; justify-content: center; }
 .findmodal .fzone { display: inline-flex; align-items: center; gap: 5px; margin: 0 0 8px;
   font-size: 11.5px; padding: 3px 9px; border-radius: 999px; border: 1px solid rgba(255,255,255,.12);
   background: rgba(255,255,255,.05); color: var(--secondary-text-color); }
@@ -3512,25 +3515,24 @@ var HaCarCard = class extends HTMLElement {
       <div class="fmapview">${this._findMapPane()}</div>
       <div class="finfo">
         <div class="fhead">${icon("pin")}${esc(title)}</div>
-        <div class="fdist"><b data-fdist>${esc(this._distText(d))}</b><span>${en ? "away" : "距离"}</span></div>
-        ${this._zoneLine(p.car)}
+        <div class="fdist"><b data-fdist>${esc(this._distText(d))}</b><span>${en ? "away" : "距离"}</span>${this._zoneLine(p.car, true)}</div>
         <div class="fcomp"><i class="frose" data-frose><i class="fring"></i><span class="fn" data-fn>N</span></i><i class="farrow" data-farrow>${icon("nav")}</i><span class="fcarpin" data-fcarpin hidden>${icon("car")}</span><span class="fdot"></span></div>
         <div class="ffoot"><button class="fperm" data-findperm type="button">${icon("gauge")}${en ? "Calibrate compass" : "校准指南针"}</button>
           <span class="facc" data-fstat>${esc(en ? "Compass" : "指南针")} · ${esc(this._findSourceText(loc.source))}</span></div>
         <div class="fnote" data-fhint>${esc(this._findHint(loc.source))}</div>
       </div></div>`;
   }
-  _zoneLine(coords) {
+  _zoneLine(coords, inline) {
     const z = this._zoneInfo(coords);
     if (!z) return "";
     const en = isEn(this._hass);
     if (z.state === "in") {
       const txt2 = z.home ? en ? "At home" : "在小区内" : en ? `In ${z.name}` : `在 ${z.name}`;
-      return `<div class="fzone in">${icon("home")}<span>${esc(txt2)}</span></div>`;
+      return `<div class="fzone${inline ? " inline" : ""}${" in"}">${icon("home")}<span>${esc(txt2)}</span></div>`;
     }
     if (z.dist == null) return "";
     const txt = en ? `${this._distText(z.dist)} from home` : `离家 ${this._distText(z.dist)}`;
-    return `<div class="fzone">${icon("home")}<span>${esc(txt)}</span></div>`;
+    return `<div class="fzone${inline ? " inline" : ""}">${icon("home")}<span>${esc(txt)}</span></div>`;
   }
   _findHint(src) {
     const en = isEn(this._hass);
@@ -5301,7 +5303,7 @@ var HaCarEditor = class extends HTMLElement {
 customElements.define("ha-car-editor", HaCarEditor);
 
 // src/main.js
-var VERSION = "3.3.0";
+var VERSION = "3.3.1";
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "ha-car",
