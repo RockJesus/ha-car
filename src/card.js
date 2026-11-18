@@ -360,7 +360,9 @@ class HaCarCard extends HTMLElement {
 
   // 分区视图里高度交给内容（rows: "auto"），避免固定行数比内容矮导致下半截被裁
   getGridOptions() {
-    return { columns: 12, min_columns: 6, rows: "auto" };
+    // rows 不能用 "auto"：分区视图会把它当成 0 行，卡片容器高度为 0、内容全被裁掉（v3.0.0 实测）
+    const rows = this._config && this._config.layout === "compact" ? 9 : 12;
+    return { columns: 12, min_columns: 6, rows };
   }
 
   getLayoutOptions() {

@@ -2080,7 +2080,8 @@ var HaCarCard = class extends HTMLElement {
   }
   // 分区视图里高度交给内容（rows: "auto"），避免固定行数比内容矮导致下半截被裁
   getGridOptions() {
-    return { columns: 12, min_columns: 6, rows: "auto" };
+    const rows = this._config && this._config.layout === "compact" ? 9 : 12;
+    return { columns: 12, min_columns: 6, rows };
   }
   getLayoutOptions() {
     const g = this.getGridOptions();
@@ -5171,7 +5172,7 @@ var HaCarEditor = class extends HTMLElement {
 customElements.define("ha-car-editor", HaCarEditor);
 
 // src/main.js
-var VERSION = "3.0.0";
+var VERSION = "3.0.1";
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "ha-car",
