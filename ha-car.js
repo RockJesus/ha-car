@@ -482,6 +482,55 @@ h1 { margin: 0; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-s
 .halo { position: absolute; inset: -20% -12% -10%; pointer-events: none;
   background: radial-gradient(46% 52% at 50% 50%, rgba(var(--hc-a,55,214,232),.20), rgba(var(--hc-a,55,214,232),.06) 46%, transparent 72%);
   filter: blur(2px); }
+/* 传感器区背景样式：radar / grid / glass / cyber / minimal */
+.hero.bs-grid::before, .hero.bs-glass::before, .hero.bs-cyber::before, .hero.bs-minimal::before,
+.hero.bs-grid::after, .hero.bs-cyber::after { content: ""; position: absolute; pointer-events: none; }
+.hero.bs-grid .halo, .hero.bs-glass .halo, .hero.bs-cyber .halo, .hero.bs-minimal .halo {
+  inset: auto; left: 50%; top: 50%; width: 92%; aspect-ratio: 1; border-radius: 50%;
+  transform: translate(-50%, -50%); }
+.hero.bs-grid .halo {
+  background-image: radial-gradient(rgba(var(--hc-a,55,214,232),.60) 1.8px, transparent 1.8px);
+  background-size: 19px 19px; filter: none;
+  -webkit-mask-image: radial-gradient(closest-side, #000 0%, #000 66%, transparent 92%);
+  mask-image: radial-gradient(closest-side, #000 0%, #000 66%, transparent 92%); }
+.hero.bs-grid .orbit { border-color: rgba(var(--hc-a,55,214,232),.26); box-shadow: inset 0 0 26px -16px rgba(var(--hc-a,55,214,232),.4); }
+.hero.bs-grid .orbit.o2 { border-style: dashed; }
+.hero.bs-grid::before { left: 50%; top: 50%; width: 92%; aspect-ratio: 1; border-radius: 50%; transform: translate(-50%, -50%); background:
+  linear-gradient(90deg, transparent calc(50% - .5px), rgba(var(--hc-a,55,214,232),.20) calc(50% - .5px), rgba(var(--hc-a,55,214,232),.20) calc(50% + .5px), transparent calc(50% + .5px)),
+  linear-gradient(0deg, transparent calc(50% - .5px), rgba(var(--hc-a,55,214,232),.20) calc(50% - .5px), rgba(var(--hc-a,55,214,232),.20) calc(50% + .5px), transparent calc(50% + .5px)); }
+
+.hero.bs-glass .halo { width: 88%;
+  background:
+    radial-gradient(60% 38% at 30% 16%, rgba(255,255,255,.14), transparent 62%),
+    radial-gradient(120% 100% at 50% 30%, rgba(var(--hc-a,55,214,232),.10), rgba(6,16,26,.16) 68%, transparent 78%);
+  border: 1px solid rgba(200,230,255,.16);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.16), inset 0 -26px 50px rgba(var(--hc-a,55,214,232),.10), 0 20px 46px rgba(0,0,0,.42);
+  backdrop-filter: blur(10px); filter: none; }
+.hero.bs-glass .orbit { border-color: rgba(200,230,255,.22); box-shadow: inset 0 1px 0 rgba(255,255,255,.2), 0 0 34px -18px rgba(var(--hc-a,55,214,232),.6); }
+.hero.bs-glass .orbit.o2 { border-color: rgba(200,230,255,.10); }
+.hero.bs-glass::before { left: 50%; top: 50%; width: 88%; aspect-ratio: 1; border-radius: 50%; transform: translate(-50%, -50%);
+  background: conic-gradient(from 150deg, rgba(var(--hc-a,55,214,232),.16), transparent 28%, transparent 66%, rgba(255,255,255,.10)); }
+
+.hero.bs-cyber .halo { width: 96%;
+  background: radial-gradient(52% 56% at 50% 50%, rgba(var(--hc-a,55,214,232),.28), transparent 70%); filter: blur(1px); }
+.hero.bs-cyber .orbit { border-color: rgba(var(--hc-a,55,214,232),.55); border-width: 1.5px;
+  box-shadow: 0 0 26px -8px rgba(var(--hc-a,55,214,232),.7), inset 0 0 30px -10px rgba(var(--hc-a,55,214,232),.45); }
+.hero.bs-cyber .orbit.o2 { border-color: rgba(var(--hc-a,55,214,232),.18); transform: translate(-50%,-50%) rotate(18deg); }
+.hero.bs-cyber::before { left: 50%; top: 50%; width: 96%; aspect-ratio: 1; border-radius: 50%; transform: translate(-50%, -50%); background:
+  conic-gradient(from 205deg, rgba(var(--hc-a,55,214,232),0) 0deg, rgba(var(--hc-a,55,214,232),.30) 18deg, rgba(var(--hc-a,55,214,232),0) 46deg,
+    rgba(var(--hc-a,55,214,232),0) 180deg, rgba(var(--hc-a,55,214,232),.22) 200deg, rgba(var(--hc-a,55,214,232),0) 232deg);
+  filter: blur(6px); }
+.hero.bs-cyber::after { left: 50%; top: 3%; width: 46px; height: 2px; border-radius: 2px; transform: translateX(-50%);
+  background: linear-gradient(90deg, transparent, rgba(var(--hc-a,55,214,232),.9)); box-shadow: 0 0 10px rgba(var(--hc-a,55,214,232),.8); }
+
+.hero.bs-minimal .halo { width: 74%;
+  background: radial-gradient(44% 48% at 50% 50%, rgba(var(--hc-a,55,214,232),.16), transparent 66%); filter: blur(8px); }
+.hero.bs-minimal .orbit { border-color: rgba(var(--hc-a,55,214,232),.10); box-shadow: none; }
+.hero.bs-minimal .orbit.o2 { display: none; }
+.hero.bs-minimal .node { opacity: .55; }
+.hero.bs-minimal::before { left: 50%; top: 50%; width: 74%; aspect-ratio: 1; border-radius: 50%; transform: translate(-50%, -50%);
+  background: radial-gradient(circle, rgba(6,14,22,.55), transparent 66%); }
+
 .orbit, .orbit.o2 { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
   border-radius: 50%; pointer-events: none; height: 94%; aspect-ratio: 1; width: auto; }
 .orbit { border: 1px solid rgba(70,220,240,.22);
@@ -1657,6 +1706,7 @@ function maskText(s) {
 
 // src/card.js
 var BG_RE = /^(?:https?:\/\/|\/\/|\/|data:image\/)/i;
+var BG_STYLES = ["radar", "grid", "glass", "cyber", "minimal"];
 var MEDIA_RE = /^media-source:\/\//i;
 function isMediaSource(v) {
   return MEDIA_RE.test(String(v || "").trim());
@@ -1807,6 +1857,7 @@ var DEFAULTS = {
   hold_ms: 2e3,
   accent: "#37d6e8",
   theme: "midnight",
+  bg_style: "radar",
   show_plate: true,
   privacy: false,
   image: "auto",
@@ -1904,6 +1955,7 @@ var HaCarCard = class extends HTMLElement {
     cfg.find.car = typeof cfg.find.car === "string" ? cfg.find.car : "";
     cfg.find.device = typeof cfg.find.device === "string" ? cfg.find.device : "";
     cfg.bg_image = typeof cfg.bg_image === "string" ? cfg.bg_image.trim() : "";
+    cfg.bg_style = BG_STYLES.indexOf(cfg.bg_style) >= 0 ? cfg.bg_style : DEFAULTS.bg_style;
     if (cfg.bg_image && !bgUrl(cfg.bg_image) && !isMediaSource(cfg.bg_image)) cfg.bg_image = "";
     cfg.hold_ms = clamp(Number(cfg.hold_ms) || DEFAULTS.hold_ms, 300, 3e3);
     cfg.blocks = normBlocks(cfg);
@@ -2752,7 +2804,8 @@ var HaCarCard = class extends HTMLElement {
   _hero(imgUrl, fbUrl, overlay, running) {
     const inner = typeof overlay === "string" ? overlay : overlay && overlay.inner || "";
     const edge = overlay && overlay.edge || "";
-    return `<div class="hero${running ? " run" : ""}"><div class="halo"></div>
+    const bg = this._config && this._config.bg_style || "radar";
+    return `<div class="hero bs-${esc(bg)}${running ? " run" : ""}"><div class="halo"></div>
       <span class="orbit${running ? " run" : ""}"><svg class="hring2" viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="49"/></svg><i class="node n1"></i><i class="node n2"></i><i class="node n3"></i><i class="node n4"></i></span>
       <span class="orbit o2"></span>
       ${imgUrl ? `<img class="carimg" src="${esc(imgUrl)}"${fbUrl ? ` data-fb="${esc(fbUrl)}"` : ""} alt="">` : `<div class="carph">${icon("car")}</div>`}
@@ -4348,6 +4401,8 @@ var L = {
   bgPlaceholder: "https://… 或 /local/…",
   theme: "主题",
   themeHint: "换一套漆面与背光配色，版式不变；下面的强调色会覆盖主题色。",
+  bgStyle: "传感器背景",
+  bgStyleHint: "换车图周围的环与光效，车图、状态卡与按钮不变。",
   items: "实体",
   addEntity: "添加实体",
   advanced: "高级：实体绑定",
@@ -4467,6 +4522,15 @@ var HaCarEditor = class extends HTMLElement {
           ${Object.entries(THEMES).map(([v, t]) => `<option value="${v}">${t.name}</option>`).join("")}
         </select>
         <p class="hint" style="margin-top:4px">${L.themeHint}</p>
+        <label class="f" for="bgstyle">${L.bgStyle}</label>
+        <select class="tf" id="bgstyle">
+          <option value="radar">雷达同心环</option>
+          <option value="grid">点阵网格 HUD</option>
+          <option value="glass">液态玻璃</option>
+          <option value="cyber">赛博脉冲</option>
+          <option value="minimal">极简深空</option>
+        </select>
+        <p class="hint" style="margin-top:4px">${L.bgStyleHint}</p>
         <label class="f">${L.accent}</label>
         <div class="swatches" id="swatches">
           ${ACCENTS.map((c) => `<span class="swatch" data-color="${c}" style="background:${c}"></span>`).join("")}
@@ -4564,6 +4628,10 @@ var HaCarEditor = class extends HTMLElement {
     });
     q("imgurl").addEventListener("input", (e) => {
       this._config.image_url = e.target.value.trim();
+      this._emit();
+    });
+    q("bgstyle").addEventListener("change", (e) => {
+      this._config.bg_style = e.target.value;
       this._emit();
     });
     q("theme").addEventListener("change", (e) => {
@@ -4936,6 +5004,7 @@ var HaCarEditor = class extends HTMLElement {
     q("imgurl").style.display = this._config.image === "custom" ? "block" : "none";
     q("imgurl").value = this._config.image_url || "";
     q("theme").value = this._config.theme || DEFAULTS.theme;
+    q("bgstyle").value = this._config.bg_style || "radar";
     this._syncBackground();
     const picked = /^#[0-9a-f]{6}$/i.test(this._config.accent || "") ? this._config.accent : (THEMES[this._config.theme] || THEMES.midnight).accent;
     q("color").value = picked;
@@ -5000,7 +5069,7 @@ var HaCarEditor = class extends HTMLElement {
 customElements.define("ha-car-editor", HaCarEditor);
 
 // src/main.js
-var VERSION = "2.8.2";
+var VERSION = "2.8.3";
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "ha-car",

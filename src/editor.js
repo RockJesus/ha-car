@@ -60,6 +60,8 @@ const L = {
   bgPlaceholder: "https://… 或 /local/…",
   theme: "主题",
   themeHint: "换一套漆面与背光配色，版式不变；下面的强调色会覆盖主题色。",
+  bgStyle: "传感器背景",
+  bgStyleHint: "换车图周围的环与光效，车图、状态卡与按钮不变。",
   items: "实体",
   addEntity: "添加实体",
   advanced: "高级：实体绑定",
@@ -183,6 +185,15 @@ class HaCarEditor extends HTMLElement {
           ${Object.entries(THEMES).map(([v, t]) => `<option value="${v}">${t.name}</option>`).join("")}
         </select>
         <p class="hint" style="margin-top:4px">${L.themeHint}</p>
+        <label class="f" for="bgstyle">${L.bgStyle}</label>
+        <select class="tf" id="bgstyle">
+          <option value="radar">雷达同心环</option>
+          <option value="grid">点阵网格 HUD</option>
+          <option value="glass">液态玻璃</option>
+          <option value="cyber">赛博脉冲</option>
+          <option value="minimal">极简深空</option>
+        </select>
+        <p class="hint" style="margin-top:4px">${L.bgStyleHint}</p>
         <label class="f">${L.accent}</label>
         <div class="swatches" id="swatches">
           ${ACCENTS.map((c) => `<span class="swatch" data-color="${c}" style="background:${c}"></span>`).join("")}
@@ -289,6 +300,11 @@ class HaCarEditor extends HTMLElement {
 
     q("imgurl").addEventListener("input", (e) => {
       this._config.image_url = e.target.value.trim();
+      this._emit();
+    });
+
+    q("bgstyle").addEventListener("change", (e) => {
+      this._config.bg_style = e.target.value;
       this._emit();
     });
 
@@ -694,6 +710,7 @@ class HaCarEditor extends HTMLElement {
     q("imgurl").style.display = this._config.image === "custom" ? "block" : "none";
     q("imgurl").value = this._config.image_url || "";
     q("theme").value = this._config.theme || DEFAULTS.theme;
+    q("bgstyle").value = this._config.bg_style || "radar";
     this._syncBackground();
     const picked = /^#[0-9a-f]{6}$/i.test(this._config.accent || "") ? this._config.accent : (THEMES[this._config.theme] || THEMES.midnight).accent;
     q("color").value = picked;

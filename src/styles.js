@@ -129,6 +129,55 @@ h1 { margin: 0; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-s
 .halo { position: absolute; inset: -20% -12% -10%; pointer-events: none;
   background: radial-gradient(46% 52% at 50% 50%, rgba(var(--hc-a,55,214,232),.20), rgba(var(--hc-a,55,214,232),.06) 46%, transparent 72%);
   filter: blur(2px); }
+/* 传感器区背景样式：radar / grid / glass / cyber / minimal */
+.hero.bs-grid::before, .hero.bs-glass::before, .hero.bs-cyber::before, .hero.bs-minimal::before,
+.hero.bs-grid::after, .hero.bs-cyber::after { content: ""; position: absolute; pointer-events: none; }
+.hero.bs-grid .halo, .hero.bs-glass .halo, .hero.bs-cyber .halo, .hero.bs-minimal .halo {
+  inset: auto; left: 50%; top: 50%; width: 92%; aspect-ratio: 1; border-radius: 50%;
+  transform: translate(-50%, -50%); }
+.hero.bs-grid .halo {
+  background-image: radial-gradient(rgba(var(--hc-a,55,214,232),.60) 1.8px, transparent 1.8px);
+  background-size: 19px 19px; filter: none;
+  -webkit-mask-image: radial-gradient(closest-side, #000 0%, #000 66%, transparent 92%);
+  mask-image: radial-gradient(closest-side, #000 0%, #000 66%, transparent 92%); }
+.hero.bs-grid .orbit { border-color: rgba(var(--hc-a,55,214,232),.26); box-shadow: inset 0 0 26px -16px rgba(var(--hc-a,55,214,232),.4); }
+.hero.bs-grid .orbit.o2 { border-style: dashed; }
+.hero.bs-grid::before { left: 50%; top: 50%; width: 92%; aspect-ratio: 1; border-radius: 50%; transform: translate(-50%, -50%); background:
+  linear-gradient(90deg, transparent calc(50% - .5px), rgba(var(--hc-a,55,214,232),.20) calc(50% - .5px), rgba(var(--hc-a,55,214,232),.20) calc(50% + .5px), transparent calc(50% + .5px)),
+  linear-gradient(0deg, transparent calc(50% - .5px), rgba(var(--hc-a,55,214,232),.20) calc(50% - .5px), rgba(var(--hc-a,55,214,232),.20) calc(50% + .5px), transparent calc(50% + .5px)); }
+
+.hero.bs-glass .halo { width: 88%;
+  background:
+    radial-gradient(60% 38% at 30% 16%, rgba(255,255,255,.14), transparent 62%),
+    radial-gradient(120% 100% at 50% 30%, rgba(var(--hc-a,55,214,232),.10), rgba(6,16,26,.16) 68%, transparent 78%);
+  border: 1px solid rgba(200,230,255,.16);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.16), inset 0 -26px 50px rgba(var(--hc-a,55,214,232),.10), 0 20px 46px rgba(0,0,0,.42);
+  backdrop-filter: blur(10px); filter: none; }
+.hero.bs-glass .orbit { border-color: rgba(200,230,255,.22); box-shadow: inset 0 1px 0 rgba(255,255,255,.2), 0 0 34px -18px rgba(var(--hc-a,55,214,232),.6); }
+.hero.bs-glass .orbit.o2 { border-color: rgba(200,230,255,.10); }
+.hero.bs-glass::before { left: 50%; top: 50%; width: 88%; aspect-ratio: 1; border-radius: 50%; transform: translate(-50%, -50%);
+  background: conic-gradient(from 150deg, rgba(var(--hc-a,55,214,232),.16), transparent 28%, transparent 66%, rgba(255,255,255,.10)); }
+
+.hero.bs-cyber .halo { width: 96%;
+  background: radial-gradient(52% 56% at 50% 50%, rgba(var(--hc-a,55,214,232),.28), transparent 70%); filter: blur(1px); }
+.hero.bs-cyber .orbit { border-color: rgba(var(--hc-a,55,214,232),.55); border-width: 1.5px;
+  box-shadow: 0 0 26px -8px rgba(var(--hc-a,55,214,232),.7), inset 0 0 30px -10px rgba(var(--hc-a,55,214,232),.45); }
+.hero.bs-cyber .orbit.o2 { border-color: rgba(var(--hc-a,55,214,232),.18); transform: translate(-50%,-50%) rotate(18deg); }
+.hero.bs-cyber::before { left: 50%; top: 50%; width: 96%; aspect-ratio: 1; border-radius: 50%; transform: translate(-50%, -50%); background:
+  conic-gradient(from 205deg, rgba(var(--hc-a,55,214,232),0) 0deg, rgba(var(--hc-a,55,214,232),.30) 18deg, rgba(var(--hc-a,55,214,232),0) 46deg,
+    rgba(var(--hc-a,55,214,232),0) 180deg, rgba(var(--hc-a,55,214,232),.22) 200deg, rgba(var(--hc-a,55,214,232),0) 232deg);
+  filter: blur(6px); }
+.hero.bs-cyber::after { left: 50%; top: 3%; width: 46px; height: 2px; border-radius: 2px; transform: translateX(-50%);
+  background: linear-gradient(90deg, transparent, rgba(var(--hc-a,55,214,232),.9)); box-shadow: 0 0 10px rgba(var(--hc-a,55,214,232),.8); }
+
+.hero.bs-minimal .halo { width: 74%;
+  background: radial-gradient(44% 48% at 50% 50%, rgba(var(--hc-a,55,214,232),.16), transparent 66%); filter: blur(8px); }
+.hero.bs-minimal .orbit { border-color: rgba(var(--hc-a,55,214,232),.10); box-shadow: none; }
+.hero.bs-minimal .orbit.o2 { display: none; }
+.hero.bs-minimal .node { opacity: .55; }
+.hero.bs-minimal::before { left: 50%; top: 50%; width: 74%; aspect-ratio: 1; border-radius: 50%; transform: translate(-50%, -50%);
+  background: radial-gradient(circle, rgba(6,14,22,.55), transparent 66%); }
+
 .orbit, .orbit.o2 { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
   border-radius: 50%; pointer-events: none; height: 94%; aspect-ratio: 1; width: auto; }
 .orbit { border: 1px solid rgba(70,220,240,.22);

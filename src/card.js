@@ -6,6 +6,8 @@ import { dict, isEn } from "./strings.js";
 import { attrs, chargingNow, clamp, esc, fmtNum, isBad, maskAddr, maskPlate, maskText, normLock, normOpen, normTire, num, relTime, text } from "./util.js";
 
 const BG_RE = /^(?:https?:\/\/|\/\/|\/|data:image\/)/i;
+const BG_STYLES = ["radar", "grid", "glass", "cyber", "minimal"];
+
 const MEDIA_RE = /^media-source:\/\//i;
 export function isMediaSource(v) {
   return MEDIA_RE.test(String(v || "").trim());
@@ -168,6 +170,7 @@ const DEFAULTS = {
   hold_ms: 2000,
   accent: "#37d6e8",
   theme: "midnight",
+  bg_style: "radar",
   show_plate: true,
   privacy: false,
   image: "auto",
@@ -285,6 +288,7 @@ class HaCarCard extends HTMLElement {
     cfg.find.car = typeof cfg.find.car === "string" ? cfg.find.car : "";
     cfg.find.device = typeof cfg.find.device === "string" ? cfg.find.device : "";
     cfg.bg_image = typeof cfg.bg_image === "string" ? cfg.bg_image.trim() : "";
+    cfg.bg_style = BG_STYLES.indexOf(cfg.bg_style) >= 0 ? cfg.bg_style : DEFAULTS.bg_style;
     if (cfg.bg_image && !bgUrl(cfg.bg_image) && !isMediaSource(cfg.bg_image)) cfg.bg_image = "";
     cfg.hold_ms = clamp(Number(cfg.hold_ms) || DEFAULTS.hold_ms, 300, 3000);
     cfg.blocks = normBlocks(cfg);
@@ -1249,7 +1253,8 @@ class HaCarCard extends HTMLElement {
   _hero(imgUrl, fbUrl, overlay, running) {
     const inner = typeof overlay === "string" ? overlay : (overlay && overlay.inner) || "";
     const edge = (overlay && overlay.edge) || "";
-    return `<div class="hero${running ? " run" : ""}"><div class="halo"></div>
+    const bg = (this._config && this._config.bg_style) || "radar";
+    return `<div class="hero bs-${esc(bg)}${running ? " run" : ""}"><div class="halo"></div>
       <span class="orbit${running ? " run" : ""}"><svg class="hring2" viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="49"/></svg><i class="node n1"></i><i class="node n2"></i><i class="node n3"></i><i class="node n4"></i></span>
       <span class="orbit o2"></span>
       ${
