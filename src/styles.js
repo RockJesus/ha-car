@@ -795,9 +795,6 @@ ha-card.panel.fit .pills { width: 100%; max-width: none; }
   background: rgba(55,214,232,.10); }
 .hmeta .door.fchip:hover { background: rgba(55,214,232,.18); }
 .hmeta .door.fchip .addr { flex: 0 0 auto; overflow: visible; }
-.hmeta .door.ffloor { border-color: rgba(125,166,255,.30); background: rgba(125,166,255,.09); color: #b8d0ff; }
-.hmeta .door.ffloor:hover { background: rgba(125,166,255,.17); }
-.hmeta .door.ffloor .addr { flex: 0 0 auto; overflow: visible; }
 .hmeta .door.pchip { flex: 0 0 auto; border-color: rgba(111,224,168,.28); background: rgba(111,224,168,.08); color: #8af0bd; }
 .hmeta .door.pchip.away { border-color: rgba(55,214,232,.26); background: rgba(55,214,232,.08); color: #8fe9f5; }
 .hmeta .door.pchip .addr { flex: 0 0 auto; overflow: visible; }

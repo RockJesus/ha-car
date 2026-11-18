@@ -1166,9 +1166,9 @@ class HaCarCard extends HTMLElement {
           const syncH = this._baseline(data, t, b);
           const placeH = compact ? "" : this._placeChip(b, data);
           const findH = compact ? "" : this._findChip(data);
-          const floorH = compact ? "" : this._floorChip(data);
+          // 楼层只在找车面板里展示，卡片正面不出现楼层胶囊
           const extra = this._extraChips(b, data, t, ["location", "place", "sync"]);
-          if (locH || syncH || placeH || findH || floorH || extra) html = `<div class="b-meta"><div class="hmeta">${locH}${placeH}${findH}${floorH}${syncH}</div>${extra}</div>`;
+          if (locH || syncH || placeH || findH || extra) html = `<div class="b-meta"><div class="hmeta">${locH}${placeH}${findH}${syncH}</div>${extra}</div>`;
           break;
         }
         case "hero": {
@@ -1705,19 +1705,6 @@ class HaCarCard extends HTMLElement {
       show: !!(p != null || car),
       calibrated: p != null && base != null,
     };
-  }
-
-  _floorChip(data) {
-    const fd = this._floorData(data);
-    if (!fd.show) return "";
-    const en = isEn(this._hass);
-    let label = "";
-    if (fd.phoneText && fd.carText) label = `${fd.phoneText}→${fd.carText}`;
-    else if (fd.carText) label = (en ? "Car " : "车 ") + fd.carText;
-    else if (fd.phoneText) label = `${fd.phoneText}→?`;
-    if (!label) return "";
-    const tip = en ? "Open find-car panel · floor" : "打开找车面板 · 楼层";
-    return `<span class="door fchip ffloor" data-floor role="button" tabindex="0" title="${esc(tip)}">${icon("home")}<span class="addr">${esc(label)}</span></span>`;
   }
 
   _floorStrip(data) {
@@ -2775,11 +2762,6 @@ class HaCarCard extends HTMLElement {
     }
     const findBtn = ev.target.closest && ev.target.closest("[data-find]");
     if (findBtn) {
-      this._openFind();
-      return;
-    }
-    const floorBtn = ev.target.closest && ev.target.closest("[data-floor]");
-    if (floorBtn) {
       this._openFind();
       return;
     }
