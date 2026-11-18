@@ -478,8 +478,8 @@ h1 { margin: 0; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-s
 
 /* 主视觉：车图 + 双同心轨道 + 四枚发光节点（参考图同构） */
 .hero { position: relative; height: 224px; display: flex; align-items: center; justify-content: center;
-  overflow: clip; overflow-clip-margin: 44px; --r: 92px; container-type: size; }
-.halo { position: absolute; inset: -20% -12% -10%; pointer-events: none;
+  overflow: clip; overflow-clip-margin: 60px; --r: 92px; container-type: size; }
+.halo { position: absolute; inset: 0; border-radius: 50%; pointer-events: none;
   background: radial-gradient(46% 52% at 50% 50%, rgba(var(--hc-a,55,214,232),.20), rgba(var(--hc-a,55,214,232),.06) 46%, transparent 72%);
   filter: blur(2px); }
 /* 传感器区背景样式：radar / grid / glass / cyber / minimal */
@@ -495,7 +495,7 @@ h1 { margin: 0; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-s
   mask-image: radial-gradient(closest-side, #000 0%, #000 66%, transparent 92%); }
 .hero.bs-grid .orbit { border-color: rgba(var(--hc-a,55,214,232),.26); box-shadow: inset 0 0 26px -16px rgba(var(--hc-a,55,214,232),.4); }
 .hero.bs-grid .orbit.o2 { border-style: dashed; }
-.hero.bs-grid::before { left: 50%; top: 50%; width: 92%; aspect-ratio: 1; border-radius: 50%; transform: translate(-50%, -50%); background:
+.hero.bs-grid::before { left: 50%; top: 50%; width: min(92%, 92cqh); aspect-ratio: 1; border-radius: 50%; transform: translate(-50%, -50%); background:
   linear-gradient(90deg, transparent calc(50% - .5px), rgba(var(--hc-a,55,214,232),.20) calc(50% - .5px), rgba(var(--hc-a,55,214,232),.20) calc(50% + .5px), transparent calc(50% + .5px)),
   linear-gradient(0deg, transparent calc(50% - .5px), rgba(var(--hc-a,55,214,232),.20) calc(50% - .5px), rgba(var(--hc-a,55,214,232),.20) calc(50% + .5px), transparent calc(50% + .5px)); }
 
@@ -531,10 +531,10 @@ h1 { margin: 0; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-s
   background: radial-gradient(circle, rgba(6,14,22,.55), transparent 66%); }
 
 .orbit, .orbit.o2 { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
-  border-radius: 50%; pointer-events: none; width: 94%; height: auto; aspect-ratio: 1; }
+  border-radius: 50%; pointer-events: none; width: min(94%, 94cqh); height: auto; aspect-ratio: 1; }
 .orbit { border: 1px solid rgba(70,220,240,.22);
   box-shadow: inset 0 0 34px -14px rgba(var(--hc-a,55,214,232),.55), 0 0 24px -16px rgba(var(--hc-a,55,214,232),.5); }
-.orbit.o2 { width: 97%;
+.orbit.o2 { width: min(97%, 97cqh);
   border: 1px solid rgba(var(--hc-a,55,214,232),.08); }
 .node { position: absolute; left: 50%; top: 50%; width: 7px; height: 7px; margin: -3.5px 0 0 -3.5px;
   transform: translate(-50%, -50%);
@@ -882,11 +882,11 @@ ha-card.theme-glass .gauge { filter: drop-shadow(0 10px 22px rgba(0,0,0,.35)); }
   box-shadow: 0 2cqw 5cqw rgba(2,7,12,.5), inset 0 1cqw 0 rgba(255,255,255,.07);
   backdrop-filter: blur(10cqw); font-variant-numeric: tabular-nums;
   transition: background .25s ease, border-color .25s ease, box-shadow .25s ease; }
-.loc { width: auto; min-width: max(92px, 38cqw); transform: translate(-50%, -50%);
+.loc { width: auto; min-width: max(100px, 38cqw); transform: translate(-50%, -50%);
   padding: max(7px, 2.4cqw) max(8px, 2.8cqw); border-radius: max(12px, 7cqw); gap: max(3px, 1.1cqw); }
 /* 车图偏窄时要保证最小宽度，卡片中心随之再往外推，避免压到车身 */
-.loc.lf, .loc.lr { left: calc(7.5% - 23.5cqw - max(0px, (92px - 38cqw) / 2)); }
-.loc.rf, .loc.rr { left: calc(92.5% + 23.5cqw + max(0px, (92px - 38cqw) / 2)); }
+.loc.lf, .loc.lr { left: calc(7.5% - 23.5cqw - max(0px, (100px - 38cqw) / 2)); }
+.loc.rf, .loc.rr { left: calc(92.5% + 23.5cqw + max(0px, (100px - 38cqw) / 2)); }
 .loc.lf, .loc.rf { top: 27%; }
 .loc.lr, .loc.rr { top: 73%; }
 .loc .lh { display: flex; align-items: center; justify-content: space-between; }
@@ -980,7 +980,7 @@ ha-card.theme-glass .gauge { filter: drop-shadow(0 10px 22px rgba(0,0,0,.35)); }
 .covl.cs-cyber .loc .lh .lk.on, .covl.cs-cyber .cap .lk.on { color: #7dffd8; }
 
 /* 前后盖小卡：车头/车尾正上方与正下方，仍落在圆环内侧 */
-.cap { left: 50%; width: auto; max-width: max(120px, 46cqw); flex-direction: row; align-items: center; justify-content: flex-start;
+.cap { left: 50%; width: auto; max-width: max(132px, 46cqw); flex-direction: row; align-items: center; justify-content: flex-start;
   gap: max(4px, 1.6cqw); padding: max(5px, 1.9cqw) max(7px, 2.6cqw) max(5px, 1.9cqw) max(8px, 3cqw);
   border-radius: max(9px, 5.2cqw); }
 .cap.hood, .cap.trunk { transform: translate(-50%, 0); }
@@ -1164,8 +1164,8 @@ ha-card.panel.fit .b-side > .b-meta,
 ha-card.panel.fit .b-side > .b-alerts,
 ha-card.panel.fit .b-side > .b-actions { flex: 0 0 auto; }
 ha-card.panel.fit .b-hero .hero { height: 100%; min-height: 600px; }
-ha-card.panel.fit .orbit { width: 78%; }
-ha-card.panel.fit .orbit.o2 { width: 86%; }
+ha-card.panel.fit .orbit { width: min(78%, 96cqh); }
+ha-card.panel.fit .orbit.o2 { width: min(86%, 98cqh); }
 ha-card.panel.fit .hmeta { grid-column: 1 / -1; }
 ha-card.panel.fit .acts { width: 100%; max-width: none; }
 ha-card.panel.fit .pills { width: 100%; max-width: none; }
@@ -1184,7 +1184,8 @@ ha-card.panel.fit .pills { width: 100%; max-width: none; }
   /* 面板模式：容器多宽就排多宽，车图列跟着面板高度走 */
   :host(.panel) { max-width: none; margin: 0; }
   ha-card.panel .wrap { padding: 22px 26px 16px; gap: 12px; }
-  ha-card.panel .b-hero .hero { height: 100%; min-height: 250px; --r: 106px; }
+  /* 宽面板里给主视觉足够高度，车图与状态卡才不会被压扁 */
+  ha-card.panel .b-hero .hero { height: auto; min-height: clamp(300px, 40vh, 440px); --r: 106px; }
   ha-card.panel .carimg { max-height: min(74%, 520px); max-width: min(60%, 330px); }
   ha-card.panel .gauge { max-width: 196px; }
   ha-card.panel .acts { max-width: 600px; }
@@ -5176,7 +5177,7 @@ var HaCarEditor = class extends HTMLElement {
 customElements.define("ha-car-editor", HaCarEditor);
 
 // src/main.js
-var VERSION = "2.9.5";
+var VERSION = "2.9.6";
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "ha-car",
