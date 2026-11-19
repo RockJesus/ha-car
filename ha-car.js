@@ -1139,6 +1139,8 @@ ha-card.gfit .wrap { height: 100%; box-sizing: border-box; overflow: hidden; }
 ha-card.gfit.gtwo .blocks { display: flex; flex-direction: row; align-items: stretch; gap: 26px; }
 /* 单列网格卡（默认卡片大小）：只收紧行间距与上下留白，把省下的留白全给英雄区，
    圆环随之变大，其它块（仪表/底座/按钮）尺寸一点不动 */
+/* 小卡片（单列网格）再把燃油/续航双表收小，省出的高度继续给大圆环 */
+ha-card.gfit:not(.gtwo) .gauge { max-width: 80px; }
 ha-card.gfit:not(.gtwo) .wrap { row-gap: 8px; padding-top: 13px; padding-bottom: 11px; }
 ha-card.gfit:not(.gtwo) .blocks { row-gap: 8px; }
 ha-card.gfit.gtwo .b-hero-col { display: flex; flex: 1.02 1 0; min-width: 0; }
@@ -5474,7 +5476,7 @@ var HaCarEditor = class extends HTMLElement {
 customElements.define("ha-car-editor", HaCarEditor);
 
 // src/main.js
-var VERSION = "3.6.6";
+var VERSION = "3.6.7";
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "ha-car",
