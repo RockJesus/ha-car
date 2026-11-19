@@ -2818,7 +2818,7 @@ class HaCarCard extends HTMLElement {
       }
     }
     if (!statusText && !meta.length && !btns.length) return "";
-    return `<div class="panel"><div class="ph">${icon("bolt")}${esc(t.chargingTitle)}</div>
+    return `<div class="cpanel"><div class="ph">${icon("bolt")}${esc(t.chargingTitle)}</div>
       <div class="chgrow"><div><div class="st">${esc(statusText || t.notCharging)}</div>
       ${meta.length ? `<div class="meta">${esc(meta.join(" · "))}</div>` : ""}</div>
       ${btns.length ? `<div style="display:flex;gap:6px;flex-wrap:wrap">${btns.join("")}</div>` : ""}</div></div>`;

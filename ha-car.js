@@ -751,11 +751,11 @@ h1 { margin: 0; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-s
   font-weight: 500; letter-spacing: 0; }
 
 /* 充电 / 服务 / 告警 */
-.panel { border-radius: 16px; border: 1px solid rgba(255,255,255,.06); background: rgba(255,255,255,.022);
+.cpanel { border-radius: 16px; border: 1px solid rgba(255,255,255,.06); background: rgba(255,255,255,.022);
   padding: 11px 12px; }
-.panel .ph { display: flex; align-items: center; gap: 7px; font-size: 10px; font-weight: 700;
+.cpanel .ph { display: flex; align-items: center; gap: 7px; font-size: 10px; font-weight: 700;
   letter-spacing: .12em; text-transform: uppercase; color: var(--hc-dim); margin-bottom: 8px; }
-.panel .ph .ic { width: 13px; height: 13px; }
+.cpanel .ph .ic { width: 13px; height: 13px; }
 .chgrow { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
 .chgrow .st { font-size: 13px; font-weight: 650; }
 .chgrow .meta { font-size: 10px; color: var(--hc-dim); letter-spacing: .06em; margin-top: 3px; }
@@ -4331,7 +4331,7 @@ var HaCarCard = class extends HTMLElement {
       }
     }
     if (!statusText && !meta.length && !btns.length) return "";
-    return `<div class="panel"><div class="ph">${icon("bolt")}${esc(t.chargingTitle)}</div>
+    return `<div class="cpanel"><div class="ph">${icon("bolt")}${esc(t.chargingTitle)}</div>
       <div class="chgrow"><div><div class="st">${esc(statusText || t.notCharging)}</div>
       ${meta.length ? `<div class="meta">${esc(meta.join(" · "))}</div>` : ""}</div>
       ${btns.length ? `<div style="display:flex;gap:6px;flex-wrap:wrap">${btns.join("")}</div>` : ""}</div></div>`;
@@ -5406,7 +5406,7 @@ var HaCarEditor = class extends HTMLElement {
 customElements.define("ha-car-editor", HaCarEditor);
 
 // src/main.js
-var VERSION = "3.5.9";
+var VERSION = "3.6.0";
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "ha-car",
