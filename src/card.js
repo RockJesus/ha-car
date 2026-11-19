@@ -1244,7 +1244,9 @@ class HaCarCard extends HTMLElement {
 
     const blocks = [];
     const plateTxt = cfg.show_plate && plate ? (cfg.privacy ? maskPlate(plate) : plate) : "";
-    const head = `<div class="head"><div class="ttl"><h1>${this._logo()}${esc(title)}</h1>` +
+    // 车标必须放在 h1 外面：h1 用 background-clip:text 做渐变字，
+    // 里面塞 SVG 会让渐变在车标区域被画成一块方形底色
+    const head = `<div class="head"><div class="ttl">${this._logo()}<h1>${esc(title)}</h1>` +
       (plateTxt ? `<span class="plate">${esc(plateTxt)}</span>` : "") +
       `</div><span class="status ${status.cls}"><span class="dot"></span>${esc(status.label)}</span></div>`;
 

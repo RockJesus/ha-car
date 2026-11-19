@@ -2881,7 +2881,7 @@ var HaCarCard = class extends HTMLElement {
     if (running) chips.push({ cls: "warn", label: t.running });
     const blocks = [];
     const plateTxt = cfg.show_plate && plate ? cfg.privacy ? maskPlate(plate) : plate : "";
-    const head = `<div class="head"><div class="ttl"><h1>${this._logo()}${esc(title)}</h1>` + (plateTxt ? `<span class="plate">${esc(plateTxt)}</span>` : "") + `</div><span class="status ${status.cls}"><span class="dot"></span>${esc(status.label)}</span></div>`;
+    const head = `<div class="head"><div class="ttl">${this._logo()}<h1>${esc(title)}</h1>` + (plateTxt ? `<span class="plate">${esc(plateTxt)}</span>` : "") + `</div><span class="status ${status.cls}"><span class="dot"></span>${esc(status.label)}</span></div>`;
     const hero = this._imagePair(data);
     for (const b of list) {
       if (b.on === false) continue;
@@ -5382,7 +5382,7 @@ var HaCarEditor = class extends HTMLElement {
 customElements.define("ha-car-editor", HaCarEditor);
 
 // src/main.js
-var VERSION = "3.5.2";
+var VERSION = "3.5.3";
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "ha-car",
