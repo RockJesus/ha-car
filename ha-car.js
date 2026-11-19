@@ -876,11 +876,13 @@ ha-card.theme-glass .gauge { filter: drop-shadow(0 10px 22px rgba(0,0,0,.35)); }
   box-shadow: 0 2cqw 5cqw rgba(2,7,12,.5), inset 0 1cqw 0 rgba(255,255,255,.07);
   backdrop-filter: blur(10cqw); font-variant-numeric: tabular-nums;
   transition: background .25s ease, border-color .25s ease, box-shadow .25s ease; }
-.loc { width: auto; min-width: max(100px, 38cqw); transform: translate(-50%, -50%);
-  padding: max(7px, 2.4cqw) max(8px, 2.8cqw); border-radius: max(12px, 7cqw); gap: max(3px, 1.1cqw); }
+.loc { width: max(70px, 22cqw); min-width: max(70px, 22cqw); transform: translate(-50%, -50%);
+  padding: max(6px, 2cqw) max(4px, 1.6cqw); border-radius: max(12px, 6.4cqw); gap: max(3px, 1.1cqw);
+  text-align: center; }
+/* 竖窄框：门/窗/胎压按行竖排，图标在上、数值在下 */
 /* 车图偏窄时要保证最小宽度，卡片中心随之再往外推，避免压到车身 */
-.loc.lf, .loc.lr { left: calc(7.5% - 23.5cqw - max(0px, (100px - 38cqw) / 2)); }
-.loc.rf, .loc.rr { left: calc(92.5% + 23.5cqw + max(0px, (100px - 38cqw) / 2)); }
+.loc.lf, .loc.lr { left: calc(7.5% - 11cqw - max(0px, (70px - 22cqw) / 2)); }
+.loc.rf, .loc.rr { left: calc(92.5% + 11cqw + max(0px, (70px - 22cqw) / 2)); }
 .loc.lf, .loc.rf { top: 27%; }
 .loc.lr, .loc.rr { top: 73%; }
 .loc .lh { display: flex; align-items: center; justify-content: space-between; }
@@ -888,10 +890,10 @@ ha-card.theme-glass .gauge { filter: drop-shadow(0 10px 22px rgba(0,0,0,.35)); }
 .loc .lh .lk { font-style: normal; width: max(11px, 5.2cqw); height: max(11px, 5.2cqw); color: #6d8298; opacity: .85; }
 .loc .lh .lk .ic { width: 100%; height: 100%; display: block; }
 .loc .lh .lk.on { color: #7ee0b3; opacity: 1; }
-.loc .lrs { display: flex; flex-direction: column; align-items: flex-start; justify-content: flex-start; gap: max(2px, .7cqw);
-  width: fit-content; max-width: 100%; margin: 0 auto; }
-.loc .lr { flex: 0 0 auto; display: flex; flex-direction: row; align-items: center;
-  justify-content: flex-start; gap: max(4px, 1.3cqw); line-height: 1; }
+.loc .lrs { display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: max(3px, 1cqw);
+  width: 100%; max-width: 100%; margin: 0 auto; }
+.loc .lr { flex: 0 0 auto; display: flex; flex-direction: column; align-items: center;
+  justify-content: center; gap: max(1px, .45cqw); line-height: 1; width: 100%; }
 .loc .lr .ri { flex: 0 0 auto; width: max(11px, 5.2cqw); height: max(11px, 5.2cqw); display: grid; place-items: center; color: #8fd6ea; }
 .loc .lr .ri .ic { width: 100%; height: 100%; display: block; }
 .loc .lr b { font-size: max(12px, 4.8cqw); font-weight: 620; color: #dbe7f5; letter-spacing: .01em; white-space: nowrap; }
@@ -5385,7 +5387,7 @@ var HaCarEditor = class extends HTMLElement {
 customElements.define("ha-car-editor", HaCarEditor);
 
 // src/main.js
-var VERSION = "3.5.4";
+var VERSION = "3.5.5";
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "ha-car",
