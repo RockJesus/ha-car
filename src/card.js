@@ -1505,10 +1505,9 @@ class HaCarCard extends HTMLElement {
       const ent = entFor(slot);
       out.push(
         `<div class="cap ${cls}${bBad ? " bad" : open ? " open" : ""}" data-more="${esc(ent)}" title="${esc(label)}">` +
-          `<span class="ri">${icon(ic)}</span><span class="cx">` +
-          `<b>${esc(label)}</b>` +
-          `<i>${bBad ? (zh ? "不可用" : "N/A") : open ? (zh ? "已打开" : "Open") : zh ? "已关闭" : "Closed"}</i></span>` +
-          `<em class="lk${locked ? " on" : ""}">${icon(locked ? "lock" : "unlock")}</em></div>`,
+          `<span class="chd"><span class="ri">${icon(ic)}</span><b>${esc(label)}</b>` +
+          `<em class="lk${locked ? " on" : ""}">${icon(locked ? "lock" : "unlock")}</em></span>` +
+          `<i>${bBad ? (zh ? "不可用" : "N/A") : open ? (zh ? "已打开" : "Open") : zh ? "已关闭" : "Closed"}</i></div>`,
       );
     };
     cap("hood", zh ? "引擎盖" : "Hood", "hood", "engine");
@@ -1599,8 +1598,8 @@ class HaCarCard extends HTMLElement {
           shown0 = nh0 * sc0;
           pad0 = (ih0 - shown0) / 2;
         }
-        const bT = img.offsetTop + shift + pad0 + shown0 * 0.058;
-        const bB = img.offsetTop + shift + pad0 + shown0 * 0.855;
+        const bT = img.offsetTop + shift + pad0 + shown0 * 0.053;
+        const bB = img.offsetTop + shift + pad0 + shown0 * 0.947;
         const rT = (r0.top - heroR0.top) * kk0;
         const rB = (r0.bottom - heroR0.top) * kk0;
         const gap0 = Math.max(10, Math.round(shown0 * 0.042));
@@ -1642,8 +1641,9 @@ class HaCarCard extends HTMLElement {
       const doorLR = doorLF;
       const doorRF = bodyR + sideGap - 4;
       const doorRR = doorRF;
-      const bodyT = topPad + shownH * 0.058;
-      const bodyB = topPad + shownH * 0.855;
+      // 车图不透明上下沿（实测 5.6%–94.4%），胶囊一律落在轮廓之外
+      const bodyT = topPad + shownH * 0.053;
+      const bodyB = topPad + shownH * 0.947;
 
       const capH = this._wrap.querySelector(".cap.hood");
       const capT = this._wrap.querySelector(".cap.trunk");

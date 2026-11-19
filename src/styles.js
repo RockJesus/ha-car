@@ -624,17 +624,19 @@ ha-card.theme-glass .gauge { filter: drop-shadow(0 10px 22px rgba(0,0,0,.35)); }
 .covl.cs-cyber .loc .lh .lk.on, .covl.cs-cyber .cap .lk.on { color: #7dffd8; }
 
 /* 前后盖小卡：车头/车尾正上方与正下方，仍落在圆环内侧 */
-.cap { left: 50%; width: auto; max-width: max(132px, 46cqw); flex-direction: row; align-items: center; justify-content: flex-start;
-  gap: max(4px, 1.6cqw); padding: max(5px, 1.9cqw) max(7px, 2.6cqw) max(5px, 1.9cqw) max(8px, 3cqw);
+.cap { left: 50%; width: auto; max-width: max(132px, 46cqw); flex-direction: column; align-items: center; justify-content: center;
+  gap: max(2px, .9cqw); padding: max(5px, 1.9cqw) max(7px, 2.6cqw);
   border-radius: max(9px, 5.2cqw); }
 .cap.hood, .cap.trunk { transform: translate(-50%, 0); }
-.cap .cx { display: flex; flex-direction: column; align-items: center; gap: .6cqw; min-width: 0; text-align: center;
-  padding: 0 4.8cqw 0 0; }
+/* 第一排：物件图标 + 名称 + 锁；第二排：只放状态文字 */
+.cap .chd { display: flex; flex-direction: row; align-items: center; justify-content: center;
+  gap: max(3px, 1.4cqw); min-width: 0; }
 .cap .ri { flex: 0 0 max(12px, 5.4cqw); height: max(12px, 5.4cqw); display: grid; place-items: center; color: #86c9de; }
 .cap .ri .ic { width: 100%; height: 100%; display: block; }
 .cap b { font-size: max(9px, 4.2cqw); font-weight: 500; color: #8fa5bb; line-height: 1; white-space: nowrap; letter-spacing: .05em; }
 .cap i { font-style: normal; font-size: max(12px, 5.4cqw); font-weight: 620; color: #dbe7f5; line-height: 1; white-space: nowrap; }
-.cap .lk { position: absolute; right: 2.2cqw; top: 50%; transform: translateY(-50%); width: 4.4cqw; height: 4.4cqw; color: #6d8298; opacity: .85; }
+.cap .lk { flex: 0 0 max(10px, 4.4cqw); width: max(10px, 4.4cqw); height: max(10px, 4.4cqw); position: static;
+  transform: none; color: #6d8298; opacity: .85; }
 .cap .lk .ic { width: 100%; height: 100%; display: block; }
 .cap .lk.on { color: #7ee0b3; opacity: 1; }
 .cap.open { border-color: rgba(255,196,107,.5); background: linear-gradient(180deg, rgba(56,32,10,.9), rgba(28,17,7,.94)); }
