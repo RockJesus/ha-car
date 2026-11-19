@@ -833,6 +833,8 @@ class HaCarEditor extends HTMLElement {
   }
 }
 
-customElements.define("ha-car-editor", HaCarEditor);
+if (!customElements.get("ha-car-editor")) {
+  customElements.define("ha-car-editor", HaCarEditor);
+}
 
 export { HaCarEditor };

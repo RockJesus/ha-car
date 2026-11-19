@@ -3323,6 +3323,12 @@ class HaCarCard extends HTMLElement {
   }
 }
 
-customElements.define("ha-car", HaCarCard);
+// 集成自带静态资源与独立 Lovelace 资源可能同时加载同一张卡片：
+// 重复 define 会抛异常并中断整包初始化，这里改成幂等注册。
+if (!customElements.get("ha-car")) {
+  customElements.define("ha-car", HaCarCard);
+} else {
+  console.warn("[ha-car] 已存在同名卡片元素，跳过重复注册（先加载的版本生效）");
+}
 
 export { HaCarCard, MODULES, CONFIRMABLE, DEFAULTS };

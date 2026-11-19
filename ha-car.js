@@ -4821,7 +4821,11 @@ var HaCarCard = class extends HTMLElement {
     requestAnimationFrame(() => this._placeToast());
   }
 };
-customElements.define("ha-car", HaCarCard);
+if (!customElements.get("ha-car")) {
+  customElements.define("ha-car", HaCarCard);
+} else {
+  console.warn("[ha-car] 已存在同名卡片元素，跳过重复注册（先加载的版本生效）");
+}
 
 // src/editor.js
 var BLOCK_LABELS = {
@@ -5605,12 +5609,15 @@ var HaCarEditor = class extends HTMLElement {
     );
   }
 };
-customElements.define("ha-car-editor", HaCarEditor);
+if (!customElements.get("ha-car-editor")) {
+  customElements.define("ha-car-editor", HaCarEditor);
+}
 
 // src/main.js
-var VERSION = "3.7.2";
+var VERSION = "3.7.3";
 window.customCards = window.customCards || [];
-window.customCards.push({
+var _hasCard = window.customCards.some((c) => c && c.type === "ha-car");
+if (!_hasCard) window.customCards.push({
   type: "ha-car",
   name: "爱车卡片",
   description: "福特派互联（FordPass CN）/ 林肯之道车辆卡片：车况、四轮胎压、门窗、充电与长按防误触控车。",
