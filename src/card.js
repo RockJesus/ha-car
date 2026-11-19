@@ -1583,35 +1583,7 @@ class HaCarCard extends HTMLElement {
     }
     if (hero && orb) {
       // 引擎盖/尾门胶囊 + 四张位置卡：统一按「车身轮廓 / 圆环边界」自适应落位
-      // 空间太窄时先把圆环收一点，给前后盖胶囊腾出位置（胶囊优先保持可读尺寸）
-      const capH0 = this._wrap.querySelector(".cap.hood");
-      const capT0 = this._wrap.querySelector(".cap.trunk");
-      if (capH0 && capT0 && orb2) {
-        const heroR0 = hero.getBoundingClientRect();
-        const r0 = orb.getBoundingClientRect();
-        const kk0 = r0.width ? orb.clientWidth / r0.width : 1;
-        const ih0 = img.offsetHeight;
-        const nw0 = img.naturalWidth, nh0 = img.naturalHeight;
-        let pad0 = 0, shown0 = ih0;
-        if (nw0 && nh0) {
-          const sc0 = Math.min(img.clientWidth / nw0, ih0 / nh0);
-          shown0 = nh0 * sc0;
-          pad0 = (ih0 - shown0) / 2;
-        }
-        const bT = img.offsetTop + shift + pad0 + shown0 * 0.053;
-        const bB = img.offsetTop + shift + pad0 + shown0 * 0.947;
-        const rT = (r0.top - heroR0.top) * kk0;
-        const rB = (r0.bottom - heroR0.top) * kk0;
-        const gap0 = Math.max(10, Math.round(shown0 * 0.042));
-        // 圆环只在真的越出可视区时才收：胶囊始终按自身尺寸落位，绝不反过来压小圆环
-        const need = Math.max(capH0.offsetHeight + gap0 + 2 - (bT - rT), 0, capT0.offsetHeight + 8 - (rB - bB));
-        if (need > 1) {
-          const d0 = Math.min(hero.clientWidth, hero.clientHeight) * 0.995;
-          const d2 = Math.max(d0 * 0.95, d0 - need * 2);
-          orb.style.width = orb.style.height = `${d2}px`;
-          orb2.style.width = orb2.style.height = `${d2 * 1.035}px`;
-        }
-      }
+      // 圆环尺寸恒定，不再为胶囊让位收缩；空间不够时由胶囊/卡片自己等比缩小
       const ovlR = ovl.getBoundingClientRect();
       const orbR3 = orb.getBoundingClientRect();
       const nw = img.naturalWidth, nh = img.naturalHeight;
@@ -1747,6 +1719,42 @@ class HaCarCard extends HTMLElement {
             const cx = leftSide ? edge - 4 - w / 2 : edge + 4 + w / 2;
             el.style.left = `${Math.round(cx)}px`;
           }
+        }
+      }
+
+      // 前后盖胶囊同样不能压到圆环：任一角出圈就等比缩进来（保持贴车身那一侧不动）
+      {
+        const caps = [
+          { el: this._wrap.querySelector(".cap.hood"), side: "top", hug: bodyT - Math.max(10, Math.round(shownH * 0.042)) },
+          { el: this._wrap.querySelector(".cap.trunk"), side: "bottom", hug: bodyB + 4 },
+        ].filter((c) => c.el);
+        const cx0 = (ringL + ringR) / 2, cy0 = (ringT + ringB) / 2, rr0 = (ringR - ringL) / 2;
+        for (let pass = 0; pass < 8 && caps.length; pass++) {
+          let changed = false;
+          for (const c of caps) {
+            const b = c.el.getBoundingClientRect();
+            const ovR = ovl.getBoundingClientRect();
+            const kpx = ovl.clientWidth / (ovR.width || 1);
+            // 换算到 overlay 坐标系，直接和圆环圆心比
+            const x1 = (b.left - ovR.left) * kpx, x2 = (b.right - ovR.left) * kpx;
+            const y1 = (b.top - ovR.top) * kpx, y2 = (b.bottom - ovR.top) * kpx;
+            const far = Math.hypot(Math.max(Math.abs(x1 - cx0), Math.abs(x2 - cx0)), Math.max(Math.abs(y1 - cy0), Math.abs(y2 - cy0)));
+            const m = String(c.el.style.transform || "").match(/scale\(([\d.]+)\)/);
+            const base = m ? parseFloat(m[1]) : 1;
+            if (far > rr0 - 6) {
+              const nk = Math.max(0.66, base * ((rr0 - 9) / far));
+              if (nk < base - 0.001) {
+                c.el.style.transform = `translate(-50%, 0) scale(${nk.toFixed(3)})`;
+                c.el.style.transformOrigin = "50% 0";
+                c.el.style.willChange = "transform";
+                // 缩放后重新贴回车身那一侧
+                const hh = c.el.offsetHeight * nk;
+                c.el.style.top = `${Math.round(c.side === "top" ? c.hug - hh : c.hug)}px`;
+                changed = true;
+              }
+            }
+          }
+          if (!changed) break;
         }
       }
 
