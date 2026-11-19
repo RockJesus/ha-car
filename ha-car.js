@@ -2715,6 +2715,7 @@ var HaCarCard = class extends HTMLElement {
     this._prunePending(data);
     const twoCol = this._card.classList.contains("fit") || this._card.classList.contains("gtwo");
     this._wrap.innerHTML = this._body(data, twoCol);
+    this._restoreGeo();
     if (this._findOpen) {
       this._card.querySelectorAll(".findmodal").forEach((m) => m.remove());
       this._card.insertAdjacentHTML("beforeend", this._findModal(data));
@@ -3166,10 +3167,64 @@ var HaCarCard = class extends HTMLElement {
     return { inner: out.join(""), edge: "" };
   }
   // 状态层贴合真实车图矩形（图片 contain 后尺寸未知，渲染完再量）
+  // 每次 hass 更新都会重建 DOM，重建后这些绝对定位元素会瞬间回到 CSS 默认位置 →
+  // 点按钮触发重绘时就会闪一下。这里在重绘后立刻把上一帧的几何写回去，再照常精算一次。
+  _geoKey(el) {
+    if (!el || !el.classList) return "";
+    if (el.classList.contains("enp")) return "enp";
+    if (el.classList.contains("cap")) return el.classList.contains("hood") ? "cap-hood" : "cap-trunk";
+    if (el.classList.contains("loc")) {
+      const side = ["lf", "rf", "lr", "rr"].find((c) => el.classList.contains(c)) || "";
+      return `loc-${side}`;
+    }
+    return "";
+  }
+  _snapshotGeo() {
+    const wrap = this._wrap;
+    if (!wrap) return;
+    const pick = (e) => e ? { l: e.style.left, t: e.style.top, tf: e.style.transform, w: e.style.width, h: e.style.height } : null;
+    const map = {};
+    wrap.querySelectorAll(".loc, .cap, .enp").forEach((e) => {
+      const k = this._geoKey(e);
+      if (k) map[k] = pick(e);
+    });
+    this._geo = {
+      map,
+      orb: pick(wrap.querySelector(".orbit:not(.o2)")),
+      orb2: pick(wrap.querySelector(".orbit.o2")),
+      ovl: pick(wrap.querySelector(".covl")),
+      img: wrap.querySelector("img.carimg") ? { tf: wrap.querySelector("img.carimg").style.transform } : null
+    };
+  }
+  _restoreGeo() {
+    const g = this._geo;
+    const wrap = this._wrap;
+    if (!g || !wrap) return;
+    const put = (e, p) => {
+      if (!e || !p) return;
+      if (p.l) e.style.left = p.l;
+      if (p.t) e.style.top = p.t;
+      if (p.tf) e.style.transform = p.tf;
+      if (p.w) e.style.width = p.w;
+      if (p.h) e.style.height = p.h;
+    };
+    put(wrap.querySelector(".orbit:not(.o2)"), g.orb);
+    put(wrap.querySelector(".orbit.o2"), g.orb2);
+    put(wrap.querySelector(".covl"), g.ovl);
+    const img = wrap.querySelector("img.carimg");
+    if (img && g.img && g.img.tf) img.style.transform = g.img.tf;
+    wrap.querySelectorAll(".loc, .cap, .enp").forEach((e) => {
+      const k = this._geoKey(e);
+      if (k && g.map && g.map[k]) put(e, g.map[k]);
+    });
+  }
   _placeOverlay() {
+    if (this._placeOverlayNow() !== false) this._snapshotGeo();
+  }
+  _placeOverlayNow() {
     const img = this._wrap && this._wrap.querySelector("img.carimg");
     const ovl = this._wrap && this._wrap.querySelector(".covl");
-    if (!img || !ovl) return;
+    if (!img || !ovl) return false;
     if (!img._hcHooked) {
       img._hcHooked = true;
       img.addEventListener("load", () => this._placeOverlay());
@@ -3181,7 +3236,7 @@ var HaCarCard = class extends HTMLElement {
         if (hv) this._ro.observe(hv);
       }
     }
-    if (!img.offsetWidth) return;
+    if (!img.offsetWidth) return false;
     const hero = this._wrap.querySelector(".hero");
     const orb = this._wrap.querySelector(".orbit:not(.o2)");
     const orb2 = this._wrap.querySelector(".orbit.o2");
@@ -3425,6 +3480,7 @@ var HaCarCard = class extends HTMLElement {
         }
       }
     }
+    return true;
   }
   // 底座条：四轮胎压 + 同步（同步入口就是刷新按钮）
   _baseline(data, t, b) {
@@ -5478,7 +5534,7 @@ var HaCarEditor = class extends HTMLElement {
 customElements.define("ha-car-editor", HaCarEditor);
 
 // src/main.js
-var VERSION = "3.6.8";
+var VERSION = "3.6.9";
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "ha-car",
