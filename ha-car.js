@@ -3269,11 +3269,13 @@ var HaCarCard = class extends HTMLElement {
         };
         const gapHood = Math.max(10, Math.round(shownH * 0.042));
         const hH = fit(capH, bodyT - ringT - gapHood + 8);
-        const tH = fit(capT, ringB - bodyB);
+        const tTopMin = bodyB + Math.max(5, Math.round(shownH * 0.012));
+        const tBotMax = ringB - 9;
+        const tH = fit(capT, tBotMax - tTopMin + 6);
         let hTop = bodyT - gapHood - hH;
         if (hTop < ringT + 10) hTop = ringT + 10;
-        let tTop = bodyB + 4;
-        if (tTop + tH > ringB - 10) tTop = ringB - 10 - tH;
+        let tTop = Math.round((tTopMin + (tBotMax - tH)) / 2);
+        tTop = Math.max(tTopMin, Math.min(tTop, tBotMax - tH));
         capH.style.top = `${Math.round(hTop)}px`;
         capT.style.top = `${Math.round(tTop)}px`;
       }
@@ -5476,7 +5478,7 @@ var HaCarEditor = class extends HTMLElement {
 customElements.define("ha-car-editor", HaCarEditor);
 
 // src/main.js
-var VERSION = "3.6.7";
+var VERSION = "3.6.8";
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "ha-car",
