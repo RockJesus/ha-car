@@ -3156,7 +3156,7 @@ var HaCarCard = class extends HTMLElement {
       const cy0 = (heroR.top + heroR.bottom) / 2;
       const zk = heroR.width ? hero.clientWidth / heroR.width : 1;
       const halfScreen = Math.min(cx0 - visL, visR - cx0, cy0 - visT, visB - cy0);
-      const d = Math.max(40, halfScreen * 2 * 0.965 * zk - 2);
+      const d = Math.max(40, halfScreen * 2 * 0.995 * zk - 2);
       if (d > 0) {
         orb.style.width = orb.style.height = `${d}px`;
         if (orb2) orb2.style.width = orb2.style.height = `${d * 1.035}px`;
@@ -3203,8 +3203,8 @@ var HaCarCard = class extends HTMLElement {
         const gap0 = Math.max(10, Math.round(shown0 * 0.042));
         const need = Math.max(capH0.offsetHeight + gap0 + 2 - (bT - rT), 0, capT0.offsetHeight + 8 - (rB - bB));
         if (need > 1) {
-          const d0 = Math.min(hero.clientWidth, hero.clientHeight) * 0.965;
-          const d2 = Math.max(d0 * 0.72, d0 - need * 2);
+          const d0 = Math.min(hero.clientWidth, hero.clientHeight) * 0.995;
+          const d2 = Math.max(d0 * 0.95, d0 - need * 2);
           orb.style.width = orb.style.height = `${d2}px`;
           orb2.style.width = orb2.style.height = `${d2 * 1.035}px`;
         }
@@ -5404,7 +5404,7 @@ var HaCarEditor = class extends HTMLElement {
 customElements.define("ha-car-editor", HaCarEditor);
 
 // src/main.js
-var VERSION = "3.5.7";
+var VERSION = "3.5.8";
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "ha-car",

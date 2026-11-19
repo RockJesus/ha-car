@@ -1551,7 +1551,7 @@ class HaCarCard extends HTMLElement {
       const cy0 = (heroR.top + heroR.bottom) / 2;
       const zk = heroR.width ? hero.clientWidth / heroR.width : 1;
       const halfScreen = Math.min(cx0 - visL, visR - cx0, cy0 - visT, visB - cy0);
-      const d = Math.max(40, halfScreen * 2 * 0.965 * zk - 2);
+      const d = Math.max(40, halfScreen * 2 * 0.995 * zk - 2);
       if (d > 0) {
         orb.style.width = orb.style.height = `${d}px`;
         if (orb2) orb2.style.width = orb2.style.height = `${d * 1.035}px`;
@@ -1601,10 +1601,11 @@ class HaCarCard extends HTMLElement {
         const rT = (r0.top - heroR0.top) * kk0;
         const rB = (r0.bottom - heroR0.top) * kk0;
         const gap0 = Math.max(10, Math.round(shown0 * 0.042));
+        // 圆环只在真的越出可视区时才收：胶囊始终按自身尺寸落位，绝不反过来压小圆环
         const need = Math.max(capH0.offsetHeight + gap0 + 2 - (bT - rT), 0, capT0.offsetHeight + 8 - (rB - bB));
         if (need > 1) {
-          const d0 = Math.min(hero.clientWidth, hero.clientHeight) * 0.965;
-          const d2 = Math.max(d0 * 0.72, d0 - need * 2);
+          const d0 = Math.min(hero.clientWidth, hero.clientHeight) * 0.995;
+          const d2 = Math.max(d0 * 0.95, d0 - need * 2);
           orb.style.width = orb.style.height = `${d2}px`;
           orb2.style.width = orb2.style.height = `${d2 * 1.035}px`;
         }
