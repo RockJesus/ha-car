@@ -1769,7 +1769,7 @@ class HaCarCard extends HTMLElement {
         enp.style.transform = "translate(-50%, -50%)";
         const baseW = enp.offsetWidth;
         const gapLeft = Math.max(60, ringL - 12);
-        let kp = Math.min(kp0, Math.max(0.62, (gapLeft - 4) / baseW));
+        let kp = Math.min(kp0, Math.max(0.74, (gapLeft - 4) / baseW));
         kp = Math.round(kp * 1000) / 1000;
         enp.style.transform = `translate(-50%, -50%) scale(${kp.toFixed(3)})`;
         const w = baseW * kp, h = enp.offsetHeight * kp;
@@ -1779,6 +1779,25 @@ class HaCarCard extends HTMLElement {
         ey = Math.max(6 - offY + h / 2, Math.min(ringB - h / 2, ey));
         enp.style.left = `${Math.round(ex)}px`;
         enp.style.top = `${Math.round(ey)}px`;
+        // 引擎卡改成圆形表盘后，先把「不蹭圆环」处理掉：按四角到圆心距离往外推
+        {
+          const eb0 = enp.getBoundingClientRect();
+          const ovR0 = ovl.getBoundingClientRect();
+          const kpx = ovl.clientWidth / (ovR0.width || 1);
+          const cxr = (ringL + ringR) / 2, cyr = (ringT + ringB) / 2;
+          const x1 = (eb0.left - ovR0.left) * kpx, x2 = (eb0.right - ovR0.left) * kpx;
+          const y1 = (eb0.top - ovR0.top) * kpx, y2 = (eb0.bottom - ovR0.top) * kpx;
+          const far = Math.hypot(Math.max(Math.abs(x1 - cxr), Math.abs(x2 - cxr)), Math.max(Math.abs(y1 - cyr), Math.abs(y2 - cyr)));
+          if (far < rr + 9) {
+            const mx = (x1 + x2) / 2, my = (y1 + y2) / 2;
+            const vx = mx - cxr, vy = my - cyr;
+            const len = Math.hypot(vx, vy) || 1;
+            const push = Math.min(44, rr + 9 - far + 3);
+            const curL = parseFloat(enp.style.left) || 0, curT = parseFloat(enp.style.top) || 0;
+            enp.style.left = `${Math.round(curL + (vx / len) * push)}px`;
+            enp.style.top = `${Math.round(curT + (vy / len) * push)}px`;
+          }
+        }
         // 别压到主驾卡片
         const first = this._wrap.querySelector(".loc.lf");
         if (first) {

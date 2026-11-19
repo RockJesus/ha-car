@@ -975,6 +975,9 @@ ha-card.theme-glass .gauge { filter: drop-shadow(0 10px 22px rgba(0,0,0,.35)); }
 .covl.cs-cyber .loc .lr.tire b { color: #f4fbff; }
 .covl.cs-cyber .loc .lr .ri, .covl.cs-cyber .cap .ri { color: var(--hc-accent); }
 .covl.cs-cyber .loc .lh .lk.on, .covl.cs-cyber .cap .lk.on { color: #7dffd8; }
+/* 引擎卡是一张仪表盘：各皮肤只换配色，不改形状与内边距 */
+.covl.cs-pill .enp, .covl.cs-bar .enp, .covl.cs-liquid .enp, .covl.cs-line .enp, .covl.cs-cyber .enp {
+  border-radius: 50%; padding: 0; border-left-width: 1px; }
 
 /* 前后盖小卡：车头/车尾正上方与正下方，仍落在圆环内侧 */
 .cap { left: 50%; width: auto; max-width: max(132px, 46cqw); flex-direction: column; align-items: center; justify-content: center;
@@ -1262,16 +1265,47 @@ ha-card.panel.fit .pills { width: 100%; max-width: none; }
 }
 @keyframes hc-ground { 0%, 100% { opacity: .55; } 50% { opacity: 1; } }
 .enp { position: absolute; left: 0; top: 0; transform: translate(-50%, -50%); z-index: 3;
-  display: flex; flex-direction: column; gap: 3px; padding: 6px 13px 7px 10px; border-radius: 13px;
-  background: rgba(9,18,26,.84); border: 1px solid rgba(140,170,190,.22); color: #a9b6bf;
+  width: 82px; height: 82px; padding: 0; border-radius: 50%;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+  background: radial-gradient(72% 72% at 50% 44%, rgba(28,46,62,.96), rgba(7,13,19,.94));
+  border: 1px solid rgba(150,185,205,.26); color: #a9b6bf;
   letter-spacing: .08em; white-space: nowrap; backdrop-filter: blur(8px);
-  box-shadow: 0 4px 14px rgba(0,0,0,.35); pointer-events: none; }
+  box-shadow: 0 4px 14px rgba(0,0,0,.35), inset 0 0 14px rgba(120,180,220,.10);
+  pointer-events: none; isolation: isolate; overflow: hidden; }
+/* 引擎卡 = 一张迷你汽车时速表：外圈刻度 + 起步亮弧 + 指针停在零位 */
+.enp::before { content: ""; position: absolute; inset: 2px; border-radius: 50%; z-index: -1; pointer-events: none;
+  background:
+    conic-gradient(from 208deg,
+      rgba(var(--hc-a,55,214,232),.72) 0deg 30deg,
+      rgba(var(--hc-a,55,214,232),.18) 30deg 138deg,
+      rgba(var(--hc-a,55,214,232),0) 138deg 360deg),
+    repeating-conic-gradient(from 208deg,
+      rgba(206,228,244,.44) 0 .55deg, rgba(206,228,244,0) .55deg 7.4deg),
+    radial-gradient(closest-side, #0000 66%, rgba(190,220,240,.20) 67.2%, #0000 68.6%);
+  -webkit-mask: radial-gradient(closest-side, #0000 84%, #000 87%);
+          mask: radial-gradient(closest-side, #0000 84%, #000 87%); }
+.enp::after { content: ""; position: absolute; left: 50%; top: 50%; width: 2px; height: 10px; border-radius: 2px;
+  transform-origin: 50% 50%; transform: translate(-50%, -50%) rotate(206deg) translate(0, -27px);
+  background: linear-gradient(180deg, rgba(var(--hc-a,55,214,232),.12), rgba(var(--hc-a,55,214,232),.95));
+  box-shadow: 0 0 5px 1px rgba(var(--hc-a,55,214,232),.45); pointer-events: none; z-index: -1; }
+.enp.on { border-color: rgba(96,255,196,.55); box-shadow: 0 0 18px rgba(40,255,160,.30), inset 0 0 16px rgba(40,255,160,.16); }
+.enp.on::before { background:
+    conic-gradient(from 208deg,
+      rgba(96,255,196,.92) 0deg 104deg,
+      rgba(96,255,196,.26) 104deg 150deg,
+      rgba(96,255,196,0) 150deg 360deg),
+    repeating-conic-gradient(from 208deg,
+      rgba(206,244,230,.60) 0 .55deg, rgba(206,244,230,0) .55deg 7.4deg); }
+.enp.on::after { transform: translate(-50%, -50%) rotate(268deg) translate(0, -19px);
+  background: linear-gradient(180deg, rgba(96,255,196,.18), rgba(96,255,196,.96));
+  box-shadow: 0 0 6px 1px rgba(96,255,196,.6);
+  transition: transform .55s cubic-bezier(.3,1.4,.5,1); }
 .enp .rsleft { display: block; margin-top: 1px; font-size: 10.5px; line-height: 1;
   font-variant-numeric: tabular-nums; letter-spacing: .4px; opacity: .92; color: currentColor; }
-.enp .row { display: flex; align-items: center; gap: 6px; }
-.enp span { font-size: 10px; opacity: .7; letter-spacing: .14em; }
-.enp b { font-size: 13px; font-weight: 600; color: #cfd9e0; letter-spacing: .04em; line-height: 1.1; }
-.enp .ed { width: 6px; height: 6px; border-radius: 50%; background: #6b7a84; flex: 0 0 auto; }
+.enp .row { display: flex; align-items: center; gap: 4px; }
+.enp span { font-size: 10.5px; opacity: .75; letter-spacing: .12em; }
+.enp b { font-size: 14px; font-weight: 620; color: #cfd9e0; letter-spacing: .03em; line-height: 1.05; }
+.enp .ed { width: 5.5px; height: 5.5px; border-radius: 50%; background: #6b7a84; flex: 0 0 auto; }
 .enp.on { border-color: rgba(76,255,178,.6); box-shadow: 0 0 16px rgba(40,255,160,.28), inset 0 0 12px rgba(40,255,160,.12); }
 .enp.on b { color: #8affcb; }
 .enp.on .ed { background: #3dffa2; box-shadow: 0 0 8px 2px rgba(61,255,162,.8); animation: hc-engpulse 1.6s ease-in-out infinite; }
@@ -3349,7 +3383,7 @@ var HaCarCard = class extends HTMLElement {
         enp.style.transform = "translate(-50%, -50%)";
         const baseW = enp.offsetWidth;
         const gapLeft = Math.max(60, ringL - 12);
-        let kp = Math.min(kp0, Math.max(0.62, (gapLeft - 4) / baseW));
+        let kp = Math.min(kp0, Math.max(0.74, (gapLeft - 4) / baseW));
         kp = Math.round(kp * 1e3) / 1e3;
         enp.style.transform = `translate(-50%, -50%) scale(${kp.toFixed(3)})`;
         const w = baseW * kp, h = enp.offsetHeight * kp;
@@ -3359,6 +3393,24 @@ var HaCarCard = class extends HTMLElement {
         ey = Math.max(6 - offY + h / 2, Math.min(ringB - h / 2, ey));
         enp.style.left = `${Math.round(ex)}px`;
         enp.style.top = `${Math.round(ey)}px`;
+        {
+          const eb0 = enp.getBoundingClientRect();
+          const ovR0 = ovl.getBoundingClientRect();
+          const kpx = ovl.clientWidth / (ovR0.width || 1);
+          const cxr = (ringL + ringR) / 2, cyr = (ringT + ringB) / 2;
+          const x1 = (eb0.left - ovR0.left) * kpx, x2 = (eb0.right - ovR0.left) * kpx;
+          const y1 = (eb0.top - ovR0.top) * kpx, y2 = (eb0.bottom - ovR0.top) * kpx;
+          const far = Math.hypot(Math.max(Math.abs(x1 - cxr), Math.abs(x2 - cxr)), Math.max(Math.abs(y1 - cyr), Math.abs(y2 - cyr)));
+          if (far < rr + 9) {
+            const mx = (x1 + x2) / 2, my = (y1 + y2) / 2;
+            const vx = mx - cxr, vy = my - cyr;
+            const len = Math.hypot(vx, vy) || 1;
+            const push = Math.min(44, rr + 9 - far + 3);
+            const curL = parseFloat(enp.style.left) || 0, curT = parseFloat(enp.style.top) || 0;
+            enp.style.left = `${Math.round(curL + vx / len * push)}px`;
+            enp.style.top = `${Math.round(curT + vy / len * push)}px`;
+          }
+        }
         const first = this._wrap.querySelector(".loc.lf");
         if (first) {
           const fb = first.getBoundingClientRect();
@@ -5422,7 +5474,7 @@ var HaCarEditor = class extends HTMLElement {
 customElements.define("ha-car-editor", HaCarEditor);
 
 // src/main.js
-var VERSION = "3.6.4";
+var VERSION = "3.6.5";
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "ha-car",
