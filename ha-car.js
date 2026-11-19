@@ -3213,7 +3213,6 @@ var HaCarCard = class extends HTMLElement {
       }
       const ovlR = ovl.getBoundingClientRect();
       const orbR3 = orb.getBoundingClientRect();
-      const iw = img.offsetWidth;
       const nw = img.naturalWidth, nh = img.naturalHeight;
       let topPad = 0, shownH = ih;
       if (nw && nh) {
@@ -3226,10 +3225,16 @@ var HaCarCard = class extends HTMLElement {
       const ringR = (orbR3.right - ovlR.left) * k3;
       const ringT = (orbR3.top - ovlR.top) * k3;
       const ringB = (orbR3.bottom - ovlR.top) * k3;
-      const doorLF = iw * 0.215;
-      const doorRF = iw * 0.785;
-      const doorLR = iw * 0.215;
-      const doorRR = iw * 0.785;
+      const drawSc = nw && nh ? Math.min(img.clientWidth / nw, ih / nh) : 1;
+      const drawnW = nw ? nw * drawSc : img.clientWidth;
+      const padX = (img.clientWidth - drawnW) / 2;
+      const bodyL = padX + drawnW * 0.148;
+      const bodyR = padX + drawnW * 0.852;
+      const sideGap = Math.max(4, Math.round(drawnW * 8e-3));
+      const doorLF = bodyL - sideGap + 4;
+      const doorLR = doorLF;
+      const doorRF = bodyR + sideGap - 4;
+      const doorRR = doorRF;
       const bodyT = topPad + shownH * 0.058;
       const bodyB = topPad + shownH * 0.855;
       const capH = this._wrap.querySelector(".cap.hood");
@@ -5406,7 +5411,7 @@ var HaCarEditor = class extends HTMLElement {
 customElements.define("ha-car-editor", HaCarEditor);
 
 // src/main.js
-var VERSION = "3.6.0";
+var VERSION = "3.6.1";
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "ha-car",

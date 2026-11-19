@@ -1615,7 +1615,6 @@ class HaCarCard extends HTMLElement {
       }
       const ovlR = ovl.getBoundingClientRect();
       const orbR3 = orb.getBoundingClientRect();
-      const iw = img.offsetWidth;
       const nw = img.naturalWidth, nh = img.naturalHeight;
       let topPad = 0, shownH = ih;
       if (nw && nh) {
@@ -1628,13 +1627,21 @@ class HaCarCard extends HTMLElement {
       const ringR = (orbR3.right - ovlR.left) * k3;
       const ringT = (orbR3.top - ovlR.top) * k3;
       const ringB = (orbR3.bottom - ovlR.top) * k3;
-      // 车门边的横向基准：俯视车图两侧留白大，取满 10%–90% 会让状态卡离车门太远。
-      // 前排要避开车外后视镜（约在 15% 处），所以前排基准再往外让一点；后排贴着车门腰线。
-      // 四张卡统一贴同一条竖线（前排后排同一列），保证左右两列水平对齐；0.215 已绕开车外后视镜
-      const doorLF = iw * 0.215;
-      const doorRF = iw * 0.785;
-      const doorLR = iw * 0.215;
-      const doorRR = iw * 0.785;
+      // 车门信息卡的横向基准：一律落在「车身不透明轮廓」的外侧，绝不压在车身上。
+      // 俯视车图（Ford/Lincoln 系列）实测不透明区域约在图宽 15.2%–84.9%、图高 5.6%–94.4%，
+      // 这里按 14.8%–85.2% 再留一点余量，并按实际绘制宽度（contain 缩放后）换算，
+      // 换车型、换尺寸都不用改数字；留白再取图宽的 0.8%，保证与车身有一条缝。
+      const drawSc = (nw && nh) ? Math.min(img.clientWidth / nw, ih / nh) : 1;
+      const drawnW = nw ? nw * drawSc : img.clientWidth;
+      const padX = (img.clientWidth - drawnW) / 2;
+      const bodyL = padX + drawnW * 0.148;
+      const bodyR = padX + drawnW * 0.852;
+      const sideGap = Math.max(4, Math.round(drawnW * 0.008));
+      // 与下面的 cx = doorEdge - 4 - w/2（左）/ doorEdge + 4 + w/2（右）配套
+      const doorLF = bodyL - sideGap + 4;
+      const doorLR = doorLF;
+      const doorRF = bodyR + sideGap - 4;
+      const doorRR = doorRF;
       const bodyT = topPad + shownH * 0.058;
       const bodyB = topPad + shownH * 0.855;
 
