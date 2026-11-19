@@ -2173,7 +2173,7 @@ class HaCarCard extends HTMLElement {
       <div class="fmapview">${this._findMapPane()}</div>
       <div class="finfo">
         <div class="fhead">${icon("pin")}${esc(title)}</div>
-        <div class="fdist"><b data-fdist>${esc(this._distText(d))}</b><span>${en ? "away" : "距离"}</span>${this._zoneLine(p.car, true)}</div>
+        <div class="fdist"><b data-fdist>${esc(this._distText(d))}</b>${this._zoneLine(p.car, true)}</div>
         <div class="fcomp"><i class="frose" data-frose><i class="fring"></i><span class="fn" data-fn>N</span></i><i class="farrow" data-farrow>${icon("nav")}</i><span class="fcarpin" data-fcarpin hidden>${icon("car")}</span><span class="fdot"></span></div>
         <div class="ffoot"><button class="fperm" data-findperm type="button">${icon("gauge")}${en ? "Calibrate compass" : "校准指南针"}</button>
           <span class="facc" data-fstat>${esc(en ? "Compass" : "指南针")} · ${esc(this._findSourceText(loc.source))}</span></div>
@@ -2454,13 +2454,12 @@ class HaCarCard extends HTMLElement {
     if (fn) fn.style.transform = `translateX(-50%) rotate(${h}deg)`;
     if (stat) {
       const en = isEn(this._hass);
-      const src = this._findSourceText(loc.source);
       const base = this._heading == null
         ? (en ? "Compass off" : "指南针未启用")
         : this._headingSrc === "gps"
           ? (en ? "Moving direction" : "移动方向")
           : (en ? "Compass" : "指南针");
-      stat.textContent = src ? `${base} · ${src}` : base;
+      stat.textContent = base;
     }
   }
 
