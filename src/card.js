@@ -679,7 +679,10 @@ class HaCarCard extends HTMLElement {
   // 圆角跟着缩放走：画布被 scale(k) 缩小时半径也会缩，按 24px 的视觉半径反算画布半径
   _setRadius(k) {
     if (!this._card || !k) return;
-    this._card.style.borderRadius = `${Math.round(24 / k)}px`;
+    const r = Math.round(24 / k);
+    this._card.style.borderRadius = `${r}px`;
+    // 内容层（.wrap/.skin）自带背景，必须跟外框同一个圆角，否则四角会露出方形直角
+    this._card.style.setProperty("--hc-radius", `${r}px`);
   }
 
 

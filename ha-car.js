@@ -387,7 +387,7 @@ ha-card { display: block; overflow: hidden; position: relative; padding: 0;
   -webkit-font-smoothing: antialiased;
   isolation: isolate;
 }
-ha-card > .skin { position: absolute; inset: 0; z-index: 0; pointer-events: none; border-radius: inherit;
+ha-card > .skin { position: absolute; inset: 0; z-index: 0; pointer-events: none; border-radius: var(--hc-radius, 28px);
   background-image: var(--hc-bg,
     radial-gradient(120% 80% at 50% -10%, rgba(55,214,232,.14), transparent 58%),
     radial-gradient(70% 50% at 15% 105%, rgba(40,120,180,.10), transparent 70%),
@@ -412,6 +412,7 @@ ha-card.has-photo .wrap { background-image:
   var(--hc-photo); background-size: cover; background-position: center; background-repeat: no-repeat; }
 .wrap { position: relative; z-index: 2; padding: 18px 16px 14px; display: flex; flex-direction: column; gap: 14px;
   container-type: inline-size;
+  border-radius: var(--hc-radius, 28px); overflow: hidden;
   background-image: var(--hc-bg,
     radial-gradient(120% 80% at 50% -10%, rgba(var(--hc-a,55,214,232),.14), transparent 58%),
     radial-gradient(70% 50% at 15% 105%, rgba(40,120,180,.10), transparent 70%),
@@ -2391,7 +2392,9 @@ var HaCarCard = class extends HTMLElement {
   // 圆角跟着缩放走：画布被 scale(k) 缩小时半径也会缩，按 24px 的视觉半径反算画布半径
   _setRadius(k) {
     if (!this._card || !k) return;
-    this._card.style.borderRadius = `${Math.round(24 / k)}px`;
+    const r = Math.round(24 / k);
+    this._card.style.borderRadius = `${r}px`;
+    this._card.style.setProperty("--hc-radius", `${r}px`);
   }
   // 品牌识别：设备 manufacturer/model/名称里带林肯特征就用林肯标，也允许配置里强制指定
   _brand() {
@@ -5388,7 +5391,7 @@ var HaCarEditor = class extends HTMLElement {
 customElements.define("ha-car-editor", HaCarEditor);
 
 // src/main.js
-var VERSION = "3.5.0";
+var VERSION = "3.5.1";
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "ha-car",

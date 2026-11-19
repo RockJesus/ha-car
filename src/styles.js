@@ -34,7 +34,7 @@ ha-card { display: block; overflow: hidden; position: relative; padding: 0;
   -webkit-font-smoothing: antialiased;
   isolation: isolate;
 }
-ha-card > .skin { position: absolute; inset: 0; z-index: 0; pointer-events: none; border-radius: inherit;
+ha-card > .skin { position: absolute; inset: 0; z-index: 0; pointer-events: none; border-radius: var(--hc-radius, 28px);
   background-image: var(--hc-bg,
     radial-gradient(120% 80% at 50% -10%, rgba(55,214,232,.14), transparent 58%),
     radial-gradient(70% 50% at 15% 105%, rgba(40,120,180,.10), transparent 70%),
@@ -59,6 +59,7 @@ ha-card.has-photo .wrap { background-image:
   var(--hc-photo); background-size: cover; background-position: center; background-repeat: no-repeat; }
 .wrap { position: relative; z-index: 2; padding: 18px 16px 14px; display: flex; flex-direction: column; gap: 14px;
   container-type: inline-size;
+  border-radius: var(--hc-radius, 28px); overflow: hidden;
   background-image: var(--hc-bg,
     radial-gradient(120% 80% at 50% -10%, rgba(var(--hc-a,55,214,232),.14), transparent 58%),
     radial-gradient(70% 50% at 15% 105%, rgba(40,120,180,.10), transparent 70%),
