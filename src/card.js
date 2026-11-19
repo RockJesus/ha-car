@@ -201,6 +201,9 @@ const DEFAULTS = {
   chip_style: "liquid",
   show_plate: true,
   privacy: false,
+  // 续航仪表的满量程（km）：每台车续航上限不同，0 表示沿用车型默认值
+  range_full: 0,
+  ev_range_full: 0,
   image: "auto",
   image_url: "",
   bg_image: "",
@@ -331,6 +334,8 @@ class HaCarCard extends HTMLElement {
     cfg.chip_style = CHIP_STYLES.indexOf(cfg.chip_style) >= 0 ? cfg.chip_style : DEFAULTS.chip_style;
     if (cfg.bg_image && !bgUrl(cfg.bg_image) && !isMediaSource(cfg.bg_image)) cfg.bg_image = "";
     cfg.hold_ms = clamp(Number(cfg.hold_ms) || DEFAULTS.hold_ms, 300, 3000);
+    cfg.range_full = clamp(Math.round(Number(cfg.range_full) || 0), 0, 2000);
+    cfg.ev_range_full = clamp(Math.round(Number(cfg.ev_range_full) || 0), 0, 2000);
     delete cfg.floor; // 楼层功能已下线，清掉旧配置残留，避免读取不存在的实体导致整卡报错
     cfg.blocks = normBlocks(cfg);
     cfg.confirm = normalizeConfirm(config, cfg);
@@ -2624,7 +2629,10 @@ class HaCarCard extends HTMLElement {
       const numv = num(st);
       const kind = def ? def.kind : "stat";
       if ((kind === "pct" || kind === "range" || kind === "odo") && gauges.length < 2 && numv != null) {
-        const full = def && def.full ? def.full : 1000;
+        let full = def && def.full ? def.full : 1000;
+        // 用户可在编辑器里设定满续航/满电续航，改比例尺不动读数本身
+        if (def === ITEM_DEFS.range && this._config.range_full) full = this._config.range_full;
+        if (def === ITEM_DEFS.ev_range && this._config.ev_range_full) full = this._config.ev_range_full;
         const pct = kind === "pct" ? clamp(numv, 2, 100) : clamp((numv / full) * 100, 2, 100);
         gauges.push(
           this._gauge({

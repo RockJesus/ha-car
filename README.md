@@ -75,6 +75,8 @@ type: custom:ha-car
 | `modules` | list | 全部 | `status` `actions` `energy` `tires` `doors` `charging` `alerts` `service` |
 | `confirm` | list | 全部动作 | 防误触总开关：省略或非空都覆盖全部动作按钮（含自定义按钮），写成 `[]` 关闭 |
 | `hold_ms` | number | `2000` | 长按时长（毫秒），300–3000 |
+| `range_full` | number | 车型默认（620） | 满续航里程（km）。每台车的续航上限不同，填上上限后环形进度按 `续航 / range_full` 计算；留空或 `0` 用默认量程。编辑器「外观 → 仪表量程」里可填 |
+| `ev_range_full` | number | 车型默认（500） | 满电续航里程（km），同样用于纯电续航仪表的比例尺 |
 | `accent` | string | `#37d6e8` | 强调色（仪表背光青） |
 | `image` | string | `auto` | `auto` / `overlook` / `3d` / `side` / `custom` / 实体 ID / URL |
 | `image_url` | string | — | `image: custom` 时使用的图片地址 |

@@ -70,6 +70,10 @@ const L = {
   advancedHint: "留空即自动识别。只有实体被改名或一台车挂多个集成时才需要填。",
   autofill: "自动适配集成实体",
   autofillDone: "已把集成里识别到的实体填入下列位置",
+  gaugeFull: "仪表量程",
+  gaugeFullHint: "每台车的满油/满电续航不一样，填上你这台车的上限，环形进度才准。留空用车型默认值。",
+  rangeFull: "满续航（km）",
+  evRangeFull: "满电续航（km）",
 };
 const IMG_MODES = [
   ["auto", "自动（俯视 → 3D → 侧视）"],
@@ -94,6 +98,10 @@ class HaCarEditor extends HTMLElement {
     this._config.entities = Object.assign({}, this._config.entities || {});
     this._config.find = Object.assign({ phone: "", car: "" }, this._config.find && typeof this._config.find === "object" ? this._config.find : {});
     this._config.bg_image = typeof this._config.bg_image === "string" ? this._config.bg_image.trim() : "";
+    for (const k of ["range_full", "ev_range_full"]) {
+      const n = Math.round(Number(this._config[k]) || 0);
+      this._config[k] = n > 0 ? Math.min(2000, n) : 0;
+    }
     if (!Array.isArray(this._config.modules)) this._config.modules = DEFAULTS.modules.slice();
     this._config.blocks = normBlocks(this._config);
     this._config.confirm = normalizeConfirm(config, this._config);
@@ -224,6 +232,14 @@ class HaCarEditor extends HTMLElement {
           <button class="btn sq clr" id="bgclr" type="button" title="清除背景图" aria-label="清除背景图">✕</button></div>
         <div class="pick" id="bgimage"></div>
         <p class="hint" style="margin-top:4px">${L.bgHint}</p>
+        <label class="f">${L.gaugeFull}</label>
+        <p class="hint" style="margin-top:-2px">${L.gaugeFullHint}</p>
+        <div class="grid2">
+          <label class="f">${L.rangeFull}</label>
+          <input class="tf" id="rangefull" type="number" min="0" max="2000" step="10" placeholder="620">
+          <label class="f">${L.evRangeFull}</label>
+          <input class="tf" id="evrangefull" type="number" min="0" max="2000" step="10" placeholder="500">
+        </div>
       </div>
 
       <details class="sec adv">
@@ -340,6 +356,15 @@ class HaCarEditor extends HTMLElement {
       this._config.theme = e.target.value;
       this._emit();
     });
+
+    for (const [id, key] of [["rangefull", "range_full"], ["evrangefull", "ev_range_full"]]) {
+      q(id).addEventListener("change", (e) => {
+        const n = Math.round(Number(e.target.value) || 0);
+        this._config[key] = n > 0 ? Math.min(2000, n) : 0;
+        this._sync();
+        this._emit();
+      });
+    }
 
     this.shadowRoot.getElementById("swatches").addEventListener("click", (e) => {
       const s = e.target.closest("[data-color]");
@@ -742,6 +767,8 @@ class HaCarEditor extends HTMLElement {
     q("theme").value = this._config.theme || DEFAULTS.theme;
     q("bgstyle").value = this._config.bg_style || "radar";
     q("chipstyle").value = this._config.chip_style || "glass";
+    q("rangefull").value = this._config.range_full ? String(this._config.range_full) : "";
+    q("evrangefull").value = this._config.ev_range_full ? String(this._config.ev_range_full) : "";
     this._syncBackground();
     const picked = /^#[0-9a-f]{6}$/i.test(this._config.accent || "") ? this._config.accent : (THEMES[this._config.theme] || THEMES.midnight).accent;
     q("color").value = picked;
