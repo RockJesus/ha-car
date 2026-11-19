@@ -3223,8 +3223,10 @@ var HaCarCard = class extends HTMLElement {
       const ringR = (orbR3.right - ovlR.left) * k3;
       const ringT = (orbR3.top - ovlR.top) * k3;
       const ringB = (orbR3.bottom - ovlR.top) * k3;
-      const bodyL = iw * 0.1;
-      const bodyR = iw * 0.9;
+      const doorLF = iw * 0.163;
+      const doorRF = iw * 0.837;
+      const doorLR = iw * 0.215;
+      const doorRR = iw * 0.785;
       const bodyT = topPad + shownH * 0.058;
       const bodyB = topPad + shownH * 0.855;
       const capH = this._wrap.querySelector(".cap.hood");
@@ -3252,13 +3254,14 @@ var HaCarCard = class extends HTMLElement {
         capH.style.top = `${Math.round(hTop)}px`;
         capT.style.top = `${Math.round(tTop)}px`;
       }
-      const midY = (bodyT + bodyB) / 2;
+      const midY = topPad + shownH * 0.505;
       const vGap = Math.max(6, Math.round(shownH * 0.012));
       this._wrap.querySelectorAll(".loc").forEach((card) => {
         const leftSide = card.classList.contains("lf") || card.classList.contains("lr");
         const front = card.classList.contains("lf") || card.classList.contains("rf");
         let w = card.offsetWidth;
-        const corridor = leftSide ? bodyL - 4 - (ringL + 6) : ringR - 6 - (bodyR + 4);
+        const doorEdge = leftSide ? front ? doorLF : doorLR : front ? doorRF : doorRR;
+        const corridor = leftSide ? doorEdge - 4 - (ringL + 6) : ringR - 6 - (doorEdge + 4);
         const kk = Math.max(0.6, Math.min(1, corridor / (w + 6)));
         if (kk < 0.995) {
           card.style.transform = `translate(-50%, -50%) scale(${kk.toFixed(3)})`;
@@ -3266,11 +3269,11 @@ var HaCarCard = class extends HTMLElement {
         } else if (card.style.transform) {
           card.style.transform = "translate(-50%, -50%)";
         }
-        let cx = leftSide ? bodyL - 4 - w / 2 : bodyR + 4 + w / 2;
+        let cx = leftSide ? doorEdge - 4 - w / 2 : doorEdge + 4 + w / 2;
         cx = leftSide ? Math.max(ringL + 6 + w / 2, cx) : Math.min(ringR - 6 - w / 2, cx);
         card.style.left = `${Math.round(cx)}px`;
         const h = card.offsetHeight * kk;
-        let cy = bodyT + (bodyB - bodyT) * (front ? 0.34 : 0.66);
+        let cy = topPad + shownH * (front ? 0.365 : 0.645);
         if (front) cy = Math.min(cy, midY - vGap / 2 - h / 2);
         else cy = Math.max(cy, midY + vGap / 2 + h / 2);
         card.style.top = `${Math.round(cy)}px`;
@@ -5387,7 +5390,7 @@ var HaCarEditor = class extends HTMLElement {
 customElements.define("ha-car-editor", HaCarEditor);
 
 // src/main.js
-var VERSION = "3.5.5";
+var VERSION = "3.5.6";
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "ha-car",

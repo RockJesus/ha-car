@@ -1624,9 +1624,12 @@ class HaCarCard extends HTMLElement {
       const ringR = (orbR3.right - ovlR.left) * k3;
       const ringT = (orbR3.top - ovlR.top) * k3;
       const ringB = (orbR3.bottom - ovlR.top) * k3;
-      // 车身轮廓：横向约占图宽 10%–90%，纵向约占图片内容高 5.8%–85.5%
-      const bodyL = iw * 0.1;
-      const bodyR = iw * 0.9;
+      // 车门边的横向基准：俯视车图两侧留白大，取满 10%–90% 会让状态卡离车门太远。
+      // 前排要避开车外后视镜（约在 15% 处），所以前排基准再往外让一点；后排贴着车门腰线。
+      const doorLF = iw * 0.163;
+      const doorRF = iw * 0.837;
+      const doorLR = iw * 0.215;
+      const doorRR = iw * 0.785;
       const bodyT = topPad + shownH * 0.058;
       const bodyB = topPad + shownH * 0.855;
 
@@ -1656,13 +1659,14 @@ class HaCarCard extends HTMLElement {
         capT.style.top = `${Math.round(tTop)}px`;
       }
 
-      const midY = (bodyT + bodyB) / 2;
+      const midY = topPad + shownH * 0.505;
       const vGap = Math.max(6, Math.round(shownH * 0.012));
       this._wrap.querySelectorAll(".loc").forEach((card) => {
         const leftSide = card.classList.contains("lf") || card.classList.contains("lr");
         const front = card.classList.contains("lf") || card.classList.contains("rf");
         let w = card.offsetWidth;
-        const corridor = leftSide ? bodyL - 4 - (ringL + 6) : ringR - 6 - (bodyR + 4);
+        const doorEdge = leftSide ? (front ? doorLF : doorLR) : (front ? doorRF : doorRR);
+        const corridor = leftSide ? doorEdge - 4 - (ringL + 6) : ringR - 6 - (doorEdge + 4);
         const kk = Math.max(0.6, Math.min(1, corridor / (w + 6)));
         if (kk < 0.995) {
           card.style.transform = `translate(-50%, -50%) scale(${kk.toFixed(3)})`;
@@ -1670,12 +1674,13 @@ class HaCarCard extends HTMLElement {
         } else if (card.style.transform) {
           card.style.transform = "translate(-50%, -50%)";
         }
-        let cx = leftSide ? bodyL - 4 - w / 2 : bodyR + 4 + w / 2;
+        let cx = leftSide ? doorEdge - 4 - w / 2 : doorEdge + 4 + w / 2;
         cx = leftSide ? Math.max(ringL + 6 + w / 2, cx) : Math.min(ringR - 6 - w / 2, cx);
         card.style.left = `${Math.round(cx)}px`;
         // 竖向对齐车门行：前排偏车头、后排偏车尾；卡片变高时自动让位，避免前后两张压在一起
         const h = card.offsetHeight * kk;
-        let cy = bodyT + (bodyB - bodyT) * (front ? 0.34 : 0.66);
+        // 竖向直接按车图比例对齐前后车门行（前门约 36.5%、后门约 64.5% 图高）
+        let cy = topPad + shownH * (front ? 0.365 : 0.645);
         if (front) cy = Math.min(cy, midY - vGap / 2 - h / 2);
         else cy = Math.max(cy, midY + vGap / 2 + h / 2);
         card.style.top = `${Math.round(cy)}px`;
