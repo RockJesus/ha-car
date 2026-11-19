@@ -1011,6 +1011,8 @@ class HaCarCard extends HTMLElement {
     this._wrap.innerHTML = this._body(data, twoCol);
     // 新 DOM 一落地就把上一帧的位置写回去，避免首帧回到 CSS 默认位置（点按钮时的闪烁就是这么来的）
     this._restoreGeo();
+    // 重绘会换掉按钮节点：正在按住的长按要重绑到新节点，否则松手时比对不上、动作被静默取消
+    this._rebindHold();
     if (this._findOpen) {
       // 每次 hass 更新都会重绘，先清掉旧蒙层，否则会叠出多层只更新最底层
       this._card.querySelectorAll(".findmodal").forEach((m) => m.remove());
@@ -1695,14 +1697,25 @@ class HaCarCard extends HTMLElement {
           } else if (el.style.transform) {
             el.style.transform = "translate(-50%, 0)";
           }
+          el._hcK = kk;
           return h;
         };
         const gapHood = Math.max(10, Math.round(shownH * 0.042));
         const hH = fit(capH, bodyT - ringT - gapHood + 8);
         // 尾门胶囊放进「车尾 → 圆环下沿」这段空白的正中：上下各留等量空隙，不压车也不压圈
         const tTopMin = bodyB + Math.max(5, Math.round(shownH * 0.012));
-        const tBotMax = ringB - 9;
-        const tH = fit(capT, tBotMax - tTopMin + 6);
+        // 尾门胶囊是矩形：下沿贴到圆环底部时，左右两角仍会越界。
+        // 这里按「四角到圆心 ≤ R-7」反推可用的最下沿，宽胶囊会自动收窄/上抬。
+        const ringR2 = Math.max(12, (ringB - ringT) / 2);
+        const cyR2 = (ringT + ringB) / 2;
+        let tBotMax = ringB - 9;
+        let tH = 0;
+        for (let i = 0; i < 3; i += 1) {
+          tH = fit(capT, Math.max(18, tBotMax - tTopMin + 6));
+          const wVis = capT.offsetWidth * (capT._hcK || 1);
+          const lim = Math.sqrt(Math.max(4, Math.pow(ringR2 - 7, 2) - Math.pow(wVis / 2, 2)));
+          tBotMax = Math.min(ringB - 9, cyR2 + lim);
+        }
         let hTop = bodyT - gapHood - hH;
         if (hTop < ringT + 10) hTop = ringT + 10;
         let tTop = Math.round((tTopMin + (tBotMax - tH)) / 2);
@@ -1810,7 +1823,8 @@ class HaCarCard extends HTMLElement {
             const m = String(c.el.style.transform || "").match(/scale\(([\d.]+)\)/);
             const base = m ? parseFloat(m[1]) : 1;
             if (far > rr0 - 6) {
-              const nk = Math.max(0.66, base * ((rr0 - 9) / far));
+              // 窄屏（360）下尾门胶囊按 0.66 收缩仍会擦到圆环，下限放宽到 0.56
+              const nk = Math.max(0.54, base * ((rr0 - 11) / far));
               if (nk < base - 0.001) {
                 c.el.style.transform = `translate(-50%, 0) scale(${nk.toFixed(3)})`;
                 c.el.style.transformOrigin = "50% 0";
@@ -3010,7 +3024,8 @@ class HaCarCard extends HTMLElement {
     w.addEventListener("pointercancel", () => this._cancelHold());
     w.addEventListener("pointerleave", (ev) => {
       const el = ev.target.closest && ev.target.closest("[data-act]");
-      if (el && this._hold && this._hold.el === el) this._cancelHold();
+      const h = this._hold;
+      if (el && h && (h.el === el || (h.act && el.dataset.act === h.act))) this._cancelHold();
     });
     w.addEventListener("click", (ev) => this._onClick(ev));
     w.addEventListener("keydown", (ev) => this._onKeyDown(ev));
@@ -3041,7 +3056,7 @@ class HaCarCard extends HTMLElement {
     el.classList.add("pressing");
     const lbl = el.querySelector(".lbl");
     const orig = lbl ? lbl.textContent : "";
-    this._hold = { el, armed: false, lbl, orig, start: Date.now() };
+    this._hold = { el, act: el.dataset.act || "", armed: false, lbl, orig, start: Date.now(), circle: null };
     try {
       if (pointerId != null) el.setPointerCapture(pointerId);
     } catch {
@@ -3052,6 +3067,7 @@ class HaCarCard extends HTMLElement {
     const ring = this.shadowRoot.querySelector(".orbit .hring2");
     const circle = ring ? ring.querySelector("circle") : null;
     if (ring && circle) {
+      if (this._hold) this._hold.circle = circle;
       const C = 2 * Math.PI * 49;
       circle.setAttribute("stroke-dasharray", String(C));
       circle.setAttribute("stroke-dashoffset", String(C));
@@ -3060,7 +3076,8 @@ class HaCarCard extends HTMLElement {
       const tickRing = () => {
         if (!this._hold) return;
         const p = Math.min(1, (Date.now() - t0) / ms);
-        circle.setAttribute("stroke-dashoffset", String(C * (1 - p)));
+        const cc = this._hold.circle || circle;
+        cc.setAttribute("stroke-dashoffset", String(C * (1 - p)));
         if (p < 1) this._holdRaf = requestAnimationFrame(tickRing);
       };
       this._holdRaf = requestAnimationFrame(tickRing);
@@ -3098,11 +3115,15 @@ class HaCarCard extends HTMLElement {
 
   _onUp(ev) {
     const el = ev.target.closest && ev.target.closest("[data-act]");
-    if (!this._hold) return;
-    if (!el || el !== this._hold.el) {
+    const h = this._hold;
+    if (!h) return;
+    // 重绘会换掉节点，且指针捕获可能仍指向旧节点：按动作键比对，别用节点身份
+    const same = el && (el === h.el || (h.act && el.dataset.act === h.act));
+    if (!same) {
       this._cancelHold();
       return;
     }
+    h.el = el; // 松手时统一用最新节点去执行
     this._finishHold();
   }
 
@@ -3142,6 +3163,35 @@ class HaCarCard extends HTMLElement {
     if (!ring || !circle) return;
     if (ring.parentElement) ring.parentElement.classList.remove("prog", "armed");
     circle.setAttribute("stroke-dashoffset", String(2 * Math.PI * 49));
+  }
+
+  _rebindHold() {
+    const h = this._hold;
+    if (!h || !this._wrap) return;
+    const el = h.act
+      ? this._wrap.querySelector(`[data-act="${h.act}"]`)
+      : null;
+    if (!el) {
+      this._cancelHold();
+      return;
+    }
+    h.el = el;
+    h.lbl = el.querySelector(".lbl");
+    if (h.lbl) h.lbl.textContent = h.armed ? dict(this._hass).armed : h.orig;
+    if (!el.classList.contains("pressing")) el.classList.add("pressing");
+    if (h.armed) el.classList.add("armed");
+    const rg = this.shadowRoot.querySelector(".orbit .hring2");
+    if (rg) {
+      const c2 = rg.querySelector("circle");
+      if (c2 && rg.parentElement) {
+        const C = 2 * Math.PI * 49;
+        const p = Math.min(1, (Date.now() - h.start) / this._holdMs());
+        c2.setAttribute("stroke-dasharray", String(C));
+        c2.setAttribute("stroke-dashoffset", String(C * (1 - p)));
+        rg.parentElement.classList.add(h.armed ? "armed" : "prog");
+        h.circle = c2;
+      }
+    }
   }
 
   _cancelHold() {

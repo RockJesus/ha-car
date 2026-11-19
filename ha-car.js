@@ -2721,6 +2721,7 @@ var HaCarCard = class extends HTMLElement {
     const twoCol = this._card.classList.contains("fit") || this._card.classList.contains("gtwo");
     this._wrap.innerHTML = this._body(data, twoCol);
     this._restoreGeo();
+    this._rebindHold();
     if (this._findOpen) {
       this._card.querySelectorAll(".findmodal").forEach((m) => m.remove());
       this._card.insertAdjacentHTML("beforeend", this._findModal(data));
@@ -3325,13 +3326,22 @@ var HaCarCard = class extends HTMLElement {
           } else if (el.style.transform) {
             el.style.transform = "translate(-50%, 0)";
           }
+          el._hcK = kk;
           return h;
         };
         const gapHood = Math.max(10, Math.round(shownH * 0.042));
         const hH = fit(capH, bodyT - ringT - gapHood + 8);
         const tTopMin = bodyB + Math.max(5, Math.round(shownH * 0.012));
-        const tBotMax = ringB - 9;
-        const tH = fit(capT, tBotMax - tTopMin + 6);
+        const ringR2 = Math.max(12, (ringB - ringT) / 2);
+        const cyR2 = (ringT + ringB) / 2;
+        let tBotMax = ringB - 9;
+        let tH = 0;
+        for (let i = 0; i < 3; i += 1) {
+          tH = fit(capT, Math.max(18, tBotMax - tTopMin + 6));
+          const wVis = capT.offsetWidth * (capT._hcK || 1);
+          const lim = Math.sqrt(Math.max(4, Math.pow(ringR2 - 7, 2) - Math.pow(wVis / 2, 2)));
+          tBotMax = Math.min(ringB - 9, cyR2 + lim);
+        }
         let hTop = bodyT - gapHood - hH;
         if (hTop < ringT + 10) hTop = ringT + 10;
         let tTop = Math.round((tTopMin + (tBotMax - tH)) / 2);
@@ -3426,7 +3436,7 @@ var HaCarCard = class extends HTMLElement {
             const m = String(c.el.style.transform || "").match(/scale\(([\d.]+)\)/);
             const base = m ? parseFloat(m[1]) : 1;
             if (far > rr0 - 6) {
-              const nk = Math.max(0.66, base * ((rr0 - 9) / far));
+              const nk = Math.max(0.54, base * ((rr0 - 11) / far));
               if (nk < base - 1e-3) {
                 c.el.style.transform = `translate(-50%, 0) scale(${nk.toFixed(3)})`;
                 c.el.style.transformOrigin = "50% 0";
@@ -4542,7 +4552,8 @@ var HaCarCard = class extends HTMLElement {
     w.addEventListener("pointercancel", () => this._cancelHold());
     w.addEventListener("pointerleave", (ev) => {
       const el = ev.target.closest && ev.target.closest("[data-act]");
-      if (el && this._hold && this._hold.el === el) this._cancelHold();
+      const h = this._hold;
+      if (el && h && (h.el === el || h.act && el.dataset.act === h.act)) this._cancelHold();
     });
     w.addEventListener("click", (ev) => this._onClick(ev));
     w.addEventListener("keydown", (ev) => this._onKeyDown(ev));
@@ -4570,7 +4581,7 @@ var HaCarCard = class extends HTMLElement {
     el.classList.add("pressing");
     const lbl = el.querySelector(".lbl");
     const orig = lbl ? lbl.textContent : "";
-    this._hold = { el, armed: false, lbl, orig, start: Date.now() };
+    this._hold = { el, act: el.dataset.act || "", armed: false, lbl, orig, start: Date.now(), circle: null };
     try {
       if (pointerId != null) el.setPointerCapture(pointerId);
     } catch {
@@ -4578,6 +4589,7 @@ var HaCarCard = class extends HTMLElement {
     const ring = this.shadowRoot.querySelector(".orbit .hring2");
     const circle = ring ? ring.querySelector("circle") : null;
     if (ring && circle) {
+      if (this._hold) this._hold.circle = circle;
       const C = 2 * Math.PI * 49;
       circle.setAttribute("stroke-dasharray", String(C));
       circle.setAttribute("stroke-dashoffset", String(C));
@@ -4586,7 +4598,8 @@ var HaCarCard = class extends HTMLElement {
       const tickRing = () => {
         if (!this._hold) return;
         const p = Math.min(1, (Date.now() - t0) / ms);
-        circle.setAttribute("stroke-dashoffset", String(C * (1 - p)));
+        const cc = this._hold.circle || circle;
+        cc.setAttribute("stroke-dashoffset", String(C * (1 - p)));
         if (p < 1) this._holdRaf = requestAnimationFrame(tickRing);
       };
       this._holdRaf = requestAnimationFrame(tickRing);
@@ -4620,11 +4633,14 @@ var HaCarCard = class extends HTMLElement {
   }
   _onUp(ev) {
     const el = ev.target.closest && ev.target.closest("[data-act]");
-    if (!this._hold) return;
-    if (!el || el !== this._hold.el) {
+    const h = this._hold;
+    if (!h) return;
+    const same = el && (el === h.el || h.act && el.dataset.act === h.act);
+    if (!same) {
       this._cancelHold();
       return;
     }
+    h.el = el;
     this._finishHold();
   }
   _finishHold() {
@@ -4661,6 +4677,32 @@ var HaCarCard = class extends HTMLElement {
     if (!ring || !circle) return;
     if (ring.parentElement) ring.parentElement.classList.remove("prog", "armed");
     circle.setAttribute("stroke-dashoffset", String(2 * Math.PI * 49));
+  }
+  _rebindHold() {
+    const h = this._hold;
+    if (!h || !this._wrap) return;
+    const el = h.act ? this._wrap.querySelector(`[data-act="${h.act}"]`) : null;
+    if (!el) {
+      this._cancelHold();
+      return;
+    }
+    h.el = el;
+    h.lbl = el.querySelector(".lbl");
+    if (h.lbl) h.lbl.textContent = h.armed ? dict(this._hass).armed : h.orig;
+    if (!el.classList.contains("pressing")) el.classList.add("pressing");
+    if (h.armed) el.classList.add("armed");
+    const rg = this.shadowRoot.querySelector(".orbit .hring2");
+    if (rg) {
+      const c2 = rg.querySelector("circle");
+      if (c2 && rg.parentElement) {
+        const C = 2 * Math.PI * 49;
+        const p = Math.min(1, (Date.now() - h.start) / this._holdMs());
+        c2.setAttribute("stroke-dasharray", String(C));
+        c2.setAttribute("stroke-dashoffset", String(C * (1 - p)));
+        rg.parentElement.classList.add(h.armed ? "armed" : "prog");
+        h.circle = c2;
+      }
+    }
   }
   _cancelHold() {
     if (!this._hold) return;
@@ -5566,7 +5608,7 @@ var HaCarEditor = class extends HTMLElement {
 customElements.define("ha-car-editor", HaCarEditor);
 
 // src/main.js
-var VERSION = "3.7.1";
+var VERSION = "3.7.2";
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "ha-car",

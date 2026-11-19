@@ -1,6 +1,6 @@
 {
   "name": "ha-car",
-  "version": "3.7.1",
+  "version": "3.7.2",
   "private": true,
   "type": "module",
   "description": "Home Assistant Lovelace card for FordPass China (福特派互联) / Lincoln Way",
