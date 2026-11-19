@@ -1296,9 +1296,9 @@ ha-card.panel.fit .pills { width: 100%; max-width: none; }
       rgba(96,255,196,0) 150deg 360deg),
     repeating-conic-gradient(from 208deg,
       rgba(206,244,230,.60) 0 .55deg, rgba(206,244,230,0) .55deg 7.4deg); }
-.enp.on::after { transform: translate(-50%, -50%) rotate(268deg) translate(0, -19px);
-  background: linear-gradient(180deg, rgba(96,255,196,.18), rgba(96,255,196,.96));
-  box-shadow: 0 0 6px 1px rgba(96,255,196,.6);
+.enp.on::after { transform: translate(-50%, -50%) rotate(312deg) translate(0, -30px);
+  background: linear-gradient(180deg, rgba(228,255,246,.15), rgba(242,255,251,.96));
+  box-shadow: 0 0 6px 1px rgba(160,255,220,.7);
   transition: transform .55s cubic-bezier(.3,1.4,.5,1); }
 .enp .rsleft { display: block; margin-top: 1px; font-size: 10.5px; line-height: 1;
   font-variant-numeric: tabular-nums; letter-spacing: .4px; opacity: .92; color: currentColor; }
@@ -5474,7 +5474,7 @@ var HaCarEditor = class extends HTMLElement {
 customElements.define("ha-car-editor", HaCarEditor);
 
 // src/main.js
-var VERSION = "3.6.5";
+var VERSION = "3.6.6";
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "ha-car",
