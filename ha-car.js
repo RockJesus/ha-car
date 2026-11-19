@@ -2040,6 +2040,15 @@ function normalizeConfirm(config, cfg) {
   return list.length ? actionKeys(cfg) : [];
 }
 var SLOT_KEYS = Object.keys(SLOTS);
+var CAR_SHEET = (() => {
+  try {
+    const sheet = new CSSStyleSheet();
+    sheet.replaceSync(STYLES);
+    return sheet;
+  } catch {
+    return null;
+  }
+})();
 var HaCarCard = class extends HTMLElement {
   constructor() {
     super();
@@ -2113,7 +2122,7 @@ var HaCarCard = class extends HTMLElement {
   }
   // 瀑布流用 50px 为单位估算高度；实测整卡 full≈844-876px、compact≈580px
   getCardSize() {
-    return this._config && this._config.layout === "compact" ? 12 : 17;
+    return this._config && this._config.layout === "compact" ? 5 : 7;
   }
   // 分区视图里高度交给内容（rows: "auto"），避免固定行数比内容矮导致下半截被裁
   getGridOptions() {
@@ -2532,7 +2541,12 @@ var HaCarCard = class extends HTMLElement {
   }
   _build() {
     const root = this.shadowRoot;
-    root.innerHTML = `<style>${STYLES}</style><ha-card><div class="skin"></div><div class="wrap"></div></ha-card>`;
+    if (CAR_SHEET) {
+      root.innerHTML = `<ha-card><div class="skin"></div><div class="wrap"></div></ha-card>`;
+      root.adoptedStyleSheets = [CAR_SHEET];
+    } else {
+      root.innerHTML = `<style>${STYLES}</style><ha-card><div class="skin"></div><div class="wrap"></div></ha-card>`;
+    }
     this._wrap = root.querySelector(".wrap");
     this._card = root.querySelector("ha-card");
     this._built = true;
@@ -5374,7 +5388,7 @@ var HaCarEditor = class extends HTMLElement {
 customElements.define("ha-car-editor", HaCarEditor);
 
 // src/main.js
-var VERSION = "3.4.2";
+var VERSION = "3.5.0";
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "ha-car",

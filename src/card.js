@@ -278,6 +278,17 @@ export function normalizeConfirm(config, cfg) {
 
 const SLOT_KEYS = Object.keys(SLOTS);
 
+// 所有卡片实例共用一份可构造样式表：一份 CSSOM，N 张卡不再各自解析 73KB CSS
+const CAR_SHEET = (() => {
+  try {
+    const sheet = new CSSStyleSheet();
+    sheet.replaceSync(STYLES);
+    return sheet;
+  } catch {
+    return null;
+  }
+})();
+
 class HaCarCard extends HTMLElement {
   constructor() {
     super();
@@ -363,7 +374,9 @@ class HaCarCard extends HTMLElement {
 
   // 瀑布流用 50px 为单位估算高度；实测整卡 full≈844-876px、compact≈580px
   getCardSize() {
-    return this._config && this._config.layout === "compact" ? 12 : 17;
+    // 卡片选择器按这个数字算预览高度（1 格≈50px）；旧的 17 格会让每张预览铺 850px，
+    // 手机上同时铺几十张预览直接吃满 WebView 内存，这里给一个贴近实际观感的值
+    return this._config && this._config.layout === "compact" ? 5 : 7;
   }
 
   // 分区视图里高度交给内容（rows: "auto"），避免固定行数比内容矮导致下半截被裁
@@ -845,7 +858,12 @@ class HaCarCard extends HTMLElement {
 
   _build() {
     const root = this.shadowRoot;
-    root.innerHTML = `<style>${STYLES}</style><ha-card><div class="skin"></div><div class="wrap"></div></ha-card>`;
+    if (CAR_SHEET) {
+      root.innerHTML = `<ha-card><div class="skin"></div><div class="wrap"></div></ha-card>`;
+      root.adoptedStyleSheets = [CAR_SHEET];
+    } else {
+      root.innerHTML = `<style>${STYLES}</style><ha-card><div class="skin"></div><div class="wrap"></div></ha-card>`;
+    }
     this._wrap = root.querySelector(".wrap");
     this._card = root.querySelector("ha-card");
 
