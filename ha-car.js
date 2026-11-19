@@ -387,12 +387,8 @@ ha-card { display: block; overflow: hidden; position: relative; padding: 0;
   -webkit-font-smoothing: antialiased;
   isolation: isolate;
 }
-ha-card > .skin { position: absolute; inset: 0; z-index: 0; pointer-events: none; border-radius: var(--hc-radius, 28px);
-  background-image: var(--hc-bg,
-    radial-gradient(120% 80% at 50% -10%, rgba(55,214,232,.14), transparent 58%),
-    radial-gradient(70% 50% at 15% 105%, rgba(40,120,180,.10), transparent 70%),
-    linear-gradient(168deg, #111d2c 0%, #0b1521 52%, #060b12 100%));
-  background-size: auto, auto, auto; background-repeat: no-repeat; }
+ha-card > .skin { position: absolute; inset: 0; z-index: 0; pointer-events: none;
+  border-radius: var(--hc-radius, 28px); }
 ha-card::before { content: ""; position: absolute; inset: 0; pointer-events: none; z-index: 1;
   background-image:
     radial-gradient(60% 34% at 50% 0%, rgba(255,255,255,.06), transparent 72%),
@@ -412,12 +408,7 @@ ha-card.has-photo .wrap { background-image:
   var(--hc-photo); background-size: cover; background-position: center; background-repeat: no-repeat; }
 .wrap { position: relative; z-index: 2; padding: 18px 16px 14px; display: flex; flex-direction: column; gap: 14px;
   container-type: inline-size;
-  border-radius: var(--hc-radius, 28px); overflow: hidden;
-  background-image: var(--hc-bg,
-    radial-gradient(120% 80% at 50% -10%, rgba(var(--hc-a,55,214,232),.14), transparent 58%),
-    radial-gradient(70% 50% at 15% 105%, rgba(40,120,180,.10), transparent 70%),
-    linear-gradient(168deg, #111d2c 0%, #0b1521 52%, #060b12 100%));
-  background-size: auto, auto, auto; background-repeat: no-repeat; }
+  border-radius: var(--hc-radius, 28px); overflow: hidden; }
 .duo { display: flex; flex-direction: column; gap: 14px; }
 .dleft, .dright { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
 /* 模块栈：顺序由配置决定，手机单列、宽屏双栏（车图固定左栏） */
@@ -5391,7 +5382,7 @@ var HaCarEditor = class extends HTMLElement {
 customElements.define("ha-car-editor", HaCarEditor);
 
 // src/main.js
-var VERSION = "3.5.1";
+var VERSION = "3.5.2";
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "ha-car",
