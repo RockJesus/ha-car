@@ -876,9 +876,9 @@ ha-card.theme-glass .gauge { filter: drop-shadow(0 10px 22px rgba(0,0,0,.35)); }
   box-shadow: 0 2cqw 5cqw rgba(2,7,12,.5), inset 0 1cqw 0 rgba(255,255,255,.07);
   backdrop-filter: blur(10cqw); font-variant-numeric: tabular-nums;
   transition: background .25s ease, border-color .25s ease, box-shadow .25s ease; }
-.loc { width: max(70px, 22cqw); min-width: max(70px, 22cqw); transform: translate(-50%, -50%);
-  padding: max(6px, 2cqw) max(4px, 1.6cqw); border-radius: max(12px, 6.4cqw); gap: max(3px, 1.1cqw);
-  text-align: center; }
+.loc { width: max(72px, 22cqw); min-width: max(72px, 22cqw); transform: translate(-50%, -50%);
+  padding: max(6px, 2cqw) max(5px, 1.8cqw); border-radius: max(12px, 6.4cqw); gap: max(3px, 1.1cqw);
+  text-align: center; justify-content: center; min-height: max(78px, 24cqw); }
 /* 竖窄框：门/窗/胎压按行竖排，图标在上、数值在下 */
 /* 车图偏窄时要保证最小宽度，卡片中心随之再往外推，避免压到车身 */
 .loc.lf, .loc.lr { left: calc(7.5% - 11cqw - max(0px, (70px - 22cqw) / 2)); }
@@ -892,8 +892,9 @@ ha-card.theme-glass .gauge { filter: drop-shadow(0 10px 22px rgba(0,0,0,.35)); }
 .loc .lh .lk.on { color: #7ee0b3; opacity: 1; }
 .loc .lrs { display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: max(3px, 1cqw);
   width: 100%; max-width: 100%; margin: 0 auto; }
-.loc .lr { flex: 0 0 auto; display: flex; flex-direction: column; align-items: center;
-  justify-content: center; gap: max(1px, .45cqw); line-height: 1; width: 100%; }
+/* 图标统一放在状态文字前面（图标在左、状态在右），三行等距，四张卡尺寸一致 */
+.loc .lr { flex: 0 0 auto; display: flex; flex-direction: row; align-items: center;
+  justify-content: center; gap: max(3px, 1.1cqw); line-height: 1; width: 100%; }
 .loc .lr .ri { flex: 0 0 auto; width: max(11px, 5.2cqw); height: max(11px, 5.2cqw); display: grid; place-items: center; color: #8fd6ea; }
 .loc .lr .ri .ic { width: 100%; height: 100%; display: block; }
 .loc .lr b { font-size: max(12px, 4.8cqw); font-weight: 620; color: #dbe7f5; letter-spacing: .01em; white-space: nowrap; }
@@ -3223,8 +3224,8 @@ var HaCarCard = class extends HTMLElement {
       const ringR = (orbR3.right - ovlR.left) * k3;
       const ringT = (orbR3.top - ovlR.top) * k3;
       const ringB = (orbR3.bottom - ovlR.top) * k3;
-      const doorLF = iw * 0.163;
-      const doorRF = iw * 0.837;
+      const doorLF = iw * 0.215;
+      const doorRF = iw * 0.785;
       const doorLR = iw * 0.215;
       const doorRR = iw * 0.785;
       const bodyT = topPad + shownH * 0.058;
@@ -3285,9 +3286,10 @@ var HaCarCard = class extends HTMLElement {
           const ocx = ob.left + ob.width / 2;
           const ocy = ob.top + ob.height / 2;
           const orr = ob.width / 2;
+          const doors = [...this._wrap.querySelectorAll(".covl .loc")];
           for (let pass = 0; pass < 8; pass++) {
-            let changed = false;
-            for (const el of this._wrap.querySelectorAll(".covl .loc")) {
+            let gs = Infinity;
+            for (const el of doors) {
               const m = String(el.style.transform || "").match(/scale\(([\d.]+)\)/);
               const base = m ? parseFloat(m[1]) : 1;
               const b = el.getBoundingClientRect();
@@ -3295,18 +3297,30 @@ var HaCarCard = class extends HTMLElement {
                 Math.max(Math.abs(b.left - ocx), Math.abs(b.right - ocx)),
                 Math.max(Math.abs(b.top - ocy), Math.abs(b.bottom - ocy))
               );
-              if (far > orr - 6) {
-                const ns = Math.max(base * 0.7, Math.min(base - 2e-3, base * ((orr - 9) / far)));
-                if (ns < base - 1e-3) {
-                  const top = el.classList.contains("cap");
-                  el.style.transform = `${top ? "translate(-50%, 0)" : "translate(-50%, -50%)"} scale(${ns.toFixed(3)})`;
-                  el.style.willChange = "transform";
-                  if (top) el.style.transformOrigin = "50% 0";
-                  changed = true;
-                }
+              if (far > orr - 6) gs = Math.min(gs, Math.max(base * 0.7, base * ((orr - 9) / far)));
+            }
+            if (!Number.isFinite(gs)) break;
+            let changed = false;
+            for (const el of doors) {
+              const m = String(el.style.transform || "").match(/scale\(([\d.]+)\)/);
+              const base = m ? parseFloat(m[1]) : 1;
+              if (gs < base - 1e-3) {
+                el.style.transform = `translate(-50%, -50%) scale(${Math.min(gs, base).toFixed(3)})`;
+                el.style.willChange = "transform";
+                changed = true;
               }
             }
             if (!changed) break;
+          }
+          for (const el of doors) {
+            const m = String(el.style.transform || "").match(/scale\(([\d.]+)\)/);
+            const kk = m ? parseFloat(m[1]) : 1;
+            const leftSide = el.classList.contains("lf") || el.classList.contains("lr");
+            const front = el.classList.contains("lf") || el.classList.contains("rf");
+            const w = el.offsetWidth * kk;
+            const edge = leftSide ? front ? doorLF : doorLR : front ? doorRF : doorRR;
+            const cx = leftSide ? edge - 4 - w / 2 : edge + 4 + w / 2;
+            el.style.left = `${Math.round(cx)}px`;
           }
         }
       }
@@ -5390,7 +5404,7 @@ var HaCarEditor = class extends HTMLElement {
 customElements.define("ha-car-editor", HaCarEditor);
 
 // src/main.js
-var VERSION = "3.5.6";
+var VERSION = "3.5.7";
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "ha-car",

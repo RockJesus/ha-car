@@ -1626,8 +1626,9 @@ class HaCarCard extends HTMLElement {
       const ringB = (orbR3.bottom - ovlR.top) * k3;
       // 车门边的横向基准：俯视车图两侧留白大，取满 10%–90% 会让状态卡离车门太远。
       // 前排要避开车外后视镜（约在 15% 处），所以前排基准再往外让一点；后排贴着车门腰线。
-      const doorLF = iw * 0.163;
-      const doorRF = iw * 0.837;
+      // 四张卡统一贴同一条竖线（前排后排同一列），保证左右两列水平对齐；0.215 已绕开车外后视镜
+      const doorLF = iw * 0.215;
+      const doorRF = iw * 0.785;
       const doorLR = iw * 0.215;
       const doorRR = iw * 0.785;
       const bodyT = topPad + shownH * 0.058;
@@ -1695,9 +1696,12 @@ class HaCarCard extends HTMLElement {
           const ocx = ob.left + ob.width / 2;
           const ocy = ob.top + ob.height / 2;
           const orr = ob.width / 2;
+          // 四张车门卡统一缩放：取四张里最紧的那一张所需倍率，四张一起缩，
+          // 这样前后两排卡片尺寸完全一致、左右两列边缘对齐（否则离圆心远的一排会被单独缩得更小）
+          const doors = [...this._wrap.querySelectorAll(".covl .loc")];
           for (let pass = 0; pass < 8; pass++) {
-            let changed = false;
-            for (const el of this._wrap.querySelectorAll(".covl .loc")) {
+            let gs = Infinity;
+            for (const el of doors) {
               const m = String(el.style.transform || "").match(/scale\(([\d.]+)\)/);
               const base = m ? parseFloat(m[1]) : 1;
               const b = el.getBoundingClientRect();
@@ -1705,18 +1709,32 @@ class HaCarCard extends HTMLElement {
                 Math.max(Math.abs(b.left - ocx), Math.abs(b.right - ocx)),
                 Math.max(Math.abs(b.top - ocy), Math.abs(b.bottom - ocy)),
               );
-              if (far > orr - 6) {
-                const ns = Math.max(base * 0.7, Math.min(base - 0.002, base * ((orr - 9) / far)));
-                if (ns < base - 0.001) {
-                  const top = el.classList.contains("cap");
-                  el.style.transform = `${top ? "translate(-50%, 0)" : "translate(-50%, -50%)"} scale(${ns.toFixed(3)})`;
-                  el.style.willChange = "transform";
-                  if (top) el.style.transformOrigin = "50% 0";
-                  changed = true;
-                }
+              if (far > orr - 6) gs = Math.min(gs, Math.max(base * 0.7, base * ((orr - 9) / far)));
+            }
+            if (!Number.isFinite(gs)) break;
+            let changed = false;
+            for (const el of doors) {
+              const m = String(el.style.transform || "").match(/scale\(([\d.]+)\)/);
+              const base = m ? parseFloat(m[1]) : 1;
+              if (gs < base - 0.001) {
+                el.style.transform = `translate(-50%, -50%) scale(${Math.min(gs, base).toFixed(3)})`;
+                el.style.willChange = "transform";
+                changed = true;
               }
             }
             if (!changed) break;
+          }
+          // 缩过之后重新贴回门边：卡片以中心缩放，边长变小会让内边缘离开车门，
+          // 这里按缩放后的实际宽度重算中心，保证内边缘始终贴着车门外沿
+          for (const el of doors) {
+            const m = String(el.style.transform || "").match(/scale\(([\d.]+)\)/);
+            const kk = m ? parseFloat(m[1]) : 1;
+            const leftSide = el.classList.contains("lf") || el.classList.contains("lr");
+            const front = el.classList.contains("lf") || el.classList.contains("rf");
+            const w = el.offsetWidth * kk;
+            const edge = leftSide ? (front ? doorLF : doorLR) : (front ? doorRF : doorRR);
+            const cx = leftSide ? edge - 4 - w / 2 : edge + 4 + w / 2;
+            el.style.left = `${Math.round(cx)}px`;
           }
         }
       }
