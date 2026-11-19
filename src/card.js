@@ -992,6 +992,9 @@ class HaCarCard extends HTMLElement {
     const accent = cfg.accent && cfg.accent !== DEFAULTS.accent ? cfg.accent : th.accent;
     this._card.style.setProperty("--hc-accent", accent);
     this._card.style.setProperty("--hc-a", hexRgb(accent));
+    // 宿主也要拿到同一套主题色：面板/栅格模式下的宿主级 CSS 不能回落到默认青色
+    this.style.setProperty("--hc-accent", accent);
+    this.style.setProperty("--hc-a", hexRgb(accent));
     // 控制按钮艺术图跟随主题强调色（原图基调约 210° 钢蓝）
     const ah = accentHsl(accent);
     this._card.style.setProperty("--hc-btnhue", `${Math.round(ah.h - 210)}deg`);

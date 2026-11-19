@@ -500,8 +500,8 @@ h1 { margin: 0; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-s
   border: 1px solid rgba(200,230,255,.16);
   box-shadow: inset 0 1px 0 rgba(255,255,255,.16), inset 0 -26px 50px rgba(var(--hc-a,55,214,232),.10), 0 20px 46px rgba(0,0,0,.42);
   backdrop-filter: blur(10px); filter: none; }
-.hero.bs-glass .orbit { border-color: rgba(200,230,255,.22); box-shadow: inset 0 1px 0 rgba(255,255,255,.2), 0 0 34px -18px rgba(var(--hc-a,55,214,232),.6); }
-.hero.bs-glass .orbit.o2 { border-color: rgba(200,230,255,.10); }
+.hero.bs-glass .orbit { border-color: rgba(var(--hc-a,55,214,232),.26); box-shadow: inset 0 1px 0 rgba(255,255,255,.2), 0 0 34px -18px rgba(var(--hc-a,55,214,232),.6); }
+.hero.bs-glass .orbit.o2 { border-color: rgba(var(--hc-a,55,214,232),.12); }
 .hero.bs-glass::before { left: 50%; top: 50%; width: min(88%, 90cqh); aspect-ratio: 1; border-radius: 50%; transform: translate(-50%, -50%);
   background: conic-gradient(from 150deg, rgba(var(--hc-a,55,214,232),.16), transparent 28%, transparent 66%, rgba(255,255,255,.10)); }
 
@@ -526,13 +526,13 @@ h1 { margin: 0; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-s
 
 .orbit, .orbit.o2 { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
   border-radius: 50%; pointer-events: none; width: min(94%, 94cqh); height: auto; aspect-ratio: 1; }
-.orbit { border: 1px solid rgba(70,220,240,.22);
+.orbit { border: 1px solid rgba(var(--hc-a,55,214,232),.24);
   box-shadow: inset 0 0 34px -14px rgba(var(--hc-a,55,214,232),.55), 0 0 24px -16px rgba(var(--hc-a,55,214,232),.5); }
 .orbit.o2 { width: min(97%, 97cqh);
   border: 1px solid rgba(var(--hc-a,55,214,232),.08); }
 .node { position: absolute; left: 50%; top: 50%; width: 7px; height: 7px; margin: -3.5px 0 0 -3.5px;
   transform: translate(-50%, -50%);
-  border-radius: 50%; background: #9ef4ff;
+  border-radius: 50%; background: var(--hc-accent);
   box-shadow: 0 0 4px 0 rgba(var(--hc-a,55,214,232),.75), 0 0 9px 2px rgba(var(--hc-a,55,214,232),.22);
   animation: hc-node 3.2s ease-in-out infinite; }
 .node.n1 { top: 0; animation-delay: 0s; }
@@ -704,7 +704,7 @@ h1 { margin: 0; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-s
   text-shadow: 0 0 22px rgba(var(--hc-a,55,214,232),.16); }
 .gn i { font-size: clamp(9px, 8cqw, 14px); font-style: normal; font-weight: 600; color: rgba(150,172,196,.9); letter-spacing: .06em; }
 .egdiv { width: 1px; height: 62%; align-self: center;
-  background: linear-gradient(180deg, transparent, rgba(120,190,215,.28) 26%, rgba(120,190,215,.28) 74%, transparent); }
+  background: linear-gradient(180deg, transparent, rgba(var(--hc-a,55,214,232),.26) 26%, rgba(var(--hc-a,55,214,232),.26) 74%, transparent); }
 .substats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); margin-top: 12px;
   border-radius: 18px; border: 1px solid rgba(255,255,255,.07); overflow: hidden;
   background: linear-gradient(180deg, rgba(255,255,255,.052), rgba(255,255,255,.018));
@@ -969,11 +969,11 @@ ha-card.theme-glass .gauge { filter: drop-shadow(0 10px 22px rgba(0,0,0,.35)); }
 
 .covl.cs-cyber .loc, .covl.cs-cyber .cap, .covl.cs-cyber .enp {
   background: linear-gradient(180deg, rgba(6,22,32,.96), rgba(4,12,20,.96));
-  border-color: rgba(55,214,232,.55); }
-.covl.cs-cyber .loc .lh span, .covl.cs-cyber .cap b, .covl.cs-cyber .enp span { color: #63e7f5; }
+  border-color: rgba(var(--hc-a,55,214,232),.55); }
+.covl.cs-cyber .loc .lh span, .covl.cs-cyber .cap b, .covl.cs-cyber .enp span { color: var(--hc-accent); }
 .covl.cs-cyber .loc .lr b, .covl.cs-cyber .cap i, .covl.cs-cyber .enp b { color: #f2fdff; }
-.covl.cs-cyber .loc .lr.tire b { color: #ff6fd0; }
-.covl.cs-cyber .loc .lr .ri, .covl.cs-cyber .cap .ri { color: #37d6e8; }
+.covl.cs-cyber .loc .lr.tire b { color: #f4fbff; }
+.covl.cs-cyber .loc .lr .ri, .covl.cs-cyber .cap .ri { color: var(--hc-accent); }
 .covl.cs-cyber .loc .lh .lk.on, .covl.cs-cyber .cap .lk.on { color: #7dffd8; }
 
 /* 前后盖小卡：车头/车尾正上方与正下方，仍落在圆环内侧 */
@@ -1271,12 +1271,12 @@ ha-card.panel.fit .pills { width: 100%; max-width: none; }
 .enp.on .ed { background: #3dffa2; box-shadow: 0 0 8px 2px rgba(61,255,162,.8); animation: hc-engpulse 1.6s ease-in-out infinite; }
 @keyframes hc-engpulse { 0%, 100% { opacity: .55; transform: scale(.9); } 50% { opacity: 1; transform: scale(1.15); } }
 /* 人车距离 / 找车罗盘 */
-.hmeta .door.fchip { flex: 0 0 auto; cursor: pointer; border-color: rgba(55,214,232,.35);
-  background: rgba(55,214,232,.10); }
-.hmeta .door.fchip:hover { background: rgba(55,214,232,.18); }
+.hmeta .door.fchip { flex: 0 0 auto; cursor: pointer; border-color: rgba(var(--hc-a,55,214,232),.35);
+  background: rgba(var(--hc-a,55,214,232),.10); }
+.hmeta .door.fchip:hover { background: rgba(var(--hc-a,55,214,232),.18); }
 .hmeta .door.fchip .addr { flex: 0 0 auto; overflow: visible; }
 .hmeta .door.pchip { flex: 0 0 auto; border-color: rgba(111,224,168,.28); background: rgba(111,224,168,.08); color: #8af0bd; }
-.hmeta .door.pchip.away { border-color: rgba(55,214,232,.26); background: rgba(55,214,232,.08); color: #8fe9f5; }
+.hmeta .door.pchip.away { border-color: rgba(var(--hc-a,55,214,232),.26); background: rgba(var(--hc-a,55,214,232),.08); color: var(--hc-accent); }
 .hmeta .door.pchip .addr { flex: 0 0 auto; overflow: visible; }
 .findmodal { position: absolute; inset: 0; z-index: 60; border-radius: var(--ha-card-border-radius, 28px); overflow: hidden; display: flex;
   flex-direction: column; align-items: stretch; justify-content: flex-start; gap: 0;
@@ -2663,6 +2663,8 @@ var HaCarCard = class extends HTMLElement {
     const accent = cfg.accent && cfg.accent !== DEFAULTS.accent ? cfg.accent : th.accent;
     this._card.style.setProperty("--hc-accent", accent);
     this._card.style.setProperty("--hc-a", hexRgb(accent));
+    this.style.setProperty("--hc-accent", accent);
+    this.style.setProperty("--hc-a", hexRgb(accent));
     const ah = accentHsl(accent);
     this._card.style.setProperty("--hc-btnhue", `${Math.round(ah.h - 210)}deg`);
     this._card.style.setProperty("--hc-btnsat", String(Math.round((0.55 + ah.s * 0.75) * 100) / 100));
@@ -5404,7 +5406,7 @@ var HaCarEditor = class extends HTMLElement {
 customElements.define("ha-car-editor", HaCarEditor);
 
 // src/main.js
-var VERSION = "3.5.8";
+var VERSION = "3.5.9";
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "ha-car",
