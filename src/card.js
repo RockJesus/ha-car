@@ -2469,7 +2469,9 @@ class HaCarCard extends HTMLElement {
     if (stat) {
       const en = isEn(this._hass);
       const base = this._heading == null
-        ? (en ? "Compass off" : "指南针未启用")
+        ? (this._compassGranted
+            ? (en ? "Waiting for compass" : "等待指南针数据")
+            : (en ? "Compass off" : "指南针未启用"))
         : this._headingSrc === "gps"
           ? (en ? "Moving direction" : "移动方向")
           : (en ? "Compass" : "指南针");
@@ -2569,6 +2571,7 @@ class HaCarCard extends HTMLElement {
 
   _closeFind() {
     this._findOpen = false;
+    this._compassAutoAsked = false;
     this._stopGpsHeading();
     cancelAnimationFrame(this._headingRaf);
     this._sig = "";
@@ -2577,15 +2580,36 @@ class HaCarCard extends HTMLElement {
     this._render(true);
   }
 
-  async _askCompass() {
+  _autoAskCompass() {
+    // 只对需要弹窗的平台自动申请（iOS 13+）；别的平台初始化时监听已生效
+    if (this._compassGranted || this._compassGot) return;
+    if (this._compassAutoAsked) return;
+    // 用户明确拒绝过就不再自动弹窗，留「校准指南针」按钮手动重试
+    try {
+      if (window.localStorage && window.localStorage.getItem("ha-car-compass-denied") === "1") return;
+    } catch { /* ignore */ }
+    this._compassAutoAsked = true;
+    if (
+      typeof DeviceOrientationEvent === "undefined" ||
+      typeof DeviceOrientationEvent.requestPermission !== "function"
+    ) {
+      return;
+    }
+    this._askCompass(true);
+  }
+
+  async _askCompass(quiet = false) {
     try {
       if (typeof DeviceOrientationEvent !== "undefined" && typeof DeviceOrientationEvent.requestPermission === "function") {
         const r = await DeviceOrientationEvent.requestPermission();
         if (r !== "granted") {
-          this._showToast(isEn(this._hass) ? "Motion permission denied" : "未获得指南针权限", "err");
+          try { window.localStorage.setItem("ha-car-compass-denied", "1"); } catch { /* ignore */ }
+          if (!quiet) this._showToast(isEn(this._hass) ? "Motion permission denied" : "未获得指南针权限", "err");
           return false;
         }
       }
+      try { window.localStorage.removeItem("ha-car-compass-denied"); } catch { /* ignore */ }
+      this._compassGranted = true;
       // iOS 授权后再绑定一次，旧监听在授权前注册时可能收不到事件
       this._bindOrientation(true);
       this._compassGot = false;
@@ -2595,18 +2619,18 @@ class HaCarCard extends HTMLElement {
       this._headingSpike = 0;
       this._lastOrientEv = null;
       if (this._findOpen) this._updateFind();
-      this._showToast(isEn(this._hass) ? "Compass on — turn your phone" : "指南针已开启，缓慢转动手机", "ok");
+      if (!quiet) this._showToast(isEn(this._hass) ? "Compass on — turn your phone" : "指南针已开启，缓慢转动手机", "ok");
       clearTimeout(this._compassTimer);
       this._compassTimer = setTimeout(() => {
         if (this._findOpen && !this._compassGot) {
           this._startGpsHeading();
-          this._showToast(isEn(this._hass) ? "No compass data — trying GPS heading" : "未收到指南针，已尝试用移动方向", "err");
+          if (!quiet) this._showToast(isEn(this._hass) ? "No compass data — trying GPS heading" : "未收到指南针，已尝试用移动方向", "err");
           if (this._findOpen) this._updateFind();
         }
       }, 1800);
       return true;
     } catch {
-      this._showToast(isEn(this._hass) ? "Compass unavailable" : "此设备不支持指南针", "err");
+      if (!quiet) this._showToast(isEn(this._hass) ? "Compass unavailable" : "此设备不支持指南针", "err");
       return false;
     }
   }
@@ -3253,6 +3277,9 @@ class HaCarCard extends HTMLElement {
     const findBtn = ev.target.closest && ev.target.closest("[data-find]");
     if (findBtn) {
       this._openFind();
+      // iOS 的方向权限必须落在用户手势里：打开面板这一次点击就是手势，
+      // 因此在这里同步发起一次静默申请，被驳回时仍留「校准指南针」兜底。
+      this._autoAskCompass();
       return;
     }
     const more = ev.target.closest && ev.target.closest("[data-more]");

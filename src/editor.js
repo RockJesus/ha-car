@@ -148,7 +148,7 @@ class HaCarEditor extends HTMLElement {
 
       <div class="sec">
         <h3>找车引导</h3>
-        <p class="hint">选择手机、登录设备与车辆的定位实体。手机定位需带 latitude / longitude；未取得手机坐标时会尝试浏览器网络定位，再退回登录设备定位。手机指南针需在找车面板里点一次“校准指南针”授权。</p>
+        <p class="hint">选择手机、登录设备与车辆的定位实体。手机定位需带 latitude / longitude；未取得手机坐标时会尝试浏览器网络定位，再退回登录设备定位。手机指南针在打开找车面板时会自动申请一次授权，若被拒绝可点“校准指南针”重新授权。</p>
         <label class="f">手机定位</label>
         <div class="pick" id="findphone"></div>
         <label class="f" style="margin-top:6px">登录设备定位（兜底）</label>
