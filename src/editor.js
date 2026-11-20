@@ -74,6 +74,10 @@ const L = {
   gaugeFullHint: "每台车的满油/满电续航不一样，填上你这台车的上限，环形进度才准。留空用车型默认值。",
   rangeFull: "满续航（km）",
   evRangeFull: "满电续航（km）",
+  fixedSize: "固定尺寸",
+  fixedSizeHint: "留空＝随格子自适应（默认）。填了宽度后卡片按该尺寸排版、居中，不再随窗口或列宽缩放；宽度或高度留空时，该项仍取容器尺寸。",
+  fixedW: "固定宽度（px）",
+  fixedH: "固定高度（px）",
 };
 const IMG_MODES = [
   ["auto", "自动（俯视 → 3D → 侧视）"],
@@ -240,6 +244,14 @@ class HaCarEditor extends HTMLElement {
           <label class="f">${L.evRangeFull}</label>
           <input class="tf" id="evrangefull" type="number" min="0" max="2000" step="10" placeholder="500">
         </div>
+        <label class="f">${L.fixedSize}</label>
+        <p class="hint" style="margin-top:-2px">${L.fixedSizeHint}</p>
+        <div class="grid2">
+          <label class="f">${L.fixedW}</label>
+          <input class="tf" id="fixedw" type="number" min="0" max="2000" step="10" placeholder="430">
+          <label class="f">${L.fixedH}</label>
+          <input class="tf" id="fixedh" type="number" min="0" max="3000" step="10" placeholder="留空">
+        </div>
       </div>
 
       <details class="sec adv">
@@ -356,6 +368,15 @@ class HaCarEditor extends HTMLElement {
       this._config.theme = e.target.value;
       this._emit();
     });
+
+    for (const [id, key, max] of [["fixedw", "fixed_width", 2000], ["fixedh", "fixed_height", 3000]]) {
+      q(id).addEventListener("change", (e) => {
+        const n = Math.round(Number(e.target.value) || 0);
+        this._config[key] = n > 0 ? Math.max(320, Math.min(max, n)) : 0;
+        this._sync();
+        this._emit();
+      });
+    }
 
     for (const [id, key] of [["rangefull", "range_full"], ["evrangefull", "ev_range_full"]]) {
       q(id).addEventListener("change", (e) => {
@@ -769,6 +790,8 @@ class HaCarEditor extends HTMLElement {
     q("chipstyle").value = this._config.chip_style || "glass";
     q("rangefull").value = this._config.range_full ? String(this._config.range_full) : "";
     q("evrangefull").value = this._config.ev_range_full ? String(this._config.ev_range_full) : "";
+    q("fixedw").value = this._config.fixed_width ? String(this._config.fixed_width) : "";
+    q("fixedh").value = this._config.fixed_height ? String(this._config.fixed_height) : "";
     this._syncBackground();
     const picked = /^#[0-9a-f]{6}$/i.test(this._config.accent || "") ? this._config.accent : (THEMES[this._config.theme] || THEMES.midnight).accent;
     q("color").value = picked;

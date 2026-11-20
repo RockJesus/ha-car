@@ -204,6 +204,9 @@ const DEFAULTS = {
   // 续航仪表的满量程（km）：每台车续航上限不同，0 表示沿用车型默认值
   range_full: 0,
   ev_range_full: 0,
+  // 固定尺寸：0 表示随容器自适应；非 0 则按该像素尺寸排版，不再缩放
+  fixed_width: 0,
+  fixed_height: 0,
   image: "auto",
   image_url: "",
   bg_image: "",
@@ -336,6 +339,10 @@ class HaCarCard extends HTMLElement {
     cfg.hold_ms = clamp(Number(cfg.hold_ms) || DEFAULTS.hold_ms, 300, 3000);
     cfg.range_full = clamp(Math.round(Number(cfg.range_full) || 0), 0, 2000);
     cfg.ev_range_full = clamp(Math.round(Number(cfg.ev_range_full) || 0), 0, 2000);
+    const fw = Math.round(Number(cfg.fixed_width) || 0);
+    const fh = Math.round(Number(cfg.fixed_height) || 0);
+    cfg.fixed_width = fw > 0 ? clamp(fw, 320, 2000) : 0;
+    cfg.fixed_height = fh > 0 ? clamp(fh, 320, 3000) : 0;
     delete cfg.floor; // 楼层功能已下线，清掉旧配置残留，避免读取不存在的实体导致整卡报错
     cfg.blocks = normBlocks(cfg);
     cfg.confirm = normalizeConfirm(config, cfg);
@@ -577,6 +584,7 @@ class HaCarCard extends HTMLElement {
   }
 
   _fitGrid() {
+    if (this._applyFixedSizeIfAny()) return;
     if (this._panel || !this._grid || !this._card) return;
     // 格子盒 = 卡片元素外侧的栅格单元（编辑态是 hui-card-edit-mode，普通态是栅格 div）
     const boxEl = this._gridBox();
@@ -720,6 +728,7 @@ class HaCarCard extends HTMLElement {
   }
 
   _fitPanel() {
+    if (this._applyFixedSizeIfAny()) return;
     if (!this._panel || !this._card) return;
     const w = this.clientWidth;
     // 容器高度偶发大于视口（HA 布局未收敛时会把自己撑大），量视口高度封顶，
@@ -769,6 +778,50 @@ class HaCarCard extends HTMLElement {
     const designH = Math.max(900, Math.round(h / k));
     this._card.style.width = `${designW}px`;
     this._card.style.height = `${designH}px`;
+  }
+
+  _applyFixedSizeIfAny() {
+    if (!this._card) return false;
+    const fw = Number((this._config && this._config.fixed_width) || 0);
+    const fh = Number((this._config && this._config.fixed_height) || 0);
+    if (fw > 0 || fh > 0) {
+      this._applyFixedSize(fw, fh);
+      return true;
+    }
+    if (this._fixedApplied) this._clearFixedSize();
+    return false;
+  }
+
+  _clearFixedSize() {
+    const c = this._card;
+    this._fixedApplied = false;
+    this._fitKey = null;
+    if (!c) return;
+    c.style.width = "";
+    c.style.height = "";
+    c.style.margin = "";
+    c.style.left = "";
+    c.style.top = "";
+    c.style.removeProperty("--pscale");
+    c.style.removeProperty("--gscale");
+  }
+
+  _applyFixedSize(fw, fh) {
+    const c = this._card;
+    this._fixedApplied = true;
+    c.classList.remove("fit", "pfit", "gfit", "gtwo");
+    c.style.removeProperty("--fit");
+    c.style.removeProperty("--gscale");
+    c.style.left = "";
+    c.style.top = "";
+    this._fitState = undefined; // 回到自适应时强制重排一次
+    c.style.removeProperty("--fit");
+    c.style.setProperty("--pscale", "1");
+    c.style.width = fw > 0 ? `${fw}px` : "";
+    c.style.height = fh > 0 ? `${fh}px` : "";
+    c.style.margin = "0 auto";
+    this._setRadius(1);
+    this.classList.add("fitready");
   }
 
   // HA 进入编辑仪表盘时会直接给元素赋 preview=true；用 setter 捕获，立刻重判上下文
@@ -989,6 +1042,8 @@ class HaCarCard extends HTMLElement {
     const cfg = this._config;
     this._syncPanel();
     this._syncGrid();
+    // 固定尺寸优先于面板/格子缩放：套用后不再参与等比缩放
+    this._applyFixedSizeIfAny();
     this._card.classList.toggle("compact", cfg.layout === "compact");
     const th = THEMES[cfg.theme] || THEMES.midnight;
     this._card.classList.toggle("theme-glass", !!th.glass);
