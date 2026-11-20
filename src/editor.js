@@ -36,9 +36,9 @@ const ACCENTS = ["#37d6e8", "#6ea8ff", "#7ee2a8", "#ffb347", "#ff7ab0"];
 
 const L = {
   vehicle: "车辆",
-  vehicleHint: "选择要显示的车辆；卡片按实体前缀自动绑定，不需要手填实体。",
+  vehicleHint: "选择要显示的车辆；福特派/林肯之道会按实体前缀自动绑定，其他品牌/集成可在下方手动指定实体。",
   autoDetect: "自动识别",
-  noVehicle: "没有检测到福特派互联的车辆实体，请先在集成里完成登录。",
+  noVehicle: "没有自动识别到整车实体。其他品牌/集成可先在下方按槽位或模块项手动指定实体（车标也会自动切换为通用文字标）。",
   title: "卡片标题",
   showPlate: "显示车牌",
   privacy: "脱敏显示",
@@ -137,7 +137,15 @@ class HaCarEditor extends HTMLElement {
           <option value="auto">自动识别（按设备厂商）</option>
           <option value="ford">福特 Ford</option>
           <option value="lincoln">林肯 Lincoln</option>
+          <option value="generic">其他品牌（通用）</option>
         </select>
+        <div id="genrow" style="display:none">
+          <label class="f">品牌名（通用模式显示）</label>
+          <input class="tf" id="brandname" type="text" maxlength="8" placeholder="特斯拉 / BMW">
+          <label class="f">自定义车标图片 URL（可选）</label>
+          <input class="tf" id="logourl" type="text" placeholder="/local/xxx/logo.png 或 https://…">
+          <p class="hint" style="margin-top:4px">不填图就用上面的文字标；图片建议透明底、高 40–80px。</p>
+        </div>
         <div class="row"><span class="rl">${L.showPlate}</span>
           <button class="sw" id="plate" role="switch" aria-checked="true"></button></div>
         <div class="row"><span class="rl">${L.privacy}</span>
@@ -308,6 +316,18 @@ class HaCarEditor extends HTMLElement {
 
     q("brand").addEventListener("change", (e) => {
       this._config.brand = e.target.value;
+      this._syncGenRow();
+      this._emit();
+    });
+
+    q("brandname").addEventListener("input", (e) => {
+      this._config.brand_name = e.target.value.trim().slice(0, 8);
+      this._emit();
+    });
+
+    q("logourl").addEventListener("change", (e) => {
+      const v = e.target.value.trim();
+      this._config.logo_url = /^(https?:\/\/|data:image\/|\/local\/)/i.test(v) ? v : "";
       this._emit();
     });
 
@@ -766,12 +786,20 @@ class HaCarEditor extends HTMLElement {
     if (hint) hint.textContent = cars.length ? "" : L.noVehicle;
   }
 
+  _syncGenRow() {
+    const row = this.shadowRoot && this.shadowRoot.getElementById("genrow");
+    if (row) row.style.display = this._config.brand === "generic" ? "block" : "none";
+  }
+
   _sync() {
     if (!this._built) return;
     const q = (id) => this.shadowRoot.getElementById(id);
     this._syncVehicles();
     q("title").value = this._config.title || "";
-    q("brand").value = ["auto", "ford", "lincoln"].includes(this._config.brand) ? this._config.brand : "auto";
+    q("brand").value = ["auto", "ford", "lincoln", "generic"].includes(this._config.brand) ? this._config.brand : "auto";
+    q("brandname").value = this._config.brand_name || "";
+    q("logourl").value = this._config.logo_url || "";
+    this._syncGenRow();
     q("plate").setAttribute("aria-checked", String(Boolean(this._config.show_plate)));
     q("privacy").setAttribute("aria-checked", String(Boolean(this._config.privacy)));
     this.shadowRoot.querySelectorAll("[data-layout]").forEach((b) => {

@@ -98,6 +98,13 @@ h1 { margin: 0; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-s
   backdrop-filter: blur(6px); }
 .brand { display: inline-flex; align-items: center; margin-right: 7px; vertical-align: -1px; }
 .brand.lin svg { width: 60px; }
+.brand.gen .genmark { display:inline-flex; align-items:center; height:19px; padding:0 8px; border-radius:6px;
+  font: 700 10.5px/1 var(--hc-font, system-ui, -apple-system, "PingFang SC", sans-serif); letter-spacing:.06em;
+  color:#eef5ff; background: linear-gradient(180deg, rgba(255,255,255,.14), rgba(255,255,255,.04));
+  border:1px solid rgba(255,255,255,.22); box-shadow: inset 0 1px 0 rgba(255,255,255,.18), 0 2px 6px rgba(0,0,0,.35);
+  white-space:nowrap; }
+.brand.custom img { display:block; height:20px; max-width:72px; object-fit:contain;
+  filter: drop-shadow(0 0 8px rgba(var(--hc-a,55,214,232),.3)); }
 .brand svg { width: 46px; height: 21px; display: block;
   filter: drop-shadow(0 0 8px rgba(var(--hc-a,55,214,232),.35)) drop-shadow(0 2px 4px rgba(0,0,0,.5));
   transform: translateZ(0); }

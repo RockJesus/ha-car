@@ -80,6 +80,9 @@ export function normOpen(state) {
   if (!s) return "unknown";
   if (s.includes("开启") || s.includes("打开") || s.includes("open")) return "open";
   if (s.includes("关闭") || s.includes("关好") || s.includes("closed")) return "closed";
+  // 通用集成常用 binary_sensor：on = 打开，off = 关闭
+  if (s === "on" || s === "true" || s === "1") return "open";
+  if (s === "off" || s === "false" || s === "0") return "closed";
   return "unknown";
 }
 

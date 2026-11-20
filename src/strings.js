@@ -92,7 +92,7 @@ const ZH = {
   reset: "恢复默认",
   none: "不显示",
   detect: "自动识别",
-  noVehicleFound: "没有检测到福特派互联的车辆实体",
+  noVehicleFound: "没有自动识别到整车实体",
   editVehicle: "更改",
   every: "全部",
 };
@@ -191,7 +191,7 @@ const EN = {
   reset: "Reset",
   none: "Hidden",
   detect: "Auto",
-  noVehicleFound: "No FordPass vehicle entities detected",
+  noVehicleFound: "No vehicle entities detected automatically",
   editVehicle: "Change",
   every: "All",
 };
