@@ -850,25 +850,39 @@ class HaCarCard extends HTMLElement {
     const pfit = !fit && w > 0 && h > 0;
     this._card.classList.toggle("pfit", pfit);
     if (pfit) {
-      // 版式画布按容器等比反算（canvas = 容器 / 缩放），内容随画布重新排布，
-      // 所以两边都能占满：先满足高就把画布排宽，先满足宽就把画布排高。
-      const k = Math.max(0.42, Math.min(2.2, Math.min(w / 390, h / 840)));
+      // 版式画布按容器等比反算（canvas = 容器 / 缩放），内容随画布重新排布，所以两边都能占满。
+      // 关键：绝不放大（k 上限 1）。以前这里上限是 2.2，桌面竖长窗口会把 390×840 版式
+      // 整体放大 1.3~2 倍，文字、1px 描边、投影全部被重采样，字体发虚。
+      // 现在 k≤1：小容器仍等比缩小；大容器 k=1、画布直接长成容器原生尺寸，
+      // 文字按真实像素渲染，任何分辨率下都清晰。
+      const k = Math.max(0.42, Math.min(1, Math.min(w / 390, h / 840)));
       this._card.style.setProperty("--pscale", String(Math.round(k * 1000) / 1000));
-      this._card.style.width = `${Math.round(w / k)}px`;
-      this._card.style.height = `${Math.round(h / k)}px`;
+      // 画布宽度同样收在 960 内（再宽英雄区会被拉得过大），居中摆放，高度方向铺满
+      const cw = Math.min(960, Math.max(390, Math.round(w / k)));
+      const ch = Math.max(840, Math.round(h / k));
+      this._card.style.width = `${cw}px`;
+      this._card.style.height = `${ch}px`;
+      this._card.style.left = `${Math.max(0, Math.round((w - cw * k) / 2))}px`;
+      this._card.style.top = "0px";
       this._setRadius(k);
       this.classList.add("fitready");
       return;
     }
     if (!fit) return;
-    const k = Math.min(w / 1440, h / 900);
-    this._card.style.setProperty("--fit", String(Math.round(k * 1000) / 1000));
+    // 与手机版式同一原则：不做任何缩放（k 恒为 1），画布直接等于容器尺寸、由 flex 流式排布。
+    // 以前这里按 1440×900 设计稿等比缩放：容器宽 1280 时缩到 0.71，宽 1600 时放大到 1.11，
+    // 放大尤其致命——文字、1px 描边、光晕全部被重采样，字体发虚。
+    const k = 1;
+    // 清掉 pfit 留下的内联 left/top，否则会盖住 .fit 的 left:50%/top:50% 定位
+    this._card.style.removeProperty("left");
+    this._card.style.removeProperty("top");
+    this._card.style.setProperty("--fit", "1");
     this.classList.add("fitready");
     this._setRadius(k);
     // 画布按等比缩放后的容器尺寸反算：宽/高两侧都补到容器边界，
     // 避免高受限时固定画布只占满高度、左右留下大片空白。
-    const designW = Math.max(1440, Math.round(w / k));
-    const designH = Math.max(900, Math.round(h / k));
+    const designW = Math.round(w);
+    const designH = Math.round(h);
     this._card.style.width = `${designW}px`;
     this._card.style.height = `${designH}px`;
   }
