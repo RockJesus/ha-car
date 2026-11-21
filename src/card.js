@@ -1804,6 +1804,13 @@ class HaCarCard extends HTMLElement {
         orb.style.width = orb.style.height = `${d}px`;
         if (orb2) orb2.style.width = orb2.style.height = `${d * 1.035}px`;
       }
+      // 圆圈在宽屏/大面板上会撑到上千 px，圈内 UI（车图/位置卡/胶囊）必须跟着放大，
+      // 否则车和卡在巨圈里缩成一粒米。以手机尺寸（圆环 ~404px）为 1.0 基准等比放大。
+      const hk = Math.min(2.6, Math.max(1, d / 430));
+      if (hero) hero.style.setProperty("--hk", hk.toFixed(3));
+      // 圈外（头部标题/状态条、右侧能量表与副指标/操作区）也跟着宽屏放大，但略缓于圈内，避免撑爆版式
+      const ks = Math.min(1.9, Math.max(1, hk * 0.78));
+      if (this._card) this._card.style.setProperty("--ks", ks.toFixed(3));
       const orbR = orb.getBoundingClientRect();
       ratio = orbR.width ? orb.clientWidth / orbR.width : 1;
       ringBotHero = (orbR.bottom - heroR.top) * ratio;
