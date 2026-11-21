@@ -1,7 +1,7 @@
 import "./card.js";
 import "./editor.js";
 
-const VERSION = "3.8.7";
+const VERSION = "3.8.8";
 
 window.customCards = window.customCards || [];
 const _hasCard = window.customCards.some((c) => c && c.type === "ha-car");
