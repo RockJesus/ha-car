@@ -1594,10 +1594,10 @@ class HaCarCard extends HTMLElement {
       <span class="orbit o2"></span>
       ${
         imgUrl
-          ? `<img class="carimg" src="${esc(imgUrl)}"${fbUrl && fbUrl.length ? ` data-fb="${esc(JSON.stringify(fbUrl))}"` : ""} alt="">`
+          ? `<img class="carimg${this._config && this._config.privacy ? " pmask" : ""}" src="${esc(imgUrl)}"${fbUrl && fbUrl.length ? ` data-fb="${esc(JSON.stringify(fbUrl))}"` : ""} alt="">`
           : `<div class="carph">${icon("car")}</div>`
       }
-      <div class="ground"></div><div class="covl cs-${esc((this._config && this._config.chip_style) || "glass")}">${inner}</div>${edge ? `<div class="cedge">${edge}</div>` : ""}</div>`;
+      <div class="ground"></div>${this._config && this._config.privacy ? '<span class="pmtag">脱敏</span>' : ""}<div class="covl cs-${esc((this._config && this._config.chip_style) || "glass")}">${inner}</div>${edge ? `<div class="cedge">${edge}</div>` : ""}</div>`;
   }
 
   // 俯视图状态层：每个车门一张聚合卡（门 + 窗 + 该轮位胎压），前后盖各一张小卡，全部落在圆环内侧
@@ -2300,7 +2300,8 @@ class HaCarCard extends HTMLElement {
     const loc = this._findLocation(p);
     const d = this._distanceM(loc.coords, p.car);
     const label = isEn(this._hass) ? "Find car" : "找车";
-    const dist = d == null ? "" : ` ${esc(this._distText(d))}`;
+    // 脱敏模式下不打真实距离：精确到米的距离等于把人车位置关系交出去
+    const dist = d == null ? "" : this._config.privacy ? " ••• m" : ` ${esc(this._distText(d))}`;
     const src = this._findSourceText(loc.source);
     const hint = isEn(this._hass) ? "Open find-car panel" : "打开找车面板";
     const tip = src ? `${hint} · ${src}` : hint;

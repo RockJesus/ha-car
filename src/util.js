@@ -130,5 +130,5 @@ export function maskText(s) {
   if (!s) return "";
   return String(s)
     .replace(/\b[A-Z0-9]{12,}\b/g, (m) => (m.match(/\d/) ? `${m.slice(0, 4)}${"•".repeat(Math.max(4, m.length - 4))}` : m))
-    .replace(/\d{7,}/g, (m) => `${m.slice(0, 3)}${"•".repeat(Math.max(4, m.length - 3))}`);
+    .replace(/\d{4,}/g, (m) => `${m.slice(0, 2)}${"•".repeat(Math.max(3, m.length - 2))}`);
 }

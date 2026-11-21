@@ -125,6 +125,11 @@ h1 { margin: 0; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-s
   border-color: rgba(255,255,255,.055); }
 
 /* 主视觉：车图 + 双同心轨道 + 四枚发光节点（参考图同构） */
+/* 分享脱敏：车图层模糊，避免照片里带车牌/门牌/住址 */
+.carimg.pmask { filter: blur(6px) saturate(.95) brightness(.98); transform: scale(1.005); }
+.pmtag { position: absolute; top: 10px; right: 12px; z-index: 3; font-size: 10px; letter-spacing: .06em;
+  padding: 3px 7px; border-radius: 999px; color: #dbe6ff; background: rgba(18,24,40,.72);
+  border: 1px solid rgba(255,255,255,.14); backdrop-filter: blur(6px); }
 .hero { position: relative; height: clamp(224px, 52cqw, 430px); display: flex; align-items: center; justify-content: center;
   overflow: clip; overflow-clip-margin: 60px; --r: 92px; container-type: size; }
 .halo { position: absolute; inset: 0; border-radius: 50%; pointer-events: none;

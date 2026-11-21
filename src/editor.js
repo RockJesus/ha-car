@@ -49,7 +49,7 @@ const L = {
   title: "卡片标题",
   showPlate: "显示车牌",
   privacy: "脱敏显示",
-  privacyHint: "分享截图时把车牌、地址、电话与 VIN 打码，数据本身不变",
+  privacyHint: "分享截图用：车牌打点、地址只留到市、电话/VIN 及 4 位以上数字打码、车图模糊、人车距离打码，数据本身不变",
   layout: "布局",
   layoutFull: DEFAULTS.layout === "full" ? "完整" : "完整",
   layoutCompact: "紧凑",
