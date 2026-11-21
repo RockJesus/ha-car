@@ -1508,22 +1508,13 @@ class HaCarCard extends HTMLElement {
       if (html) blocks.push({ html, hero: b.type === "hero", type: b.type });
     }
 
-    // 「车辆告警」固定排在「总里程」所在的能源块之后（不受旧配置里的块顺序影响）
+    // 「车辆告警」固定排在「定位」行之后（用户 2026-11-21 指定），不再吸附到能源块内部
     const ai = blocks.findIndex((x) => x.type === "alerts");
-    const ei = blocks.findIndex((x) => x.type === "energy");
-    if (ai > -1 && ei > -1 && ai !== ei + 1) {
-      const [alerts] = blocks.splice(ai, 1);
-      const target = blocks.findIndex((x) => x.type === "energy");
-      blocks.splice(target + 1, 0, alerts);
-    }
-    // 吸附：把告警块并进能源块内部，紧贴「总里程」三列，不再被右栏 flex 分配推到底部
-    const enIdx = blocks.findIndex((x) => x.type === "energy");
-    if (enIdx > -1 && blocks[enIdx + 1] && blocks[enIdx + 1].type === "alerts") {
-      const eh = blocks[enIdx].html;
-      const ah = blocks[enIdx + 1].html;
-      if (eh.endsWith("</div>")) {
-        blocks[enIdx].html = eh.slice(0, -6) + ah + "</div>";
-        blocks.splice(enIdx + 1, 1);
+    if (ai > -1) {
+      const mi = blocks.findIndex((x) => x.type === "meta");
+      if (mi > -1 && ai !== mi + 1) {
+        const [alerts] = blocks.splice(ai, 1);
+        blocks.splice(mi + 1, 0, alerts);
       }
     }
 
