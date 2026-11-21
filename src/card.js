@@ -836,12 +836,6 @@ class HaCarCard extends HTMLElement {
     return name ? `<span class="brand gen" aria-hidden="true"><span class="genmark"${st}>${esc(name)}</span></span>` : "";
   }
 
-  // 车牌左侧的车企标识：官方标（福特/林肯）、自定义车标图、或通用文字标，按品牌自动切换
-  _logoMark() {
-    const html = this._logo();
-    return html ? `<i class="mk">${html}</i>` : "";
-  }
-
   _fitPanel() {
     if (this._applyFixedSizeIfAny()) return;
     if (!this._panel || !this._card) return;
@@ -1443,7 +1437,7 @@ class HaCarCard extends HTMLElement {
     // 车标必须放在 h1 外面：h1 用 background-clip:text 做渐变字，
     // 里面塞 SVG 会让渐变在车标区域被画成一块方形底色
     const head = `<div class="head"><div class="ttl">${this._logo()}<h1>${esc(title)}</h1>` +
-      (plateTxt ? `<span class="plate">${this._logoMark()}<b>${esc(plateTxt)}</b></span>` : "") +
+      (plateTxt ? `<span class="plate">${esc(plateTxt)}</span>` : "") +
       `</div><span class="status ${status.cls}"><span class="dot"></span>${esc(status.label)}</span></div>`;
 
     const hero = this._imagePair(data);

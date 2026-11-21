@@ -49,14 +49,6 @@ ha-card::after { content: ""; position: absolute; left: 8%; right: 8%; top: 0; h
   background: linear-gradient(90deg, transparent, rgba(190,240,255,.5) 18%, rgba(190,240,255,.5) 82%, transparent);
   opacity: .55; }
 .plate, .gn b, .tc b, .stat b { font-variant-numeric: tabular-nums; }
-/* 车牌里的车企标识：缩到 20×9 的官方标高度，文字标压到 13px，自定义图 11px */
-.plate .mk { display: inline-flex; align-items: center; }
-.plate .mk .brand { display: inline-flex; align-items: center; }
-.plate .mk .brand svg { width: 20px; height: 9px; filter: none; transform: none; }
-.plate .mk .brand.lin svg { width: 26px; height: 9px; }
-.plate .mk .brand.gen .genmark { height: 13px; padding: 0 4px; border-radius: 4px; font-size: 8px; letter-spacing: .04em; box-shadow: none; }
-.plate .mk .brand.custom img { height: 11px; max-width: 28px; filter: none; }
-.plate b { font-weight: inherit; letter-spacing: inherit; }
 .plate { font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace; }
 ha-card.has-photo .wrap { background-image:
   linear-gradient(180deg, rgba(5,10,18,.58) 0%, rgba(5,10,18,.78) 48%, rgba(4,8,14,.9) 100%),
@@ -96,7 +88,7 @@ h1 { margin: 0; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-s
   -webkit-background-clip: text; background-clip: text; color: transparent;
   filter: drop-shadow(0 2px 6px rgba(0,0,0,.55));
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.plate { flex: 0 0 auto; display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 620;
+.plate { flex: 0 0 auto; display: inline-block; font-size: 11px; font-weight: 620;
   letter-spacing: .2em; color: rgba(190,214,230,.82); vertical-align: .14em;
   text-shadow: 0 0 12px rgba(var(--hc-a,55,214,232),.22); }
 .status { flex: none; display: inline-flex; align-items: center; gap: 7px; height: 30px; padding: 0 14px;
