@@ -1393,8 +1393,8 @@ class HaCarCard extends HTMLElement {
     const t = dict(this._hass);
     if (!data.group && !Object.keys(cfg.entities || {}).length) {
       return this._empty(isEn(this._hass)
-        ? "No vehicle entity found. Check that FordPass integration is loaded, or pick a vehicle in the card editor."
-        : "没找到车辆实体。确认福特派互联集成已加载，或在卡片编辑器里选择车辆。");
+        ? "No vehicle entity found. Check that the vehicle integration is loaded, or pick a vehicle in the card editor."
+        : "没找到车辆实体。确认车辆相关集成已加载，或在卡片编辑器里选择车辆。");
     }
     const compact = cfg.layout === "compact";
     const list = cfg.blocks || normBlocks(cfg);
