@@ -121,7 +121,7 @@ export const ITEM_DEFS = {
 export const DEFAULT_ITEMS = {
   meta: [{ slot: "addr" }, { slot: "place" }, { slot: "sync" }],
   hero: [{ slot: "image" }],
-  energy: ["fuel", "battery", "range", "odo", "volt", "oil"],
+  energy: ["fuel", "battery", "range", "ev_range", "odo", "volt", "oil"],
   alerts: ["alerts"],
   doors: [
     "ignition", "door_fl", "door_fr", "door_rl", "door_rr",
@@ -1614,13 +1614,14 @@ class HaCarCard extends HTMLElement {
         `<span class="ri">${icon("tireo")}</span><b>${txt}<s>${esc(unit)}</s></b></div>`;
       return { slot, html, warn };
     };
+    const pureEv = this._isPureEv(data);
     const out = [];
     if (running) {
       out.push(`<i class="beam lb"></i><i class="beam rb"></i><i class="gpool"></i><i class="tailbar"></i><i class="tailglow"></i>`);
     }
     const engItem = itemFor("ignition");
     const engSt = doors ? (engItem ? this._itemState(engItem, data) : (data.get("sw_engine") || data.get("remote_start"))) : null;
-    if (engSt) {
+    if (engSt && !pureEv) {
       const engEnt = engItem ? this._itemEnt(engItem, data) : (data.id("sw_engine") || data.id("remote_start") || data.id("ignition"));
       const rsEnd = this._rsEndMs(data);
       const engTxt = rsEnd ? (zh ? "远程启动" : "Remote") : engItem ? String(engSt.state) : (running ? (zh ? "已启动" : "Running") : (zh ? "已熄火" : "Off"));
@@ -1681,7 +1682,7 @@ class HaCarCard extends HTMLElement {
           `<i>${bBad ? (zh ? "不可用" : "N/A") : open ? (zh ? "已打开" : "Open") : zh ? "已关闭" : "Closed"}</i></div>`,
       );
     };
-    cap("hood", zh ? "引擎盖" : "Hood", "hood", "engine");
+    cap("hood", pureEv ? (zh ? "前备箱" : "Frunk") : (zh ? "引擎盖" : "Hood"), "hood", "engine");
     cap("trunk", zh ? "尾门" : "Tailgate", "tailgate", "trunk");
     return { inner: out.join(""), edge: "" };
   }
@@ -2814,10 +2815,17 @@ class HaCarCard extends HTMLElement {
     return it ? it.entity || "" : "";
   }
 
+  // 纯电车型：有电量（SOC）且没有燃油量。插混/增程两者都有，不算纯电。
+  _isPureEv(data) {
+    return Boolean(data && data.get("battery") && !data.get("fuel"));
+  }
+
   _energy(data, t, b) {
     const items = this._items(b);
     const gauges = [];
     const stats = [];
+    const hybrid = Boolean(data.get("fuel") && data.get("battery"));
+    const gaugeCap = hybrid ? 3 : 2;
     for (const it of items) {
       const def = this._itemDef(it);
       const st = this._itemState(it, data);
@@ -2827,7 +2835,10 @@ class HaCarCard extends HTMLElement {
       const unit = attrs(st, "unit_of_measurement") || it.unit || "";
       const numv = num(st);
       const kind = def ? def.kind : "stat";
-      if ((kind === "pct" || kind === "range" || kind === "odo") && gauges.length < 2 && numv != null) {
+      // 蓄电池电压动辄 12.6/13.4V，四舍五入成整数会失真，单独保留一位小数
+      const voltSlot = it.slot === "volt" || def === ITEM_DEFS.volt;
+      // 纯油/纯电最多两块表；插混、增程「油电同在」时放开到三块（燃油 / 电量 / 续航）
+      if ((kind === "pct" || kind === "range" || kind === "odo") && gauges.length < gaugeCap && numv != null) {
         let full = def && def.full ? def.full : 1000;
         // 用户可在编辑器里设定满续航/满电续航，改比例尺不动读数本身
         if (def === ITEM_DEFS.range && this._config.range_full) full = this._config.range_full;
@@ -2847,11 +2858,11 @@ class HaCarCard extends HTMLElement {
       if (numv == null && kind !== "stat") continue;
       stats.push(
         `<span class="sstat" data-more="${esc(ent)}">${this._itemShowLabel(it) ? `<i>${esc(label)}</i>` : ""}` +
-          `<b>${numv == null ? esc(String(st.state)) : fmtNum(numv)}</b><span>${esc(unit)}</span></span>`,
+          `<b>${numv == null ? esc(String(st.state)) : fmtNum(numv, voltSlot ? 1 : 0)}</b><span>${esc(unit)}</span></span>`,
       );
     }
     if (!gauges.length && !stats.length) return "";
-    return `${gauges.length ? `<div class="energy">${gauges.join(`<span class="egdiv"></span>`)}</div>` : ""}
+    return `${gauges.length ? `<div class="energy${gauges.length >= 3 ? " trio" : ""}">${gauges.join(`<span class="egdiv"></span>`)}</div>` : ""}
       ${stats.length ? `<div class="substats">${stats.join("")}</div>` : ""}`;
   }
 
@@ -2889,6 +2900,8 @@ class HaCarCard extends HTMLElement {
         continue;
       }
       const slot = it.slot || "";
+      // 纯电车没有发动机，「远程启动」换成无意义的按钮，直接跳过
+      if (slot === "sw_engine" && this._isPureEv(data)) continue;
       if (slot === "sw_va" || slot === "sw_light") {
         if (!compact) {
           pills.push(this._pill({

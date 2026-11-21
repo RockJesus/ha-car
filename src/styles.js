@@ -342,6 +342,10 @@ h1 { margin: 0; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-s
 
 /* 能耗：双环形仪表 + 中间量纲图标（参考图同构） */
 .energy { display: grid; grid-template-columns: 1fr 1px 1fr; align-items: center; column-gap: 14px; padding: 2px 2px 0; }
+/* 插混/增程三表并排（燃油 / 电量 / 续航）：多一根分隔线、表盘收窄，避免挤到下面的数据条 */
+.energy.trio { grid-template-columns: 1fr 1px 1fr 1px 1fr; column-gap: 8px; }
+.energy.trio .gauge { max-width: 104px; }
+.energy.trio .gauge .gn b { font-size: 26px; }
 .gauge { position: relative; width: 100%; max-width: 132px; aspect-ratio: 1; margin: 0 auto; overflow: visible;
   container-type: inline-size; }
 .gauge > svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
