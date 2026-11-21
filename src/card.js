@@ -1861,6 +1861,8 @@ class HaCarCard extends HTMLElement {
       const doorRR = doorRF;
       // 车图不透明上下沿（实测 5.6%–94.4%），胶囊一律落在轮廓之外
       const bodyT = topPad + shownH * 0.053;
+      // 尾门胶囊按车高上提一点，贴着车尾而不是掉在圆环底部
+      const trunkUp = Math.max(20, Math.round(shownH * 0.055));
       const bodyB = topPad + shownH * 0.947;
 
       const capH = this._wrap.querySelector(".cap.hood");
@@ -1882,7 +1884,8 @@ class HaCarCard extends HTMLElement {
         const gapHood = Math.max(10, Math.round(shownH * 0.042));
         const hH = fit(capH, bodyT - ringT - gapHood + 8);
         // 尾门胶囊放进「车尾 → 圆环下沿」这段空白的正中：上下各留等量空隙，不压车也不压圈
-        const tTopMin = bodyB + Math.max(5, Math.round(shownH * 0.012));
+        // 允许尾门胶囊压住车尾一点点：纯下沉时它离车身太远，视觉上像掉在圆环里
+        const tTopMin = bodyB - trunkUp;
         // 尾门胶囊是矩形：下沿贴到圆环底部时，左右两角仍会越界。
         // 这里按「四角到圆心 ≤ R-7」反推可用的最下沿，宽胶囊会自动收窄/上抬。
         const ringR2 = Math.max(12, (ringB - ringT) / 2);
@@ -1897,7 +1900,8 @@ class HaCarCard extends HTMLElement {
         }
         let hTop = bodyT - gapHood - hH;
         if (hTop < ringT + 10) hTop = ringT + 10;
-        let tTop = Math.round((tTopMin + (tBotMax - tH)) / 2);
+        // 居中偏上一点：尾门胶囊下沉太多会显得和车身脱开，按车高比例上提
+        let tTop = Math.round((tTopMin + (tBotMax - tH)) / 2 - Math.max(8, Math.round(shownH * 0.03)));
         tTop = Math.max(tTopMin, Math.min(tTop, tBotMax - tH));
         capH.style.top = `${Math.round(hTop)}px`;
         capT.style.top = `${Math.round(tTop)}px`;
@@ -1986,7 +1990,7 @@ class HaCarCard extends HTMLElement {
       {
         const caps = [
           { el: this._wrap.querySelector(".cap.hood"), side: "top", hug: bodyT - Math.max(10, Math.round(shownH * 0.042)) },
-          { el: this._wrap.querySelector(".cap.trunk"), side: "bottom", hug: bodyB + 4 },
+          { el: this._wrap.querySelector(".cap.trunk"), side: "bottom", hug: bodyB - trunkUp },
         ].filter((c) => c.el);
         const cx0 = (ringL + ringR) / 2, cy0 = (ringT + ringB) / 2, rr0 = (ringR - ringL) / 2;
         for (let pass = 0; pass < 8 && caps.length; pass++) {
