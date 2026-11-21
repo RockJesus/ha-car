@@ -1801,10 +1801,10 @@ class HaCarCard extends HTMLElement {
       const halfScreen = Math.min(cx0 - visL, visR - cx0, cy0 - visT, visB - cy0);
       // 0.995 只留了 0.5% 余量，圆环描边+外发光会被 hero/卡片边缘裁掉（宽屏与 pfit 面板都出现上下左右切边），
       // 收到 0.965 让整圈（含 glow）完整可见
-      const d = Math.max(40, halfScreen * 2 * 0.965 * zk - 4 * zk);
+      const d = Math.max(40, halfScreen * 2 * 0.95 * zk - 6 * zk);
       if (d > 0) {
         orb.style.width = orb.style.height = `${d}px`;
-        if (orb2) orb2.style.width = orb2.style.height = `${d * 1.035}px`;
+        if (orb2) orb2.style.width = orb2.style.height = `${d * 1.012}px`;
       }
       // 圆圈在宽屏/大面板上会撑到上千 px，圈内 UI（车图/位置卡/胶囊）必须跟着放大，
       // 否则车和卡在巨圈里缩成一粒米。以手机尺寸（圆环 ~404px）为 1.0 基准等比放大。
