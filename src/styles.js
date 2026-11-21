@@ -842,8 +842,9 @@ ha-card.panel.fit .b-side { display: flex; flex: 0 0 34%; }
 /* 模块是 .blocks 的直接子元素（没有 b-hero-col/b-side 包裹）：给车图与能量表明确占比，
    位置/里程信息条改为浮在车图区左上，避免它单独占一列把圆环挤窄 */
 ha-card.panel.fit .blocks { display: grid; grid-template-columns: minmax(0, 1.95fr) minmax(0, 1fr);
-  column-gap: calc(26px * var(--ks, 1)); align-content: center; }
-ha-card.panel.fit .blocks > .b-hero { grid-column: 1; grid-row: 1 / span 10; min-width: 0; align-self: stretch; }
+  grid-template-rows: minmax(0, 1fr) auto auto auto; column-gap: calc(26px * var(--ks, 1)); }
+ha-card.panel.fit .blocks > .b-hero { grid-column: 1; grid-row: 1 / span 4; min-width: 0; align-self: stretch; }
+ha-card.panel.fit .blocks > .b-energy { align-self: center; }
 ha-card.panel.fit .blocks > .b-energy,
 ha-card.panel.fit .blocks > .b-alerts,
 ha-card.panel.fit .blocks > .b-actions,
