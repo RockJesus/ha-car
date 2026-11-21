@@ -21,6 +21,11 @@ const DEFS = [
   { s: "odo", d: ["sensor"], a: ["odometer", "zong_li_cheng"], n: ["总里程"] },
   { s: "volt", d: ["sensor"], a: ["battery_voltage", "xu_dian_chi_dian_ya"], n: ["蓄电池电压"] },
   { s: "oil", d: ["sensor"], a: ["prognostic", "ji_you_shou_ming", "oil_health", "ji_you_jian_kang_zhuang_tai"], n: ["机油寿命", "机油健康状态"] },
+  // 柴油 / 氢燃料 / 其他动力专属项：只有映射了对应实体才出现，不影响油车电车
+  { s: "adblue", d: ["sensor"], a: ["adblue_level", "def_level", "niao_su_liang", "che_yong_niao_su_yu_liang"], n: ["尿素余量", "车用尿素余量"] },
+  { s: "h2", d: ["sensor"], a: ["h2_level", "hydrogen_level", "qing_guan_yu_liang", "qing_qi_yu_liang"], n: ["氢罐余量", "氢气余量"] },
+  { s: "dpf", d: ["sensor"], a: ["dpf_status", "dpf_zai_sheng", "li_zi_bu_zhuo_qi_zhuang_tai"], n: ["DPF 状态", "颗粒捕集器状态"] },
+  { s: "coolant", d: ["sensor"], a: ["coolant_temp", "leng_que_ye_wen_du", "shui_wen"], n: ["冷却液温度", "水温"] },
   { s: "tp_lf", d: ["sensor"], a: ["lf_tire", "zuo_qian_lun_tai_ya"], n: ["左前轮胎压"] },
   { s: "tp_rf", d: ["sensor"], a: ["rf_tire", "you_qian_lun_tai_ya"], n: ["右前轮胎压"] },
   { s: "tp_lr", d: ["sensor"], a: ["lr_tire", "zuo_hou_lun_tai_ya"], n: ["左后轮胎压"] },

@@ -32,6 +32,16 @@ const LINCOLN_LOGO = `<span class="brand lin" aria-hidden="true"><svg viewBox="0
  font-weight="700" font-size="7.4" fill="#f4f8ff" letter-spacing="1.04">LINCOLN</text></svg></span>`;
 
 // 通用品牌识别：只看设备厂商/型号/名称里的关键字，命中就用车名文字牌
+// 文字标配色：识别到品牌名时给一点主色暗示，认不出品牌就用中性灰
+const BRAND_TINT = {
+  特斯拉: "#e82127", 比亚迪: "#d71920", 蔚来: "#00bebd", 小鹏: "#00b3a4", 理想: "#00b96b",
+  极氪: "#00b0ea", 吉利: "#0d5eaf", 长安: "#0f4c9c", 长城: "#c8102e", 奇瑞: "#005bac",
+  广汽: "#0f6cbd", 上汽: "#1d6fa5", 东风: "#1b4f8f", 丰田: "#eb0a1e", 本田: "#e60012",
+  日产: "#c3002f", 马自达: "#910a2d", 大众: "#001e50", 宝马: "#0066b1", 奔驰: "#00adef",
+  沃尔沃: "#0a5bd4", 路虎: "#005a2b", 通用: "#c8102e", 现代: "#002c5f", 标致: "#0a3d62",
+  斯巴鲁: "#003da5", 吉普: "#2b4736", 三菱: "#e60012", 铃木: "#003399", 起亚: "#05141f",
+};
+
 const BRAND_WORDS = [
   [/lincoln|林肯|corsair|nautilus|navigator|continental|zephyr/i, "lincoln"],
   [/ford|福特|escape|explorer|mondeo|mustang|ranger|bronco|territory/i, "ford"],
@@ -93,6 +103,10 @@ export const ITEM_DEFS = {
   win_rr: { zh: "右后车窗", en: "Rear R window", icon: "carwin", kind: "door" },
   ignition: { zh: "引擎", en: "Engine", icon: "engine", kind: "stat" },
   hood: { zh: "引擎盖", en: "Hood", icon: "engine", kind: "cap" },
+  adblue: { zh: "尿素", en: "AdBlue", icon: "fuel", kind: "stat" },
+  h2: { zh: "氢罐", en: "H₂ tank", icon: "gauge", kind: "pct", full: 100 },
+  dpf: { zh: "DPF", en: "DPF", icon: "engine", kind: "stat" },
+  coolant: { zh: "冷却液", en: "Coolant", icon: "gauge", kind: "stat" },
   tailgate: { zh: "尾门", en: "Tailgate", icon: "trunk", kind: "cap" },
   tp_lf: { zh: "左前胎压", en: "LF tire", icon: "tire", kind: "tire" },
   tp_rf: { zh: "右前胎压", en: "RF tire", icon: "tire", kind: "tire" },
@@ -121,7 +135,7 @@ export const ITEM_DEFS = {
 export const DEFAULT_ITEMS = {
   meta: [{ slot: "addr" }, { slot: "place" }, { slot: "sync" }],
   hero: [{ slot: "image" }],
-  energy: ["fuel", "battery", "range", "ev_range", "odo", "volt", "oil"],
+  energy: ["fuel", "battery", "h2", "range", "ev_range", "odo", "volt", "oil", "adblue", "dpf", "coolant"],
   alerts: ["alerts"],
   doors: [
     "ignition", "door_fl", "door_fr", "door_rl", "door_rr",
@@ -817,7 +831,15 @@ class HaCarCard extends HTMLElement {
     if (b === "lincoln") return LINCOLN_LOGO;
     if (b === "ford") return FORD_LOGO;
     const name = String(cfg.brand_name || this._brandLabel() || this._deviceHint() || "").trim().slice(0, 8);
-    return name ? `<span class="brand gen" aria-hidden="true"><span class="genmark">${esc(name)}</span></span>` : "";
+    const tint = BRAND_TINT[name] || "";
+    const st = tint ? ` style="border-color:${tint}88;box-shadow:inset 0 1px 0 rgba(255,255,255,.18),0 0 12px -4px ${tint}cc"` : "";
+    return name ? `<span class="brand gen" aria-hidden="true"><span class="genmark"${st}>${esc(name)}</span></span>` : "";
+  }
+
+  // 车牌左侧的车企标识：官方标（福特/林肯）、自定义车标图、或通用文字标，按品牌自动切换
+  _logoMark() {
+    const html = this._logo();
+    return html ? `<i class="mk">${html}</i>` : "";
   }
 
   _fitPanel() {
@@ -1421,7 +1443,7 @@ class HaCarCard extends HTMLElement {
     // 车标必须放在 h1 外面：h1 用 background-clip:text 做渐变字，
     // 里面塞 SVG 会让渐变在车标区域被画成一块方形底色
     const head = `<div class="head"><div class="ttl">${this._logo()}<h1>${esc(title)}</h1>` +
-      (plateTxt ? `<span class="plate">${esc(plateTxt)}</span>` : "") +
+      (plateTxt ? `<span class="plate">${this._logoMark()}<b>${esc(plateTxt)}</b></span>` : "") +
       `</div><span class="status ${status.cls}"><span class="dot"></span>${esc(status.label)}</span></div>`;
 
     const hero = this._imagePair(data);

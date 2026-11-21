@@ -31,11 +31,12 @@
 一张替代「实体罗列卡」的车辆卡片。它按本车**实际具备的能力**渲染：汽油车不会出现充电模块，没有俯视图就自动退回 3D / 侧视图，实体缺失的模块整块不出现。
 
 - **车辆驾驶舱视觉**：车型图作为主视觉，外圈双同心轨道 + 四枚发光节点；深蓝黑漆面 + 车机背光青，全卡只有一处强调色。
-- **环形仪表**：燃油/电量与续航各占一枚 SVG 环形仪表，中心读数值，中间夹量纲图标；里程/电压/机油寿命收成一行小字。
+- **环形仪表**：燃油/电量与续航各占一枚 SVG 环形仪表，中心读数值，中间夹量纲图标；插混与增程「油电同在」时自动放开到三枚（燃油 / 电量 / 综合续航）；里程/电压/机油寿命收成一行小字。
 - **一屏完成日常操作**：圆形玻璃操作钮（车锁、后备箱、远程启动、鸣笛、声光/灯光寻车），同步时间就是云端刷新入口。
 - **长按防误触**：所有动作按钮默认需要按住 2 秒——开锁、上锁、远程启动/熄火、鸣笛寻车、声光寻车、灯光寻车，以及动作模块里自定义添加的实体按钮；松手太早只提示不动作，编辑里只需开关总开关和调时长，不再逐项勾选。
 - **四轮胎压**：底部底座条一排四个读数，按「推荐胎压 / 胎状态」判据变色，异常那一格直接亮。
 - **门窗开合态**：只显示真正开启的门/窗/尾门/引擎盖，全部关闭时收敛成一枚「已关闭」。
+- **动力类型自动分档**：纯油（燃油+续航双表、机油寿命）、纯电（电量+续航、引擎盖改「前备箱」、隐藏远程启动）、插混 / 增程（三环表 + 纯电续航）、柴油（尿素 AdBlue 余量、DPF 状态）、氢燃料（氢罐余量直接当主表）；没映射的项不占位，换车不用改布局。
 - **充电域按车型出现**：SOC、充电状态、立即/停止充电、家充桩、上次充电电量。
 - **服务信息折叠区**：保养计划、召回、未读消息、车机固件、客服电话，不占主视觉高度。
 - **执行反馈**：指令发出后按钮带脉冲点，等云端状态真正翻转才消；失败给明确报错。
@@ -101,7 +102,7 @@ type: custom:ha-car
 - **自动绑定**只覆盖福特派互联 / 林肯之道的命名习惯（中文拼音与历史英文名）。**其他品牌（特斯拉、比亚迪、蔚小理、德系日系、国标车机等）** 只要在编辑器里把每个位置手动选一次实体即可：
   - 「实体覆盖」：按槽位指定 `lock` `fuel` `range` `odo` `tracker` `door_fl` …（见下一节表格）；
   - 「模块 / 自定义模块」：每个模块项都能单独选实体，也能新增任意实体做成小卡片。
-- **车标**：默认按设备厂商自动识别；识别不出（或你不想用）时用「通用」文字标，填品牌名即可，也可以直接给一张自定义车标图。
+- **车标**：默认按设备厂商自动识别；识别不出（或你不想用）时用「通用」文字标，填品牌名即可，也可以直接给一张自定义车标图。**车牌左侧同步显示同一枚车企标识**（福特/林肯为内置官方标 SVG，其他品牌为带主色的文字标）。
 - **车辆图**：任何品牌都可以用 `image: custom` + `image_url` 指定自己的车型图（本地 `/local/…` 或任意图床），没有图时退回内置车形剪影，不会留空。
 - **状态解析**：开/合、锁/解锁同时支持中英文与 `on` / `off`（binary_sensor 常见形态），第三方集成直接映射也能正确显示。
 - **动作**：按你映射的实体所在域执行（`lock` / `button` / `switch` / `select`），不依赖福特派服务。
@@ -146,7 +147,7 @@ entities:
   tracker: device_tracker.my_car
 ```
 
-可用槽位：`lock` `online` `ignition` `remote_start` `tpms` `alarm` `fuel` `battery` `range` `ev_range` `odo` `volt` `oil` `tp_lf` `tp_rf` `tp_lr` `tp_rr` `door_fl` `door_fr` `door_rl` `door_rr` `tailgate` `hood` `win_fl` `win_fr` `tracker` `addr` `chg_status` `alerts` `maint` `recall` `messages` `sync` `data_time` `fw` `support` `btn_lock` `btn_unlock` `btn_trunk` `btn_refresh` `sw_engine` `sw_honk` `sw_va` `sw_light`。
+可用槽位：`lock` `online` `ignition` `remote_start` `tpms` `alarm` `fuel` `battery` `range` `ev_range` `odo` `volt` `oil` `adblue` `h2` `dpf` `coolant` `tp_lf` `tp_rf` `tp_lr` `tp_rr` `door_fl` `door_fr` `door_rl` `door_rr` `tailgate` `hood` `win_fl` `win_fr` `tracker` `addr` `chg_status` `alerts` `maint` `recall` `messages` `sync` `data_time` `fw` `support` `btn_lock` `btn_unlock` `btn_trunk` `btn_refresh` `sw_engine` `sw_honk` `sw_va` `sw_light`。
 
 ## 操作反馈怎么读
 
