@@ -2212,8 +2212,11 @@ class HaCarCard extends HTMLElement {
     return "";
   }
 
-  _requestNetworkLocation() {
-    if (this._netLoc || this._netPending || !navigator.geolocation) return;
+  // 找车面板打开后每 10 秒刷新一次本机定位；普通渲染只在缓存过期（20 秒）时才重新取
+  _requestNetworkLocation(force) {
+    if (!navigator.geolocation || this._netPending) return;
+    const age = Date.now() - (this._netLocAt || 0);
+    if (!force && this._netLoc && age < 20000) return;
     this._netPending = true;
     this._netFailed = false;
     try {
@@ -2228,16 +2231,23 @@ class HaCarCard extends HTMLElement {
             return;
           }
           const acc = Number(pos && pos.coords && pos.coords.accuracy);
+          const prev = this._netLoc;
           this._netLoc = { lat, lon, acc: Number.isFinite(acc) && acc > 0 ? acc : null };
-          if (this._findOpen) this._refreshFind();
-          else this._render(true);
+          this._netLocAt = Date.now();
+          const moved = prev ? this._distanceM(prev, this._netLoc) : null;
+          // 位移小于 8 米且精度没变时不重绘整张卡，只挪地图上的点，避免面板每 10 秒闪一下
+          if (this._findOpen && (!prev || (moved != null && moved > 8))) this._refreshFind();
+          else if (this._findOpen) {
+            this._paintFindMap(false);
+            this._updateFind();
+          } else if (!prev || (moved != null && moved > 8)) this._render(true);
         },
         () => {
           this._netPending = false;
           this._netFailed = true;
           if (this._findOpen) this._refreshFind();
         },
-        { enableHighAccuracy: false, timeout: 12000, maximumAge: 120000 },
+        { enableHighAccuracy: Boolean(force), timeout: 12000, maximumAge: force ? 5000 : 120000 },
       );
     } catch { /* ignore */ }
   }
@@ -2748,13 +2758,29 @@ class HaCarCard extends HTMLElement {
     this._lastOrientEv = null;
     this._sig = "";
     const pts = this._findData ? this._findPoints(this._findData) : { phone: null };
-    if (!this._isPhoneView() || !pts.phone) this._requestNetworkLocation();
+    if (!this._isPhoneView() || !pts.phone) this._requestNetworkLocation(true);
+    // 面板打开期间持续刷新：定位每 10 秒重取一次，车辆点随 hass 状态更新自然跟着走
+    this._stopFindTimer();
+    this._findTimer = setInterval(() => {
+      if (!this._findOpen) return;
+      this._requestNetworkLocation(true);
+      this._paintFindMap(false);
+      this._updateFind();
+    }, 10000);
     if (this._hass) this._paint(resolve(this._hass, this._config));
     else this._render(true);
   }
 
+  _stopFindTimer() {
+    if (this._findTimer) {
+      clearInterval(this._findTimer);
+      this._findTimer = 0;
+    }
+  }
+
   _closeFind() {
     this._findOpen = false;
+    this._stopFindTimer();
     this._compassAutoAsked = false;
     this._stopGpsHeading();
     cancelAnimationFrame(this._headingRaf);
