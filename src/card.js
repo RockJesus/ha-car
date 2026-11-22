@@ -2187,7 +2187,12 @@ class HaCarCard extends HTMLElement {
     if (!user || !this._hass.states) return null;
     for (const st of Object.values(this._hass.states)) {
       if (!st || !String(st.entity_id || "").startsWith("person.")) continue;
-      if (st.attributes && st.attributes.user_id === user.id) return this._ll(st);
+      if (st.attributes && st.attributes.user_id === user.id) {
+        // person 的坐标来自它跟踪的手机 device_tracker，直接用后者精度更高
+        const src = st.attributes.source;
+        const srcSt = src && this._hass.states[src];
+        return (srcSt && this._ll(srcSt)) || this._ll(st);
+      }
     }
     return null;
   }
