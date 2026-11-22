@@ -1192,16 +1192,17 @@ class HaCarCard extends HTMLElement {
     // 重绘会换掉按钮节点：正在按住的长按要重绑到新节点，否则松手时比对不上、动作被静默取消
     this._rebindHold();
     if (this._findOpen) {
-      // 每次 hass 更新都会重绘，先清掉旧蒙层，否则会叠出多层只更新最底层
-      this._card.querySelectorAll(".findmodal").forEach((m) => m.remove());
-      this._card.insertAdjacentHTML("beforeend", this._findModal(data));
+      // 已有蒙层就留着：删掉重建会让地图 DOM 归零、所有瓦片重新淡入 → 整屏闪
+      const mods = this._card.querySelectorAll(".findmodal");
+      if (!mods.length) this._card.insertAdjacentHTML("beforeend", this._findModal(data));
+      else mods.forEach((m, i) => { if (i < mods.length - 1) m.remove(); });
     }
     this._findData = data;
     this._updateFind();
     // 蒙层每次都是新 DOM，瓦片要重画；尺寸由容器决定，等一帧布局落定再画
     if (this._findOpen) {
       cancelAnimationFrame(this._mapRaf);
-      this._mapRaf = requestAnimationFrame(() => this._paintFindMap(true));
+      this._mapRaf = requestAnimationFrame(() => this._paintFindMap(!this._findOpen || !this._card.querySelector(".findmodal [data-fmap]")));
     }
 
     this._placeToast();
@@ -2596,30 +2597,43 @@ class HaCarCard extends HTMLElement {
     if (force || sig !== this._mapSig) {
       this._mapSig = sig;
       this._mapCtx = { sig, z, w, h, tlx: tl.x, tly: tl.y, at: Date.now() };
-      const parts = [];
       const tx0 = Math.floor(tl.x / 256);
       const tx1 = Math.floor((tl.x + w - 1) / 256);
       const ty0 = Math.floor(tl.y / 256);
       const ty1 = Math.floor((tl.y + h - 1) / 256);
+      const keep = new Set();
       for (let ty = ty0; ty <= ty1; ty++) {
         if (ty < 0 || ty >= n) continue;
         for (let tx = tx0; tx <= tx1; tx++) {
           const wx = ((tx % n) + n) % n;
-          const url = `https://webrd0${(wx % 4) + 1}.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=8&x=${wx}&y=${ty}&z=${z}`;
-          parts.push(`<img src="${url}" alt="" draggable="false" loading="eager" style="left:${Math.round(tx * 256 - tl.x)}px;top:${Math.round(ty * 256 - tl.y)}px">`);
+          const key = `${z}/${wx}/${ty}`;
+          keep.add(key);
+          // 只增删差异瓦片：整块重建会让每个 <img> 从 opacity:0 重新淡入，看起来就是地图在闪
+          let img = tiles.querySelector(`img[data-k="${key}"]`);
+          if (!img) {
+            img = document.createElement("img");
+            img.dataset.k = key;
+            img.alt = "";
+            img.draggable = false;
+            img.loading = "eager";
+            img.src = `https://webrd0${(wx % 4) + 1}.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=8&x=${wx}&y=${ty}&z=${z}`;
+            // 瓦片子域偶尔抽风会整块空白：失败时换子域重试两次，避免地图缺角
+            img.addEventListener("error", function retry() {
+              const r = Number(this.dataset.retry || 0);
+              if (r >= 2) return;
+              this.dataset.retry = String(r + 1);
+              const rnd = 1 + Math.floor(Math.random() * 4);
+              this.src = this.src.replace(/webrd0[1-4]/, "webrd0" + rnd);
+            });
+            tiles.appendChild(img);
+          }
+          img.style.left = Math.round(tx * 256 - tl.x) + "px";
+          img.style.top = Math.round(ty * 256 - tl.y) + "px";
         }
       }
-      tiles.innerHTML = parts.join("");
-      // 瓦片子域偶尔抽风会整块空白：失败时换子域重试两次，避免地图缺角
-      tiles.querySelectorAll("img").forEach((img) => {
-        img.addEventListener("error", function retry() {
-          const n = Number(this.dataset.retry || 0);
-          if (n >= 2) return;
-          this.dataset.retry = String(n + 1);
-          const rnd = 1 + Math.floor(Math.random() * 4);
-          this.src = this.src.replace(/webrd0[1-4]/, "webrd0" + rnd);
-        });
-      });
+      for (const img of Array.from(tiles.children)) {
+        if (!keep.has(img.dataset.k || "")) img.remove();
+      }
     }
     const at = (pt) => {
       const q = proj(pt.lat, pt.lon, z);
