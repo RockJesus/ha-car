@@ -2155,7 +2155,7 @@ class HaCarCard extends HTMLElement {
     if (!Number.isFinite(lat) || !Number.isFinite(lon)) return null;
     const raw = Number(st.attributes.gps_accuracy != null ? st.attributes.gps_accuracy : st.attributes.accuracy);
     const acc = Number.isFinite(raw) && raw > 0 && raw < 5000 ? raw : null;
-    return { lat, lon, acc };
+    return { lat, lon, acc, ts: st.last_updated || st.last_changed || null };
   }
 
   _findPoints(data) {
@@ -2197,14 +2197,41 @@ class HaCarCard extends HTMLElement {
     return null;
   }
 
-  _findLocation(p) {
-    // HA 里已有手机定位时优先用它（随 HA 状态实时更新，桌面端也比浏览器网络定位准）
-    if (p.phone) return { coords: p.phone, source: "phone" };
+  // 本机定位候选：HA 侧（手机追踪实体 / 登录用户 person / 指定设备）+ 浏览器本机 GPS。
+  // 两边互为兜底，按「有效精度 = 精度 + 陈旧惩罚」选最准且最新的那个：
+  // 精度接近时本机 GPS 更快（watch 秒级推送），差得太多才退回 HA 坐标。
+  _pickSelf(p) {
+    const cands = [];
+    const add = (coords, source, ts) => {
+      if (!coords) return;
+      cands.push({ coords, source, ts: ts || coords.ts || null });
+    };
+    if (p && p.phone) add(p.phone, "phone");
     const person = this._loginPoint();
-    if (person) return { coords: person, source: "person" };
-    if (p.device) return { coords: p.device, source: "device" };
-    if (this._netLoc) return { coords: this._netLoc, source: "network" };
-    return { coords: null, source: "" };
+    if (person) add(person, "person");
+    if (p && p.device) add(p.device, "device");
+    if (this._nativeLoc) add(this._nativeLoc, "native", this._nativeLoc.ts);
+    const eff = (c) => {
+      const acc = c.coords.acc != null && c.coords.acc > 0 ? c.coords.acc : 400;
+      const age = c.ts ? Math.max(0, (Date.now() - new Date(c.ts).getTime()) / 1000) : 0;
+      let e = acc + Math.min(age, 240) * 1.5;
+      if (c.source === "native") e *= 0.85;
+      return e;
+    };
+    let best = null;
+    for (const c of cands) if (!best || eff(c) < eff(best)) best = c;
+    const cur = this._selfPick;
+    if (cur && best && cur.source !== best.source) {
+      const same = cands.find((c) => c.source === cur.source);
+      // 迟滞：新源有效精度要低 25% 以上才切换，避免两个点位来回跳
+      if (same && eff(same) <= eff(best) * 1.35) best = same;
+    }
+    this._selfPick = best;
+    return best || { coords: null, source: "" };
+  }
+
+  _findLocation(p) {
+    return this._pickSelf(p);
   }
 
   // HA 侧是否已提供本机位置（手机定位实体或登录用户 person 实体）
@@ -2217,9 +2244,56 @@ class HaCarCard extends HTMLElement {
     const en = isEn(this._hass);
     if (source === "phone") return en ? "phone location" : "手机定位";
     if (source === "network") return en ? "network location" : "网络定位";
+    if (source === "native") return en ? "device GPS" : "本机 GPS";
     if (source === "device") return en ? "logged-in device" : "登录设备";
     if (source === "person") return en ? "logged-in user" : "登录用户";
     return "";
+  }
+
+  // 本机 GPS：watch 秒级推送，面板打开期间常驻；关面板即释放
+  _startNativeWatch() {
+    if (this._nativeWatch != null) return;
+    if (!navigator.geolocation) return;
+    try {
+      this._nativeWatch = navigator.geolocation.watchPosition(
+        (pos) => this._applyNativePos(pos),
+        () => { this._nativeFailed = true; },
+        { enableHighAccuracy: true, maximumAge: 0, timeout: 20000 },
+      );
+    } catch { this._nativeWatch = null; }
+  }
+
+  _stopNativeWatch() {
+    if (this._nativeWatch != null && navigator.geolocation) {
+      try { navigator.geolocation.clearWatch(this._nativeWatch); } catch { /* ignore */ }
+    }
+    this._nativeWatch = null;
+    this._nativeRaf = 0;
+  }
+
+  _applyNativePos(pos) {
+    const c = pos && pos.coords;
+    if (!c) return;
+    const lat = Number(c.latitude);
+    const lon = Number(c.longitude);
+    if (!Number.isFinite(lat) || !Number.isFinite(lon)) return;
+    const acc = Number(c.accuracy);
+    this._nativeLoc = { lat, lon, acc: Number.isFinite(acc) && acc > 0 ? acc : null, ts: Date.now() };
+    this._nativeFailed = false;
+    // 方位：指南针没数据时才用行进方向（静止时 heading 为 -1，不采）
+    const h = Number(c.heading);
+    const sp = Number(c.speed);
+    if (Number.isFinite(h) && h >= 0 && Number.isFinite(sp) && sp > 2 && this._headingSrc !== "compass") {
+      this._heading = h;
+      this._headingSrc = "gps";
+    }
+    if (!this._findOpen || this._nativeRaf) return;
+    // 一帧只合一次重绘：GPS 每秒上报也不会把画面刷成幻灯片
+    this._nativeRaf = requestAnimationFrame(() => {
+      this._nativeRaf = 0;
+      this._paintFindMap(false);
+      this._updateFind();
+    });
   }
 
   // 找车面板打开后每 10 秒刷新一次本机定位；普通渲染只在缓存过期（20 秒）时才重新取
@@ -2509,10 +2583,19 @@ class HaCarCard extends HTMLElement {
     const c0 = meG && carG ? { lat: (meG.lat + carG.lat) / 2, lon: (meG.lon + carG.lon) / 2 } : (carG || meG);
     const ctr = proj(c0.lat, c0.lon, z);
     const tl = { x: ctr.x - w / 2, y: ctr.y - h / 2 };
-    const sig = [w, h, z, tl.x.toFixed(1), tl.y.toFixed(1)].join("|");
+    let sig = [w, h, z, tl.x.toFixed(1), tl.y.toFixed(1)].join("|");
+    const ctx = this._mapCtx;
+    // 行进中每帧重拉瓦片太费流量：1.2 秒内的位移沿用上一帧取景，只挪点和连线
+    if (!force && ctx && ctx.z === z && ctx.w === w && ctx.h === h && Date.now() - ctx.at < 1200) {
+      sig = ctx.sig;
+      tl.x = ctx.tlx;
+      tl.y = ctx.tly;
+      this._mapSig = ctx.sig;
+    }
     const n = Math.pow(2, z);
     if (force || sig !== this._mapSig) {
       this._mapSig = sig;
+      this._mapCtx = { sig, z, w, h, tlx: tl.x, tly: tl.y, at: Date.now() };
       const parts = [];
       const tx0 = Math.floor(tl.x / 256);
       const tx1 = Math.floor((tl.x + w - 1) / 256);
@@ -2617,20 +2700,8 @@ class HaCarCard extends HTMLElement {
   }
 
   _startGpsHeading() {
-    if (this._gpsWatch != null || !navigator.geolocation) return;
-    // HA 已提供手机定位时不再调用浏览器定位：watchPosition 会弹位置授权，
-    // 而方位交给指南针即可，位置继续跟着 HA 实体走。
-    if (this._hasHaPoint(this._findData ? this._findPoints(this._findData) : {})) return;
-    try {
-      this._gpsWatch = navigator.geolocation.watchPosition((pos) => {
-        const h = pos && pos.coords && pos.coords.heading;
-        if (!Number.isFinite(h) || h < 0) return;
-        if (this._headingSrc === "compass") return;
-        this._heading = h;
-        this._headingSrc = "gps";
-        if (this._findOpen) this._updateFind();
-      }, () => {}, { enableHighAccuracy: true, maximumAge: 1000, timeout: 15000 });
-    } catch { /* ignore */ }
+    // 方位不再单独起 watch：定位 watch 已经在跑，移动时直接用它的 heading 兜底
+    if (this._findOpen) this._startNativeWatch();
   }
 
   _stopGpsHeading() {
@@ -2770,17 +2841,17 @@ class HaCarCard extends HTMLElement {
     this._compassGot = false;
     this._lastOrientEv = null;
     this._sig = "";
-    const pts = this._findData ? this._findPoints(this._findData) : { phone: null };
-    if (!this._hasHaPoint(pts)) this._requestNetworkLocation(true);
-    // 面板打开期间持续刷新：HA 有手机定位就跟着 hass 更新走，没有才每 10 秒重取浏览器定位
+    this._selfPick = null;
+    this._mapCtx = null;
+    // 打开即申请定位权限（浏览器弹一次授权），之后靠 watch 秒级推送，不再轮询取点
+    this._startNativeWatch();
+    // HA 坐标随 hass 推送实时到达；这个定时器只是 15 秒兜底重绘，防状态推送断流
     this._stopFindTimer();
     this._findTimer = setInterval(() => {
       if (!this._findOpen) return;
-      const np = this._findData ? this._findPoints(this._findData) : { phone: null };
-      if (!this._hasHaPoint(np)) this._requestNetworkLocation(true);
       this._paintFindMap(false);
       this._updateFind();
-    }, 10000);
+    }, 15000);
     if (this._hass) this._paint(resolve(this._hass, this._config));
     else this._render(true);
   }
@@ -2796,6 +2867,9 @@ class HaCarCard extends HTMLElement {
     this._findOpen = false;
     this._stopFindTimer();
     this._compassAutoAsked = false;
+    this._selfPick = null;
+    this._mapCtx = null;
+    this._stopNativeWatch();
     this._stopGpsHeading();
     cancelAnimationFrame(this._headingRaf);
     this._sig = "";
@@ -2848,7 +2922,7 @@ class HaCarCard extends HTMLElement {
       this._compassTimer = setTimeout(() => {
         if (this._findOpen && !this._compassGot) {
           this._startGpsHeading();
-          if (!quiet) this._showToast(isEn(this._hass) ? "No compass data — trying GPS heading" : "未收到指南针，已尝试用移动方向", "err");
+          if (!quiet) this._showToast(isEn(this._hass) ? "No compass data — using travel direction" : "未收到指南针，移动时将用行进方向", "err");
           if (this._findOpen) this._updateFind();
         }
       }, 1800);
