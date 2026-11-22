@@ -2618,6 +2618,9 @@ class HaCarCard extends HTMLElement {
 
   _startGpsHeading() {
     if (this._gpsWatch != null || !navigator.geolocation) return;
+    // HA 已提供手机定位时不再调用浏览器定位：watchPosition 会弹位置授权，
+    // 而方位交给指南针即可，位置继续跟着 HA 实体走。
+    if (this._hasHaPoint(this._findData ? this._findPoints(this._findData) : {})) return;
     try {
       this._gpsWatch = navigator.geolocation.watchPosition((pos) => {
         const h = pos && pos.coords && pos.coords.heading;
