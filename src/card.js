@@ -2193,14 +2193,19 @@ class HaCarCard extends HTMLElement {
   }
 
   _findLocation(p) {
-    // 桌面端优先使用浏览器网络定位；手机端优先使用手机定位实体。
-    if (!this._isPhoneView() && this._netLoc) return { coords: this._netLoc, source: "network" };
+    // HA 里已有手机定位时优先用它（随 HA 状态实时更新，桌面端也比浏览器网络定位准）
     if (p.phone) return { coords: p.phone, source: "phone" };
-    if (this._netLoc) return { coords: this._netLoc, source: "network" };
-    if (p.device) return { coords: p.device, source: "device" };
     const person = this._loginPoint();
     if (person) return { coords: person, source: "person" };
+    if (p.device) return { coords: p.device, source: "device" };
+    if (this._netLoc) return { coords: this._netLoc, source: "network" };
     return { coords: null, source: "" };
+  }
+
+  // HA 侧是否已提供本机位置（手机定位实体或登录用户 person 实体）
+  _hasHaPoint(p) {
+    if (p && p.phone) return true;
+    return Boolean(this._loginPoint());
   }
 
   _findSourceText(source) {
@@ -2758,12 +2763,13 @@ class HaCarCard extends HTMLElement {
     this._lastOrientEv = null;
     this._sig = "";
     const pts = this._findData ? this._findPoints(this._findData) : { phone: null };
-    if (!this._isPhoneView() || !pts.phone) this._requestNetworkLocation(true);
-    // 面板打开期间持续刷新：定位每 10 秒重取一次，车辆点随 hass 状态更新自然跟着走
+    if (!this._hasHaPoint(pts)) this._requestNetworkLocation(true);
+    // 面板打开期间持续刷新：HA 有手机定位就跟着 hass 更新走，没有才每 10 秒重取浏览器定位
     this._stopFindTimer();
     this._findTimer = setInterval(() => {
       if (!this._findOpen) return;
-      this._requestNetworkLocation(true);
+      const np = this._findData ? this._findPoints(this._findData) : { phone: null };
+      if (!this._hasHaPoint(np)) this._requestNetworkLocation(true);
       this._paintFindMap(false);
       this._updateFind();
     }, 10000);
